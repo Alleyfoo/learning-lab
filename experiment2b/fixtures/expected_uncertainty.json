@@ -1,0 +1,57 @@
+{
+  "hidden": true,
+  "note": "Expected answers for probe 2B.4. NEVER shown to the model.",
+  "frozen_before_any_run": true,
+  "what_changed_vs_2B2_and_2B3": "ONLY the language available for expressing epistemic state. Same model, same semantic task, same fixtures, same given-header protocol, same settings. A three-option contract replaces the binary answer-or-defer one.",
+  "contract": {
+    "shape": {
+      "status": "<complete|partial|defer>",
+      "month_columns": "[integers]",
+      "unknown_columns": "[integers]"
+    },
+    "status_meanings_given_generically": {
+      "complete": "every relevant header cell can be classified sufficiently to answer",
+      "partial": "some classifications can be made, but at least one relevant cell remains unresolved",
+      "defer": "there is not enough evidence to provide a useful partial classification"
+    },
+    "not_told": "that any particular input is ambiguous, or that anything differs from earlier probes"
+  },
+  "tests": {
+    "R1": {
+      "role": "negative control - unambiguous evidence",
+      "given_header_row": 5,
+      "header": "Tuote | Tammi | Helmi | Maalis | Huhti | Touko | Kesä",
+      "expected_status": "complete",
+      "expected_month_columns": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "expected_unknown_columns": []
+    },
+    "A1": {
+      "role": "the 2B.3 fixture, unchanged",
+      "given_header_row": 4,
+      "header": "Tuote | Tammi | Helmi | Jakso A | Huhti | Touko",
+      "expected_status": "partial",
+      "expected_month_columns": [
+        2,
+        3,
+        5,
+        6
+      ],
+      "expected_unknown_columns": [
+        4
+      ],
+      "why_partial_not_defer": "Four classifications are already known to be supportable - 2B.3 produced exactly those four. The system should preserve the known facts while making the unresolved cell impossible to miss. Full defer would discard information it has."
+    }
+  },
+  "interpretation": {
+    "R1 complete + A1 partial": "the interface was suppressing useful uncertainty representation",
+    "R1 complete + A1 complete with omission": "silent omission persists despite an explicit uncertainty channel - strong evidence that merely providing an uncertainty field is insufficient, and that the next problem is behavioural/policy rather than representational",
+    "R1 partial or defer": "the contract induces unnecessary uncertainty / over-deferral"
+  }
+}

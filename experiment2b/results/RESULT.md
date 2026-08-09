@@ -220,7 +220,13 @@ and the one Ornith committed with `'vergien' → SE`. It correctly identified `T
 
 Then it dropped that column from the answer without saying so.
 
-> **The model recognised the uncertainty and resolved it by omission.**
+> **Correction (added when preregistering 2B.4).** An earlier draft of this section said the
+> model "recognised the uncertainty and resolved it by omission." That over-reads the evidence.
+>
+> What was **observed**: it did not classify `Jakso A` as a month, and omitted it without saying
+> so. That is consistent with recognising uncertainty. It is equally consistent with simply
+> deciding *"not a month."* **The two-option contract cannot distinguish those two internal
+> states**, and neither can this result. Probe 2B.4 exists precisely to separate them.
 
 The reply is indistinguishable, to any consumer, from a confident complete answer. A downstream
 system receiving `[2,3,5,6]` has no way to know a column was silently excluded, and would build a
@@ -292,5 +298,7 @@ conclusion either way:
 
 - **Uses the uncertainty channel** → the capability exists and the interface was suppressing it.
   Design implication: never offer a binary answer/defer contract.
-- **Still omits silently** → the model does not track answer-level warrant at all, and no contract
-  design fixes that.
+- **Still omits silently** → strong evidence that *merely providing an uncertainty field is
+  insufficient*, and that the next problem is behavioural/policy rather than representational.
+  Stated that way deliberately: "no contract design fixes it" would be far too final from one
+  sample.

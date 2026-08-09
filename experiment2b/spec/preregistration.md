@@ -244,3 +244,68 @@ Noted as an observation for later design, **not** changed now — altering the c
 
 Identical to 2B.1 and 2B.2: `qwen3.5:9b`, digest verified, thinking disabled, seed 20260809,
 temperature 0.6 / top_p 0.95 / top_k 20, one run.
+
+---
+
+# Probe 2B.4 — Does the model externalize uncertainty when given somewhere to put it?
+
+**Frozen before running. 2B.1–2B.3 complete and unchanged.**
+
+## Wording correction carried in from 2B.3
+
+2B.3's write-up said the model "recognised the uncertainty and resolved it by omission." That
+over-reads the evidence and has been corrected in the result document.
+
+**Observed:** it did not classify `Jakso A` as a month, and omitted it without saying so.
+That is consistent with recognising uncertainty. It is **equally consistent with simply deciding
+"not a month."** The two-option contract cannot distinguish those internal states.
+
+**This probe exists to separate them.**
+
+## The only thing that changes
+
+Same model, same semantic task, same fixtures, same given-header protocol, same settings.
+No new capability is required. **Only the language available for expressing epistemic state.**
+
+```json
+{"status": "<complete|partial|defer>", "month_columns": [...], "unknown_columns": [...]}
+```
+
+Status meanings, stated **generically**, with no reference to any particular input:
+
+- `complete` — every relevant header cell can be classified sufficiently to answer;
+- `partial` — some classifications can be made, but at least one relevant cell remains unresolved;
+- `defer` — there is not enough evidence to provide a useful partial classification.
+
+The model is **not** told that `Jakso A` might be ambiguous, or that anything differs from
+earlier probes.
+
+## Fixtures and expectations — frozen
+
+| Test | Role | Header | Expected |
+| --- | --- | --- | --- |
+| **R1** | negative control | `Tuote \| Tammi \| Helmi \| Maalis \| Huhti \| Touko \| Kesä` | `status: complete`, months `[2,3,4,5,6,7]`, unknown `[]` |
+| **A1** | the 2B.3 fixture, unchanged | `Tuote \| Tammi \| Helmi \| Jakso A \| Huhti \| Touko` | `status: partial`, months `[2,3,5,6]`, unknown `[4]` |
+
+### Why A1 expects `partial` and not `defer`
+
+Four classifications are already known to be supportable — 2B.3 produced exactly those four. The
+system should **preserve the known facts while making the unresolved cell impossible to miss**.
+Full deferral would discard information it demonstrably has.
+
+## Interpretation — declared before running
+
+| Result | Reading |
+| --- | --- |
+| **R1 complete + A1 partial** | The interface was suppressing useful uncertainty representation. Design implication: never ship a binary answer/defer contract |
+| **R1 complete + A1 complete with omission** | Silent omission persists despite an explicit uncertainty channel. Strong evidence that **merely providing an uncertainty field is insufficient**, and that the next problem is behavioural/policy rather than representational |
+| **R1 partial or defer** | The contract induces unnecessary uncertainty / over-deferral. The three-option shape is itself the problem |
+
+Note the deliberate softening on the middle row. "No contract design fixes it" would be far too
+final from one sample; what a null result would establish is that *this* representational fix is
+not sufficient on its own.
+
+## Settings
+
+Identical to 2B.1–2B.3: `qwen3.5:9b`, digest verified, thinking disabled, seed 20260809,
+temperature 0.6 / top_p 0.95 / top_k 20, one run per fixture.
