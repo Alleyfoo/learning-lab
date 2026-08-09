@@ -43,7 +43,16 @@ reported anyway, as a pair, because suppressing them would misrepresent a crash 
 
 ## Two distinct failures, and they must not be conflated
 
-### A. A run-configuration defect that is mine, not the model's
+### A. Truncation — diagnosis SUPERSEDED by Run 2
+
+> **Annotation added after Run 2 (`results/run2_ornith9b_result.md` section 3).**
+> The conclusion below — that this was my configuration defect rather than the model's
+> behaviour — is **wrong**. Run 2 raised `num_predict` to 32768 and attempts 1 and 3 truncated
+> again, at 118,722 and 103,621 characters of thinking with zero content. The budget was the
+> proximate cause, not the root cause: the model does not converge on this prompt. The original
+> text is preserved unedited below.
+
+#### Original Run 1 text, preserved
 
 Attempts 1 and 3 returned **literally empty content** — zero characters.
 
