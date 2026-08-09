@@ -3,6 +3,11 @@
 **Status:** Research only. Build authorization NOT granted at time of writing.
 **Working title:** Data Task Modelling Lab
 **Date:** 2026-08-09
+**Amended by:** [workorder_amendment_001.md](workorder_amendment_001.md) — read that first.
+It renames L4, adds non-claim N1, defines the memory object as a triple, adds evidence
+provenance tiers, and revises the build sequence. Where this report and the amendment differ,
+**the amendment wins**.
+
 **Scope:** Answers Workorder sections 6–12. Companion deliverables:
 [comparative_system_table.md](comparative_system_table.md),
 [repo_reuse_map.md](repo_reuse_map.md),
@@ -32,6 +37,19 @@ The open problem, restated from the evidence:
 This reframes Hypothesis H6. The hard problem is not "task modelling rather than one-off
 transformation." It is **the publication boundary**: the evidence under which a procedure is
 allowed to run again, and the machinery that detects when that evidence has stopped holding.
+
+Stated as the research object (per [amendment A1](workorder_amendment_001.md)):
+
+> The interesting problem is not whether agents can learn an executable schema. It is
+> **deciding when that learned schema is allowed to run again.**
+
+And the boundary of what any such machinery can achieve, stated as a non-claim
+([amendment A3](workorder_amendment_001.md)):
+
+> **N1 — Structural and statistical agreement cannot prove semantic continuity.**
+> Some semantic changes are observationally indistinguishable from the available data. The
+> system may therefore never output "semantically unchanged" — only *"no evidence of change,
+> at detection floor X."*
 
 Second headline finding, from repository inspection: **none of the four existing repositories
 contain any LLM code at all.** `Data-agents` "agents" are Markdown role specifications for
@@ -182,9 +200,23 @@ memory; conversational memory should not be the production source of truth.
 - *Corpus-based schema matching* (2005) and *meta-mappings* (2019) establish the principle
   pre-LLM.
 
+**The memory object is a triple, not a mapping file** ([amendment A4](workorder_amendment_001.md)):
+
+```text
+MEMORY OBJECT =
+      executable procedure
+    + applicability contract
+    + evidence / history
+```
+
+At 2,000-company scale you do not retrieve company 947's conversation. You retrieve a versioned
+model stating: *I know how to process this source when these conditions hold, and here is the
+evidence supporting that claim.* The third element is what the survey found missing everywhere —
+without it the contract is an assertion rather than something auditable.
+
 **Recommended memory composition:**
 
-1. **Primary** — versioned published task models (canonical + adapters). Production source of truth.
+1. **Primary** — versioned published task models (canonical + adapters + applicability contract + backing evidence). Production source of truth.
 2. **Retrieval index** — source fingerprints → candidate adapters. Enables the 10→2,000 story.
 3. **Semantic decision records** — which human answered what, when, on what evidence, effective from when. Required both to avoid re-asking and to make semantic drift detectable at all.
 4. **Failure / negative memory** — candidate models that were *rejected* and why they failed replay. **Absent from every system surveyed.** Without it the modelling plane re-proposes known-bad hypotheses.
@@ -211,8 +243,27 @@ the work plane with no intelligence:
 | **L1 Structural** | Expected sheet(s), header row location, column-name multiset, column count, position of key columns | Cosmetic + structural drift |
 | **L2 Typing** | Per-column dtype/format profile, null-rate bands, cardinality bands | Format changes, column reuse |
 | **L3 Grain** | Declared key must be exactly unique; row-count band per period | **Grain change** — the silent killer |
-| **L4 Statistical** | Aggregate magnitude bands per period, share of negative rows, cross-field consistency (e.g. `amount ≈ qty × unit_price` within historical tolerance) | The only automatic hint of semantic drift |
+| **L4 Statistical evidence relevant to applicability** | Aggregate magnitude bands per period, share of negative rows, cross-field consistency (e.g. `amount ≈ qty × unit_price` within historical tolerance) | *Evidence that something changed.* **Not** evidence that meaning is unchanged — see N1 |
 | **L5 Semantic assertions** | Recorded claims ("amount excludes freight") with evidence source and confidence | Not decidable from data — triggers escalation on external evidence only |
+
+**L4 was originally named "Statistical" and described as the "only automatic semantic-drift
+signal."** That overstated it, and the label has been corrected
+([amendment A2](workorder_amendment_001.md)). L4 produces evidence *relevant to* applicability;
+it does not validate semantics.
+
+**Each contract must publish its detection floor** ([amendment A3.1](workorder_amendment_001.md)).
+Given the historical variance of a measure, the size of definitional shift L4 would catch at a
+stated confidence is computable, and should be carried as a property of the contract:
+
+```jsonc
+"L4_detection_floor": {
+  "period_total": { "min_detectable_shift_pct": 3.2, "confidence": 0.95, "baseline_periods": 14 }
+}
+```
+
+This turns N1 from a disclaimer into a number. "Could freight have been folded into this
+measure?" becomes: *freight is ~0.4% of revenue here, below our 3.2% floor — undecidable from
+the data; only external evidence settles it.*
 
 The critical design consequence: **L5 is not checkable**, so the fingerprint at L0 must carry
 source-*system* identity markers (producing application, export template version, sheet naming
@@ -242,10 +293,19 @@ The industry literature independently converges on this: semantic drift "gets th
 attention" of the drift classes, and no pipeline test catches it — pipelines complete
 successfully while loading misaligned data.
 
-**Conclusion:** semantic drift can be detected as an *anomaly*, never *classified*, without
-external evidence. The architecture must therefore carry historical statistical baselines,
-recorded semantic assertions, and a cheap external-evidence channel. This is the strongest
-candidate for genuine research contribution in the whole workorder.
+**Conclusion, corrected.** Semantic change can sometimes be detected as an *anomaly*, never
+*classified*, without external evidence — and **often it cannot be detected at all**. Where the
+magnitude of a definitional change falls below the natural variation of the measure, it is
+observationally indistinguishable from a normal period. That is non-claim **N1**, and it is a
+permanent property of the problem rather than a limitation of current methods.
+
+The architecture must therefore carry historical statistical baselines, recorded semantic
+assertions, a published detection floor, and a cheap external-evidence channel — and it must
+never report "semantically unchanged." The strongest permitted statement is *"no evidence of
+change, at detection floor X."*
+
+This remains the strongest candidate for genuine contribution in the workorder, but the
+contribution is **honest quantification of what cannot be known**, not detection.
 
 ---
 
@@ -279,9 +339,34 @@ source makes available:
 | Transformation trace | Runtime | Provenance + human review |
 
 **The one advantage this problem has over everything surveyed:** because the source recurs,
-*previously accepted outputs are legitimate, non-leaking ground truth*. No surveyed system
-uses this, because none of them operate on a recurring source. It should be the backbone of
-the verification suite.
+*previously accepted outputs are candidate ground truth*. No surveyed system uses this, because
+none of them operate on a recurring source.
+
+**But historical agreement is evidence only to the extent the historical result is
+independently trustworthy** ([amendment A5](workorder_amendment_001.md)). Otherwise the system
+manufactures its own certainty:
+
+```text
+wrong model → wrong output → output becomes memory
+           → future wrong model matches memory → "verified"
+```
+
+Baselines must therefore be tiered by provenance, and **the tiers are not one ranking** — T2
+and T3 are strong on different axes and each is blind where the other is strong:
+
+| Tier | Source | Strong on | Blind to |
+| --- | --- | --- | --- |
+| **T0** | Procedure-generated, unreviewed | Nothing — self-referential | Everything |
+| **T1** | Procedure-generated, passed declared invariants | Internal consistency | Anything the invariants don't encode |
+| **T2** | Independently reconciled to an external artifact (provider's stated total, ERP control total, settlement figure) | **Aggregate correctness** | **Meaning** — a total reconciles while a small definitional shift hides inside it |
+| **T3** | Human-confirmed against business meaning | **Meaning** | **Coverage** — humans check samples, not populations |
+
+**Reconciliation freshness** follows directly and is cheap to implement: if period N was
+T2-anchored and N+1…N+6 were T0, the trailing baseline is self-generated regardless of its
+length. Each contract carries `periods_since_independent_anchor`, and exceeding a declared
+maximum is an escalation trigger *even when nothing has drifted*. This is the only mechanism
+identified in the study that breaks the self-certification loop without external supervision on
+every period.
 
 ---
 
@@ -508,6 +593,28 @@ architecture, no production integration.
 
 **Do NOT build yet** — the agentic modelling network, the retrieval index, the escalation
 protocol, or any cross-repo merge. Those depend on answers Experiment 1 produces.
+
+### Revised sequence ([amendment A6](workorder_amendment_001.md))
+
+```text
+1. Amend research WO                                    <- done
+   |
+2. Define applicability levels (L0-L5) + evidence tiers
+   |
+3. Build deterministic drift corpus
+   |
+4. Measure false-apply / false-escalate
+   |
+5. Determine what applicability evidence is actually useful
+   |
+6. THEN give agents the job of producing
+   procedures + applicability claims + backing evidence
+```
+
+Step 6 is last for a precise reason: **before step 5, "build a schema" is an underspecified
+instruction.** After step 5, the agent's output contract is known — a procedure, an
+applicability contract, and the evidence backing each clause of that contract at a stated
+evidence tier. That is specifiable. "Build a schema" is not.
 
 **Explicitly rejected options and why:**
 - *Use an existing framework* — bdi-kit is the closest fit and is biomedical-schema oriented;

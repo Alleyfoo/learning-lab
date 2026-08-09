@@ -4,6 +4,23 @@ Research output for the workorder **Agentic Data Task Modelling** (2026-08-09).
 
 **Status: research only. No implementation is authorized beyond Experiment 1.**
 
+## The research object, restated
+
+> The interesting problem is not whether agents can learn an executable schema. It is
+> **deciding when that learned schema is allowed to run again.**
+
+```text
+MODELLING → candidate procedure → VERIFICATION
+   → published procedure + applicability contract
+   → future input → APPLICABILITY CHECK
+        ├── match            → deterministic work
+        └── mismatch/unknown → escalation
+```
+
+**Non-claim N1 — structural and statistical agreement cannot prove semantic continuity.**
+Some semantic changes are observationally indistinguishable from the available data. The system
+may never output "semantically unchanged" — only *"no evidence of change, at detection floor X."*
+
 ## Decision
 
 ### AMEND, then BUILD (narrow)
@@ -26,12 +43,16 @@ Research output for the workorder **Agentic Data Task Modelling** (2026-08-09).
    human-reviewed work, inadequate for unattended publication.
 3. The open problem is therefore **verification, applicability and drift classification** —
    which no surveyed system implements.
-4. **Semantic drift is undetectable from structure by definition**, and is the least-addressed
-   drift class in both research and industry. It is the strongest candidate for genuine
-   contribution.
-5. **None of the four existing repositories contain any LLM code.** The modelling plane is
+4. **Semantic change is undetectable from structure by definition, and frequently undetectable
+   from statistics too** (N1). The contribution available here is *honest quantification of what
+   cannot be known* — a published detection floor per contract — not detection.
+5. **The memory object is a triple**: executable procedure + applicability contract +
+   evidence/history. Not `mapping.json`. Historical agreement counts as evidence only to the
+   extent the history is independently trustworthy, so baselines are tiered T0–T3 and carry
+   `periods_since_independent_anchor`.
+6. **None of the four existing repositories contain any LLM code.** The modelling plane is
    greenfield; the deterministic scaffolding already exists.
-6. `Data-tool` has a persistent artifact and no publication boundary. `Data-agents` has the
+7. `Data-tool` has a persistent artifact and no publication boundary. `Data-agents` has the
    publication shape and no memory. Neither has applicability. That is the missing middle.
 
 ## Deliverables
@@ -45,6 +66,21 @@ Research output for the workorder **Agentic Data Task Modelling** (2026-08-09).
 | 5 | [unanswered_questions.md](unanswered_questions.md) | 11 open questions, tiered; plus questions closed by this study |
 | 6 | [experiment_001_drift_discrimination.md](experiment_001_drift_discrimination.md) | The single recommended first experiment |
 | 7 | Decision | §13 of the main report; summarized above |
+| 8 | [workorder_amendment_001.md](workorder_amendment_001.md) | **Amendment — read first.** Renames L4, adds N1, memory triple, evidence tiers, revised sequence |
+
+## Sequence
+
+```text
+1. Amend research WO                                    <- done
+2. Define applicability levels (L0-L5) + evidence tiers
+3. Build deterministic drift corpus
+4. Measure false-apply / false-escalate
+5. Determine what applicability evidence is actually useful
+6. THEN give agents the job of producing
+   procedures + applicability claims + backing evidence
+```
+
+Step 6 is last because before step 5, "build a schema" is an underspecified instruction.
 
 ## Method
 

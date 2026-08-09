@@ -72,11 +72,17 @@ non-tabular regions.
 - **Partially answerable now:** the Meta-Mappings PVLDB PDF could not be text-extracted during
   this study. **It should be read properly before adapter inheritance is designed.**
 
-### UQ-6. What false-escalation rate does statistical baselining (L4) produce?
+### UQ-6. What is L4's detection floor, and what false-escalation rate does it cost?
 
-L4 is the only automatic semantic-drift signal, and it cannot distinguish "definition changed"
-from "genuinely good month." What alarm rate does it produce on real historical data, and is
-that rate operationally tolerable?
+Reframed by [amendment A2/A3](workorder_amendment_001.md). L4 produces *statistical evidence
+relevant to applicability*; it is not semantic validation, and per non-claim **N1** it cannot
+be. Two quantities are needed per provider and measure:
+
+- **Detection floor** — the smallest definitional shift L4 separates from normal variation at
+  95% confidence. This becomes a published property of the applicability contract.
+- **False-escalation rate** at that floor, on real historical data. L4 cannot distinguish
+  "definition changed" from "genuinely good month," so the floor and the alarm rate trade off
+  directly.
 
 - **Blocks:** whether gate trigger #5 (statistical discontinuity with no structural explanation)
   is usable or must be dropped.
@@ -106,14 +112,24 @@ Needed for the cost-bounded escalation policy. No surveyed system reports escala
 DeepPrep reports only that it achieves comparable accuracy at 15× lower inference cost than a
 strong closed-source baseline, which is a per-task figure, not a per-escalation policy.
 
-### UQ-10. Can historical replay serve as ground truth without circularity?
+### UQ-10. ~~Can historical replay serve as ground truth without circularity?~~ — **PROMOTED to design constraint**
 
-The report proposes replay against previously accepted outputs as non-leaking ground truth. But
-if a semantic drift went undetected in period N, period N's accepted output is *wrong*, and
-replay will then certify period N+1's matching wrongness. How is the baseline itself
-re-validated, and how often?
+Resolved in principle by [amendment A5](workorder_amendment_001.md): baselines are tiered by
+provenance (T0 procedure-generated → T3 human-confirmed), the tiers are **not one ranking**
+(T2 is strong on aggregate correctness and blind to meaning; T3 is strong on meaning and blind
+to coverage), and `periods_since_independent_anchor` is carried on every contract so a
+self-generated baseline cannot masquerade as evidence.
 
-- **This is the sharpest unresolved objection to the proposed verification design.**
+**What remains open, and it is now a quantity rather than a question:**
+
+- What is a tolerable `max_periods_since_anchor`? Too short and re-anchoring becomes a standing
+  tax; too long and the self-certification loop reopens.
+- Which external artifacts are actually available per provider to serve as T2 anchors — stated
+  period totals, ERP control totals, settlement or payment figures? Availability varies by
+  provider and is the practical constraint on the whole scheme.
+- Does S-creep (Experiment 1) escalate before the anchor expires? If not, independent
+  re-anchoring becomes a **scheduled obligation** rather than a triggered one — a recurring cost
+  the business has to accept knowingly.
 
 ### UQ-11. Do humans give consistent semantic answers?
 

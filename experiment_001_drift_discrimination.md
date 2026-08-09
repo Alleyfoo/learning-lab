@@ -72,12 +72,23 @@ transform path.
       "key_must_be_unique": true,
       "row_count_band": [800, 2400]
     },
-    "L4_statistical": {
+    // L4 = statistical evidence RELEVANT TO applicability.
+    // It is not semantic validation. See non-claim N1 (amendment A2/A3).
+    "L4_statistical_evidence": {
       "period_total_band_pct": 0.35,          // vs. trailing accepted periods
       "negative_row_share_band": [0.00, 0.06],
       "cross_field": [
         { "expr": "abs(Summa - Kpl * unit_price) / Summa", "max": 0.01, "coverage_min": 0.95 }
-      ]
+      ],
+      "detection_floor": {                    // published property, amendment A3.1
+        "period_total": { "min_detectable_shift_pct": 3.2, "confidence": 0.95 }
+      },
+      "baseline_provenance": {                // amendment A5.1
+        "periods_in_baseline": 14,
+        "highest_tier_in_baseline": "T2",
+        "periods_since_independent_anchor": 6,
+        "max_periods_since_anchor": 12        // exceed -> escalate for re-anchoring
+      }
     },
     "L5_semantic_assertions": [
       { "claim": "Summa excludes freight",     "evidence": "provider email 2025-11-03", "confidence": "human_confirmed" },
@@ -108,11 +119,26 @@ real file can be used). Generate variants programmatically so ground truth is ex
 | **Control** | Unchanged file; same file, next period |
 | **Cosmetic** | Header renamed (`Summa`→`Myynti EUR`); columns reordered; sheet renamed; date format `31.01.2026`→`2026-01-31`; decimal comma→point; extra whitespace/casing |
 | **Structural** | One sheet split into two; wide monthly → long; **an extra column inserted before a mapped column** (the D1 trap); grain change (per-invoice-line instead of per-article-month); returns moved to a separate sheet; header row moved by 2 |
-| **Semantic** | **`Summa` redefined to include freight — file structurally byte-identical in layout, only values shift** (+4–9%); `Kpl` changed from units to cases (÷12); date changed from invoice date to posting date (values shift across month boundaries only) |
+| **Semantic** — see §3.2.1, **both detectability cases are mandatory** | **S-obvious**: `Summa` redefined to include freight where freight ≈ 8% of revenue; **S-invisible**: same redefinition where freight ≈ 0.4% — below the noise floor; **S-creep**: the 0.4% redefinition sustained over 6 periods; `Kpl` changed from units to cases (÷12); date changed from invoice date to posting date (values shift only across month boundaries) |
 | **Adjacent-provider** | A *different* provider's file from the same source family (tests UQ-3 false-apply) |
 
 Target ≈ 25–35 variants. Every variant carries a ground-truth label: `(applies | drifted)` and
 `drift_class ∈ {none, cosmetic, structural, semantic}`.
+
+### 3.2.1 The semantic variants must span both detectability cases
+
+Amendment A7. Without this, the experiment risks "solving" semantic drift by constructing only
+convenient examples.
+
+| Variant | Construction | Expected result |
+| --- | --- | --- |
+| **S-obvious** | Freight ≈ 8% of revenue — well above period-to-period variation | L4 escalates. Establishes L4 has non-zero power |
+| **S-invisible** | Freight ≈ 0.4% — below the noise floor | **L4 does not escalate. This is a correct result and must be reported as a success of the experiment design, not a failure of the method** |
+| **S-creep** | The 0.4% redefinition sustained across 6 periods | Tests whether reconciliation freshness (A5.1) catches cumulative divergence from an external anchor that per-period L4 never sees |
+
+S-invisible is the variant that **measures** non-claim N1 rather than assuming it, and it is
+what calibrates the published detection floor. S-creep tests the one mechanism that might
+recover ground lost to N1 without external supervision every period.
 
 ### 3.3 The harness
 
@@ -144,12 +170,21 @@ quarantine writer are the starting point.
 
 | Metric | Definition | Prediction |
 | --- | --- | --- |
-| **False-apply rate on semantic variants** | semantic variants judged `APPLIES` ÷ semantic variants | **100% with L0–L3 only.** Non-zero but materially lower with L4 |
+| **False-apply rate on semantic variants** | semantic variants judged `APPLIES` ÷ semantic variants | **100% with L0–L3 only.** With L4: **S-obvious caught, S-invisible not caught** |
+| **Published detection floor** | smallest definitional shift L4 separates from normal variation at 95% confidence, per measure | A number, e.g. ±3.2% of period total. This is the deliverable that makes N1 usable |
+| **S-creep recovery** | does reconciliation freshness escalate S-creep before period 6? | Unknown — this is the genuinely open sub-question |
 
-The predicted 100% is the point. It converts "structural predicates cannot see semantic drift"
-from an architectural argument into a measurement, and it establishes the exact marginal value
-of L4 statistical baselining — which is the most expensive layer to build and the only one that
-requires retained history.
+Two things are being measured here, and only one of them is a capability.
+
+The predicted 100% false-apply under L0–L3 converts "structural predicates cannot see semantic
+change" from an architectural argument into a measurement, and establishes the marginal value of
+L4 — the most expensive layer to build and the only one requiring retained history.
+
+**The S-invisible result is not a capability measurement. It is a boundary measurement.**
+It should come out negative, and reporting it as a failure would be a misreading. Its purpose is
+to calibrate the detection floor, so that every published contract can state what magnitude of
+definitional change it is blind to. That number is what lets a human be asked the right question
+at the right time, instead of being asked everything or nothing.
 
 **Secondary:**
 
@@ -174,8 +209,12 @@ the fact:
 | --- | --- | --- |
 | Cosmetic + structural detection ≥ 90%, class attribution ≥ 80%, cosmetic self-heal ≥ 50% | Declared applicability works. The work plane can decide when to escalate | Proceed to design the escalation contract and modelling plane |
 | Structural detection high but grain change missed | L3 needs a declared key and it cannot be optional | Make grain declaration mandatory; revisit the human-gate cost |
-| L4 catches semantic variants at a tolerable false-escalation rate (< ~15% on controls) | Statistical baselining is worth its cost | Build history retention into the work plane |
-| L4 false-escalation rate is intolerable | Trigger #5 is unusable; semantic drift needs external evidence only | Redesign the human gate around source-system change events; **this materially weakens the whole programme and must be reported as such** |
+| L4 catches **S-obvious** at a tolerable false-escalation rate (< ~15% on controls) | Statistical evidence is worth its cost, within its floor | Build history retention; publish the detection floor on every contract |
+| L4 misses **S-invisible** | **Expected. N1 confirmed empirically** | Report the detection floor as a contract property; route sub-floor questions to external evidence. Not a failure |
+| L4 *catches* S-invisible | **N1 challenged** — investigate before believing it; most likely an artefact of corpus construction | Re-examine whether the variant was genuinely sub-floor before claiming anything |
+| L4 false-escalation rate is intolerable | Trigger #5 is unusable; semantic change needs external evidence only | Redesign the human gate around source-system change events; **this materially weakens the whole programme and must be reported as such** |
+| Reconciliation freshness escalates **S-creep** before period 6 | Cumulative divergence recovers some of what per-period L4 cannot see | Make `periods_since_independent_anchor` mandatory in every contract |
+| S-creep never escalates | Sustained sub-floor drift is undetectable without periodic external anchoring | Independent re-anchoring becomes a **scheduled obligation**, not a trigger — a recurring cost the business must accept |
 | Cross-provider false-apply is non-trivial | Structural fingerprinting cannot gate publication at scale | Publication must depend on L3+L4, not L1. Revisit Q10 before any multi-provider work |
 | Detection is poor across the board | Declared applicability over `Template` is not viable | **STOP.** Reconsider the artifact from scratch before building any agent |
 

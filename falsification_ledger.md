@@ -230,6 +230,41 @@ It **is** the hard problem.
 
 ---
 
+## N1 — Stated non-claim (added by [amendment A3](workorder_amendment_001.md))
+
+> **Structural and statistical agreement cannot prove semantic continuity.**
+
+Not a hypothesis to be supported — a claim the architecture is **forbidden from making**.
+
+**Why it holds:** where the magnitude of a definitional change falls below the natural
+variation of the measure, the changed and unchanged worlds produce observationally identical
+data. The workorder's own example makes this concrete: if `Revenue` starts including freight
+and freight is 0.4% of revenue, no detector operating on the delivered file separates that from
+an ordinary month.
+
+**What would falsify N1:** a method that reliably separates definitional change from normal
+variation using only the delivered data. If demonstrated, the architecture simplifies
+considerably — the human gate could shrink to genuinely new concepts only. Nothing in the
+surveyed literature comes close, and the drift literature's position (no pipeline test catches
+semantic drift) is consistent with N1 rather than against it.
+
+**Operational consequences, binding on any implementation:**
+
+1. The system may never output "semantically unchanged." The strongest permitted statement is
+   *"no evidence of change, at detection floor X."*
+2. External metadata, contractual meaning, or a human gate is **structurally necessary** — not
+   a stopgap awaiting better automation.
+3. The detection floor must be **computed and published per contract**, so that sub-floor
+   questions are routed to external evidence rather than silently answered by the absence of an
+   alarm.
+
+**Relationship to H4:** N1 puts a hard ceiling on H4. Whatever fraction of source changes turn
+out to be semantic (UQ-1), some portion of that fraction is undetectable in principle. H4 can
+therefore never be fully true; the question is only whether the undetectable remainder is small
+enough to be economically tolerable.
+
+---
+
 ## Cross-cutting contrary finding
 
 Three of six hypotheses (H2, H3, and half of H5) turned out to be **already established in the
