@@ -117,6 +117,22 @@ Ordinary monitoring has no state for this and reports it as health.
 | 8 | [workorder_amendment_001.md](workorder_amendment_001.md) | Amendment 001 — renames L4, adds N1, memory triple, revised sequence |
 | 9 | [workorder_amendment_002.md](workorder_amendment_002.md) | Amendment 002 — detection power (α + power), evidence dimensions replacing tiers, three escalation reasons, preregistration |
 | 10 | [workorder_amendment_003.md](workorder_amendment_003.md) | **Amendment 003 — read first.** Warranted procedure, frozen terminology, `safety_factor` withdrawn, RUN A/RUN B split. **Conceptual amendments closed** |
+| 11 | [operating_procedure.md](operating_procedure.md) | Measurement phase: orthogonality of the two measurements, contamination rule, combination step |
+
+## Status: measurement phase
+
+**Conceptual amendments are closed.** Exactly two things are authorized:
+
+```text
+EXPERIMENT 1                      UQ-1 AUDIT
+synthetic / controlled            real archived history
+"Does the warrant machinery       "How often do these conditions
+ behave as claimed?"               actually occur in business data?"
+```
+
+They must not inform each other's design — see the contamination rule in
+[operating_procedure.md](operating_procedure.md). Combined afterwards, they answer whether the
+architecture is worth building at all. **Both answers are acceptable results.**
 
 ## Sequence
 
