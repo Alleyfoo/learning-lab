@@ -1,0 +1,159 @@
+{
+  "floor_used": {
+    "metric": "period_total",
+    "alpha": 0.05,
+    "power": 0.8,
+    "assumption": "iid",
+    "min_detectable_shift_pct": 22.4367,
+    "sustained_min_detectable_shift_pct": 10.7782,
+    "sustained_window": 6,
+    "baseline_window": 12,
+    "baseline_mean": 36210.0375,
+    "baseline_sd": 2535.6135,
+    "baseline_cv": 0.070025,
+    "baseline_commit": "52904d934cc358122260af0dc8b2aeca11da4ed4",
+    "baseline_sha256": "1f2575bebadce618be3d5553b05461f259f9ae0529d6dc53ffd9a45950366d03",
+    "method_version": "l4/1.1.0"
+  },
+  "n_evaluations": 168,
+  "O1a_unwarranted_execution": {
+    "count": 0,
+    "note": "Evidence held fresh in RUN A by design; O1a is measured in expiry.py (O5)."
+  },
+  "O1b_warranted_but_wrong_SYSTEM_FAILURE": {
+    "count": 22,
+    "variants": [
+      "COS_case_whitespace",
+      "COS_period_format"
+    ],
+    "definition": "Authorized while ground-truth output_equivalent is False, excluding sub-floor semantic variants (those are O4). Refined after RUN A: the first definition counted any authorized change as a failure, which would have scored order-independent renaming as a defect and rewarded over-escalation. Floor and corpus data were NOT touched."
+  },
+  "O2_false_escalation_rate_on_controls": 0.0833,
+  "O3_above_floor_miss": {
+    "count": 0,
+    "variants": []
+  },
+  "O4_correct_undecidability": {
+    "count": 7,
+    "variants": [
+      "SEM_creep",
+      "SEM_invisible"
+    ],
+    "note": "Below declared capability and correctly not claimed as semantic continuity."
+  },
+  "n1_guard": "passed on all evaluations",
+  "per_variant": [
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "n": 12,
+      "escalated": 1,
+      "first_level": null
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "n": 12,
+      "escalated": 12,
+      "first_level": [
+        "L2"
+      ]
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "n": 12,
+      "escalated": 1,
+      "first_level": null
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "n": 12,
+      "escalated": 12,
+      "first_level": [
+        "L1"
+      ]
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "n": 12,
+      "escalated": 1,
+      "first_level": null
+    },
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "n": 12,
+      "escalated": 1,
+      "first_level": null
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "n": 12,
+      "escalated": 6,
+      "first_level": null
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "n": 1,
+      "escalated": 0,
+      "first_level": null
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "n": 1,
+      "escalated": 1,
+      "first_level": null
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "n": 12,
+      "escalated": 12,
+      "first_level": [
+        "L1"
+      ]
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "n": 12,
+      "escalated": 12,
+      "first_level": [
+        "L3"
+      ]
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "n": 12,
+      "escalated": 12,
+      "first_level": [
+        "L1"
+      ]
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "n": 12,
+      "escalated": 12,
+      "first_level": [
+        "L1"
+      ]
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "n": 12,
+      "escalated": 12,
+      "first_level": [
+        "L1"
+      ]
+    }
+  ]
+}

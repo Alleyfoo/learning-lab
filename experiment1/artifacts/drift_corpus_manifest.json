@@ -1,0 +1,1464 @@
+{
+  "generated_after_floor_commit": "52904d934cc358122260af0dc8b2aeca11da4ed4",
+  "floor_used": {
+    "min_detectable_shift_pct": 22.4367,
+    "sustained_min_detectable_shift_pct": 10.7782
+  },
+  "eval_start_index": 12,
+  "single_period_index": 18,
+  "labelling_rule": "Variants are labelled by WHAT CHANGED, never by what would have been detected (operating_procedure.md 2.2).",
+  "rename_vocabulary_source": "Data-tool config.yaml synonyms, data only",
+  "variants": [
+    {
+      "name": "C0_unchanged",
+      "drift_class": "none",
+      "story": "control, no change",
+      "apply_at": "all",
+      "output_equivalent": true
+    },
+    {
+      "name": "COS_rename",
+      "drift_class": "cosmetic",
+      "story": "headers renamed to real provider vocabulary",
+      "apply_at": "all",
+      "output_equivalent": false
+    },
+    {
+      "name": "COS_reorder",
+      "drift_class": "cosmetic",
+      "story": "columns reversed",
+      "apply_at": "all",
+      "output_equivalent": true
+    },
+    {
+      "name": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "story": "measure written as '1 234,56'",
+      "apply_at": "all",
+      "output_equivalent": false
+    },
+    {
+      "name": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "story": "sku lowercased and padded",
+      "apply_at": "all",
+      "output_equivalent": false
+    },
+    {
+      "name": "COS_period_format",
+      "drift_class": "cosmetic",
+      "story": "period written as MM/YYYY",
+      "apply_at": "all",
+      "output_equivalent": false
+    },
+    {
+      "name": "STR_insert_column",
+      "drift_class": "structural",
+      "story": "extra column inserted before the measure (D1 trap)",
+      "apply_at": "all",
+      "output_equivalent": false
+    },
+    {
+      "name": "STR_wide",
+      "drift_class": "structural",
+      "story": "long reshaped to wide",
+      "apply_at": "all",
+      "output_equivalent": false
+    },
+    {
+      "name": "STR_grain_split",
+      "drift_class": "structural",
+      "story": "grain becomes per-invoice-line; period total preserved",
+      "apply_at": "all",
+      "output_equivalent": false
+    },
+    {
+      "name": "STR_drop_column",
+      "drift_class": "structural",
+      "story": "freight column removed",
+      "apply_at": "all",
+      "output_equivalent": false
+    },
+    {
+      "name": "STR_header_offset",
+      "drift_class": "structural",
+      "story": "three banner rows prepended",
+      "apply_at": "all",
+      "output_equivalent": false
+    },
+    {
+      "name": "SEM_invisible",
+      "drift_class": "semantic",
+      "story": "measure redefined; shift = 0.15 x floor = 3.366%",
+      "apply_at": "single",
+      "output_equivalent": false,
+      "target_shift_pct": 3.3655,
+      "floor_multiple": 0.15
+    },
+    {
+      "name": "SEM_obvious",
+      "drift_class": "semantic",
+      "story": "measure redefined; shift = 2.50 x floor = 56.092%",
+      "apply_at": "single",
+      "output_equivalent": false,
+      "target_shift_pct": 56.0917,
+      "floor_multiple": 2.5
+    },
+    {
+      "name": "SEM_creep",
+      "drift_class": "semantic",
+      "story": "measure redefined; shift = 0.15 x floor sustained from period 12",
+      "apply_at": "all",
+      "output_equivalent": false,
+      "target_shift_pct": 3.3655,
+      "floor_multiple": 0.15,
+      "sustained": true
+    }
+  ],
+  "files": [
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": true,
+      "file": "C0_unchanged__2025-01.csv"
+    },
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": true,
+      "file": "C0_unchanged__2025-02.csv"
+    },
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": true,
+      "file": "C0_unchanged__2025-03.csv"
+    },
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": true,
+      "file": "C0_unchanged__2025-04.csv"
+    },
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": true,
+      "file": "C0_unchanged__2025-05.csv"
+    },
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": true,
+      "file": "C0_unchanged__2025-06.csv"
+    },
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "C0_unchanged__2025-07.csv"
+    },
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": true,
+      "file": "C0_unchanged__2025-08.csv"
+    },
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": true,
+      "file": "C0_unchanged__2025-09.csv"
+    },
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": true,
+      "file": "C0_unchanged__2025-10.csv"
+    },
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": true,
+      "file": "C0_unchanged__2025-11.csv"
+    },
+    {
+      "variant": "C0_unchanged",
+      "drift_class": "none",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": true,
+      "file": "C0_unchanged__2025-12.csv"
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": true,
+      "file": "COS_rename__2025-01.csv"
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": true,
+      "file": "COS_rename__2025-02.csv"
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": true,
+      "file": "COS_rename__2025-03.csv"
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": true,
+      "file": "COS_rename__2025-04.csv"
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": true,
+      "file": "COS_rename__2025-05.csv"
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": true,
+      "file": "COS_rename__2025-06.csv"
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "COS_rename__2025-07.csv"
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": true,
+      "file": "COS_rename__2025-08.csv"
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": true,
+      "file": "COS_rename__2025-09.csv"
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": true,
+      "file": "COS_rename__2025-10.csv"
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": true,
+      "file": "COS_rename__2025-11.csv"
+    },
+    {
+      "variant": "COS_rename",
+      "drift_class": "cosmetic",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": true,
+      "file": "COS_rename__2025-12.csv"
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": true,
+      "file": "COS_reorder__2025-01.csv"
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": true,
+      "file": "COS_reorder__2025-02.csv"
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": true,
+      "file": "COS_reorder__2025-03.csv"
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": true,
+      "file": "COS_reorder__2025-04.csv"
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": true,
+      "file": "COS_reorder__2025-05.csv"
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": true,
+      "file": "COS_reorder__2025-06.csv"
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "COS_reorder__2025-07.csv"
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": true,
+      "file": "COS_reorder__2025-08.csv"
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": true,
+      "file": "COS_reorder__2025-09.csv"
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": true,
+      "file": "COS_reorder__2025-10.csv"
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": true,
+      "file": "COS_reorder__2025-11.csv"
+    },
+    {
+      "variant": "COS_reorder",
+      "drift_class": "cosmetic",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": true,
+      "file": "COS_reorder__2025-12.csv"
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": true,
+      "file": "COS_decimal_comma__2025-01.csv"
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": true,
+      "file": "COS_decimal_comma__2025-02.csv"
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": true,
+      "file": "COS_decimal_comma__2025-03.csv"
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": true,
+      "file": "COS_decimal_comma__2025-04.csv"
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": true,
+      "file": "COS_decimal_comma__2025-05.csv"
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": true,
+      "file": "COS_decimal_comma__2025-06.csv"
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "COS_decimal_comma__2025-07.csv"
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": true,
+      "file": "COS_decimal_comma__2025-08.csv"
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": true,
+      "file": "COS_decimal_comma__2025-09.csv"
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": true,
+      "file": "COS_decimal_comma__2025-10.csv"
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": true,
+      "file": "COS_decimal_comma__2025-11.csv"
+    },
+    {
+      "variant": "COS_decimal_comma",
+      "drift_class": "cosmetic",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": true,
+      "file": "COS_decimal_comma__2025-12.csv"
+    },
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": true,
+      "file": "COS_case_whitespace__2025-01.csv"
+    },
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": true,
+      "file": "COS_case_whitespace__2025-02.csv"
+    },
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": true,
+      "file": "COS_case_whitespace__2025-03.csv"
+    },
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": true,
+      "file": "COS_case_whitespace__2025-04.csv"
+    },
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": true,
+      "file": "COS_case_whitespace__2025-05.csv"
+    },
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": true,
+      "file": "COS_case_whitespace__2025-06.csv"
+    },
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "COS_case_whitespace__2025-07.csv"
+    },
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": true,
+      "file": "COS_case_whitespace__2025-08.csv"
+    },
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": true,
+      "file": "COS_case_whitespace__2025-09.csv"
+    },
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": true,
+      "file": "COS_case_whitespace__2025-10.csv"
+    },
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": true,
+      "file": "COS_case_whitespace__2025-11.csv"
+    },
+    {
+      "variant": "COS_case_whitespace",
+      "drift_class": "cosmetic",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": true,
+      "file": "COS_case_whitespace__2025-12.csv"
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": true,
+      "file": "COS_period_format__2025-01.csv"
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": true,
+      "file": "COS_period_format__2025-02.csv"
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": true,
+      "file": "COS_period_format__2025-03.csv"
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": true,
+      "file": "COS_period_format__2025-04.csv"
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": true,
+      "file": "COS_period_format__2025-05.csv"
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": true,
+      "file": "COS_period_format__2025-06.csv"
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "COS_period_format__2025-07.csv"
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": true,
+      "file": "COS_period_format__2025-08.csv"
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": true,
+      "file": "COS_period_format__2025-09.csv"
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": true,
+      "file": "COS_period_format__2025-10.csv"
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": true,
+      "file": "COS_period_format__2025-11.csv"
+    },
+    {
+      "variant": "COS_period_format",
+      "drift_class": "cosmetic",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": true,
+      "file": "COS_period_format__2025-12.csv"
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": true,
+      "file": "STR_insert_column__2025-01.csv"
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": true,
+      "file": "STR_insert_column__2025-02.csv"
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": true,
+      "file": "STR_insert_column__2025-03.csv"
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": true,
+      "file": "STR_insert_column__2025-04.csv"
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": true,
+      "file": "STR_insert_column__2025-05.csv"
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": true,
+      "file": "STR_insert_column__2025-06.csv"
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "STR_insert_column__2025-07.csv"
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": true,
+      "file": "STR_insert_column__2025-08.csv"
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": true,
+      "file": "STR_insert_column__2025-09.csv"
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": true,
+      "file": "STR_insert_column__2025-10.csv"
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": true,
+      "file": "STR_insert_column__2025-11.csv"
+    },
+    {
+      "variant": "STR_insert_column",
+      "drift_class": "structural",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": true,
+      "file": "STR_insert_column__2025-12.csv"
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": true,
+      "file": "STR_wide__2025-01.csv"
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": true,
+      "file": "STR_wide__2025-02.csv"
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": true,
+      "file": "STR_wide__2025-03.csv"
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": true,
+      "file": "STR_wide__2025-04.csv"
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": true,
+      "file": "STR_wide__2025-05.csv"
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": true,
+      "file": "STR_wide__2025-06.csv"
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "STR_wide__2025-07.csv"
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": true,
+      "file": "STR_wide__2025-08.csv"
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": true,
+      "file": "STR_wide__2025-09.csv"
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": true,
+      "file": "STR_wide__2025-10.csv"
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": true,
+      "file": "STR_wide__2025-11.csv"
+    },
+    {
+      "variant": "STR_wide",
+      "drift_class": "structural",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": true,
+      "file": "STR_wide__2025-12.csv"
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": true,
+      "file": "STR_grain_split__2025-01.csv"
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": true,
+      "file": "STR_grain_split__2025-02.csv"
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": true,
+      "file": "STR_grain_split__2025-03.csv"
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": true,
+      "file": "STR_grain_split__2025-04.csv"
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": true,
+      "file": "STR_grain_split__2025-05.csv"
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": true,
+      "file": "STR_grain_split__2025-06.csv"
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "STR_grain_split__2025-07.csv"
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": true,
+      "file": "STR_grain_split__2025-08.csv"
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": true,
+      "file": "STR_grain_split__2025-09.csv"
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": true,
+      "file": "STR_grain_split__2025-10.csv"
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": true,
+      "file": "STR_grain_split__2025-11.csv"
+    },
+    {
+      "variant": "STR_grain_split",
+      "drift_class": "structural",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": true,
+      "file": "STR_grain_split__2025-12.csv"
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": true,
+      "file": "STR_drop_column__2025-01.csv"
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": true,
+      "file": "STR_drop_column__2025-02.csv"
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": true,
+      "file": "STR_drop_column__2025-03.csv"
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": true,
+      "file": "STR_drop_column__2025-04.csv"
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": true,
+      "file": "STR_drop_column__2025-05.csv"
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": true,
+      "file": "STR_drop_column__2025-06.csv"
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "STR_drop_column__2025-07.csv"
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": true,
+      "file": "STR_drop_column__2025-08.csv"
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": true,
+      "file": "STR_drop_column__2025-09.csv"
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": true,
+      "file": "STR_drop_column__2025-10.csv"
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": true,
+      "file": "STR_drop_column__2025-11.csv"
+    },
+    {
+      "variant": "STR_drop_column",
+      "drift_class": "structural",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": true,
+      "file": "STR_drop_column__2025-12.csv"
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": true,
+      "file": "STR_header_offset__2025-01.csv"
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": true,
+      "file": "STR_header_offset__2025-02.csv"
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": true,
+      "file": "STR_header_offset__2025-03.csv"
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": true,
+      "file": "STR_header_offset__2025-04.csv"
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": true,
+      "file": "STR_header_offset__2025-05.csv"
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": true,
+      "file": "STR_header_offset__2025-06.csv"
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "STR_header_offset__2025-07.csv"
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": true,
+      "file": "STR_header_offset__2025-08.csv"
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": true,
+      "file": "STR_header_offset__2025-09.csv"
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": true,
+      "file": "STR_header_offset__2025-10.csv"
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": true,
+      "file": "STR_header_offset__2025-11.csv"
+    },
+    {
+      "variant": "STR_header_offset",
+      "drift_class": "structural",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": true,
+      "file": "STR_header_offset__2025-12.csv"
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": false,
+      "file": "SEM_invisible__2025-01.csv"
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": false,
+      "file": "SEM_invisible__2025-02.csv"
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": false,
+      "file": "SEM_invisible__2025-03.csv"
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": false,
+      "file": "SEM_invisible__2025-04.csv"
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": false,
+      "file": "SEM_invisible__2025-05.csv"
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": false,
+      "file": "SEM_invisible__2025-06.csv"
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "SEM_invisible__2025-07.csv"
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": false,
+      "file": "SEM_invisible__2025-08.csv"
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": false,
+      "file": "SEM_invisible__2025-09.csv"
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": false,
+      "file": "SEM_invisible__2025-10.csv"
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": false,
+      "file": "SEM_invisible__2025-11.csv"
+    },
+    {
+      "variant": "SEM_invisible",
+      "drift_class": "semantic",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": false,
+      "file": "SEM_invisible__2025-12.csv"
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": false,
+      "file": "SEM_obvious__2025-01.csv"
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": false,
+      "file": "SEM_obvious__2025-02.csv"
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": false,
+      "file": "SEM_obvious__2025-03.csv"
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": false,
+      "file": "SEM_obvious__2025-04.csv"
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": false,
+      "file": "SEM_obvious__2025-05.csv"
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": false,
+      "file": "SEM_obvious__2025-06.csv"
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "SEM_obvious__2025-07.csv"
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": false,
+      "file": "SEM_obvious__2025-08.csv"
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": false,
+      "file": "SEM_obvious__2025-09.csv"
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": false,
+      "file": "SEM_obvious__2025-10.csv"
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": false,
+      "file": "SEM_obvious__2025-11.csv"
+    },
+    {
+      "variant": "SEM_obvious",
+      "drift_class": "semantic",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": false,
+      "file": "SEM_obvious__2025-12.csv"
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "period": "2025-01",
+      "period_index": 12,
+      "modified": true,
+      "file": "SEM_creep__2025-01.csv"
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "period": "2025-02",
+      "period_index": 13,
+      "modified": true,
+      "file": "SEM_creep__2025-02.csv"
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "period": "2025-03",
+      "period_index": 14,
+      "modified": true,
+      "file": "SEM_creep__2025-03.csv"
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "period": "2025-04",
+      "period_index": 15,
+      "modified": true,
+      "file": "SEM_creep__2025-04.csv"
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "period": "2025-05",
+      "period_index": 16,
+      "modified": true,
+      "file": "SEM_creep__2025-05.csv"
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "period": "2025-06",
+      "period_index": 17,
+      "modified": true,
+      "file": "SEM_creep__2025-06.csv"
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "period": "2025-07",
+      "period_index": 18,
+      "modified": true,
+      "file": "SEM_creep__2025-07.csv"
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "period": "2025-08",
+      "period_index": 19,
+      "modified": true,
+      "file": "SEM_creep__2025-08.csv"
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "period": "2025-09",
+      "period_index": 20,
+      "modified": true,
+      "file": "SEM_creep__2025-09.csv"
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "period": "2025-10",
+      "period_index": 21,
+      "modified": true,
+      "file": "SEM_creep__2025-10.csv"
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "period": "2025-11",
+      "period_index": 22,
+      "modified": true,
+      "file": "SEM_creep__2025-11.csv"
+    },
+    {
+      "variant": "SEM_creep",
+      "drift_class": "semantic",
+      "period": "2025-12",
+      "period_index": 23,
+      "modified": true,
+      "file": "SEM_creep__2025-12.csv"
+    }
+  ]
+}

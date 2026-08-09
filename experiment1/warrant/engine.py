@@ -141,6 +141,24 @@ def evaluate(
 
     failed = _check_l1(period_df, proc) + _check_l2(period_df, proc) + _check_l3(period_df, proc)
 
+    if measure_column not in period_df.columns:
+        # The measure itself is missing. L4 cannot be evaluated at all; this is an
+        # L1 failure, not a statistical result, and must not be reported as "no
+        # evidence of change".
+        return AuthorizationResult(
+            state=AuthorizationState.MISMATCH_ESCALATION,
+            reasons=[EscalationReason.OBSERVED_MISMATCH],
+            failed_predicates=failed
+            + [{"level": "L1", "predicate": "measure_column_present",
+                "expected": measure_column, "observed": None}],
+            l4_report={"single_period": None, "note": "measure column absent; L4 not evaluable"},
+            stale_dimensions=proc.evidence.stale_dimensions(now_index),
+            periods_since_independent_anchor=proc.evidence.periods_since_independent_anchor(
+                now_index
+            ),
+            undecidable_region=proc.undecidable_region(),
+        )
+
     observed_total = float(pd.to_numeric(period_df[measure_column], errors="coerce").sum())
     single = single_period_test(
         observed_total, baseline_totals, proc.applicability.l4.alpha, floor.min_detectable_shift_pct

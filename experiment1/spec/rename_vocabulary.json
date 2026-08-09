@@ -1,0 +1,77 @@
+{
+  "_provenance": {
+    "copied_from": "Alleyfoo/Data-tool @ ab10b8c src/config.yaml synonyms:",
+    "copied": "data only - no matching code was ported",
+    "why": "real provider header vocabulary; renames in the cosmetic variants use terms a provider might actually send"
+  },
+  "canonical_to_baseline_column": {
+    "article_sku": "article_sku",
+    "report_date": "report_period",
+    "sales_qty": "quantity",
+    "sales_amount": "amount",
+    "unit_price": "unit_price"
+  },
+  "synonyms": {
+    "article_sku": [
+      "sku",
+      "article",
+      "item",
+      "material",
+      "product",
+      "description",
+      "desc",
+      "part no",
+      "identifier",
+      "owner",
+      "product name",
+      "product id",
+      "item code"
+    ],
+    "report_date": [
+      "date",
+      "period",
+      "month",
+      "time",
+      "year",
+      "invoice date",
+      "doc date",
+      "billing period",
+      "posting date",
+      "calendar month"
+    ],
+    "sales_qty": [
+      "qty",
+      "quantity",
+      "units",
+      "vol",
+      "volume",
+      "pcs",
+      "pieces",
+      "sold",
+      "budget",
+      "units sold"
+    ],
+    "sales_amount": [
+      "amount",
+      "total",
+      "value",
+      "revenue",
+      "sales",
+      "net",
+      "gross",
+      "eur",
+      "usd",
+      "turnover",
+      "sales value",
+      "net sales",
+      "gross sales"
+    ],
+    "unit_price": [
+      "unit_price",
+      "price",
+      "unit cost",
+      "rate",
+      "unit value"
+    ]
+  }
+}
