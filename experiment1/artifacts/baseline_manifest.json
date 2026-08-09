@@ -1,0 +1,49 @@
+{
+  "schema_version": "baseline/1",
+  "generator": "experiment1/generator/baseline.py",
+  "params": {
+    "seed": 20260809,
+    "n_periods": 24,
+    "first_period": "2024-01",
+    "n_articles": 150,
+    "article_presence_prob": 0.85,
+    "qty_lognorm_mean": 2.4,
+    "qty_lognorm_sigma": 0.55,
+    "price_lognorm_mean": 3.0,
+    "price_lognorm_sigma": 0.45,
+    "price_jitter_sigma": 0.01,
+    "period_factor_sigma": 0.04,
+    "freight_rate_mean": 0.031,
+    "freight_rate_sigma": 0.004
+  },
+  "declared_world_model": "iid",
+  "semantic_assertions": [
+    {
+      "claim": "amount excludes freight",
+      "source": "generator construction",
+      "checkable_from_data": false
+    },
+    {
+      "claim": "amount excludes VAT",
+      "source": "generator construction",
+      "checkable_from_data": false
+    },
+    {
+      "claim": "one row per (article_sku, report_period)",
+      "source": "generator construction",
+      "checkable_from_data": true
+    }
+  ],
+  "realised": {
+    "n_periods": 24,
+    "n_rows": 3024,
+    "period_total_mean": 37072.388333333336,
+    "period_total_sd": 2410.188686497146,
+    "period_total_cv": 0.06501304056340078,
+    "rows_per_period_mean": 126.0,
+    "freight_share_of_amount": 0.030944211714082084
+  },
+  "artifact_sha256": {
+    "baseline_history.csv": "1f2575bebadce618be3d5553b05461f259f9ae0529d6dc53ffd9a45950366d03"
+  }
+}
