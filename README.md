@@ -22,19 +22,40 @@ Some semantic changes are observationally indistinguishable from the available d
 may never output "semantically unchanged" — only *"no evidence of change, at detection floor X,
 declared with α and power."*
 
-### A published task model
+### The artifact: a warranted procedure
 
 ```text
-  executable procedure
-+ applicability contract              (L0-L5)
-+ statistical detection capability    (floor: alpha, power, variance basis, assumptions)
-+ evidence vector                     (semantic / aggregate / structural, each dated)
-+ anchor freshness                    (per-dimension staleness)
-+ known undecidable assumptions       (explicitly not checkable)
+  PROCEDURE            what to do
+  APPLICABILITY CLAIM  when we believe it describes the source
+  DETECTION CAPABILITY which changes our evidence can reasonably expose
+  EVIDENCE             why we currently trust those claims
+  EXPIRY               when the evidence is no longer sufficient
+  UNDECIDABLE REGION   what this machinery cannot establish
 ```
 
-The last component is what separates this from "schema memory." A model that cannot enumerate
-what it *cannot* establish is making an implicit claim of completeness it has no basis for.
+Execution asks **"does this procedure currently have sufficient warrant for autonomous use?"** —
+not "does the Excel match the schema?" The last component is what separates this from schema
+memory: a model that cannot enumerate what it *cannot* establish is making an implicit claim of
+completeness it has no basis for.
+
+### Three states, kept apart
+
+```text
+WORLD STATE          Does this procedure actually still describe the source?
+EVIDENCE STATE       How strongly can we establish that?
+AUTHORIZATION STATE  Are we willing to let it run unattended?
+```
+
+Independent. **Authorization to rely on a model can expire without evidence of source change** —
+that is epistemic decay in the contract, not drift in the source. Agents must never be able to
+report the former as the latter.
+
+```text
+APPLICABLE + WELL-EVIDENCED   -> autonomous execution
+POSSIBLY APPLICABLE + STALE   -> re-anchor required
+OBSERVED MISMATCH             -> modelling escalation
+SEMANTIC STATUS UNDECIDABLE   -> external evidence / human gate
+```
 
 ### Three reasons to escalate
 
@@ -94,7 +115,8 @@ Ordinary monitoring has no state for this and reports it as health.
 | 6 | [experiment_001_drift_discrimination.md](experiment_001_drift_discrimination.md) | The single recommended first experiment |
 | 7 | Decision | §13 of the main report; summarized above |
 | 8 | [workorder_amendment_001.md](workorder_amendment_001.md) | Amendment 001 — renames L4, adds N1, memory triple, revised sequence |
-| 9 | [workorder_amendment_002.md](workorder_amendment_002.md) | **Amendment 002 — read first.** Detection power (α + power), evidence dimensions replacing tiers, three escalation reasons, preregistration protocol |
+| 9 | [workorder_amendment_002.md](workorder_amendment_002.md) | Amendment 002 — detection power (α + power), evidence dimensions replacing tiers, three escalation reasons, preregistration |
+| 10 | [workorder_amendment_003.md](workorder_amendment_003.md) | **Amendment 003 — read first.** Warranted procedure, frozen terminology, `safety_factor` withdrawn, RUN A/RUN B split. **Conceptual amendments closed** |
 
 ## Sequence
 

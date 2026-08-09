@@ -92,8 +92,10 @@ transform path.
           "power": 0.80,
           "variance_basis": "independently_anchored_periods",
           "independence_assumed": true,       // B2: biases the floor OPTIMISTICALLY
-          "seasonality_model": "none",        // first experiment only
-          "safety_factor": 1.5                // applied while independence is assumed
+          "baseline_model": "iid",            // floor is calibrated under this
+          // C3: safety_factor WITHDRAWN. A policy number in statistical clothing.
+          // Replaced by measuring power degradation under misspecification:
+          "stress_models": ["ar1_rho_0.3", "ar1_rho_0.6", "seasonal_component"]
         }
       },
       // amendment B3: orthogonal dimensions, not an ordered ladder.
@@ -209,7 +211,8 @@ quarantine writer are the starting point.
 
 | # | Outcome | Definition |
 | --- | --- | --- |
-| **O1** | **False apply** | Procedure runs when it should not |
+| **O1a** | **Unwarranted execution** | Procedure ran while warrant was absent or expired. **System failure** — authorization logic is wrong |
+| **O1b** | **Warranted but wrong** | Procedure ran with valid warrant; world state had changed undetectably. **Not a system failure** — this is the N1 boundary manifesting, and what O4 characterises |
 | **O2** | **False escalation** | Applicable procedure rejected or escalated |
 | **O3** | **Detectable-drift miss** | Change *above* the declared L4 floor that did not trigger |
 | **O4** | **Correct undecidability** | Change *below* declared detection capability, and the system correctly does not claim semantic continuity |
@@ -231,6 +234,49 @@ shift magnitude from ≈0.1× to 4× the declared floor and locate the empirical
 
 This locates miscalibration in the *claim* rather than in the detector, which is the correct
 place for it.
+
+**Report both directions as a paired metric** ([C6](workorder_amendment_003.md)):
+
+```text
+floor too optimistic  -> unsafe autonomous reliance
+floor too pessimistic -> unnecessary escalation / cost
+```
+
+Which inverts one intuition: **S-invisible being detected consistently is not necessarily good
+news.** It indicates an over-pessimistic contract, and therefore needless re-anchoring and
+needless human intervention. A single-sided "detection rate" would reward exactly the wrong
+behaviour.
+
+### 4.2.1 Split calibration from certification ([C4](workorder_amendment_003.md))
+
+The sweep must not both correct the floor and certify the correction.
+
+```text
+RUN A  - calibration / falsification
+         Does the claimed floor correspond to ~80% power?
+         If not: the claim FAILS. Preserve the result. Do not repair in place.
+
+RUN B  - separately preregistered
+         New baseline, new seeds, held-out histories, corrected method.
+         Test the revised floor.
+```
+
+Otherwise the conclusion is *"our empirical floor was exactly where our empirical experiment
+reached 80% power"* — true by construction, not a test.
+
+**Honest limit of RUN B** ([C4.1](workorder_amendment_003.md)): under a synthetic corpus,
+"held-out" means new seeds from the *same generator*. That tests estimator stability, not model
+correctness. If the generator is wrong in the same way the floor is wrong, RUN B will certify
+the error. Only real archived history breaks that circle — a second, independent argument for
+the UQ-1 audit.
+
+### 4.2.2 Misspecification stress ([C3](workorder_amendment_003.md))
+
+Calibrate the floor under `baseline_model: iid`, then measure how far the claimed 80% power
+degrades under `ar1_rho_0.3`, `ar1_rho_0.6` and a seasonal component. This yields an empirical
+misspecification correction instead of a blessed constant. `safety_factor` was withdrawn for
+precisely this reason — it may return later as operator policy, but only once its coverage is
+known.
 
 ### 4.3 Detailed metrics
 

@@ -261,9 +261,12 @@ semantic drift) is consistent with N1 rather than against it.
 4. The floor's independence assumption must be **visible**, because assuming i.i.d. monthly
    observations biases the floor *optimistically* — the unsafe direction (B2).
 5. **The floor is not a constant.** Variance estimated from unanchored history is contaminated
-   by any undetected drift it contains, which widens the floor as the anchor ages. Detection
-   capability decays precisely when drift is present, so a model can lose applicability without
-   the source changing at all (B2.1).
+   by any undetected drift it contains, which widens the floor as the anchor ages — detection
+   capability decays precisely when drift is present (B2.1). Stated correctly per
+   [C1.1](workorder_amendment_003.md): **authorization to rely on a model can expire without
+   evidence of source change.** This is epistemic decay in the *contract*, not drift in the
+   *source*; the two must never be conflated, and an agent must never be able to report the
+   former as the latter.
 6. Any claim of undetectability must be **declared before the result is observed**, or it is
    unfalsifiable. Experiment 1 enforces this by committing the floor to git before the drift
    corpus exists (B6.2).

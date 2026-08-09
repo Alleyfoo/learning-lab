@@ -284,12 +284,22 @@ modelling is out of scope for Experiment 1; making the assumption visible and ca
 declared safety factor is not.
 
 **The floor is not a constant — it degrades as the anchor ages**
-([B2.1](workorder_amendment_002.md)). If variance is estimated from unanchored,
-procedure-generated history, that baseline may itself contain undetected drift. For sustained
-sub-floor change the contamination is monotone, inflating variance and *widening* the floor —
-so detection capability decays precisely when drift is present. A model can therefore lose
-applicability without the source changing at all. This gives evidence expiry a measurable
-statistical consequence, not merely a policy one.
+([B2.1](workorder_amendment_002.md), corrected by [C1.1](workorder_amendment_003.md)). If
+variance is estimated from unanchored, procedure-generated history, that baseline may itself
+contain undetected drift. For sustained sub-floor change the contamination is monotone,
+inflating variance and *widening* the floor — so detection capability decays precisely when
+drift is present.
+
+State this carefully. It is **not** that a model loses applicability without the source
+changing; that would assert a change in world state on the basis of a change in evidence state.
+Correctly:
+
+> **Authorization to rely on a model can expire without evidence of source change.**
+
+The world state may be entirely stationary. What degrades is our warrant to assert
+applicability. The phenomenon is **epistemic decay in the contract**, explicitly not drift in
+the source — a distinction that becomes load-bearing once agents propose contracts, because an
+agent must never be able to convert *"we no longer know"* into *"the schema changed."*
 
 This turns N1 from a disclaimer into a number. "Could freight have been folded into this
 measure?" becomes: *freight is ~0.4% of revenue here, below our 3.2% floor at 80% power —
@@ -419,6 +429,27 @@ Genuinely requires human semantic input:
 5. **(Added from §6)** **Statistical discontinuity with no structural explanation.** This must
    be a trigger, because it is the *only* automatic semantic-drift alarm. It will produce
    false positives; that is the price of catching the class at all.
+
+### 8.0 Three states, and the authorization machine ([amendment C1–C2](workorder_amendment_003.md))
+
+```text
+WORLD STATE          Does this procedure actually still describe the source?
+EVIDENCE STATE       How strongly can we establish that?
+AUTHORIZATION STATE  Are we willing to let it run unattended?
+```
+
+Independent. A procedure can remain correct while its evidence expires; evidence can look
+excellent while the procedure has silently become wrong.
+
+```text
+APPLICABLE + WELL-EVIDENCED   -> autonomous execution
+POSSIBLY APPLICABLE + STALE   -> re-anchor required
+OBSERVED MISMATCH             -> modelling escalation
+SEMANTIC STATUS UNDECIDABLE   -> external evidence / human gate
+```
+
+Collapsing *stale* into *mismatch* manufactures phantom source changes out of our own epistemic
+decay. Each state has a distinct owner and a distinct remedy.
 
 ### 8.1 Three escalation reasons ([amendment B5](workorder_amendment_002.md))
 
