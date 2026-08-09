@@ -1,0 +1,131 @@
+{
+  "condition": "B",
+  "label": "qwenB_s11111",
+  "seed": 11111,
+  "model": {
+    "tag": "qwen3.5:9b",
+    "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7"
+  },
+  "generation_options": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "seed": 11111,
+    "num_ctx": 65536,
+    "num_predict": 32768
+  },
+  "think_enabled": false,
+  "warmup_passed": false,
+  "warmup_attempt": null,
+  "phase1_role": "TRAINING - NOT EVIDENCE, NOT SCORED",
+  "phase2_prompt_sha256": "3c286bad748b27a7c2151682ff0ad30f63fefa680dc38785459e13daa509cbf5",
+  "completion_classes": [
+    {
+      "attempt": 1,
+      "class": "COMPLETE",
+      "done_reason": "stop",
+      "eval_count": 3232,
+      "content_chars": 13700,
+      "thinking_chars": 0
+    },
+    {
+      "attempt": 2,
+      "class": "TRUNCATED",
+      "done_reason": "length",
+      "eval_count": 32768,
+      "content_chars": 142143,
+      "thinking_chars": 0
+    },
+    {
+      "attempt": 3,
+      "class": "TRUNCATED",
+      "done_reason": "length",
+      "eval_count": 5511,
+      "content_chars": 24318,
+      "thinking_chars": 0
+    }
+  ],
+  "completion_summary": {
+    "COMPLETE": 1,
+    "TRUNCATED": 2,
+    "EMPTY_NONTRUNCATED": 0
+  },
+  "frozen_sha256": {
+    "artifacts/task_packet/TASK.md": "a9b8dc0d7af534adbe2ca088bbba9f98c2498ee8b13914b5da7217b018174f42",
+    "artifacts/task_packet/contract.py": "b49eb4bd8e36979e8916b08804b85995e8f2b3a2a0275df9ad824496919be321",
+    "artifacts/corpus_manifest.json": "45b27a2e99c88f1b7a97fee99d8f0fe313d858d95829e108bdd73c18f87dd205",
+    "artifacts/canonical.csv": "c5111ef822697dd958689e3c58e89ef1807eca99afe3068ac5595f33fef3b1c7",
+    "harness/evaluate.py": "3fff0401822cd3ba8a9eac4793a412dfd5948b0e718f942ad90102a8472eaace",
+    "harness/executor.py": "dc9921a3b449ae807abcaa48e991cf532dfe80750edf104fb32c494975cd3c6e",
+    "harness/reference/oracle_reference.py": "28dcadae76f3f4d12a8e51e58dde2a33ffd74173e91f6ae21f8791548e2def18"
+  },
+  "submission": "submission_qwenB_s11111.py",
+  "submission_sha256": "5ea16bc25aaacf61425c551c3895f2bb4a521f748b21043e9a7cbf45cb50a02f",
+  "dev_probes": [
+    {
+      "attempt": 1,
+      "reports": [
+        {
+          "file": "D01.csv",
+          "outcome": "load_error",
+          "error": "IndentationError('unexpected indent', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenB_s11111.py', 164, 21, \"                     if 'january' in c_str:\\n\", 164, -1))"
+        },
+        {
+          "file": "D02.csv",
+          "outcome": "load_error",
+          "error": "IndentationError('unexpected indent', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenB_s11111.py', 164, 21, \"                     if 'january' in c_str:\\n\", 164, -1))"
+        },
+        {
+          "file": "D03.csv",
+          "outcome": "load_error",
+          "error": "IndentationError('unexpected indent', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenB_s11111.py', 164, 21, \"                     if 'january' in c_str:\\n\", 164, -1))"
+        },
+        {
+          "file": "D04.csv",
+          "outcome": "load_error",
+          "error": "IndentationError('unexpected indent', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenB_s11111.py', 164, 21, \"                     if 'january' in c_str:\\n\", 164, -1))"
+        },
+        {
+          "file": "D05.csv",
+          "outcome": "load_error",
+          "error": "IndentationError('unexpected indent', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenB_s11111.py', 164, 21, \"                     if 'january' in c_str:\\n\", 164, -1))"
+        },
+        {
+          "file": "D06.csv",
+          "outcome": "load_error",
+          "error": "IndentationError('unexpected indent', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenB_s11111.py', 164, 21, \"                     if 'january' in c_str:\\n\", 164, -1))"
+        },
+        {
+          "file": "D07.csv",
+          "outcome": "load_error",
+          "error": "IndentationError('unexpected indent', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenB_s11111.py', 164, 21, \"                     if 'january' in c_str:\\n\", 164, -1))"
+        },
+        {
+          "file": "D08.csv",
+          "outcome": "load_error",
+          "error": "IndentationError('unexpected indent', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenB_s11111.py', 164, 21, \"                     if 'january' in c_str:\\n\", 164, -1))"
+        },
+        {
+          "file": "D09.csv",
+          "outcome": "load_error",
+          "error": "IndentationError('unexpected indent', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenB_s11111.py', 164, 21, \"                     if 'january' in c_str:\\n\", 164, -1))"
+        },
+        {
+          "file": "D10.csv",
+          "outcome": "load_error",
+          "error": "IndentationError('unexpected indent', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenB_s11111.py', 164, 21, \"                     if 'january' in c_str:\\n\", 164, -1))"
+        },
+        {
+          "file": "D11.csv",
+          "outcome": "load_error",
+          "error": "IndentationError('unexpected indent', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenB_s11111.py', 164, 21, \"                     if 'january' in c_str:\\n\", 164, -1))"
+        },
+        {
+          "file": "D12.csv",
+          "outcome": "load_error",
+          "error": "IndentationError('unexpected indent', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenB_s11111.py', 164, 21, \"                     if 'january' in c_str:\\n\", 164, -1))"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "condition": "B",
+  "label": "qwenB_s33333",
+  "seed": 33333,
+  "model": {
+    "tag": "qwen3.5:9b",
+    "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7"
+  },
+  "generation_options": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "seed": 33333,
+    "num_ctx": 65536,
+    "num_predict": 32768
+  },
+  "think_enabled": false,
+  "warmup_passed": true,
+  "warmup_attempt": 3,
+  "phase1_role": "TRAINING - NOT EVIDENCE, NOT SCORED",
+  "phase2_prompt_sha256": "3c286bad748b27a7c2151682ff0ad30f63fefa680dc38785459e13daa509cbf5",
+  "completion_classes": [
+    {
+      "attempt": 1,
+      "class": "TRUNCATED",
+      "done_reason": "length",
+      "eval_count": 32768,
+      "content_chars": 124488,
+      "thinking_chars": 0
+    },
+    {
+      "attempt": 2,
+      "class": "COMPLETE",
+      "done_reason": "stop",
+      "eval_count": 5012,
+      "content_chars": 18778,
+      "thinking_chars": 0
+    },
+    {
+      "attempt": 3,
+      "class": "COMPLETE",
+      "done_reason": "stop",
+      "eval_count": 3897,
+      "content_chars": 14937,
+      "thinking_chars": 0
+    }
+  ],
+  "completion_summary": {
+    "COMPLETE": 2,
+    "TRUNCATED": 1,
+    "EMPTY_NONTRUNCATED": 0
+  },
+  "frozen_sha256": {
+    "artifacts/task_packet/TASK.md": "a9b8dc0d7af534adbe2ca088bbba9f98c2498ee8b13914b5da7217b018174f42",
+    "artifacts/task_packet/contract.py": "b49eb4bd8e36979e8916b08804b85995e8f2b3a2a0275df9ad824496919be321",
+    "artifacts/corpus_manifest.json": "45b27a2e99c88f1b7a97fee99d8f0fe313d858d95829e108bdd73c18f87dd205",
+    "artifacts/canonical.csv": "c5111ef822697dd958689e3c58e89ef1807eca99afe3068ac5595f33fef3b1c7",
+    "harness/evaluate.py": "3fff0401822cd3ba8a9eac4793a412dfd5948b0e718f942ad90102a8472eaace",
+    "harness/executor.py": "dc9921a3b449ae807abcaa48e991cf532dfe80750edf104fb32c494975cd3c6e",
+    "harness/reference/oracle_reference.py": "28dcadae76f3f4d12a8e51e58dde2a33ffd74173e91f6ae21f8791548e2def18"
+  },
+  "submission": null,
+  "submission_sha256": null,
+  "dev_probes": []
+}
