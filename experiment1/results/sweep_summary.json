@@ -1,0 +1,61 @@
+{
+  "floor_used": {
+    "metric": "period_total",
+    "alpha": 0.05,
+    "power": 0.8,
+    "assumption": "iid",
+    "min_detectable_shift_pct": 22.4367,
+    "sustained_min_detectable_shift_pct": 10.7782,
+    "sustained_window": 6,
+    "baseline_window": 12,
+    "baseline_mean": 36210.0375,
+    "baseline_sd": 2535.6135,
+    "baseline_cv": 0.070025,
+    "baseline_commit": "52904d934cc358122260af0dc8b2aeca11da4ed4",
+    "baseline_sha256": "1f2575bebadce618be3d5553b05461f259f9ae0529d6dc53ffd9a45950366d03",
+    "method_version": "l4/1.1.0"
+  },
+  "trials_per_point": 6000,
+  "models": {
+    "iid": {
+      "null_alarm_rate_single": 0.0562,
+      "declared_alpha": 0.05,
+      "alpha_inflation_factor": 1.12,
+      "power_at_declared_floor": 0.7685,
+      "declared_power": 0.8,
+      "empirical_80pct_power_multiple": 1.061,
+      "empirical_80pct_power_shift_pct": 23.813,
+      "null_alarm_rate_sustained": 0.0555
+    },
+    "ar1_0.3": {
+      "null_alarm_rate_single": 0.068,
+      "declared_alpha": 0.05,
+      "alpha_inflation_factor": 1.36,
+      "power_at_declared_floor": 0.7863,
+      "declared_power": 0.8,
+      "empirical_80pct_power_multiple": 1.028,
+      "empirical_80pct_power_shift_pct": 23.054,
+      "null_alarm_rate_sustained": 0.129
+    },
+    "ar1_0.6": {
+      "null_alarm_rate_single": 0.12,
+      "declared_alpha": 0.05,
+      "alpha_inflation_factor": 2.4,
+      "power_at_declared_floor": 0.8047,
+      "declared_power": 0.8,
+      "empirical_80pct_power_multiple": 0.993,
+      "empirical_80pct_power_shift_pct": 22.281,
+      "null_alarm_rate_sustained": 0.2712
+    },
+    "seasonal": {
+      "null_alarm_rate_single": 0.031,
+      "declared_alpha": 0.05,
+      "alpha_inflation_factor": 0.62,
+      "power_at_declared_floor": 0.7478,
+      "declared_power": 0.8,
+      "empirical_80pct_power_multiple": 1.093,
+      "empirical_80pct_power_shift_pct": 24.527,
+      "null_alarm_rate_sustained": 0.0595
+    }
+  }
+}

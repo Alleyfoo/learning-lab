@@ -1,0 +1,244 @@
+{
+  "no_reanchor": {
+    "n_periods": 12,
+    "O1a_unwarranted_execution": 0,
+    "O5_expiry_fired_while_all_checks_pass": 5,
+    "first_expiry_period": "2025-08",
+    "states": {
+      "authorized": 6,
+      "re_anchor_required": 5,
+      "mismatch_escalation": 1
+    },
+    "per_period": [
+      {
+        "period": "2025-01",
+        "period_index": 12,
+        "anchor_age": 0,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 2.426
+      },
+      {
+        "period": "2025-02",
+        "period_index": 13,
+        "anchor_age": 1,
+        "state": "mismatch_escalation",
+        "automatic_checks_pass": false,
+        "stale_dimensions": null,
+        "shift_pct": 16.186
+      },
+      {
+        "period": "2025-03",
+        "period_index": 14,
+        "anchor_age": 2,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 13.021
+      },
+      {
+        "period": "2025-04",
+        "period_index": 15,
+        "anchor_age": 3,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": -0.317
+      },
+      {
+        "period": "2025-05",
+        "period_index": 16,
+        "anchor_age": 4,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 1.033
+      },
+      {
+        "period": "2025-06",
+        "period_index": 17,
+        "anchor_age": 5,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 4.073
+      },
+      {
+        "period": "2025-07",
+        "period_index": 18,
+        "anchor_age": 6,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 1.112
+      },
+      {
+        "period": "2025-08",
+        "period_index": 19,
+        "anchor_age": 7,
+        "state": "re_anchor_required",
+        "automatic_checks_pass": true,
+        "stale_dimensions": "aggregate_correctness",
+        "shift_pct": -3.035
+      },
+      {
+        "period": "2025-09",
+        "period_index": 20,
+        "anchor_age": 8,
+        "state": "re_anchor_required",
+        "automatic_checks_pass": true,
+        "stale_dimensions": "aggregate_correctness",
+        "shift_pct": 2.859
+      },
+      {
+        "period": "2025-10",
+        "period_index": 21,
+        "anchor_age": 9,
+        "state": "re_anchor_required",
+        "automatic_checks_pass": true,
+        "stale_dimensions": "aggregate_correctness",
+        "shift_pct": 9.072
+      },
+      {
+        "period": "2025-11",
+        "period_index": 22,
+        "anchor_age": 10,
+        "state": "re_anchor_required",
+        "automatic_checks_pass": true,
+        "stale_dimensions": "aggregate_correctness",
+        "shift_pct": 6.386
+      },
+      {
+        "period": "2025-12",
+        "period_index": 23,
+        "anchor_age": 11,
+        "state": "re_anchor_required",
+        "automatic_checks_pass": true,
+        "stale_dimensions": "aggregate_correctness",
+        "shift_pct": 4.339
+      }
+    ]
+  },
+  "reanchor": {
+    "n_periods": 12,
+    "O1a_unwarranted_execution": 0,
+    "O5_expiry_fired_while_all_checks_pass": 1,
+    "first_expiry_period": "2025-08",
+    "states": {
+      "authorized": 10,
+      "mismatch_escalation": 1,
+      "re_anchor_required": 1
+    },
+    "per_period": [
+      {
+        "period": "2025-01",
+        "period_index": 12,
+        "anchor_age": 0,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 2.426
+      },
+      {
+        "period": "2025-02",
+        "period_index": 13,
+        "anchor_age": 1,
+        "state": "mismatch_escalation",
+        "automatic_checks_pass": false,
+        "stale_dimensions": null,
+        "shift_pct": 16.186
+      },
+      {
+        "period": "2025-03",
+        "period_index": 14,
+        "anchor_age": 2,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 13.021
+      },
+      {
+        "period": "2025-04",
+        "period_index": 15,
+        "anchor_age": 3,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": -0.317
+      },
+      {
+        "period": "2025-05",
+        "period_index": 16,
+        "anchor_age": 4,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 1.033
+      },
+      {
+        "period": "2025-06",
+        "period_index": 17,
+        "anchor_age": 5,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 4.073
+      },
+      {
+        "period": "2025-07",
+        "period_index": 18,
+        "anchor_age": 6,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 1.112
+      },
+      {
+        "period": "2025-08",
+        "period_index": 19,
+        "anchor_age": 7,
+        "state": "re_anchor_required",
+        "automatic_checks_pass": true,
+        "stale_dimensions": "aggregate_correctness",
+        "shift_pct": -3.035
+      },
+      {
+        "period": "2025-09",
+        "period_index": 20,
+        "anchor_age": 1,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 2.859
+      },
+      {
+        "period": "2025-10",
+        "period_index": 21,
+        "anchor_age": 2,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 9.072
+      },
+      {
+        "period": "2025-11",
+        "period_index": 22,
+        "anchor_age": 3,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 6.386
+      },
+      {
+        "period": "2025-12",
+        "period_index": 23,
+        "anchor_age": 4,
+        "state": "authorized",
+        "automatic_checks_pass": true,
+        "stale_dimensions": null,
+        "shift_pct": 4.339
+      }
+    ]
+  }
+}

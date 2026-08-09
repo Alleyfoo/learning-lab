@@ -31,7 +31,10 @@ The ordering **is** the integrity mechanism. It is verifiable from `git log` by 
 | 1. Frozen baseline history | **done** `0a26063` — [spec](spec/baseline_spec.md) |
 | 2. Warrant/evidence structures + L4 | **done** `52904d9` |
 | 3. Detection-floor artifact (pre-drift) | **done** `a038a2e` — **gate closed** |
-| 4–9. Corpus, runs, stress, expiry, results | not started — gate is now open |
+| 4. Drift corpus (post-gate) | **done** `af0dcc3` |
+| 5–9. RUN A, sweep, stress, expiry, results | **done** — [experiment_1_result.md](results/experiment_1_result.md) |
+| RUN B (certification) | not run |
+| Value-level identity predicate | deliberately not implemented |
 
 ### Declared capability (committed `a038a2e`, before any drift existed)
 
