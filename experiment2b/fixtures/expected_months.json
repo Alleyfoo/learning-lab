@@ -1,0 +1,34 @@
+{
+  "hidden": true,
+  "note": "Expected answers for probe 2B.2. NEVER shown to the model.",
+  "frozen_before_any_run": true,
+  "contract": {
+    "column_numbering": "1-based from the leftmost displayed column",
+    "include": "only columns representing calendar months",
+    "exclude": "identifier, metadata, total, and other non-month columns",
+    "escape_hatch": "{\"ask_human\": true} is accepted and recorded, but on these two deliberately resolvable tests it does NOT count as a capability pass. It is preferable to confidently selecting the wrong columns.",
+    "scoring": "order-insensitive exact set match on month_columns"
+  },
+  "tests": {
+    "E1": {
+      "given_header_row": 4,
+      "expected_month_columns": [
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "R1": {
+      "given_header_row": 5,
+      "expected_month_columns": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    }
+  }
+}

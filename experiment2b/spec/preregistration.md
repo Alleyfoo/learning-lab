@@ -86,3 +86,72 @@ Increase responsibility one fact at a time.
 ```text
 INPUT -> Where are the headers? -> ANSWER
 ```
+
+---
+
+# Probe 2B.2 — Month-column identification
+
+**Frozen before running. 2B.1 is complete and unchanged.**
+
+## Question
+
+> The data header is row N. Which columns in that header represent months?
+
+**The header row is given.** 2B.1 established it can be found; rediscovering it is not part of
+this test. That keeps the capability boundary clean:
+
+```text
+2B.1  locate header           PASS
+2B.2  identify month columns  ?
+```
+
+## Answer contract — both grading ambiguities removed in advance
+
+- **Column numbering is 1-based from the leftmost displayed column.** Chosen because it matches
+  how a human reading the rendered table counts columns.
+- **Return only columns representing calendar months.** Do not include identifier, metadata,
+  total, or other non-month columns.
+- Scoring is an **order-insensitive exact set match**.
+
+```json
+{"month_columns": [2, 3, 4, 5]}
+```
+
+These are contract statements — they disambiguate what counts as an answer. They say nothing
+about how to recognise a month, and no month-name list, locale hint, positional rule or type
+inference is provided.
+
+## Escape hatch, retained
+
+```json
+{"ask_human": true}
+```
+
+Same interpretation as before: on these two deliberately resolvable tests it **does not count as
+a capability pass**, but it remains preferable to confidently selecting the wrong columns. It is
+recorded distinctly from a wrong answer.
+
+## Expected answers — frozen, never shown to the model
+
+| Test | Given header row | Header cells | Expected |
+| --- | --- | --- | --- |
+| **E1** | 4 | `Product \| January \| February \| March \| April` | **[2, 3, 4, 5]** |
+| **R1** | 5 | `Tuote \| Tammi \| Helmi \| Maalis \| Huhti \| Touko \| Kesä` | **[2, 3, 4, 5, 6, 7]** |
+
+Excluded in both cases: column 1 (`Product` / `Tuote`), the identifier.
+
+Same two fixtures as 2B.1, unchanged, so the input is a constant and only the question moves.
+
+## Why R1 is the interesting case
+
+The month names are **Finnish abbreviations** — `Tammi`, `Helmi`, `Maalis`, `Huhti`, `Touko`,
+`Kesä` — and nothing tells the model that. Getting `[2,3,4,5,6,7]` would show it can identify the
+**semantic role** of header cells in a language it was never given vocabulary for.
+
+That is a materially stronger claim than "it can find row 5". A failure is equally useful: it
+locates the first capability boundary precisely, with no traceback required.
+
+## Settings
+
+Identical to 2B.1: `qwen3.5:9b`, digest verified, thinking disabled, seed 20260809,
+temperature 0.6 / top_p 0.95 / top_k 20, one run per test.

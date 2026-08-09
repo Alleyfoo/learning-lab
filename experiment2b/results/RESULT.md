@@ -59,11 +59,18 @@ Experiment 2A concluded that the binding constraint was *emitting syntactically 
 the required size*, not data understanding — and that the intended question was never actually
 reached.
 
-**This result supports that reading directly.** The same model, at the same quantization, with
-the same sampling settings, correctly located a header row inside cluttered, Finnish-localized
-business input on the first attempt, and returned perfectly-formed JSON while doing it.
+**This result supports that reading. It does not confirm it.** The same model, at the same
+quantization, with the same sampling settings, correctly located a header row inside cluttered,
+Finnish-localized business input on the first attempt, and returned perfectly-formed JSON while
+doing it.
 
-The capability was there. Experiment 2A's protocol never let it show.
+What is demonstrated: the model possesses **at least this** source-understanding capability when
+the output burden is tiny.
+
+What is **not** demonstrated: that code emission was the *only* thing preventing 2A from
+succeeding. 2A required structure inference, semantic mapping, locale normalization, generalization
+and refusal on top of module synthesis. Showing that one of those sub-abilities survives a
+low-output-burden setting does not establish that the others would have.
 
 ## What this establishes
 
