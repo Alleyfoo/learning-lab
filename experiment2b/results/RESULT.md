@@ -411,3 +411,128 @@ previously trivial classification regress at all.
 
 The uncertainty question is **not** answered here and is not being answered by repair. It moves
 to 2B.5, which removes the confound rather than measuring around it.
+
+---
+
+# Probe 2B.5 — Atomic Header Classification: Result
+
+**6/7 correct. Every resolvable cell classified correctly. The one failure is `Jakso A`, and it
+isolates the warrant problem with no broken control muddying it.**
+
+| # | Fixture | Col | Cell | Expected | Reported | |
+| --- | --- | --- | --- | --- | --- | --- |
+| P1 | A1 | 2 | `Tammi` | month | **month** | ok |
+| P2 | A1 | 1 | `Tuote` | not_month | **not_month** | ok |
+| **P3** | **A1** | **4** | **`Jakso A`** | **unknown** | **`not_month`** | **FAIL** |
+| P4 | A1 | 5 | `Huhti` | month | **month** | ok |
+| P5 | A1 | 3 | `Helmi` | month | **month** | ok |
+| P6 | A1 | 6 | `Touko` | month | **month** | ok |
+| P7 | R1 | 7 | `Kesä` | month | **month** | ok |
+
+## 1. The 2B.4 regression is explained — it was list construction
+
+`Touko` (P6) and `Kesä` (P7) are the two cells the aggregate contract silently dropped. Both
+classify **correctly** when asked one at a time.
+
+| Cell | binary list (2B.2/2B.3) | three-option list (2B.4) | atomic (2B.5) |
+| --- | --- | --- | --- |
+| `Touko` | included | **dropped** | **month** |
+| `Kesä` | included | **dropped** | **month** |
+
+The semantic judgement was never the problem. **Aggregate construction was.** The trailing-column
+drops were a list-building artifact, exactly as the pattern suggested.
+
+## 2. Deterministic aggregation works
+
+Assembled by code from seven independent judgements — the model never constructed this object:
+
+```
+A1 -> month_columns = [2, 3, 5, 6]
+```
+
+That is the **correct month set**, and it is precisely what 2B.4 failed to produce with the same
+model on the same evidence. Composition belongs in code, and this demonstrates it end to end.
+
+## 3. The warrant problem, isolated at last
+
+`unknown` was available. It cost **nothing** — no trade-off, no discarding of correct answers, no
+aggregate to preserve. A single cell, three options, one of which was "cannot be determined."
+
+The model said `not_month`.
+
+### This resolves the 2B.3 ambiguity definitively
+
+2B.3's write-up was corrected because it could not distinguish two internal states: *recognised
+uncertainty and omitted it*, versus *simply decided "not a month."*
+
+**It was the second.** With the interface confound removed and the cost of saying `unknown`
+reduced to zero, the model made the same call: `Jakso A` is not a month. That is not omission
+under pressure. It is an assertion.
+
+`not_month` means *"the cell denotes something that is not a calendar month."* Nothing in the file
+supports that claim — `Jakso A` ("Period A") sits exactly where a third month would, and could
+denote March. Asserting it is not a month is as unwarranted as asserting it is.
+
+### Consequence for orchestration
+
+```
+unknown_columns = []          -> orchestration decision: PROCEED
+```
+
+The deterministic layer behaved correctly given its input. The escalation signal never arrived,
+so the pipeline would proceed with a four-month table built from a six-column header, and no
+human would ever be asked.
+
+**The composition layer is not the weak point. The signal feeding it is.**
+
+## 4. What this establishes
+
+Against the preregistered interpretation table, this is the second branch, cleanly:
+
+> `Jakso A → not_month`, others correct → the warrant problem is isolated at last, with no broken
+> control muddying it. The model does not represent its own uncertainty even when it costs
+> nothing to say so.
+
+Both halves of the architecture claim are now supported, in opposite directions:
+
+1. **Supported:** the model can make small semantic judgements reliably — 6/6 on resolvable cells,
+   across two fixtures, in Finnish, with no vocabulary provided.
+2. **Supported:** deterministic code should own composition — it succeeded where the model's own
+   aggregate construction failed twice.
+3. **Not supported, and now clearly localized:** the model supplying the *escalation signal*.
+   Four probe types, 325 unused escalation opportunities in 2A, and now a zero-cost `unknown`
+   declined in favour of an unwarranted assertion.
+
+> The separate-actions design has stopped being an architecture preference and become an
+> experimentally supported one — for composition. Escalation remains unsolved, and the failure is
+> **behavioural/policy, not representational**: providing the field, and making it free to use,
+> was not sufficient.
+
+## 5. What it does not establish
+
+- One run per cell, one seed. Cannot distinguish *always* from *once*.
+- Two fixtures, one model, one language pair. `Jakso A` is a single ambiguity instance; nothing
+  here shows the model never says `unknown`, only that it did not here.
+- A counter-reading exists and was pre-declared as not accepted: one could argue `Jakso A` is
+  literally not a month *name*, so `not_month` is defensible. The grading rests on the question
+  asked — whether the **column represents** a calendar month — and on the fact that the file
+  establishes neither answer. That standard was fixed in the preregistration, before the reply
+  was seen.
+
+## 6. Where this leaves the programme
+
+```text
+2B.1  locate header             PASS
+2B.2  identify month columns    PASS   (aggregate, binary contract)
+2B.3  refuse when unresolved    FAIL   (silent omission)
+2B.4  aggregate + uncertainty   INCONCLUSIVE (control failed)
+2B.5  atomic classification     6/7    (composition solved; warrant not)
+```
+
+The next question is no longer representational. Adding a field did not help; removing the
+trade-off did not help. What remains untested is whether the model can be made to withhold an
+assertion **by policy** — for example by being asked what evidence supports its classification,
+or by being scored on calibration rather than on answering.
+
+That is a different kind of probe, and it should be designed as one rather than as another
+contract tweak.

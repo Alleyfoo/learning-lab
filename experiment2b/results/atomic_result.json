@@ -1,0 +1,143 @@
+{
+  "probe": "2B.5 atomic header classification",
+  "model": {
+    "tag": "qwen3.5:9b",
+    "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+    "family": "qwen35",
+    "parameter_size": "9.7B",
+    "quantization": "Q4_K_M",
+    "ollama_version": "ollama version is 0.32.6"
+  },
+  "think_enabled": false,
+  "generation_options": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "seed": 20260809,
+    "num_ctx": 8192,
+    "num_predict": 2048
+  },
+  "per_cell": [
+    {
+      "api_finished": "stop",
+      "json_parseable": true,
+      "valid_value": true,
+      "reported": "month",
+      "raw_reply": "{\"classification\": \"month\"}",
+      "prompt_sha256": "d85ea96a960221413d858951ee0c7d0ac0b41764dd058184506943b1727a20e1",
+      "probe": "P1",
+      "fixture": "A1",
+      "column": 2,
+      "cell": "Tammi",
+      "expected": "month",
+      "correct": true
+    },
+    {
+      "api_finished": "stop",
+      "json_parseable": true,
+      "valid_value": true,
+      "reported": "not_month",
+      "raw_reply": "{\"classification\": \"not_month\"}",
+      "prompt_sha256": "abe2a99638e9f41a45c410c5f44793cae056e3557dd15934b4210aaa97893927",
+      "probe": "P2",
+      "fixture": "A1",
+      "column": 1,
+      "cell": "Tuote",
+      "expected": "not_month",
+      "correct": true
+    },
+    {
+      "api_finished": "stop",
+      "json_parseable": true,
+      "valid_value": true,
+      "reported": "not_month",
+      "raw_reply": "{\"classification\": \"not_month\"}",
+      "prompt_sha256": "8e4938d64863f5f5e8d1e35a90700e33a39d393a473ceb9759fb64d913a15127",
+      "probe": "P3",
+      "fixture": "A1",
+      "column": 4,
+      "cell": "Jakso A",
+      "expected": "unknown",
+      "correct": false
+    },
+    {
+      "api_finished": "stop",
+      "json_parseable": true,
+      "valid_value": true,
+      "reported": "month",
+      "raw_reply": "{\"classification\": \"month\"}",
+      "prompt_sha256": "eb28d6b61b2d5ae3868e9e61dbf5967f47d017ecfada07eef704b575bc2068a8",
+      "probe": "P4",
+      "fixture": "A1",
+      "column": 5,
+      "cell": "Huhti",
+      "expected": "month",
+      "correct": true
+    },
+    {
+      "api_finished": "stop",
+      "json_parseable": true,
+      "valid_value": true,
+      "reported": "month",
+      "raw_reply": "{\"classification\": \"month\"}",
+      "prompt_sha256": "75b2cab1333ed8bec7924a1711332ab90834bbe6bd16d0f91b11739752a15356",
+      "probe": "P5",
+      "fixture": "A1",
+      "column": 3,
+      "cell": "Helmi",
+      "expected": "month",
+      "correct": true
+    },
+    {
+      "api_finished": "stop",
+      "json_parseable": true,
+      "valid_value": true,
+      "reported": "month",
+      "raw_reply": "{\"classification\": \"month\"}",
+      "prompt_sha256": "06baaf97ec83c6272277a89ccc6cc98895b333dc262876444e5fc18554dc4aab",
+      "probe": "P6",
+      "fixture": "A1",
+      "column": 6,
+      "cell": "Touko",
+      "expected": "month",
+      "correct": true
+    },
+    {
+      "api_finished": "stop",
+      "json_parseable": true,
+      "valid_value": true,
+      "reported": "month",
+      "raw_reply": "{\"classification\": \"month\"}",
+      "prompt_sha256": "de33723d22919cfd16eb2c1af375364f749fce23414f80a4a11404b373a12f63",
+      "probe": "P7",
+      "fixture": "R1",
+      "column": 7,
+      "cell": "Kesä",
+      "expected": "month",
+      "correct": true
+    }
+  ],
+  "per_cell_correct": "6/7",
+  "deterministic_aggregation": {
+    "A1": {
+      "month_columns": [
+        2,
+        3,
+        5,
+        6
+      ],
+      "unknown_columns": [],
+      "expected_month_columns": [
+        2,
+        3,
+        5,
+        6
+      ],
+      "expected_unknown_columns": [
+        4
+      ],
+      "matches_expected": false,
+      "orchestration_decision": "proceed"
+    }
+  }
+}
