@@ -1,0 +1,19 @@
+{
+  "hidden": true,
+  "note": "Expected answers. NEVER shown to the model.",
+  "frozen_before_any_run": true,
+  "source": "verbatim from the Experiment 2B workorder, sections 5 and 6",
+  "tests": {
+    "E1": {
+      "role": "easy positive control",
+      "expected_header_row": 4,
+      "sha256": "7e6f56252f36938f81b55b5c3552c313acb17f03a62f792e5d335c83f7be8afd"
+    },
+    "R1": {
+      "role": "regular / realistic",
+      "expected_header_row": 5,
+      "sha256": "1ec857c695c1cd720b5019be6f6e4b7db3137e0c20ef33bcd793b5832f67607d"
+    }
+  },
+  "row_numbering": "1-based, blank rows counted and rendered as (empty)"
+}
