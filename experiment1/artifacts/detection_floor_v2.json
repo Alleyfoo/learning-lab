@@ -1,0 +1,81 @@
+{
+  "metric": "period_total",
+  "alpha": 0.05,
+  "power": 0.8,
+  "assumption": "iid",
+  "shift_model": "multiplicative",
+  "mde_method": "monte_carlo",
+  "min_detectable_shift_pct": 23.704,
+  "sustained_min_detectable_shift_pct": 11.0794,
+  "sustained_window": 6,
+  "baseline_window": 12,
+  "baseline_mean": 36210.0375,
+  "baseline_sd": 2535.6135,
+  "baseline_cv": 0.070025,
+  "baseline_sha256": "1f2575bebadce618be3d5553b05461f259f9ae0529d6dc53ffd9a45950366d03",
+  "method_version": "l4/2.0.0",
+  "supersedes": {
+    "method_version": "l4/1.1.0",
+    "min_detectable_shift_pct": 22.4367
+  },
+  "calibration_trials": 8000,
+  "calibration_seed_family": 700000,
+  "certification_trials": 40000,
+  "certification_seed_family": 810000,
+  "certification": {
+    "P1_power_resampled": {
+      "value": 0.8002,
+      "band": [
+        0.78,
+        0.82
+      ],
+      "pass": true
+    },
+    "P2_null_alpha_resampled": {
+      "value": 0.0511,
+      "band": [
+        0.04,
+        0.06
+      ],
+      "pass": true
+    },
+    "P3_power_fixed_baseline": {
+      "value": 0.8141,
+      "band": [
+        0.75,
+        0.85
+      ],
+      "pass": true
+    },
+    "P4_floor_larger_than_v1": {
+      "value": 23.704,
+      "band": [
+        22.4367,
+        null
+      ],
+      "pass": true
+    }
+  },
+  "certified": true,
+  "descriptive_stress_not_a_pass_criterion": {
+    "iid": {
+      "null_alarm_rate": 0.0515,
+      "power_at_corrected_floor": 0.8083
+    },
+    "ar1_0.3": {
+      "null_alarm_rate": 0.0682,
+      "power_at_corrected_floor": 0.8125
+    },
+    "ar1_0.6": {
+      "null_alarm_rate": 0.1174,
+      "power_at_corrected_floor": 0.8428
+    },
+    "seasonal": {
+      "null_alarm_rate": 0.0308,
+      "power_at_corrected_floor": 0.7865
+    }
+  },
+  "interpretation": "Under a multiplicative measure redefinition, single-period changes smaller than 23.70% of the period total are not reliably distinguishable from normal variation at alpha=0.05, power=0.8. Absence of an alarm is NOT evidence of semantic continuity.",
+  "assumption_bias_direction": "The iid assumption remains OPTIMISTIC and is deliberately uncorrected in RUN B. See descriptive_stress_not_a_pass_criterion.",
+  "external_validity": "Certification seeds are held out from calibration but draw from the same declared world model. This establishes internal calibration stability, not external validity."
+}
