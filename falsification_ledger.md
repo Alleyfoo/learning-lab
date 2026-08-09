@@ -248,15 +248,25 @@ considerably — the human gate could shrink to genuinely new concepts only. Not
 surveyed literature comes close, and the drift literature's position (no pipeline test catches
 semantic drift) is consistent with N1 rather than against it.
 
-**Operational consequences, binding on any implementation:**
+**Operational consequences, binding on any implementation**
+(updated by [amendment 002](workorder_amendment_002.md)):
 
 1. The system may never output "semantically unchanged." The strongest permitted statement is
-   *"no evidence of change, at detection floor X."*
+   *"no evidence of change, at detection floor X, declared with α and power."*
 2. External metadata, contractual meaning, or a human gate is **structurally necessary** — not
    a stopgap awaiting better automation.
-3. The detection floor must be **computed and published per contract**, so that sub-floor
-   questions are routed to external evidence rather than silently answered by the absence of an
-   alarm.
+3. The detection floor must be **computed and published per contract**, and must state **power**,
+   not only confidence. A floor is a Type II statement; bounding α while concluding "we would
+   have caught this" bounds the wrong error (B1).
+4. The floor's independence assumption must be **visible**, because assuming i.i.d. monthly
+   observations biases the floor *optimistically* — the unsafe direction (B2).
+5. **The floor is not a constant.** Variance estimated from unanchored history is contaminated
+   by any undetected drift it contains, which widens the floor as the anchor ages. Detection
+   capability decays precisely when drift is present, so a model can lose applicability without
+   the source changing at all (B2.1).
+6. Any claim of undetectability must be **declared before the result is observed**, or it is
+   unfalsifiable. Experiment 1 enforces this by committing the floor to git before the drift
+   corpus exists (B6.2).
 
 **Relationship to H4:** N1 puts a hard ceiling on H4. Whatever fraction of source changes turn
 out to be semantic (UQ-1), some portion of that fraction is undetectable in principle. H4 can

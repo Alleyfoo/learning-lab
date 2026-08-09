@@ -255,15 +255,45 @@ it does not validate semantics.
 Given the historical variance of a measure, the size of definitional shift L4 would catch at a
 stated confidence is computable, and should be carried as a property of the contract:
 
-```jsonc
-"L4_detection_floor": {
-  "period_total": { "min_detectable_shift_pct": 3.2, "confidence": 0.95, "baseline_periods": 14 }
-}
+```yaml
+L4_detection_floor:
+  period_total:
+    statistic: monthly_total
+    test: <declared test>
+    baseline_window: 12
+    min_detectable_shift_pct: 3.2
+    alpha: 0.05                        # Type I
+    power: 0.80                        # 1 - Type II  <- the one that matters here
+    variance_basis: independently_anchored_periods
+    independence_assumed: true         # biases the floor optimistically; see below
+    seasonality_model: none
+    safety_factor: 1.5
 ```
 
+**Power, not confidence** ([amendment B1](workorder_amendment_002.md)). A floor is a Type II
+statement — the probability of *missing* a real shift. Bounding α while using the result to
+justify "we would have caught this" bounds the wrong error. The permitted claim is exactly:
+*given this baseline, test and power requirement, changes smaller than ~3.2% are not reliably
+distinguishable from normal variation.*
+
+**The independence assumption errs in the unsafe direction** ([B2](workorder_amendment_002.md)).
+Monthly business series are seasonal and autocorrelated; treating observations as i.i.d.
+overstates effective sample size, understates variance, and makes the floor look *smaller* than
+it is — i.e. it manufactures exactly the false assurance N1 exists to prevent. Time-series
+modelling is out of scope for Experiment 1; making the assumption visible and carrying a
+declared safety factor is not.
+
+**The floor is not a constant — it degrades as the anchor ages**
+([B2.1](workorder_amendment_002.md)). If variance is estimated from unanchored,
+procedure-generated history, that baseline may itself contain undetected drift. For sustained
+sub-floor change the contamination is monotone, inflating variance and *widening* the floor —
+so detection capability decays precisely when drift is present. A model can therefore lose
+applicability without the source changing at all. This gives evidence expiry a measurable
+statistical consequence, not merely a policy one.
+
 This turns N1 from a disclaimer into a number. "Could freight have been folded into this
-measure?" becomes: *freight is ~0.4% of revenue here, below our 3.2% floor — undecidable from
-the data; only external evidence settles it.*
+measure?" becomes: *freight is ~0.4% of revenue here, below our 3.2% floor at 80% power —
+undecidable from the data; only external evidence settles it.*
 
 The critical design consequence: **L5 is not checkable**, so the fingerprint at L0 must carry
 source-*system* identity markers (producing application, export template version, sheet naming
@@ -351,22 +381,29 @@ wrong model → wrong output → output becomes memory
            → future wrong model matches memory → "verified"
 ```
 
-Baselines must therefore be tiered by provenance, and **the tiers are not one ranking** — T2
-and T3 are strong on different axes and each is blind where the other is strong:
+Evidence must therefore be recorded as an **evidence vector of orthogonal dimensions**, not an
+ordered ladder ([amendment B3](workorder_amendment_002.md)). The earlier T0–T3 tiering was
+wrong in a specific way: it implies an order the relation does not have. A human can confirm
+*"Revenue means product revenue excluding freight"* and never notice that 3% of rows vanished;
+reconciliation can prove *"the total agrees with the ledger"* while establishing nothing about
+what was included in that total.
 
-| Tier | Source | Strong on | Blind to |
-| --- | --- | --- | --- |
-| **T0** | Procedure-generated, unreviewed | Nothing — self-referential | Everything |
-| **T1** | Procedure-generated, passed declared invariants | Internal consistency | Anything the invariants don't encode |
-| **T2** | Independently reconciled to an external artifact (provider's stated total, ERP control total, settlement figure) | **Aggregate correctness** | **Meaning** — a total reconciles while a small definitional shift hides inside it |
-| **T3** | Human-confirmed against business meaning | **Meaning** | **Coverage** — humans check samples, not populations |
+| Dimension | Source | Establishes | Blind to | Stales in |
+| --- | --- | --- | --- | --- |
+| `semantic_meaning` | Human confirmation | What the measure **means** | **Coverage** — humans check samples, not populations | ~24 periods |
+| `aggregate_correctness` | Independent reconciliation to an external artifact (provider's stated total, ERP control total, settlement figure) | Whether the **total is right** | **Meaning** — a total reconciles while a small definitional shift hides inside it | ~6 periods |
+| `structural_fit` | Deterministic validation | Whether the **shape holds** | Both of the above | 1 period |
 
-**Reconciliation freshness** follows directly and is cheap to implement: if period N was
-T2-anchored and N+1…N+6 were T0, the trailing baseline is self-generated regardless of its
-length. Each contract carries `periods_since_independent_anchor`, and exceeding a declared
-maximum is an escalation trigger *even when nothing has drifted*. This is the only mechanism
-identified in the study that breaks the self-certification loop without external supervision on
-every period.
+**Freshness is a per-dimension decay, not a fourth dimension**
+([B3.1](workorder_amendment_002.md)). The decay rates differ by more than an order of magnitude:
+a semantic confirmation from 18 months ago is still decent evidence about what a measure *means*;
+a reconciliation from 18 months ago is nearly worthless evidence about *this* month's total. Each
+dimension therefore carries its own `established` date and `staleness_tolerance_periods`. The
+global `periods_since_independent_anchor` is kept as an operator-facing headline; the
+per-dimension values are what the escalation logic reads.
+
+This is the only mechanism identified in the study that breaks the self-certification loop
+without requiring external supervision on every period.
 
 ---
 
@@ -382,6 +419,33 @@ Genuinely requires human semantic input:
 5. **(Added from §6)** **Statistical discontinuity with no structural explanation.** This must
    be a trigger, because it is the *only* automatic semantic-drift alarm. It will produce
    false positives; that is the price of catching the class at all.
+
+### 8.1 Three escalation reasons ([amendment B5](workorder_amendment_002.md))
+
+| # | Reason | Trigger | Character |
+| --- | --- | --- | --- |
+| 1 | **Observed mismatch** | An L0–L4 predicate fails | Something looks wrong |
+| 2 | **Epistemic insufficiency** | Question falls below the declared detection floor; or two semantic readings survive the evidence | We cannot know from this data |
+| 3 | **Evidence expiry** | A dimension's `staleness_tolerance_periods` exceeded | **Nothing looks wrong** |
+
+Reason 3 must be a distinct terminal state, never folded into pass or fail:
+
+```text
+VALIDATION PASSES
+APPLICABILITY APPEARS VALID
+EVIDENCE TOO STALE
+  -> RE-ANCHOR REQUIRED
+```
+
+Everything green, everything structurally valid, all statistics normal — and correctness has not
+been independently established for eighteen months. Ordinary monitoring architectures have no
+state for this and therefore report it as health. Conflating it with either outcome destroys the
+information.
+
+This is the move that makes the system defensible under N1. It changes the goal from *detect
+every meaningful change* — which N1 says is impossible — to: **detect what we can, explicitly
+bound what we cannot, and periodically obtain independent evidence before self-generated history
+becomes circular.**
 
 Explicitly should **not** reach a human: header location, column renames with corroborating
 type and value evidence, wide/long form, dedupe keys, join discovery, type coercion — all

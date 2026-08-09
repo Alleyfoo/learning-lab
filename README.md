@@ -19,7 +19,34 @@ MODELLING → candidate procedure → VERIFICATION
 
 **Non-claim N1 — structural and statistical agreement cannot prove semantic continuity.**
 Some semantic changes are observationally indistinguishable from the available data. The system
-may never output "semantically unchanged" — only *"no evidence of change, at detection floor X."*
+may never output "semantically unchanged" — only *"no evidence of change, at detection floor X,
+declared with α and power."*
+
+### A published task model
+
+```text
+  executable procedure
++ applicability contract              (L0-L5)
++ statistical detection capability    (floor: alpha, power, variance basis, assumptions)
++ evidence vector                     (semantic / aggregate / structural, each dated)
++ anchor freshness                    (per-dimension staleness)
++ known undecidable assumptions       (explicitly not checkable)
+```
+
+The last component is what separates this from "schema memory." A model that cannot enumerate
+what it *cannot* establish is making an implicit claim of completeness it has no basis for.
+
+### Three reasons to escalate
+
+```text
+1. observed mismatch        structure/statistics changed
+2. epistemic insufficiency  question is below the detection floor
+3. evidence expiry          NOTHING LOOKS WRONG - the independent anchor is stale
+```
+
+Reason 3 is a legitimate terminal state, not a failure:
+`VALIDATION PASSES / APPLICABILITY VALID / EVIDENCE TOO STALE -> RE-ANCHOR REQUIRED`.
+Ordinary monitoring has no state for this and reports it as health.
 
 ## Decision
 
@@ -66,7 +93,8 @@ may never output "semantically unchanged" — only *"no evidence of change, at d
 | 5 | [unanswered_questions.md](unanswered_questions.md) | 11 open questions, tiered; plus questions closed by this study |
 | 6 | [experiment_001_drift_discrimination.md](experiment_001_drift_discrimination.md) | The single recommended first experiment |
 | 7 | Decision | §13 of the main report; summarized above |
-| 8 | [workorder_amendment_001.md](workorder_amendment_001.md) | **Amendment — read first.** Renames L4, adds N1, memory triple, evidence tiers, revised sequence |
+| 8 | [workorder_amendment_001.md](workorder_amendment_001.md) | Amendment 001 — renames L4, adds N1, memory triple, revised sequence |
+| 9 | [workorder_amendment_002.md](workorder_amendment_002.md) | **Amendment 002 — read first.** Detection power (α + power), evidence dimensions replacing tiers, three escalation reasons, preregistration protocol |
 
 ## Sequence
 

@@ -80,14 +80,29 @@ transform path.
       "cross_field": [
         { "expr": "abs(Summa - Kpl * unit_price) / Summa", "max": 0.01, "coverage_min": 0.95 }
       ],
-      "detection_floor": {                    // published property, amendment A3.1
-        "period_total": { "min_detectable_shift_pct": 3.2, "confidence": 0.95 }
+      // amendment B1: power is required, not just confidence.
+      // A floor is a Type II statement; alpha alone bounds the wrong error.
+      "detection_floor": {
+        "period_total": {
+          "statistic": "monthly_total",
+          "test": "<declared test>",
+          "baseline_window": 12,
+          "min_detectable_shift_pct": 3.2,
+          "alpha": 0.05,
+          "power": 0.80,
+          "variance_basis": "independently_anchored_periods",
+          "independence_assumed": true,       // B2: biases the floor OPTIMISTICALLY
+          "seasonality_model": "none",        // first experiment only
+          "safety_factor": 1.5                // applied while independence is assumed
+        }
       },
-      "baseline_provenance": {                // amendment A5.1
-        "periods_in_baseline": 14,
-        "highest_tier_in_baseline": "T2",
-        "periods_since_independent_anchor": 6,
-        "max_periods_since_anchor": 12        // exceed -> escalate for re-anchoring
+      // amendment B3: orthogonal dimensions, not an ordered ladder.
+      // Freshness is a per-dimension decay, not a fourth dimension (B3.1).
+      "evidence": {
+        "semantic_meaning":      { "source": "human_confirmation",        "established": "2025-11-03", "staleness_tolerance_periods": 24 },
+        "aggregate_correctness": { "source": "independent_reconciliation", "established": "2026-02-28", "staleness_tolerance_periods": 6 },
+        "structural_fit":        { "source": "deterministic_validation",   "established": "2026-08-01", "staleness_tolerance_periods": 1 },
+        "freshness":             { "periods_since_independent_anchor": 4 }
       }
     },
     "L5_semantic_assertions": [
@@ -140,6 +155,30 @@ S-invisible is the variant that **measures** non-claim N1 rather than assuming i
 what calibrates the published detection floor. S-creep tests the one mechanism that might
 recover ground lost to N1 without external supervision every period.
 
+Preserve the asymmetry exactly:
+
+```text
+S-obvious    -> detector SHOULD fire
+S-invisible  -> detector should NOT be expected to fire
+S-creep      -> asks whether evidence accumulates across time
+```
+
+### 3.2.2 Preregistration protocol (amendment B6.2)
+
+O4 ("correct undecidability") counts a miss as a correct result. That is only honest if the
+inability was declared *before* the result was seen, so the ordering must be mechanically
+verifiable rather than asserted:
+
+1. Compute the detection floor from the frozen baseline **only**.
+2. **Commit the floor to git as its own commit, before the drift corpus exists.**
+3. Generate variants *relative to the committed floor* — S-invisible at ≈0.15× floor, S-obvious
+   at ≈2.5× floor — so "invisible" and "obvious" are defined rather than guessed.
+4. Run the harness. Do not adjust the floor afterwards. Any post-hoc floor change invalidates
+   O3 and O4 and requires a separate, re-preregistered run.
+
+The commit ordering is the integrity mechanism: cheap, and checkable by anyone reading the
+history later.
+
 ### 3.3 The harness
 
 Pure Python, deterministic, no LLM:
@@ -165,6 +204,35 @@ quarantine writer are the starting point.
 ---
 
 ## 4. Measurements
+
+### 4.1 Preregistered outcomes (amendment B6.1)
+
+| # | Outcome | Definition |
+| --- | --- | --- |
+| **O1** | **False apply** | Procedure runs when it should not |
+| **O2** | **False escalation** | Applicable procedure rejected or escalated |
+| **O3** | **Detectable-drift miss** | Change *above* the declared L4 floor that did not trigger |
+| **O4** | **Correct undecidability** | Change *below* declared detection capability, and the system correctly does not claim semantic continuity |
+| **O5** | **Anchor expiry** | Measured separately: does the system eventually demand external evidence while all automatic applicability checks continue to pass? |
+
+O4 is the unusual one — **a miss counted as a correct result**, valid only because the inability
+was declared first (§3.2.2). O5 is measured separately because nothing looks wrong when it fires.
+
+### 4.2 Floor calibration sweep (amendment B6.3)
+
+The named trio are the preregistered anchors. The sweep tests the **floor claim itself**: vary
+shift magnitude from ≈0.1× to 4× the declared floor and locate the empirical 80%-power point.
+
+| Result | Meaning |
+| --- | --- |
+| Empirical point ≈ declared floor | Floor is calibrated; publishable |
+| Shift at 2.5× floor missed | Floor **overstated** — contract claims power it lacks. **Unsafe direction** |
+| Shift at 0.15× floor caught reliably | Floor **understated** — needlessly conservative, causes avoidable human escalation |
+
+This locates miscalibration in the *claim* rather than in the detector, which is the correct
+place for it.
+
+### 4.3 Detailed metrics
 
 **Primary — the one the experiment exists for:**
 
