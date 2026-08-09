@@ -399,3 +399,15 @@ uncertainty finding can be re-examined on a sound footing.
 
 Proceeding to interpret A1 before that is settled would repeat exactly the error corrected in
 2B.3's write-up: reading an internal state off a single ambiguous observation.
+
+## 2B.4 — FROZEN: INCONCLUSIVE
+
+**Status: INCONCLUSIVE — control failure; the aggregate uncertainty contract is not neutral.**
+
+No multi-seed rescue run. The control already established what matters for engineering purposes:
+**the three-option list contract is itself fragile.** Whether the regression reproduces on 20%,
+50% or 100% of seeds is less interesting than the fact that adding epistemic metadata made a
+previously trivial classification regress at all.
+
+The uncertainty question is **not** answered here and is not being answered by repair. It moves
+to 2B.5, which removes the confound rather than measuring around it.

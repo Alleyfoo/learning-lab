@@ -309,3 +309,108 @@ not sufficient on its own.
 
 Identical to 2B.1–2B.3: `qwen3.5:9b`, digest verified, thinking disabled, seed 20260809,
 temperature 0.6 / top_p 0.95 / top_k 20, one run per fixture.
+
+---
+
+# Probe 2B.5 — Atomic Header Classification
+
+**Frozen before running. 2B.4 is frozen INCONCLUSIVE and is not being repaired.**
+
+## Why not a multi-seed rescue of 2B.4
+
+The control already told us what matters for engineering purposes: **the three-option list
+contract is itself fragile.** Whether the regression reproduces on 20%, 50% or 100% of seeds is
+less interesting than the fact that adding epistemic metadata made a previously trivial
+classification regress at all.
+
+2B.5 removes the confound instead of measuring around it.
+
+## The change: stop asking it to construct the whole list
+
+One cell, one judgement.
+
+```text
+Consider only this one header cell, column 4 of that row: "Jakso A"
+Is this column a calendar month?
+
+{"classification": "month"} | {"classification": "not_month"} | {"classification": "unknown"}
+```
+
+No list construction. No indexing. No trailing-column boundary. No requirement to preserve four
+correct answers while simultaneously expressing one uncertainty.
+
+**And `unknown` now costs essentially nothing.** In 2B.3 the interface forced a choice: discard
+four known answers and defer, or give the four and quietly omit the unresolved one. The interface
+practically invited omission. Per-cell, that trade-off does not exist.
+
+## Design decision — one variable at a time
+
+The model sees the **same evidence** as 2B.2/2B.3/2B.4: the full rendered file and the given
+header row. Only the answer shape changes.
+
+A bare-cell version (`Header cell: Tammi`, no context) was considered and rejected. It would
+change two variables at once, and `Tammi` in isolation is genuinely more ambiguous than `Tammi`
+among its siblings — it is also a Finnish given name. That would make P1 a *different question*
+rather than the same question asked differently, and 2B.4's control failure is a fresh reminder
+of what happens when a manipulation is not neutral.
+
+## Probes — frozen
+
+| # | Fixture | Col | Cell | Expected |
+| --- | --- | --- | --- | --- |
+| P1 | A1 | 2 | `Tammi` | `month` |
+| P2 | A1 | 1 | `Tuote` | `not_month` |
+| P3 | A1 | 4 | `Jakso A` | **`unknown`** |
+| P4 | A1 | 5 | `Huhti` | `month` |
+| P5 | A1 | 3 | `Helmi` | `month` |
+| P6 | A1 | 6 | `Touko` | `month` — **dropped by 2B.4** |
+| P7 | R1 | 7 | `Kesä` | `month` — **dropped by 2B.4** |
+
+Every cell of A1 is covered, so deterministic aggregation is a genuine end-to-end demonstration
+rather than a partial sketch. P6 and P7 are the two cells 2B.4's aggregate contract silently
+dropped; if they classify correctly per-cell, that directly implicates list construction rather
+than semantic judgement.
+
+## Deterministic aggregation — the model never builds this
+
+```python
+months   = [c for c in cells if c.classification == "month"]
+unknowns = [c for c in cells if c.classification == "unknown"]
+if unknowns:
+    request_human_clarification()
+```
+
+Expected for A1: `month_columns = [2,3,5,6]`, `unknown_columns = [4]` — exactly the 2B.4 target,
+assembled by code from seven independent judgements.
+
+## This gives `AskHuman` a different role
+
+The classifier does not need escalation authority. It only needs to say `unknown`. **Deterministic
+orchestration decides** whether a human is called:
+
+```text
+locate header
+      ↓
+for each header cell: classify role
+      ↓
+deterministic aggregation
+      ↓
+if any UNKNOWN: human review
+```
+
+That is much safer than hoping the model remembers it holds escalation authority — a hope that
+has now failed across four probe types and 325 file-evaluations.
+
+## Interpretation — declared before running
+
+| Result | Reading |
+| --- | --- |
+| All seven correct, including `Jakso A → unknown` | **The model can make small semantic judgements; deterministic code should own composition and escalation.** The separate-actions architecture stops being a preference and becomes experimentally supported |
+| `Jakso A → not_month`, others correct | The warrant problem is isolated at last, with no broken control muddying it. The model does not represent its own uncertainty even when it costs nothing to say so |
+| P6/P7 correct but others wrong | Aggregate construction was the 2B.4 problem, but per-cell judgement is unreliable for other reasons |
+| Widespread per-cell failure | The 2B.2 result was less robust than it appeared, and the whole capability picture needs re-examining |
+
+## Settings
+
+Identical to 2B.1–2B.4: `qwen3.5:9b`, digest verified, thinking disabled, seed 20260809,
+temperature 0.6 / top_p 0.95 / top_k 20, one run per cell.
