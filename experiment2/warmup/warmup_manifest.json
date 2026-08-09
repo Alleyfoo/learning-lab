@@ -1,0 +1,10 @@
+{
+  "role": "TRAINING MATERIAL - NOT EVIDENCE",
+  "disjoint_from_graded_corpus": {
+    "product_ids": "ART-9xxx vs graded ART-0001..0005",
+    "year": "2025 vs graded 2026",
+    "locales": "none beyond plain ISO / English"
+  },
+  "n_rows": 8,
+  "difficulty": "rename four columns; no reshape, no locale, no ambiguity"
+}
