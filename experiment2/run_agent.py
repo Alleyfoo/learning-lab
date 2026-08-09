@@ -101,13 +101,25 @@ def probe(module_path: Path) -> tuple[str, list[dict]]:
     return "\n".join(lines), reports
 
 
-def chat(model: str, messages: list[dict], opts: dict) -> str:
+def classify(resp: dict) -> str:
+    """Mechanical completion class, decided from the API envelope only.
+
+    Declared in spec/run2_preregistration.md section 3. A TRUNCATED attempt is
+    preserved but is never evidence about procedure competence.
+    """
+    content = (resp.get("message") or {}).get("content") or ""
+    if resp.get("done_reason") == "length":
+        return "TRUNCATED"
+    return "COMPLETE" if content.strip() else "EMPTY_NONTRUNCATED"
+
+
+def chat(model: str, messages: list[dict], opts: dict) -> dict:
     body = json.dumps({"model": model, "messages": messages,
                        "stream": False, "options": opts}).encode()
     req = urllib.request.Request(OLLAMA, data=body,
                                  headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=1800) as r:
-        return json.loads(r.read())["message"]["content"]
+    with urllib.request.urlopen(req, timeout=7200) as r:
+        return json.loads(r.read())
 
 
 def main() -> int:
@@ -115,18 +127,33 @@ def main() -> int:
     ap.add_argument("--model", default="ornith:9b")
     ap.add_argument("--attempts", type=int, default=3)
     ap.add_argument("--label", default="ornith9b")
+    ap.add_argument("--num-ctx", type=int, default=32768)
+    ap.add_argument("--num-predict", type=int, default=8192)
+    ap.add_argument("--expect-digest", default=None,
+                    help="abort unless the model digest matches exactly")
+    ap.add_argument("--expect-frozen", type=Path, default=None,
+                    help="abort unless frozen sha256 match this manifest's")
     args = ap.parse_args()
 
     RESULTS.mkdir(exist_ok=True)
     opts = {"temperature": 0.6, "top_p": 0.95, "top_k": 20,
-            "seed": 20260809, "num_ctx": 32768, "num_predict": 8192}
+            "seed": 20260809, "num_ctx": args.num_ctx, "num_predict": args.num_predict}
 
     frozen = {f: sha(ROOT / f) for f in FROZEN}
     tags = json.loads(urllib.request.urlopen(
         "http://localhost:11434/api/tags", timeout=30).read())
     info = next(m for m in tags["models"] if m["name"] == args.model)
 
-    transcript = []
+    if args.expect_digest and info["digest"] != args.expect_digest:
+        raise SystemExit(f"ABORT: digest {info['digest']} != expected {args.expect_digest}")
+    if args.expect_frozen:
+        prior = json.loads(args.expect_frozen.read_text(encoding="utf-8"))["frozen_sha256"]
+        drift = {k: (prior[k], frozen[k]) for k in prior if prior.get(k) != frozen.get(k)}
+        if drift:
+            raise SystemExit(f"ABORT: frozen artifacts changed since the prior run: {drift}")
+        print("frozen artifacts verified identical to prior run")
+
+    transcript, completion = [], []
     messages = [{"role": "user", "content": build_initial_prompt()}]
     submission = RESULTS / f"submission_{args.label}.py"
     final_module, attempts_used, probes = None, 0, []
@@ -134,8 +161,19 @@ def main() -> int:
     for attempt in range(1, args.attempts + 1):
         attempts_used = attempt
         print(f"--- attempt {attempt}/{args.attempts} ---", flush=True)
-        reply = chat(args.model, messages, opts)
-        transcript.append({"attempt": attempt, "role": "assistant", "content": reply})
+        resp = chat(args.model, messages, opts)
+        reply = (resp.get("message") or {}).get("content") or ""
+        cls = classify(resp)
+        env = {"done_reason": resp.get("done_reason"),
+               "eval_count": resp.get("eval_count"),
+               "prompt_eval_count": resp.get("prompt_eval_count"),
+               "thinking_chars": len((resp.get("message") or {}).get("thinking") or ""),
+               "content_chars": len(reply)}
+        completion.append({"attempt": attempt, "class": cls, **env})
+        print(f"  {cls}  done_reason={env['done_reason']} eval={env['eval_count']} "
+              f"content={env['content_chars']}ch thinking={env['thinking_chars']}ch")
+        transcript.append({"attempt": attempt, "role": "assistant", "content": reply,
+                           "completion_class": cls, "envelope": env})
         messages.append({"role": "assistant", "content": reply})
 
         module = extract_module(reply)
@@ -173,6 +211,9 @@ def main() -> int:
         "generation_options": opts,
         "attempts_allowed": args.attempts,
         "attempts_used": attempts_used,
+        "completion_classes": completion,
+        "completion_summary": {c: sum(1 for x in completion if x["class"] == c)
+                               for c in ("COMPLETE", "TRUNCATED", "EMPTY_NONTRUNCATED")},
         "packet_files": ["TASK.md", "contract.py"] + sorted(
             f.name for f in (PACKET / "sources").glob("*.csv")),
         "withheld": ["canonical.csv", "canonical_manifest.json", "corpus_manifest.json",
