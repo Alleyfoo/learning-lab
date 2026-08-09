@@ -1,0 +1,4 @@
+provider_id,source_system,from_period,to_period,classification,what_changed,evidence_source,measure_shift_pct,anchor_available,anchor_type,grain_declared_would_catch,notes
+EXAMPLE-A,SAP,2025-01,2025-02,unchanged,no change,none,1.8,yes,ledger_reconciliation,,delete this example row
+EXAMPLE-A,SAP,2025-02,2025-03,cosmetic,"header 'Summa' renamed to 'Myynti EUR'",none,-2.1,no,none,,delete this example row
+EXAMPLE-A,SAP,2025-03,2025-04,semantic_confirmed,"amount now includes freight; provider migrated to Netvisor",erp_notice,3.4,yes,payment_settlement,,delete this example row
