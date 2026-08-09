@@ -1,0 +1,666 @@
+{
+  "phase": "main",
+  "procedure": "results\\submission_qwenAp_s22222.py",
+  "corpus": "C:\\Users\\pertt\\Data task modelling lab\\experiment2\\artifacts\\corpus",
+  "1_output_correctness": {
+    "equivalent_variants": 20,
+    "exact_match_rate": 0.0
+  },
+  "2_format_coverage_by_family": {
+    "cosmetic": {
+      "n": 5,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "country_code": {
+      "n": 6,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "country_en": {
+      "n": 3,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "country_endonym": {
+      "n": 3,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "country_exonym": {
+      "n": 8,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "header_cs": {
+      "n": 2,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "header_de": {
+      "n": 3,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "header_en": {
+      "n": 9,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "header_es": {
+      "n": 1,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "header_fi": {
+      "n": 3,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "header_fr": {
+      "n": 1,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "header_sv": {
+      "n": 1,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "long": {
+      "n": 9,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "mixed_conventions": {
+      "n": 6,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "month_abbr_en": {
+      "n": 2,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "month_iso": {
+      "n": 2,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "month_name_cs": {
+      "n": 2,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "month_name_de": {
+      "n": 1,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "month_name_en": {
+      "n": 1,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "month_name_es": {
+      "n": 2,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "month_name_fi": {
+      "n": 2,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "month_name_fr": {
+      "n": 2,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "month_name_sv": {
+      "n": 2,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "month_numeric": {
+      "n": 4,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "num_ch": {
+      "n": 2,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "num_eu_dot": {
+      "n": 5,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "num_eu_nbsp": {
+      "n": 2,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "num_eu_space": {
+      "n": 4,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "num_plain": {
+      "n": 4,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "num_us": {
+      "n": 3,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "period_value": {
+      "n": 5,
+      "correct": 0,
+      "rate": 0.0
+    },
+    "wide": {
+      "n": 6,
+      "correct": 0,
+      "rate": 0.0
+    }
+  },
+  "3_generalization": {
+    "dev_exact_match_rate": 0.0,
+    "heldout_exact_match_rate": 0.0,
+    "note": "Held-out profiles use locales absent from every development profile."
+  },
+  "4_overgeneralization_correct_refusal": {
+    "ambiguity_cases": 5,
+    "correct_refusal_rate": 0.0
+  },
+  "5_incorrect_canonicalization": {
+    "count": 0,
+    "profiles": [],
+    "note": "THE DANGEROUS FAILURE. Tracked apart from failure to normalize."
+  },
+  "6_unnecessary_escalation": {
+    "count": 0,
+    "profiles": [],
+    "note": "Paired with 5. Neither is reported alone."
+  },
+  "8_human_questions": {
+    "count": 0,
+    "questions": [],
+    "note": "Classify each as inferable-from-source or genuinely-unavailable."
+  },
+  "outcomes": {
+    "load_error": 25
+  },
+  "per_variant": [
+    {
+      "profile_id": "D01",
+      "split": "dev",
+      "families": [
+        "long",
+        "month_iso",
+        "header_en",
+        "country_code",
+        "num_plain"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "D02",
+      "split": "dev",
+      "families": [
+        "wide",
+        "month_name_en",
+        "header_en",
+        "country_en",
+        "num_us",
+        "cosmetic"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "D03",
+      "split": "dev",
+      "families": [
+        "long",
+        "month_abbr_en",
+        "header_en",
+        "country_code",
+        "num_eu_space"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "D04",
+      "split": "dev",
+      "families": [
+        "period_value",
+        "month_numeric",
+        "header_fi",
+        "country_endonym",
+        "num_eu_dot"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "D05",
+      "split": "dev",
+      "families": [
+        "wide",
+        "month_numeric",
+        "header_de",
+        "country_exonym",
+        "num_ch"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "D06",
+      "split": "dev",
+      "families": [
+        "long",
+        "month_name_fi",
+        "header_fi",
+        "country_exonym",
+        "num_eu_space",
+        "cosmetic"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "D07",
+      "split": "dev",
+      "families": [
+        "period_value",
+        "month_iso",
+        "header_de",
+        "country_en",
+        "num_eu_nbsp",
+        "mixed_conventions"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "D08",
+      "split": "dev",
+      "families": [
+        "wide",
+        "month_abbr_en",
+        "header_en",
+        "country_code",
+        "num_plain",
+        "cosmetic"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "D09",
+      "split": "dev",
+      "families": [
+        "long",
+        "month_numeric",
+        "header_en",
+        "country_endonym",
+        "num_us"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "D10",
+      "split": "dev",
+      "families": [
+        "long",
+        "month_name_de",
+        "header_de",
+        "country_exonym",
+        "num_eu_dot"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "D11",
+      "split": "dev",
+      "families": [
+        "period_value",
+        "month_numeric",
+        "header_fi",
+        "country_code",
+        "num_plain",
+        "cosmetic"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "D12",
+      "split": "dev",
+      "families": [
+        "wide",
+        "month_name_fi",
+        "header_en",
+        "country_exonym",
+        "num_eu_dot",
+        "mixed_conventions"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "H01",
+      "split": "heldout",
+      "families": [
+        "long",
+        "month_name_sv",
+        "header_sv",
+        "country_exonym",
+        "num_eu_space"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "H02",
+      "split": "heldout",
+      "families": [
+        "wide",
+        "month_name_cs",
+        "header_cs",
+        "country_code",
+        "num_eu_dot"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "H03",
+      "split": "heldout",
+      "families": [
+        "period_value",
+        "month_name_fr",
+        "header_fr",
+        "country_exonym",
+        "num_plain"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "H04",
+      "split": "heldout",
+      "families": [
+        "long",
+        "month_name_es",
+        "header_es",
+        "country_en",
+        "num_us"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "H05",
+      "split": "heldout",
+      "families": [
+        "wide",
+        "month_name_sv",
+        "header_en",
+        "country_exonym",
+        "num_ch",
+        "mixed_conventions"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "H06",
+      "split": "heldout",
+      "families": [
+        "long",
+        "month_name_cs",
+        "header_en",
+        "country_endonym",
+        "num_eu_nbsp",
+        "mixed_conventions"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "H07",
+      "split": "heldout",
+      "families": [
+        "period_value",
+        "month_name_fr",
+        "header_en",
+        "country_exonym",
+        "num_eu_space",
+        "cosmetic",
+        "mixed_conventions"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "H08",
+      "split": "heldout",
+      "families": [
+        "long",
+        "month_name_es",
+        "header_cs",
+        "country_code",
+        "num_eu_dot",
+        "mixed_conventions"
+      ],
+      "equivalent": true,
+      "ambiguity_expected": false,
+      "expected_behaviour": "normalize",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "A01",
+      "split": "ambiguity",
+      "families": [
+        "ambiguity_date_order"
+      ],
+      "equivalent": false,
+      "ambiguity_expected": true,
+      "expected_behaviour": "escalate",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "A02",
+      "split": "ambiguity",
+      "families": [
+        "ambiguity_numeric_separator"
+      ],
+      "equivalent": false,
+      "ambiguity_expected": true,
+      "expected_behaviour": "escalate",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "A03",
+      "split": "ambiguity",
+      "families": [
+        "ambiguity_unknown_entity"
+      ],
+      "equivalent": false,
+      "ambiguity_expected": true,
+      "expected_behaviour": "escalate",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "A04",
+      "split": "ambiguity",
+      "families": [
+        "ambiguity_malformed_identifier"
+      ],
+      "equivalent": false,
+      "ambiguity_expected": true,
+      "expected_behaviour": "escalate",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    },
+    {
+      "profile_id": "A05",
+      "split": "ambiguity",
+      "families": [
+        "ambiguity_unestablished_alias"
+      ],
+      "equivalent": false,
+      "ambiguity_expected": true,
+      "expected_behaviour": "escalate",
+      "outcome": "load_error",
+      "error": "SyntaxError('invalid syntax', ('C:\\\\Users\\\\pertt\\\\Data task modelling lab\\\\experiment2\\\\results\\\\submission_qwenAp_s22222.py', 157, 5, '    def identify_columns(df):\\n', 157, 8))",
+      "correct": false,
+      "incorrect_canonicalization": false,
+      "unnecessary_escalation": false
+    }
+  ]
+}

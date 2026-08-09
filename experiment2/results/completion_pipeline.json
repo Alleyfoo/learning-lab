@@ -1,29 +1,17 @@
 {
-  "qwen35_9b_s33333": {
-    "label": "qwen35_9b_s33333",
+  "qwenAp_s11111": {
+    "label": "qwenAp_s11111",
     "per_attempt": [
-      {
-        "API_FINISHED": "length",
-        "CONTENT_PRESENT": true,
-        "SUBMISSION_EXTRACTED": true,
-        "SUBMISSION_EXTRACTED_LENIENT": true,
-        "PYTHON_PARSEABLE": true,
-        "PYTHON_PARSEABLE_LENIENT": true,
-        "parse_error_strict": null,
-        "parse_error_lenient": null,
-        "attempt": 1,
-        "legacy_class": "TRUNCATED"
-      },
       {
         "API_FINISHED": "stop",
         "CONTENT_PRESENT": true,
         "SUBMISSION_EXTRACTED": true,
         "SUBMISSION_EXTRACTED_LENIENT": true,
-        "PYTHON_PARSEABLE": true,
+        "PYTHON_PARSEABLE": false,
         "PYTHON_PARSEABLE_LENIENT": false,
-        "parse_error_strict": null,
-        "parse_error_lenient": "unterminated triple-quoted string literal (detected at line 80) (line 80)",
-        "attempt": 2,
+        "parse_error_strict": "invalid syntax (line 84)",
+        "parse_error_lenient": "invalid syntax (line 84)",
+        "attempt": 1,
         "legacy_class": "COMPLETE"
       },
       {
@@ -34,86 +22,7 @@
         "PYTHON_PARSEABLE": true,
         "PYTHON_PARSEABLE_LENIENT": false,
         "parse_error_strict": null,
-        "parse_error_lenient": "expected 'except' or 'finally' block (line 120)",
-        "attempt": 3,
-        "legacy_class": "COMPLETE"
-      }
-    ],
-    "submission": {
-      "MODULE_LOADABLE": true,
-      "PROCEDURE_EXECUTABLE": true,
-      "probe_outcome": "ok"
-    }
-  },
-  "qwenB_s33333": {
-    "label": "qwenB_s33333",
-    "per_attempt": [
-      {
-        "API_FINISHED": "length",
-        "CONTENT_PRESENT": true,
-        "SUBMISSION_EXTRACTED": false,
-        "SUBMISSION_EXTRACTED_LENIENT": true,
-        "PYTHON_PARSEABLE": false,
-        "PYTHON_PARSEABLE_LENIENT": false,
-        "parse_error_strict": "no source",
-        "parse_error_lenient": "expected an indented block after 'if' statement on line 227 (line 229)",
-        "attempt": 1,
-        "legacy_class": "TRUNCATED"
-      },
-      {
-        "API_FINISHED": "stop",
-        "CONTENT_PRESENT": true,
-        "SUBMISSION_EXTRACTED": false,
-        "SUBMISSION_EXTRACTED_LENIENT": true,
-        "PYTHON_PARSEABLE": false,
-        "PYTHON_PARSEABLE_LENIENT": false,
-        "parse_error_strict": "no source",
-        "parse_error_lenient": "invalid syntax (line 94)",
-        "attempt": 2,
-        "legacy_class": "COMPLETE"
-      },
-      {
-        "API_FINISHED": "stop",
-        "CONTENT_PRESENT": true,
-        "SUBMISSION_EXTRACTED": false,
-        "SUBMISSION_EXTRACTED_LENIENT": true,
-        "PYTHON_PARSEABLE": false,
-        "PYTHON_PARSEABLE_LENIENT": false,
-        "parse_error_strict": "no source",
-        "parse_error_lenient": "invalid syntax (line 94)",
-        "attempt": 3,
-        "legacy_class": "COMPLETE"
-      }
-    ],
-    "submission": {
-      "MODULE_LOADABLE": false,
-      "PROCEDURE_EXECUTABLE": false
-    }
-  },
-  "qwenB_s22222": {
-    "label": "qwenB_s22222",
-    "per_attempt": [
-      {
-        "API_FINISHED": "stop",
-        "CONTENT_PRESENT": true,
-        "SUBMISSION_EXTRACTED": true,
-        "SUBMISSION_EXTRACTED_LENIENT": true,
-        "PYTHON_PARSEABLE": false,
-        "PYTHON_PARSEABLE_LENIENT": false,
-        "parse_error_strict": "unindent does not match any outer indentation level (line 167)",
-        "parse_error_lenient": "unindent does not match any outer indentation level (line 167)",
-        "attempt": 1,
-        "legacy_class": "COMPLETE"
-      },
-      {
-        "API_FINISHED": "stop",
-        "CONTENT_PRESENT": true,
-        "SUBMISSION_EXTRACTED": true,
-        "SUBMISSION_EXTRACTED_LENIENT": true,
-        "PYTHON_PARSEABLE": false,
-        "PYTHON_PARSEABLE_LENIENT": false,
-        "parse_error_strict": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (line 260)",
-        "parse_error_lenient": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (line 260)",
+        "parse_error_lenient": "invalid syntax (line 228)",
         "attempt": 2,
         "legacy_class": "COMPLETE"
       },
@@ -124,8 +33,8 @@
         "SUBMISSION_EXTRACTED_LENIENT": true,
         "PYTHON_PARSEABLE": false,
         "PYTHON_PARSEABLE_LENIENT": false,
-        "parse_error_strict": "invalid syntax (line 123)",
-        "parse_error_lenient": "invalid syntax (line 123)",
+        "parse_error_strict": "invalid syntax (line 68)",
+        "parse_error_lenient": "invalid syntax (line 68)",
         "attempt": 3,
         "legacy_class": "COMPLETE"
       }
@@ -133,7 +42,242 @@
     "submission": {
       "MODULE_LOADABLE": false,
       "PROCEDURE_EXECUTABLE": false,
-      "parse_error": "invalid syntax (line 123)",
+      "parse_error": "invalid syntax (line 68)",
+      "probe_outcome": "load_error"
+    }
+  },
+  "qwenAp_s22222": {
+    "label": "qwenAp_s22222",
+    "per_attempt": [
+      {
+        "API_FINISHED": "length",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "invalid syntax (line 157)",
+        "parse_error_lenient": "invalid syntax (line 19)",
+        "attempt": 1,
+        "legacy_class": "TRUNCATED"
+      },
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": false,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "no source",
+        "parse_error_lenient": "invalid syntax (line 58)",
+        "attempt": 2,
+        "legacy_class": "COMPLETE"
+      },
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": false,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "no source",
+        "parse_error_lenient": "invalid syntax (line 41)",
+        "attempt": 3,
+        "legacy_class": "COMPLETE"
+      }
+    ],
+    "submission": {
+      "MODULE_LOADABLE": false,
+      "PROCEDURE_EXECUTABLE": false,
+      "parse_error": "invalid syntax (line 157)",
+      "probe_outcome": "load_error"
+    }
+  },
+  "qwenAp_s33333": {
+    "label": "qwenAp_s33333",
+    "per_attempt": [
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "unexpected indent (line 217)",
+        "parse_error_lenient": "unexpected indent (line 217)",
+        "attempt": 1,
+        "legacy_class": "COMPLETE"
+      },
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "unindent does not match any outer indentation level (line 73)",
+        "parse_error_lenient": "unindent does not match any outer indentation level (line 73)",
+        "attempt": 2,
+        "legacy_class": "COMPLETE"
+      },
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "invalid syntax (line 45)",
+        "parse_error_lenient": "invalid syntax (line 45)",
+        "attempt": 3,
+        "legacy_class": "COMPLETE"
+      }
+    ],
+    "submission": {
+      "MODULE_LOADABLE": false,
+      "PROCEDURE_EXECUTABLE": false,
+      "parse_error": "invalid syntax (line 45)",
+      "probe_outcome": "load_error"
+    }
+  },
+  "qwenBp_s11111": {
+    "label": "qwenBp_s11111",
+    "per_attempt": [
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "unexpected indent (line 33)",
+        "parse_error_lenient": "unexpected indent (line 33)",
+        "attempt": 1,
+        "legacy_class": "COMPLETE"
+      },
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "expected 'except' or 'finally' block (line 40)",
+        "parse_error_lenient": "expected 'except' or 'finally' block (line 40)",
+        "attempt": 2,
+        "legacy_class": "COMPLETE"
+      },
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "expected 'except' or 'finally' block (line 38)",
+        "parse_error_lenient": "expected 'except' or 'finally' block (line 38)",
+        "attempt": 3,
+        "legacy_class": "COMPLETE"
+      }
+    ],
+    "submission": {
+      "MODULE_LOADABLE": false,
+      "PROCEDURE_EXECUTABLE": false,
+      "parse_error": "expected 'except' or 'finally' block (line 38)",
+      "probe_outcome": "load_error"
+    }
+  },
+  "qwenBp_s22222": {
+    "label": "qwenBp_s22222",
+    "per_attempt": [
+      {
+        "API_FINISHED": "length",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "invalid syntax (line 84)",
+        "parse_error_lenient": "expected an indented block after 'except' statement on line 42 (line 42)",
+        "attempt": 1,
+        "legacy_class": "TRUNCATED"
+      },
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "invalid syntax (line 84)",
+        "parse_error_lenient": "invalid syntax (line 84)",
+        "attempt": 2,
+        "legacy_class": "COMPLETE"
+      },
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "invalid syntax (line 84)",
+        "parse_error_lenient": "invalid syntax (line 84)",
+        "attempt": 3,
+        "legacy_class": "COMPLETE"
+      }
+    ],
+    "submission": {
+      "MODULE_LOADABLE": false,
+      "PROCEDURE_EXECUTABLE": false,
+      "parse_error": "invalid syntax (line 84)",
+      "probe_outcome": "load_error"
+    }
+  },
+  "qwenBp_s33333": {
+    "label": "qwenBp_s33333",
+    "per_attempt": [
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "unindent does not match any outer indentation level (line 51)",
+        "parse_error_lenient": "unindent does not match any outer indentation level (line 51)",
+        "attempt": 1,
+        "legacy_class": "COMPLETE"
+      },
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "invalid syntax (line 92)",
+        "parse_error_lenient": "invalid syntax (line 92)",
+        "attempt": 2,
+        "legacy_class": "COMPLETE"
+      },
+      {
+        "API_FINISHED": "stop",
+        "CONTENT_PRESENT": true,
+        "SUBMISSION_EXTRACTED": true,
+        "SUBMISSION_EXTRACTED_LENIENT": true,
+        "PYTHON_PARSEABLE": false,
+        "PYTHON_PARSEABLE_LENIENT": false,
+        "parse_error_strict": "unindent does not match any outer indentation level (line 212)",
+        "parse_error_lenient": "unindent does not match any outer indentation level (line 212)",
+        "attempt": 3,
+        "legacy_class": "COMPLETE"
+      }
+    ],
+    "submission": {
+      "MODULE_LOADABLE": false,
+      "PROCEDURE_EXECUTABLE": false,
+      "parse_error": "unindent does not match any outer indentation level (line 212)",
       "probe_outcome": "load_error"
     }
   }
