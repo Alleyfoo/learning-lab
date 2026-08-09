@@ -108,3 +108,78 @@ abbreviations, and nothing tells the model that.
 Worth deciding in advance, because it will otherwise be decided after seeing the answer: whether
 the expected column indices are 0-based or 1-based, and whether the product column is expected
 to be excluded. Both must be fixed in the preregistration.
+
+---
+
+# Probe 2B.2 — Month-column identification: Result
+
+**Both tests pass.**
+
+| Test | Given header | Expected | Reported | Correct | API | JSON | Valid | ask_human |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **E1** | row 4 | `[2,3,4,5]` | **`[2,3,4,5]`** | **yes** | `stop` | yes | yes | no |
+| **R1** | row 5 | `[2,3,4,5,6,7]` | **`[2,3,4,5,6,7]`** | **yes** | `stop` | yes | yes | no |
+
+Raw replies, in full:
+
+```
+E1:  {"month_columns": [2, 3, 4, 5]}
+R1:  {"month_columns": [2, 3, 4, 5, 6, 7]}
+```
+
+Exact set match, correct 1-based numbering, identifier column correctly excluded in both. No
+prose, no fence, no escape hatch taken.
+
+## The R1 result is the substantive one
+
+R1's header is `Tuote | Tammi | Helmi | Maalis | Huhti | Touko | Kesä`.
+
+The model was given **no month vocabulary in any language**, no locale hint, no positional rule
+and no type inference guidance. It identified all six Finnish abbreviated month names as months,
+and correctly excluded `Tuote` — a Finnish word for *product* it was equally never taught.
+
+This is a stronger claim than 2B.1. Locating row 5 could in principle rest on structural cues:
+the first row followed by numeric data, the widest row, the row after the blank. Identifying
+which of its cells are months, and which one is not, requires recognising the **semantic role**
+of header cells in a language the model was given nothing about.
+
+## Capability boundary so far
+
+```text
+2B.1  locate header            PASS  (E1, R1)
+2B.2  identify month columns   PASS  (E1, R1)
+```
+
+Four probes, four passes, four perfectly-formed structured answers, zero escape hatches.
+
+## What this does and does not establish
+
+**Establishes:** on these two fixtures, this model locates the header row and identifies which of
+its columns are months, including Finnish abbreviations, without being taught how.
+
+**Does not establish:** reliability. Two fixtures, one seed, one run per probe. A single run
+cannot separate *can do this* from *did this once*. Nor does it establish wide/long recognition,
+value normalization, grain reasoning, procedure synthesis, or refusal behaviour — the escape
+hatch was available and never exercised, so nothing has been learned about whether the model
+would decline a genuinely undecidable case.
+
+**On Experiment 2A:** this continues to *support* the reading that 2A's failures landed on code
+emission rather than data understanding. It still does not confirm it. Two sub-abilities
+surviving a low-output-burden setting is not evidence that the remaining ones would have.
+
+## Recommended next step
+
+The escape hatch has now been offered twice and never used, on two tests where using it would
+have been wrong. That is the right behaviour but it is untested in the direction that matters.
+
+The natural next probe is therefore either:
+
+1. **the same question on an undecidable input** — a header row where a column genuinely cannot
+   be classified from the evidence, where `{"ask_human": true}` is the *correct* answer; or
+2. **one more capability step** — e.g. which column holds the identifier, or what period a given
+   month column denotes.
+
+Option 1 is more valuable. Four passes in a row on resolvable inputs tell us the model answers;
+they tell us nothing about whether it knows when not to. Given that `Escalate` went unused across
+325 file-evaluations in Experiment 2A, refusal is the least-evidenced behaviour in the entire
+programme.

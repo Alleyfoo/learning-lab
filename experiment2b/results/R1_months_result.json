@@ -1,0 +1,46 @@
+{
+  "test": "R1",
+  "probe": "2B.2 month columns",
+  "model": {
+    "tag": "qwen3.5:9b",
+    "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+    "family": "qwen35",
+    "parameter_size": "9.7B",
+    "quantization": "Q4_K_M",
+    "ollama_version": "ollama version is 0.32.6"
+  },
+  "think_enabled": false,
+  "generation_options": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "seed": 20260809,
+    "num_ctx": 8192,
+    "num_predict": 2048
+  },
+  "given_header_row": 5,
+  "api_finished": "stop",
+  "content_present": true,
+  "json_parseable": true,
+  "valid_structured_output": true,
+  "asked_human": false,
+  "expected_month_columns": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "reported_month_columns": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "correct": true,
+  "raw_reply": "{\"month_columns\": [2, 3, 4, 5, 6, 7]}",
+  "prompt_sha256": "286bbac8ac916b16304e4a6e677d7ef0c0f9acd31337cfa6ff68188e0d07aa82"
+}
