@@ -1,0 +1,50 @@
+{
+  "hidden": true,
+  "note": "Ground truth. Never place this file, or any derivative, in the task packet.",
+  "params": {
+    "seed": 20260809,
+    "year": 2026,
+    "n_months": 6,
+    "products": [
+      "ART-0001",
+      "ART-0002",
+      "ART-0003",
+      "ART-0004",
+      "ART-0005"
+    ],
+    "presence_prob": 0.8,
+    "sales_low": 3.0,
+    "sales_high": 900.0
+  },
+  "columns": [
+    "country",
+    "product_id",
+    "period",
+    "sales"
+  ],
+  "n_rows": 77,
+  "countries": [
+    "CZ",
+    "DE",
+    "FI",
+    "SE"
+  ],
+  "products": [
+    "ART-0001",
+    "ART-0002",
+    "ART-0003",
+    "ART-0004",
+    "ART-0005"
+  ],
+  "periods": [
+    "2026-01",
+    "2026-02",
+    "2026-03",
+    "2026-04",
+    "2026-05",
+    "2026-06"
+  ],
+  "grain": "one row per (country, product_id, period)",
+  "sales_total": 33224.42,
+  "sha256": "c5111ef822697dd958689e3c58e89ef1807eca99afe3068ac5595f33fef3b1c7"
+}
