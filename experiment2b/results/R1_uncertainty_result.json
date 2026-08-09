@@ -1,0 +1,52 @@
+{
+  "test": "R1",
+  "probe": "2B.4 three-option uncertainty contract",
+  "model": {
+    "tag": "qwen3.5:9b",
+    "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+    "family": "qwen35",
+    "parameter_size": "9.7B",
+    "quantization": "Q4_K_M",
+    "ollama_version": "ollama version is 0.32.6"
+  },
+  "think_enabled": false,
+  "generation_options": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "seed": 20260809,
+    "num_ctx": 8192,
+    "num_predict": 2048
+  },
+  "given_header_row": 5,
+  "api_finished": "stop",
+  "content_present": true,
+  "json_parseable": true,
+  "expected": {
+    "expected_status": "complete",
+    "expected_month_columns": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "expected_unknown_columns": []
+  },
+  "reported": {
+    "status": "complete",
+    "month_columns": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "unknown_columns": []
+  },
+  "correct": false,
+  "verdict": "FAIL - wrong content (status=complete, months=[2, 3, 4, 5, 6], unknown=[])",
+  "raw_reply": "{\"status\": \"complete\", \"month_columns\": [2, 3, 4, 5, 6], \"unknown_columns\": []}",
+  "prompt_sha256": "3e0e3a3d4f6fb46d44e28b0cfebf3b2cbedfc16aa5558026595a2030fa4c4bc2"
+}
