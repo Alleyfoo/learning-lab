@@ -2,325 +2,47 @@
   "submission_ornith9b.py": {
     "submission": "submission_ornith9b.py",
     "headline_count": 4,
+    "classes": {
+      "INERT": 4,
+      "VINDICATED": 0,
+      "CONSEQUENTIAL_RISK": 0
+    },
     "headline": [
       {
         "literal": "tsk",
         "bound_to": "CZ",
         "kind": "dict_entry",
         "container": "fin_map",
-        "line": 45
+        "line": 45,
+        "class": "INERT",
+        "why": "occurs nowhere in any variant file; a dead entry that cannot fire"
       },
       {
         "literal": "dsb",
         "bound_to": "DE",
         "kind": "dict_entry",
         "container": "fin_map",
-        "line": 45
+        "line": 45,
+        "class": "INERT",
+        "why": "occurs nowhere in any variant file; a dead entry that cannot fire"
       },
       {
         "literal": "ceská republika",
         "bound_to": "CZ",
         "kind": "dict_entry",
         "container": "full_map",
-        "line": 55
+        "line": 55,
+        "class": "INERT",
+        "why": "occurs nowhere in any variant file; a dead entry that cannot fire"
       },
       {
         "literal": "vergien",
         "bound_to": "SE",
         "kind": "dict_entry",
         "container": "full_map",
-        "line": 55
-      }
-    ],
-    "secondary_count": 36,
-    "secondary": [
-      {
-        "literal": "july",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_MONTH_NAMES",
-        "line": 8
-      },
-      {
-        "literal": "august",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_MONTH_NAMES",
-        "line": 8
-      },
-      {
-        "literal": "september",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_MONTH_NAMES",
-        "line": 8
-      },
-      {
-        "literal": "october",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_MONTH_NAMES",
-        "line": 8
-      },
-      {
-        "literal": "november",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_MONTH_NAMES",
-        "line": 8
-      },
-      {
-        "literal": "december",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_MONTH_NAMES",
-        "line": 8
-      },
-      {
-        "literal": "heinäkuu",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_FINNISH_MONTHS",
-        "line": 13
-      },
-      {
-        "literal": "elokuu",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_FINNISH_MONTHS",
-        "line": 13
-      },
-      {
-        "literal": "syyskuu",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_FINNISH_MONTHS",
-        "line": 13
-      },
-      {
-        "literal": "lokakuu",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_FINNISH_MONTHS",
-        "line": 13
-      },
-      {
-        "literal": "marraskuu",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_FINNISH_MONTHS",
-        "line": 13
-      },
-      {
-        "literal": "joulukuu",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_FINNISH_MONTHS",
-        "line": 13
-      },
-      {
-        "literal": "juli",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_GERMAN_MONTHS",
-        "line": 18
-      },
-      {
-        "literal": "august",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_GERMAN_MONTHS",
-        "line": 18
-      },
-      {
-        "literal": "september",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_GERMAN_MONTHS",
-        "line": 18
-      },
-      {
-        "literal": "oktober",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_GERMAN_MONTHS",
-        "line": 18
-      },
-      {
-        "literal": "november",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_GERMAN_MONTHS",
-        "line": 18
-      },
-      {
-        "literal": "dezember",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "_GERMAN_MONTHS",
-        "line": 18
-      },
-      {
-        "literal": "July",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "months",
-        "line": 90
-      },
-      {
-        "literal": "August",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "months",
-        "line": 90
-      },
-      {
-        "literal": "September",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "months",
-        "line": 90
-      },
-      {
-        "literal": "October",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "months",
-        "line": 90
-      },
-      {
-        "literal": "November",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "months",
-        "line": 90
-      },
-      {
-        "literal": "December",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "months",
-        "line": 90
-      },
-      {
-        "literal": "Juli",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "german_months",
-        "line": 99
-      },
-      {
-        "literal": "August",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "german_months",
-        "line": 99
-      },
-      {
-        "literal": "September",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "german_months",
-        "line": 99
-      },
-      {
-        "literal": "Oktober",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "german_months",
-        "line": 99
-      },
-      {
-        "literal": "November",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "german_months",
-        "line": 99
-      },
-      {
-        "literal": "Dezember",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "german_months",
-        "line": 99
-      },
-      {
-        "literal": "heinäkuu",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "fin_months",
-        "line": 108
-      },
-      {
-        "literal": "elokuu",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "fin_months",
-        "line": 108
-      },
-      {
-        "literal": "syyskuu",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "fin_months",
-        "line": 108
-      },
-      {
-        "literal": "lokakuu",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "fin_months",
-        "line": 108
-      },
-      {
-        "literal": "marraskuu",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "fin_months",
-        "line": 108
-      },
-      {
-        "literal": "joulukuu",
-        "bound_to": null,
-        "kind": "membership",
-        "container": "fin_months",
-        "line": 108
-      }
-    ],
-    "rule": "spec/run2_preregistration.md section 4",
-    "note": "Headline = literals absent from the provided material that are bound to a canonical-shaped value (2-letter uppercase code, int 1-12, or YYYY-MM). Secondary is for manual audit and is NOT part of the headline number."
-  },
-  "submission_ornith9b_run2.py": {
-    "submission": "submission_ornith9b_run2.py",
-    "headline_count": 4,
-    "headline": [
-      {
-        "literal": "tsk",
-        "bound_to": "CZ",
-        "kind": "dict_entry",
-        "container": "fin_map",
-        "line": 45
-      },
-      {
-        "literal": "dsb",
-        "bound_to": "DE",
-        "kind": "dict_entry",
-        "container": "fin_map",
-        "line": 45
-      },
-      {
-        "literal": "ceská republika",
-        "bound_to": "CZ",
-        "kind": "dict_entry",
-        "container": "full_map",
-        "line": 55
-      },
-      {
-        "literal": "vergien",
-        "bound_to": "SE",
-        "kind": "dict_entry",
-        "container": "full_map",
-        "line": 55
+        "line": 55,
+        "class": "INERT",
+        "why": "occurs nowhere in any variant file; a dead entry that cannot fire"
       }
     ],
     "secondary_count": 36,

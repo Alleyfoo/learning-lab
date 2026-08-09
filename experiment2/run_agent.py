@@ -113,8 +113,8 @@ def classify(resp: dict) -> str:
     return "COMPLETE" if content.strip() else "EMPTY_NONTRUNCATED"
 
 
-def chat(model: str, messages: list[dict], opts: dict) -> dict:
-    body = json.dumps({"model": model, "messages": messages,
+def chat(model: str, messages: list[dict], opts: dict, think: bool = True) -> dict:
+    body = json.dumps({"model": model, "messages": messages, "think": think,
                        "stream": False, "options": opts}).encode()
     req = urllib.request.Request(OLLAMA, data=body,
                                  headers={"Content-Type": "application/json"})
@@ -129,6 +129,9 @@ def main() -> int:
     ap.add_argument("--label", default="ornith9b")
     ap.add_argument("--num-ctx", type=int, default=32768)
     ap.add_argument("--num-predict", type=int, default=8192)
+    ap.add_argument("--seed", type=int, default=20260809)
+    ap.add_argument("--no-think", action="store_true",
+                    help="disable the model's thinking channel (Ollama think=false)")
     ap.add_argument("--expect-digest", default=None,
                     help="abort unless the model digest matches exactly")
     ap.add_argument("--expect-frozen", type=Path, default=None,
@@ -137,7 +140,8 @@ def main() -> int:
 
     RESULTS.mkdir(exist_ok=True)
     opts = {"temperature": 0.6, "top_p": 0.95, "top_k": 20,
-            "seed": 20260809, "num_ctx": args.num_ctx, "num_predict": args.num_predict}
+            "seed": args.seed, "num_ctx": args.num_ctx, "num_predict": args.num_predict}
+    think = not args.no_think
 
     frozen = {f: sha(ROOT / f) for f in FROZEN}
     tags = json.loads(urllib.request.urlopen(
@@ -161,7 +165,7 @@ def main() -> int:
     for attempt in range(1, args.attempts + 1):
         attempts_used = attempt
         print(f"--- attempt {attempt}/{args.attempts} ---", flush=True)
-        resp = chat(args.model, messages, opts)
+        resp = chat(args.model, messages, opts, think=think)
         reply = (resp.get("message") or {}).get("content") or ""
         cls = classify(resp)
         env = {"done_reason": resp.get("done_reason"),
@@ -209,6 +213,8 @@ def main() -> int:
                       ["ollama", "--version"], capture_output=True, text=True
                   ).stdout.strip()},
         "generation_options": opts,
+        "think_enabled": think,
+        "seed": args.seed,
         "attempts_allowed": args.attempts,
         "attempts_used": attempts_used,
         "completion_classes": completion,
