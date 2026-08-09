@@ -302,5 +302,76 @@
     ],
     "rule": "spec/run2_preregistration.md section 4",
     "note": "Headline = literals absent from the provided material that are bound to a canonical-shaped value (2-letter uppercase code, int 1-12, or YYYY-MM). Secondary is for manual audit and is NOT part of the headline number."
+  },
+  "submission_qwen35_9b_s11111.py": {
+    "submission": "submission_qwen35_9b_s11111.py",
+    "headline_count": 0,
+    "classes": {
+      "INERT": 0,
+      "VINDICATED": 0,
+      "CONSEQUENTIAL_RISK": 0
+    },
+    "headline": [],
+    "secondary_count": 0,
+    "secondary": [],
+    "rule": "spec/run2_preregistration.md section 4",
+    "note": "Headline = literals absent from the provided material that are bound to a canonical-shaped value (2-letter uppercase code, int 1-12, or YYYY-MM). Secondary is for manual audit and is NOT part of the headline number."
+  },
+  "submission_qwen35_9b_s22222.py": {
+    "submission": "submission_qwen35_9b_s22222.py",
+    "headline_count": 1,
+    "classes": {
+      "INERT": 1,
+      "VINDICATED": 0,
+      "CONSEQUENTIAL_RISK": 0
+    },
+    "headline": [
+      {
+        "literal": "cesko",
+        "bound_to": "CZ",
+        "kind": "dict_entry",
+        "container": "mapping",
+        "line": 9,
+        "class": "INERT",
+        "why": "occurs nowhere in any variant file; a dead entry that cannot fire"
+      }
+    ],
+    "secondary_count": 0,
+    "secondary": [],
+    "rule": "spec/run2_preregistration.md section 4",
+    "note": "Headline = literals absent from the provided material that are bound to a canonical-shaped value (2-letter uppercase code, int 1-12, or YYYY-MM). Secondary is for manual audit and is NOT part of the headline number."
+  },
+  "submission_qwen35_9b_s33333.py": {
+    "submission": "submission_qwen35_9b_s33333.py",
+    "headline_count": 2,
+    "classes": {
+      "INERT": 2,
+      "VINDICATED": 0,
+      "CONSEQUENTIAL_RISK": 0
+    },
+    "headline": [
+      {
+        "literal": "ceská republika",
+        "bound_to": "CZ",
+        "kind": "dict_entry",
+        "container": "COUNTRY_MAP",
+        "line": 16,
+        "class": "INERT",
+        "why": "occurs nowhere in any variant file; a dead entry that cannot fire"
+      },
+      {
+        "literal": "czesko",
+        "bound_to": "CZ",
+        "kind": "dict_entry",
+        "container": "COUNTRY_MAP",
+        "line": 16,
+        "class": "INERT",
+        "why": "occurs nowhere in any variant file; a dead entry that cannot fire"
+      }
+    ],
+    "secondary_count": 0,
+    "secondary": [],
+    "rule": "spec/run2_preregistration.md section 4",
+    "note": "Headline = literals absent from the provided material that are bound to a canonical-shaped value (2-letter uppercase code, int 1-12, or YYYY-MM). Secondary is for manual audit and is NOT part of the headline number."
   }
 }
