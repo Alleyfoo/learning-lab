@@ -95,6 +95,7 @@ def main() -> int:
     ap.add_argument("--num-ctx", type=int, default=65536)
     ap.add_argument("--num-predict", type=int, default=32768)
     ap.add_argument("--no-think", action="store_true")
+    ap.add_argument("--only-source", action="append", default=None)
     ap.add_argument("--expect-digest", default=None)
     ap.add_argument("--expect-frozen", type=Path, default=None)
     args = ap.parse_args()
@@ -158,7 +159,7 @@ def main() -> int:
 
     # ---------------- PHASE 2: REAL TASK (SCORED) ---------------------------
     print("=== PHASE 2: condition-A task (SCORED) ===", flush=True)
-    real_prompt = build_initial_prompt()
+    real_prompt = build_initial_prompt(args.only_source)
     messages.append({"role": "user", "content": real_prompt})
     submission = RESULTS / f"submission_{args.label}.py"
     final, completion, probes = None, [], []
@@ -198,6 +199,7 @@ def main() -> int:
 
     (RESULTS / f"run_{args.label}_manifest.json").write_text(json.dumps({
         "condition": "B",
+        "only_source": args.only_source,
         "label": args.label, "seed": args.seed,
         "model": {"tag": args.model, "digest": info["digest"]},
         "generation_options": opts, "think_enabled": think,

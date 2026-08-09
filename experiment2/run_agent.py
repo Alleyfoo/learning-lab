@@ -40,7 +40,8 @@ def sha(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
-def build_initial_prompt() -> str:
+def build_initial_prompt(only: list[str] | None = None) -> str:
+    """`only` restricts the exposed dev sources (conditions A-prime / B-prime)."""
     parts = [
         "You are given a data task. Read everything, then produce your answer.",
         "\n\n===== TASK.md =====\n",
@@ -48,7 +49,12 @@ def build_initial_prompt() -> str:
         "\n\n===== contract.py (importable as `from contract import Escalate, AskHuman`) =====\n",
         (PACKET / "contract.py").read_text(encoding="utf-8"),
     ]
-    for f in sorted((PACKET / "sources").glob("*.csv")):
+    files = sorted((PACKET / "sources").glob("*.csv"))
+    if only:
+        files = [f for f in files if f.stem in only]
+        if len(files) != len(only):
+            raise SystemExit(f"ABORT: requested sources {only} not all present")
+    for f in files:
         parts.append(f"\n\n===== sources/{f.name} =====\n")
         parts.append(f.read_text(encoding="utf-8"))
     parts.append(
@@ -130,6 +136,8 @@ def main() -> int:
     ap.add_argument("--num-ctx", type=int, default=32768)
     ap.add_argument("--num-predict", type=int, default=8192)
     ap.add_argument("--seed", type=int, default=20260809)
+    ap.add_argument("--only-source", action="append", default=None,
+                    help="restrict exposed dev sources, e.g. --only-source D04")
     ap.add_argument("--no-think", action="store_true",
                     help="disable the model's thinking channel (Ollama think=false)")
     ap.add_argument("--expect-digest", default=None,
@@ -158,7 +166,8 @@ def main() -> int:
         print("frozen artifacts verified identical to prior run")
 
     transcript, completion = [], []
-    messages = [{"role": "user", "content": build_initial_prompt()}]
+    real_prompt = build_initial_prompt(args.only_source)
+    messages = [{"role": "user", "content": real_prompt}]
     submission = RESULTS / f"submission_{args.label}.py"
     final_module, attempts_used, probes = None, 0, []
 
@@ -220,6 +229,8 @@ def main() -> int:
         "completion_classes": completion,
         "completion_summary": {c: sum(1 for x in completion if x["class"] == c)
                                for c in ("COMPLETE", "TRUNCATED", "EMPTY_NONTRUNCATED")},
+        "only_source": args.only_source,
+        "prompt_sha256": hashlib.sha256(real_prompt.encode()).hexdigest(),
         "packet_files": ["TASK.md", "contract.py"] + sorted(
             f.name for f in (PACKET / "sources").glob("*.csv")),
         "withheld": ["canonical.csv", "canonical_manifest.json", "corpus_manifest.json",
