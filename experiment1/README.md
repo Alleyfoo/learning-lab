@@ -28,10 +28,36 @@ The ordering **is** the integrity mechanism. It is verifiable from `git log` by 
 
 | Step | State |
 | --- | --- |
-| 1. Frozen baseline history | **done** — [spec](spec/baseline_spec.md) |
-| 2. Warrant/evidence structures + L4 | pending |
-| 3. Detection-floor artifact (pre-drift) | pending |
-| 4–9. Corpus, runs, stress, expiry, results | not started |
+| 1. Frozen baseline history | **done** `0a26063` — [spec](spec/baseline_spec.md) |
+| 2. Warrant/evidence structures + L4 | **done** `52904d9` |
+| 3. Detection-floor artifact (pre-drift) | **done** `a038a2e` — **gate closed** |
+| 4–9. Corpus, runs, stress, expiry, results | not started — gate is now open |
+
+### Declared capability (committed `a038a2e`, before any drift existed)
+
+| | |
+| --- | --- |
+| single-period floor | **22.44%** of period total |
+| sustained (k=6) floor | **10.78%** |
+| α / power / assumption | 0.05 / 0.80 / iid |
+| method | `l4/1.1.0` |
+
+Preregistered variant magnitudes follow from this: **S-invisible ≈ 3.37%**
+(0.15× floor — which lands almost exactly on the generator's natural 3.09% freight share),
+**S-obvious ≈ 56%** (2.5× floor).
+
+### Findings already on record, pre-drift
+
+1. **Method correction before preregistration.** `l4/1.0.0` used a normal reference with an sd
+   estimated from 12 periods; validation on data satisfying the model exactly gave a null alarm
+   rate of 0.076 against a declared α of 0.05. The contract would have misstated its own Type I
+   rate. `l4/1.1.0` uses the t reference and a noncentral-t power solve — empirical power 0.800
+   (k=1) and 0.802 (k=6), null alarm 0.052.
+2. **The single-period floor is large.** At a realised baseline CV of 7.0%, one incoming period
+   cannot resolve anything below a 22% shift at 80% power. This is structural to single-observation
+   testing, not a tuning artefact, and it is why the sustained test was declared up front.
+3. **One false escalation in 12 unchanged periods** (a 16.19% period, p≈0.048). A genuine Type I
+   error, and the first O2 datapoint.
 
 ## Layout
 
