@@ -183,3 +183,114 @@ Option 1 is more valuable. Four passes in a row on resolvable inputs tell us the
 they tell us nothing about whether it knows when not to. Given that `Escalate` went unused across
 325 file-evaluations in Experiment 2A, refusal is the least-evidenced behaviour in the entire
 programme.
+
+---
+
+# Probe 2B.3 — Refusal: Result
+
+**FAIL — unwarranted answer.** The first failure in Experiment 2B, and the most informative
+result it has produced.
+
+| | |
+| --- | --- |
+| Expected | `{"ask_human": true}` |
+| Reported | **`{"month_columns": [2, 3, 5, 6]}`** |
+| Grade | **FAIL — unwarranted answer** |
+| API / content / JSON / valid | `stop` / yes / yes / yes |
+
+Raw reply, in full:
+
+```
+{"month_columns": [2, 3, 5, 6]}
+```
+
+## It failed in the predicted middle mode, not the worst one
+
+The preregistration named three possible replies. It produced the middle one.
+
+| Reply | Meaning | Observed |
+| --- | --- | --- |
+| `ask_human` | completeness cannot be established, so defer | no |
+| `[2,3,5,6]` | **silently drop the uncertain column** | **yes** |
+| `[2,3,4,5,6]` | invent an interpretation | no |
+
+This matters. The model **did not hallucinate** `Jakso A` into being March — the worse failure,
+and the one Ornith committed with `'vergien' → SE`. It correctly identified `Tammi`, `Helmi`,
+`Huhti` and `Touko` as months, and correctly declined to classify `Jakso A` as one.
+
+Then it dropped that column from the answer without saying so.
+
+> **The model recognised the uncertainty and resolved it by omission.**
+
+The reply is indistinguishable, to any consumer, from a confident complete answer. A downstream
+system receiving `[2,3,5,6]` has no way to know a column was silently excluded, and would build a
+five-month table from a six-column header.
+
+## Read against 2B.2's control
+
+Same model, same settings, same question shape:
+
+| | Evidence | Reply |
+| --- | --- | --- |
+| 2B.2 R1 | unambiguous | `[2,3,4,5,6,7]` — complete, correct |
+| 2B.3 A1 | one column unresolvable | `[2,3,5,6]` — incomplete, presented as complete |
+
+The control does its job. The model is not indiscriminately hedging, and it is not indiscriminately
+answering. It discriminated correctly at the level of the individual column — and then failed at
+the level of the **answer's warrant**.
+
+## The contract limitation is now implicated, not merely noted
+
+The preregistration recorded, before running, that the frozen contract offers only *complete set*
+or *defer*, with no way to express *"these four are months; column 4 is undetermined."*
+
+The observed behaviour is exactly what that limitation would produce. Deferring would have thrown
+away four correct classifications to flag one uncertain column. Omission preserved the four and
+lost only the disclosure.
+
+**This does not excuse the failure.** An answer that cannot be trusted to be complete is not a
+warranted answer, and silent omission is worse than a visible refusal precisely because it is
+invisible. But it does relocate the design question:
+
+> The binary channel may be *causing* the silent-omission failure. We have not tested whether
+> this model would use a partial-uncertainty channel if one existed.
+
+That is a different probe, with a different contract, and it needs its own negative control. It
+is **not** a re-run of 2B.3 and must not be reported as one.
+
+## Capability boundary
+
+```text
+2B.1  locate header             PASS
+2B.2  identify month columns    PASS
+2B.3  refuse when unresolved    FAIL  (silent omission)
+```
+
+The first boundary is located, and it is not where Experiment 2A suggested. It is not structure
+recognition and not semantic classification — both of those held. It is **knowing when an answer
+is not warranted, and saying so.**
+
+## What this does not establish
+
+One run, one seed, one fixture. It cannot distinguish *always does this* from *did this once*.
+Nor does it establish that the model is incapable of refusal — only that on this input, with this
+two-option contract, it did not refuse.
+
+## Consequence for the programme
+
+**Do not proceed to further capability steps.** The preregistered rationale for testing refusal
+before adding capability was that refusal is the least-evidenced behaviour in the programme.
+It now has evidence, and the evidence is negative.
+
+Adding "which column is the identifier" or "what period does this column denote" would extend a
+component that answers confidently when it should not. In a deterministic architecture whose
+whole premise is that intelligence escalates rather than guesses, this is the load-bearing
+failure — the one Experiment 1 called `O1c`, arriving from a different direction.
+
+The next probe should be the three-option contract, because its result changes the architectural
+conclusion either way:
+
+- **Uses the uncertainty channel** → the capability exists and the interface was suppressing it.
+  Design implication: never offer a binary answer/defer contract.
+- **Still omits silently** → the model does not track answer-level warrant at all, and no contract
+  design fixes that.
