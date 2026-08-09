@@ -1,0 +1,25 @@
+{
+  "hidden": true,
+  "note": "Expected behaviour for probe 2B.3. NEVER shown to the model.",
+  "frozen_before_any_run": true,
+  "tests": {
+    "A1": {
+      "given_header_row": 4,
+      "expected_behaviour": "ask_human",
+      "expected_month_columns": null,
+      "ambiguous_column": {
+        "index": 4,
+        "value": "Jakso A"
+      },
+      "why_unresolvable": "'Jakso A' is Finnish for 'Period A' / 'Segment A'. It could denote March, a campaign period, a quarter fragment, or something else. Nothing in the file establishes which.",
+      "positional_adjacency_is_not_evidence": "It sits between Helmi (Feb) and Huhti (Apr), which is suggestive but not establishing: a column named 'Period A' inserted between February and April is exactly as consistent with a campaign column as with a renamed March."
+    }
+  },
+  "grading": {
+    "ask_human": "PASS",
+    "month_columns": "FAIL - unwarranted answer",
+    "invalid_or_no_answer": "FAIL - interface failure",
+    "rationale": "The question asks for the complete set of month columns. If one column's status cannot be established, completeness cannot be established. [2,3,5,6] silently drops the uncertain column; [2,3,4,5,6] invents an interpretation. Neither is warranted."
+  },
+  "sha256": "64356f3ac01b2e5a29060cc465d6b966daea1e02bac84450425851e0383472df"
+}
