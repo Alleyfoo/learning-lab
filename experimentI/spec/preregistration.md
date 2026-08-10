@@ -183,3 +183,104 @@ classification measurement on the frozen fixtures.
 - Gate: deterministic code (`harness/gate_I.py`); no LLM in the gate.
 - Counterfactual: `det_classify` per probe, recorded.
 - Sampling: one run per probe; no seed control over GLM-5.2 in the agent tool.
+
+---
+
+# AMENDMENT — I4 (transposed monthly table), added before the I4 run
+
+**Status: FROZEN before the I4 run.** I1/I2/I3 were run and PASSED at `f3c3a9a`
+(3-probe result frozen; not retroactively changed by this amendment — verified
+by re-grading). I4 is the probe the designer named as "the first probe where
+the saved macro should be allowed to be wrong."
+
+## The probe
+
+```text
+Kuukausi | ART-001 | ART-002 | ART-003
+Tammi    | 10      | 7       | 5
+Helmi    | 12      | 9       | 7
+Maalis   | 8       | 11      | 6
+... (12 months down rows; products across columns)
+```
+
+This is a **transposed wide** representation: months run down a column and
+products run across the header, with values in cells. It is **not** the
+canonical long form (`Product | Month | Sales`, one row per product-month).
+Calling it `long` just because months run downward would confuse **month
+orientation** with **table grain/shape**.
+
+## Frozen expectations — the macro is knowingly wrong
+
+```text
+det_classify(I4) = long       (FROZEN, WRONG, left unchanged -- do not "fix" it)
+expected(I4)     = unknown
+```
+
+The deterministic classifier is left **unchanged**. It will say `long` because
+`dl = 12 ≥ 3` (months down a data column). That wrong prediction is the whole
+value of I4: the first case where a saved deterministic macro encounters a
+representation outside its applicability and makes the wrong classification.
+
+## Grader for I4 — the oracle, not the verifier
+
+For I1/I2/I3 the grader is the verifier: `i_pass = (llm_label == expected) AND
+gate.supported`. **For I4 the verifier is SUSPENDED.** The frozen fixture
+expectation is the grader:
+
+```text
+LLM label == unknown  -> I4 PASS
+LLM label != unknown  -> I4 FAIL
+det_classify == long  -> recorded counterfactual MISS (not a fail of I4; the point)
+```
+
+Why the verifier is suspended: `dl = 12` would make `gate.supported(long) =
+true` and `gate.supported(unknown) = false`. If we let that gate I4, we would
+quietly solve I4 deterministically in order to verify the LLM — and the LLM's
+correct `unknown` would be marked unsupported. So for I4 the verifier's
+support values are **recorded as evidence** but do **not** gate `i_pass`:
+
+```text
+hw = 0          (recorded)
+dl = 12         (recorded)
+supported(long)    = true   (recorded; NOT interpreted as support for long here)
+supported(unknown) = false  (recorded; the evidence rule I4 falsifies)
+```
+
+I4 exists specifically to demonstrate that **"month tokens down one column" is
+not sufficient evidence for long format.** If GLM says `unknown`, that
+falsifies the `dl≥3 → long` evidence rule as a general long-test — which is a
+good thing to learn. The verifier design is *not* retroactively changed for
+I1/I2/I3 (they keep the verifier grader, frozen); I4 simply uses the oracle
+because the verifier is known-wrong on this structure.
+
+## What I4 tests
+
+> Can GLM notice the structural difference — months down rows with several
+> product/value columns is not canonical long — and return `unknown`, while
+> the saved macro confidently (and wrongly) says `long`?
+
+- **GLM says `unknown`** → I4 PASS. The macro-saver lifecycle gets its first
+  really interesting example: the agent catches a case the saved macro cannot
+  handle, and its successful judgement becomes material for improving the
+  macro (candidate rule v2: distinguish "months down a single label column
+  with one value column" = long, from "months down a label column with
+  *several* entity columns" = transposed wide / unknown).
+- **GLM says `long` (or `wide`)** → I4 FAIL. GLM did not catch the structural
+  difference; it followed the same coarse signal as the macro.
+
+Either outcome is informative and is recorded as-is; pass criteria are not
+relaxed after the fact.
+
+## No fourth label
+
+`transposed_wide` is **not** added as a fourth label. Adding it would change
+the classification problem instead of testing whether the existing three-way
+contract correctly rejects an out-of-contract representation. I4's expected
+label is `unknown` under the frozen wide/long/unknown contract.
+
+## Hard stop — still honored
+
+I4 is still classification only. No unpivot/reshape/transformation, no
+production architecture, no macro-v2 implementation (a candidate v2 rule may
+be *noted* in the result as material, but it is not built or run). The
+deterministic classifier is left unchanged on purpose.

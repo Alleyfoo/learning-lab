@@ -185,8 +185,9 @@ def grade(judgements_path: Path) -> dict:
     judgements = json.loads(judgements_path.read_text(encoding="utf-8"))
     expected = json.loads(EXPECTED_PATH.read_text(encoding="utf-8"))
     probes_expected = expected["per_probe"]
+    grader_map = expected.get("grader_per_probe", {})
 
-    present = [p for p in ("I1", "I2", "I3") if p in judgements]
+    present = [p for p in ("I1", "I2", "I3", "I4") if p in judgements]
     per_probe = {}
     for p in present:
         j = judgements[p]
@@ -195,21 +196,34 @@ def grade(judgements_path: Path) -> dict:
         header, data = _read_csv(fixture_path)
         llm_label = j.get("llm_answer", {}).get("format")
         g = gate(llm_label, header, data)
+        grader = grader_map.get(p, "verifier")
+        if grader == "oracle":
+            # Verifier SUSPENDED for this probe: the frozen fixture expectation is
+            # the grader. (For I4, dl=12 would make supported(long)=true and
+            # supported(unknown)=false, but that evidence rule is exactly what I4
+            # falsifies -- record it, do not let it gate i_pass.)
+            i_pass = (llm_label == exp)
+        else:
+            i_pass = (llm_label == exp) and g["supported"]
         per_probe[p] = {
             "expected": exp,
             "llm_label": llm_label,
             "det_classify": g["det_classify"],
             "hw": g["hw"],
             "dl": g["dl"],
-            "supported": g["supported"],
-            "i_pass": (llm_label == exp) and g["supported"],
-            "det_ok": g["det_classify"] == exp,  # counterfactual
+            "supported": g["supported"],   # evidence; for I4 does NOT gate i_pass
+            "grader": grader,
+            "i_pass": i_pass,
+            "det_ok": g["det_classify"] == exp,  # counterfactual (miss on I4)
         }
 
+    all_pass = all(pp["i_pass"] for pp in per_probe.values())
     i1_i2 = ("I1" in per_probe and "I2" in per_probe
              and per_probe["I1"]["i_pass"] and per_probe["I2"]["i_pass"])
-    all_pass = all(pp["i_pass"] for pp in per_probe.values())
-    overall = (len(present) == 3) and all_pass
+    i1_i2_i3 = (all(p in per_probe for p in ("I1", "I2", "I3"))
+                and all(per_probe[p]["i_pass"] for p in ("I1", "I2", "I3")))
+    i4 = ("I4" in per_probe and per_probe["I4"]["i_pass"])
+    overall = all_pass  # all present probes pass
 
     stage = judgements.get("stage", "partial")
     return {
@@ -218,6 +232,8 @@ def grade(judgements_path: Path) -> dict:
         "present": present,
         "per_probe": per_probe,
         "i1_i2_pass": i1_i2,
+        "i1_i2_i3_pass": i1_i2_i3,
+        "i4_pass": i4,
         "all_probes_pass": all_pass,
         "overall": overall,
         "counterfactual": [counterfactual_scan(ROOT / probes_expected[p]["fixture"]) for p in present],
@@ -265,6 +281,24 @@ def _self_test() -> int:
     if gate("long", h3, d3)["supported"]:
         failures.append("I3 gate(long) should be unsupported")
 
+    # I4 transposed wide: months DOWN rows -> the macro is KNOWINGLY WRONG here.
+    # det must say 'long' (frozen wrong prediction); expected is 'unknown'.
+    h4, d4 = _read_csv(ROOT / "fixtures" / "I4.csv")
+    if det_classify(h4, d4) != "long":
+        failures.append(f"I4 det != long (got {det_classify(h4, d4)}); macro must be knowingly WRONG here")
+    hw4, dl4 = measures(h4, d4)
+    if (hw4, dl4) != (0, 12):
+        failures.append(f"I4 measures should be (hw=0, dl=12); got ({hw4}, {dl4})")
+    # The coarse verifier evidence: long IS supported (dl=12), unknown is NOT.
+    # Both are recorded as evidence; neither gates I4 (oracle grader).
+    if not gate("long", h4, d4)["supported"]:
+        failures.append("I4 gate(long) should be supported by coarse evidence (dl=12) -- recorded, not gating")
+    if gate("unknown", h4, d4)["supported"]:
+        failures.append("I4 gate(unknown) should be unsupported (dl=12) -- the evidence rule I4 falsifies")
+    # Counterfactual: det_ok must be False (macro wrong on this representation).
+    if det_classify(h4, d4) == "unknown":
+        failures.append("I4 det_classify should be long (wrong), not unknown -- do not 'fix' the macro")
+
     # Invalid label -> unsupported.
     if gate("pivoted", h1, d1)["supported"]:
         failures.append("invalid label should be unsupported")
@@ -278,7 +312,7 @@ def _self_test() -> int:
     if failures:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
         return 1
-    sys.stdout.write("SELF-TEST PASSED (I1 wide / I2 long / I3 unknown / gate support / boundary)\n")
+    sys.stdout.write("SELF-TEST PASSED (I1 wide / I2 long / I3 unknown / I4 macro-wrong-long / gate support / boundary)\n")
     return 0
 
 
@@ -295,6 +329,10 @@ if __name__ == "__main__":
             raise SystemExit(0 if r["overall"] is True else 1)
         if stage == "i1_i2":
             raise SystemExit(0 if r["i1_i2_pass"] is True else 1)
+        if stage == "i1_i2_i3":
+            raise SystemExit(0 if r["i1_i2_i3_pass"] is True else 1)
+        if stage == "i4":
+            raise SystemExit(0 if r["i4_pass"] is True else 1)
         # partial / unknown stage: do not fail the run
         raise SystemExit(0)
     sys.stderr.write("usage: gate_I.py --self-test | --grade <judgements.json>\n")
