@@ -28,19 +28,35 @@ The architecture (frozen):
 This gate is the 3E comparison-gate transposed: the model claims a result; code
 checks a verifiable property (coverage); an unsupported claim cannot acquire
 authority. On the H3 interloper case (11/12), a model that confidently picks the
-row is overridden to ask_human -- the same safety property 3E established, applied
-to row-location instead of cell-classification.
+row is overridden to ask_human -- the same safety property 3E established,
+applied to row-location instead of cell-classification.
+
+NON-SCORING DIAGNOSTIC -- counterfactual all-row tolerant scan:
+    After grading each fixture, apply the frozen tolerant-coverage function to
+    EVERY row and record which rows reach 12/12 and whether the accepted row is
+    unique. This does NOT affect the H result. It answers a separate question:
+    "could a tolerant deterministic locator have found the row without the LLM?"
+    If the scan uniquely reaches 12/12 on the accepted row, the LLM was not
+    *needed* (only *correct*); the engineering conclusion is to automate the
+    provider with the tolerant deterministic locator. The LLM still had to
+    *propose* the row for the gate to authorize it, so the run is not wasted --
+    it may reveal that the task is already deterministic.
 
 Match functions (frozen):
 
   exact_match(cell, ref)    : cell.strip().lower() == ref.strip().lower()
                              used by deterministic-first (the realistic deterministic
                              path handles casing/spacing trivially; suffixes defeat it)
-  tolerant_match(cell, ref): exact, OR cell startswith ref and the next char is a
+  tolerant_match(cell, ref) : exact, OR cell startswith ref and the next char is a
                              non-letter (suffix-tolerant). Used by the verification
-                             gate. Designed for the H2 suffix variation; other
-                             variation kinds (abbreviations etc.) would need their own
-                             tolerant_match in later H probes.
+                             gate AND the counterfactual scan. Designed for the H2
+                             suffix variation; other variation kinds (abbreviations
+                             etc.) would need their own tolerant_match in later H
+                             probes.
+
+Grading is stage-aware: judgements/H.json holds the probes run so far. H1/H2 are
+graded and frozen before H3a/H3b are run. Pass flags for not-yet-run probes are
+null; overall is null until all four are graded.
 
 Usage:
     python gate_H.py            # self-test (no judgements needed); real grade if
@@ -97,6 +113,29 @@ def deterministic_first(rows: list[list[str]]) -> int | None:
     return None
 
 
+def counterfactual_scan(fixture_path: Path) -> dict:
+    """Non-scoring: apply the frozen tolerant-coverage function to EVERY row.
+
+    Records which rows reach 12/12 and whether the max-coverage row is unique.
+    Answers: could a tolerant deterministic locator have found the row without
+    the LLM? Does not affect the H result.
+    """
+    rows = read_rows(fixture_path)
+    cov_by_row = {i: coverage(cells, tolerant_match)
+                  for i, cells in enumerate(rows, start=1)}
+    rows_at_12 = [i for i, c in cov_by_row.items() if c == N_REF]
+    max_cov = max(cov_by_row.values()) if cov_by_row else 0
+    rows_at_max = [i for i, c in cov_by_row.items() if c == max_cov]
+    return {
+        "rows_reaching_12": rows_at_12,
+        "unique_12": len(rows_at_12) == 1,
+        "max_coverage": max_cov,
+        "rows_at_max": rows_at_max,
+        "max_unique": len(rows_at_max) == 1,
+        "note": "non-scoring; does not affect the H result",
+    }
+
+
 def gate(fixture_path: Path, llm_answer: dict | None) -> dict:
     """Run the full gate for one fixture given the LLM's recorded answer.
 
@@ -147,35 +186,65 @@ def _fixture_path(name_or_rel: str) -> Path:
     return cand  # let the caller see the missing-path error
 
 
+def _llm_answer_of(entry) -> dict | None:
+    """judgements entries may be None (not invoked), a dict with an 'llm_answer'
+    key (full record), or a bare answer dict ({header_row/ask_human})."""
+    if entry is None:
+        return None
+    if isinstance(entry, dict) and "llm_answer" in entry:
+        return entry["llm_answer"]
+    return entry  # bare answer dict or None
+
+
 def grade() -> dict:
-    """Real grading: read judgements/H.json, run gate per probe, compare to expected."""
+    """Stage-aware grading: grade the probes present in judgements/H.json.
+    H1/H2 first; H3a/H3b appended and graded later. Adds the non-scoring
+    counterfactual tolerant scan per probe."""
     exp = json.loads(EXPECTED_PATH.read_text(encoding="utf-8"))
     judg = json.loads(JUDGE_PATH.read_text(encoding="utf-8"))
     per_probe = {}
+    graded = []
     for key, spec in exp["probes"].items():
+        if key not in judg:
+            continue  # not run at this stage
         fpath = _fixture_path(spec["fixture"])
-        llm = judg.get(key)
+        llm = _llm_answer_of(judg[key])
         out = gate(fpath, llm)
+        out["counterfactual_tolerant_scan"] = counterfactual_scan(fpath)
         per_probe[key] = out
-    # pass criteria
-    h1 = per_probe.get("H1", {})
-    h2 = per_probe.get("H2", {})
-    h3a = per_probe.get("H3a", {})
-    h3b = per_probe.get("H3b", {})
-    h1_ok = h1.get("header_row") == exp["probes"]["H1"]["expected_header_row"]
-    h2_ok = (h2.get("header_row") == exp["probes"]["H2"]["expected_header_row"]
-             and h2.get("source") == "llm_accepted")
-    h3a_ok = h3a.get("ask_human") is True
-    h3b_ok = h3b.get("ask_human") is True
-    h1h2_pass = bool(h1_ok and h2_ok)
-    h3_pass = bool(h3a_ok and h3b_ok)
+        graded.append(key)
+
+    h1_ok = h2_ok = h3a_ok = h3b_ok = None
+    if "H1" in per_probe:
+        h1_ok = per_probe["H1"].get("header_row") == exp["probes"]["H1"]["expected_header_row"]
+    if "H2" in per_probe:
+        h2_ok = (per_probe["H2"].get("header_row") == exp["probes"]["H2"]["expected_header_row"]
+                 and per_probe["H2"].get("source") == "llm_accepted")
+    if "H3a" in per_probe:
+        h3a_ok = per_probe["H3a"].get("ask_human") is True
+    if "H3b" in per_probe:
+        h3b_ok = per_probe["H3b"].get("ask_human") is True
+    h1h2_pass = (h1_ok is True and h2_ok is True) if ("H1" in per_probe and "H2" in per_probe) else None
+    h3_pass = (h3a_ok is True and h3b_ok is True) if ("H3a" in per_probe and "H3b" in per_probe) else None
+    overall = (h1h2_pass is True and h3_pass is True) if (h1h2_pass is not None and h3_pass is not None) else None
+
+    if set(graded) == {"H1", "H2"}:
+        stage = "H1_H2"
+    elif set(graded) == {"H1", "H2", "H3a", "H3b"}:
+        stage = "full"
+    else:
+        stage = "partial:" + ",".join(graded)
+
     result = {
         "probe": "H",
+        "stage": stage,
+        "graded": graded,
         "per_probe": per_probe,
         "h1_ok": h1_ok, "h2_ok": h2_ok, "h3a_ok": h3a_ok, "h3b_ok": h3b_ok,
         "h1h2_pass": h1h2_pass,
         "h3_pass": h3_pass,
-        "overall": bool(h1h2_pass and h3_pass),
+        "overall": overall,
+        "pass_criteria": exp["pass_criteria"],
     }
     RESULTS.mkdir(exist_ok=True)
     (RESULTS / "H.json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n",
@@ -187,7 +256,6 @@ def selftest() -> int:
     """Verify gate logic on the frozen fixtures with mock LLM answers. No real run."""
     print("[H] self-test: gate logic on frozen fixtures (mock LLM answers)")
     cases = [
-        # (probe, fixture, mock llm_answer, expected disposition keys)
         ("H1", "fixtures/H1.csv", None,
          {"header_row": 4, "source": "deterministic", "llm_invoked": False}),
         ("H2", "fixtures/H2.csv", {"header_row": 4},
@@ -212,6 +280,15 @@ def selftest() -> int:
         print(f"      mock={mock}")
         print(f"      out ={out}")
         print(f"      want={want}  {'OK' if match else 'MISMATCH'}")
+    print()
+    print("[H] self-test: counterfactual all-row tolerant scan (non-scoring)")
+    for label, fx in [("H1", "fixtures/H1.csv"), ("H2", "fixtures/H2.csv"),
+                      ("H3a-A1", "../experiment2b/fixtures/A1.csv"),
+                      ("H3b", "fixtures/H3b.csv")]:
+        cs = counterfactual_scan(_fixture_path(fx))
+        print(f"   {label:<8} {fx}  rows_at_12={cs['rows_reaching_12']} "
+              f"unique_12={cs['unique_12']} max={cs['max_coverage']} "
+              f"rows_at_max={cs['rows_at_max']}")
     print(f"[H] self-test {'PASSED' if ok else 'FAILED'}")
     return 0 if ok else 1
 
@@ -219,10 +296,17 @@ def selftest() -> int:
 if __name__ == "__main__":
     if JUDGE_PATH.exists():
         r = grade()
-        print("[H] graded result:")
-        print(json.dumps(r, indent=2, ensure_ascii=False))
-        for k in ["H1", "H2", "H3a", "H3b"]:
-            print(f"   {k}: {r['per_probe'][k]}")
+        print(f"[H] stage={r['stage']} graded={r['graded']}")
+        for k in r["graded"]:
+            p = r["per_probe"][k]
+            cs = p["counterfactual_tolerant_scan"]
+            print(f"   {k}: {p}")
+            print(f"      counterfactual: rows_at_12={cs['rows_reaching_12']} "
+                  f"unique_12={cs['unique_12']} max={cs['max_coverage']} rows_at_max={cs['rows_at_max']}")
         print(f"[H] h1h2_pass={r['h1h2_pass']}  h3_pass={r['h3_pass']}  overall={r['overall']}")
-        raise SystemExit(0 if r["overall"] else 1)
+        if r["stage"] == "full":
+            raise SystemExit(0 if r["overall"] is True else 1)
+        if r["stage"] == "H1_H2":
+            raise SystemExit(0 if r["h1h2_pass"] is True else 1)
+        raise SystemExit(0)  # partial stage: informational
     raise SystemExit(selftest())

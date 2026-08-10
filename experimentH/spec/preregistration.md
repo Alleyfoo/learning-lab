@@ -80,6 +80,53 @@ final gated output: {"header_row": r, "source": ...} or {"ask_human": true}
 No LLM participates in the deterministic-first scan or the verification gate.
 The gate is ordinary code in `harness/gate_H.py`.
 
+## Non-scoring diagnostic — counterfactual all-row tolerant scan
+
+> If the deterministic tolerant-coverage gate can compute "12/12" for an
+> arbitrary row, it could presumably scan every row itself.
+
+After grading each fixture, apply the frozen `tolerant_match` coverage function
+to **every row** and record:
+
+- the rows reaching 12/12
+- whether the max-coverage row is unique
+
+This diagnostic **does not affect the H result.** It answers a separate
+question: *could a tolerant deterministic locator have found the row without the
+LLM?* Two outcomes, both useful:
+
+- If the scan uniquely reaches 12/12 on the accepted row → the LLM was
+  **correct, but not needed**. The engineering conclusion is to automate the
+  provider with the tolerant deterministic locator. The LLM still had to
+  *propose* the row for the gate to authorize it, so the run is not wasted — it
+  taught us the task is already deterministic.
+- If the scan produces several candidate rows (or none) while the LLM correctly
+  identifies the header → the LLM adds genuine discriminatory value that the
+  deterministic locator lacks.
+
+Either result is informative. The diagnostic is recorded per probe in
+`results/H.json` under `counterfactual_tolerant_scan`. It never changes `h*_ok`
+or the pass flags.
+
+## What H2 does and does not establish (stated before the run)
+
+H2 requires `source == llm_accepted` for `h2_ok` — the LLM must **propose** the
+row and the gate must **authorize** it. That establishes:
+
+> The LLM can propose the correct row, and deterministic evidence can authorize
+> that proposal.
+
+It does **not** establish:
+
+> The LLM was needed to find the row.
+
+Whether the LLM was needed is decided by the counterfactual scan above. If H2's
+accepted row is uniquely 12/12 under the tolerant scan, the honest reading is:
+the LLM works, but the provider's monthly workflow can be automated with the
+tolerant deterministic locator. That is a successful outcome of the experiment,
+not a failure — the agent helped discover that the task is already
+deterministic.
+
 ## Why deterministic-first is a positive control, not an aside
 
 If a row contains all 12 reference strings exactly, we do not need the LLM. The
@@ -188,6 +235,13 @@ LLM never earned its keep — that is a `FAIL_h2_deterministic_solved`, not a pa
 | H3 passes, H1/H2 fail | **FAIL — locator broken.** Safety gate works but the LLM cannot find clean/dirty rows, or deterministic-first routing is wrong. |
 | H2 `source==deterministic` | **FAIL — H2 too easy.** Deterministic-first solved the suffix case; LLM never invoked; fixture or `exact_match` too loose. |
 | nothing | **FAIL — architecture mis-designed.** Inspect per-probe gate outputs. |
+
+The counterfactual tolerant scan is recorded alongside every probe and is
+**non-scoring**. A PASS with H2's accepted row uniquely 12/12 under the tolerant
+scan reads as: the locator+gate works, *and* the provider can likely be
+automated deterministically (delete the LLM). A PASS with the tolerant scan
+ambiguous (multiple candidate rows) reads as: the LLM adds genuine
+discriminatory value. Both are useful; the scan decides which.
 
 ## Hard stop — scope ruling for the H line (carried from 3A–3E, with a ruling)
 
