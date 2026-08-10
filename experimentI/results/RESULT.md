@@ -307,6 +307,17 @@ The oracle grader is what makes I4 fair.
 - **n=1, no seed control.** GLM said `wide` once. It may say `unknown` on
   another sample; reliability is unmeasured. This is a single existence sample
   of the failure, not a frequency.
+- **The I3-vs-I4 contrast is an observation, not an isolated mechanism.** GLM
+  said `unknown` on I3 (no month tokens anywhere) and `wide` on I4 (month
+  tokens present, down a column). That contrast is *consistent with* the
+  hypothesis that I3's `unknown` was token-absence-driven rather than
+  structure-driven — but with one run on each probe and no controlled contrast
+  (unlike 3C's 2×2), the mechanism is **not established**. I4 makes the
+  hypothesis plausible; it does not isolate it. I5 (contrastive prototypes)
+  bears on this: if prototypes flip I4 to `unknown`, the original contract
+  was underspecified; if not, a contextual-classification limitation is more
+  likely. Either way the token-absence reading stays a hypothesis until a
+  controlled probe isolates it.
 - **No candidate rule v2 is extracted.** The macro-saver lifecycle's
   interesting example requires the *agent* to solve the instance the macro
   cannot; here the agent also failed, so there is no successful judgement to

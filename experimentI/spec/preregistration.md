@@ -284,3 +284,97 @@ I4 is still classification only. No unpivot/reshape/transformation, no
 production architecture, no macro-v2 implementation (a candidate v2 rule may
 be *noted* in the result as material, but it is not built or run). The
 deterministic classifier is left unchanged on purpose.
+
+---
+
+# AMENDMENT 2 — I5 (contrastive prototypes), added before the I5 run
+
+**Status: FROZEN before the I5 run.** I4 ran and FAILED (`cd91bd4`): the macro
+said `long` (wrong, frozen), GLM said `wide` (also wrong) — neither said
+`unknown`. I5 is the designer's contrastive probe to isolate *why* GLM failed:
+**contract underspecification** vs **genuine contextual-classification limit**.
+
+## The probe — only the contract changes
+
+I5 uses the **same frozen I4 fixture** (`fixtures/I4.csv`, unchanged), the
+**same three labels** (`wide`/`long`/`unknown`), and the **same expected
+label** (`unknown`). The deterministic classifier is **unchanged** — it still
+says `long` on this fixture (`det_classify=long`, wrong). The grader is the
+same oracle (verifier suspended; `dl=12` is evidence, not long-support).
+
+The **only** change from I4 is the LLM contract: instead of word definitions,
+the prompt first shows two category prototypes, then the target, then asks for
+the label with "Use unknown if it matches neither supplied representation."
+
+```text
+WIDE example
+Product | Jan | Feb | Mar
+A       | 10  | 12  | 8
+B       | 7   | 9   | 11
+
+LONG example
+Product | Month | Sales
+A       | Jan   | 10
+A       | Feb   | 12
+B       | Jan   | 7
+
+[then the unchanged I4 fixture, in its standard ROW N rendering]
+
+Classify the monthly representation as: wide / long / unknown.
+Use unknown if it matches neither supplied representation.
+Output ONLY {"format": ...}.
+```
+
+Crucially: do **not** name "transposed wide," and do **not** give a rule like
+"long requires one row per product-month." Let the examples establish the
+distinction. That is the whole point — testing whether canonical examples
+carry the category boundary that three words did not.
+
+## Frozen expectations
+
+```text
+det_classify(I5) = long    (UNCHANGED, WRONG; same fixture as I4)
+expected(I5)     = unknown
+grader           = oracle  (i_pass = llm_label == unknown; verifier suspended)
+```
+
+## The clean branch
+
+```text
+I4 (word contract)        -> wide     (observed, cd91bd4)
+I5 (prototype contract)   -> ?        (this run)
+```
+
+- **I5 → `unknown`**: GLM *can* distinguish canonical long from transposed-wide
+  structure when given prototypes. The I4 failure was **contract
+  underspecification**, not a capability limit. Practical upshot for the skill
+  idea: the skill may need a couple of canonical examples, not pages of
+  instructions. (Caveat: the prototypes are English, the target is Finnish —
+  see limitations — so a fully clean follow-up would use matched-language
+  prototypes.)
+- **I5 → `wide` (or `long`)**: even with prototypes GLM does not distinguish.
+  Stronger evidence of a **genuine contextual-classification limitation**
+  rather than mere contract ambiguity.
+
+Either outcome is informative and recorded as-is; pass criteria are not
+relaxed.
+
+## What I5 does NOT establish
+
+- **n=1, no seed control.** A single I5 sample. If I5→`unknown`, it is one
+  sample of the prototypes working; reliability unmeasured.
+- **The I3-mechanism hypothesis stays a hypothesis.** I4 made "I3's `unknown`
+  was token-absence-driven" plausible (I3 had no month tokens; I4 had them
+  down a column and GLM said `wide`). But one run on each, no controlled
+  contrast (unlike 3C's 2×2) — not isolated. I5 bears on it indirectly but does
+  not isolate it.
+- **Cross-language caveat.** Prototypes are English (`Product/Month/Sales`,
+  `Jan/Feb/Mar`); the target is Finnish (`Kuukausi`, `Tammi..`). Deliberate:
+  the prototypes are generic category illustrations and the cross-language
+  match tests structural (not lexical) generalization. But it is a stated
+  caveat on the inference; a matched-language follow-up would be cleaner.
+
+## Hard stop — still honored
+
+I5 is classification only. No transformation, no macro-v2 implementation, no
+fourth label. The deterministic classifier is left unchanged on purpose.

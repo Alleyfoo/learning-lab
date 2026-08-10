@@ -187,7 +187,7 @@ def grade(judgements_path: Path) -> dict:
     probes_expected = expected["per_probe"]
     grader_map = expected.get("grader_per_probe", {})
 
-    present = [p for p in ("I1", "I2", "I3", "I4") if p in judgements]
+    present = [p for p in ("I1", "I2", "I3", "I4", "I5") if p in judgements]
     per_probe = {}
     for p in present:
         j = judgements[p]
@@ -223,6 +223,7 @@ def grade(judgements_path: Path) -> dict:
     i1_i2_i3 = (all(p in per_probe for p in ("I1", "I2", "I3"))
                 and all(per_probe[p]["i_pass"] for p in ("I1", "I2", "I3")))
     i4 = ("I4" in per_probe and per_probe["I4"]["i_pass"])
+    i5 = ("I5" in per_probe and per_probe["I5"]["i_pass"])
     overall = all_pass  # all present probes pass
 
     stage = judgements.get("stage", "partial")
@@ -234,6 +235,7 @@ def grade(judgements_path: Path) -> dict:
         "i1_i2_pass": i1_i2,
         "i1_i2_i3_pass": i1_i2_i3,
         "i4_pass": i4,
+        "i5_pass": i5,
         "all_probes_pass": all_pass,
         "overall": overall,
         "counterfactual": [counterfactual_scan(ROOT / probes_expected[p]["fixture"]) for p in present],
@@ -333,6 +335,8 @@ if __name__ == "__main__":
             raise SystemExit(0 if r["i1_i2_i3_pass"] is True else 1)
         if stage == "i4":
             raise SystemExit(0 if r["i4_pass"] is True else 1)
+        if stage == "i5":
+            raise SystemExit(0 if r["i5_pass"] is True else 1)
         # partial / unknown stage: do not fail the run
         raise SystemExit(0)
     sys.stderr.write("usage: gate_I.py --self-test | --grade <judgements.json>\n")
