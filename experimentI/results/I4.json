@@ -1,0 +1,26 @@
+{
+  "probe": "I4",
+  "stage": "i4",
+  "result": "FAIL",
+  "i4_pass": false,
+  "overall": false,
+  "per_probe": {
+    "I4": {
+      "expected": "unknown",
+      "llm_label": "wide",
+      "det_classify": "long",
+      "hw": 0,
+      "dl": 12,
+      "supported": false,
+      "grader": "oracle",
+      "i_pass": false,
+      "det_ok": false,
+      "read": "macro said long (wrong, frozen); GLM said wide (also wrong, differently); neither said unknown. GLM's wide is unsupported too (hw=0, no months in header)."
+    }
+  },
+  "counterfactual": [
+    {"fixture": "fixtures/I4.csv", "det_classify": "long", "hw": 0, "dl": 12, "K_w": 3, "K_l": 3}
+  ],
+  "summary": "I4 FAILS as run: GLM did not catch the structural difference. The saved macro v1 is wrong on transposed wide (said long, as frozen-predicted); GLM said wide -- it reverted to generic pivot-shape classification (values across columns -> wide), the failure mode it avoided on I3's quarterly case. Neither returned unknown. The dl>=3 -> long evidence rule is falsified as a general long-test (dl=12 here, correct label unknown). Recorded as-is; pass criteria not relaxed. n=1, no seed control.",
+  "i1_i2_i3_frozen": "The 3-probe I1/I2/I3 PASS at f3c3a9a is NOT retroactively changed; I4 is graded separately (stage i4)."
+}

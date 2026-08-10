@@ -1,0 +1,19 @@
+{
+  "probe": "I4",
+  "stage": "i4",
+  "classifier_model": "glm-5.2:cloud",
+  "contract": "wide/long/unknown monthly-representation classification (same contract as I1/I2/I3); output only JSON {\"format\": ...}",
+  "fixture": "fixtures/I4.csv",
+  "description": "transposed monthly table: months DOWN rows (Kuukausi col), products ACROSS columns; a transposed wide representation, not canonical long",
+  "frozen_predictions": {
+    "det_classify": "long",
+    "det_classify_note": "FROZEN WRONG: dl=12 (months down a data column) triggers dl>=3 -> long. Left unchanged; the whole point of I4.",
+    "expected": "unknown"
+  },
+  "I4": {
+    "llm_invoked": true,
+    "raw_output": "{\"format\": \"wide\"}",
+    "llm_answer": {"format": "wide"},
+    "note": "GLM returned wide, NOT unknown. It did not catch the structural difference (months down rows + several product columns is not canonical long, and months are not across columns so it is not canonical wide either). On I3 (quarterly, products across columns) GLM correctly returned unknown; on I4 it reverted to classifying generic pivot shape (values spread across columns -> wide). The saved macro said long (wrong); GLM said wide (also wrong, differently). Neither returned unknown. Recorded as-is; pass criteria not relaxed."
+  }
+}

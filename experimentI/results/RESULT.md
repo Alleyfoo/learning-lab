@@ -223,3 +223,119 @@ verifier-not-authority design matters (the gate will not force the heuristic's
 `long` over the model's judgement) and where the LLM would genuinely earn its
 keep. It needs its own preregistration freeze before any run. Not authorized
 here.
+
+---
+
+# AMENDMENT — I4 result (transposed monthly table): FAIL
+
+**I4 FAILS as run.** GLM did not catch the structural difference. This is the
+first probe where the saved macro was allowed to be wrong — and on this single
+sample the agent did not rescue it.
+
+```text
+                     macro (v1)     GLM          expected
+I4 transposed wide    long (WRONG)   wide (WRONG)  unknown
+```
+
+The frozen predictions held exactly: `det_classify(I4) = long` (wrong,
+unchanged on purpose), `expected = unknown`. GLM returned `{"format": "wide"}`,
+not `unknown`.
+
+## What happened
+
+- **The saved macro said `long`** — wrong, as frozen-predicted. `dl = 12`
+  (months down the `Kuukausi` data column) triggers `dl≥3 → long`. This is the
+  macro's known blind spot: it confuses *month orientation* (months down a
+  column) with *table grain/shape* (canonical long is `Product | Month | Sales`,
+  one row per product-month — not months down a label column with several
+  product columns across).
+- **GLM said `wide`** — also wrong, and wrong *differently*. It reverted to
+  generic pivot-shape classification ("values spread across columns → wide").
+  This is precisely the failure mode GLM *avoided* on I3, where it correctly
+  returned `unknown` on a quarterly table with products across columns. On I4
+  it did not hold the line: it saw products across columns and said `wide`,
+  even though the months are not across the header (`hw = 0`).
+- **Neither said `unknown`.** The macro-saver lifecycle did **not** get its
+  happy example on this sample: the agent did not catch the case the saved
+  macro cannot handle. No candidate rule v2 emerges from a run where the agent
+  was also wrong.
+
+## The verifier, and what I4 falsifies
+
+GLM's `wide` claim is `supported = false` under the verifier (`hw = 0 < 3` —
+no months in the header). So GLM's answer fails **both** graders: the oracle
+(`wide ≠ unknown`) *and* the verifier (`wide` unsupported). It is not a case of
+the LLM being right for contextual reasons the heuristic cannot check; it is a
+case of the LLM being wrong, and ungrounded.
+
+The frozen `dl≥3 → long` evidence rule is **falsified as a general long-test**:
+`dl = 12` here, yet the correct label is `unknown`, not `long`. "Month tokens
+down one column" is not sufficient evidence for long format. This was the
+explicit purpose of I4, and the falsification is now demonstrated — by the
+macro being wrong, not by the LLM being right.
+
+## Grader (frozen, oracle for I4)
+
+```text
+i_pass(I4) = (llm_label == unknown)             # oracle; verifier suspended
+           = (wide == unknown) = false           # FAIL
+det_ok(I4) = (det_classify == unknown) = false   # counterfactual MISS (the point)
+supported(I4, wide)    = (hw >= 3) = false       # GLM's claim ungrounded
+supported(I4, long)    = (dl >= 3) = true        # recorded; NOT gating; the falsified rule
+supported(I4, unknown) = (hw<3 and dl<3) = false  # the verifier would reject the RIGHT answer
+```
+
+The verifier is suspended for I4 exactly because `supported(unknown) = false`
+here: the coarse evidence rule would reject the correct answer. Letting it
+gate would mark the LLM's correct `unknown` (had it given one) as unsupported.
+The oracle grader is what makes I4 fair.
+
+## What this establishes
+
+- **The saved macro v1 is wrong on transposed wide** (says `long`), as
+  frozen-predicted. `dl≥3 → long` is insufficient: month orientation ≠ table
+  grain. This is now demonstrated, not just asserted.
+- **On this single sample, GLM did not catch it.** It said `wide`, reverting to
+  generic pivot-shape classification — the failure mode it avoided on I3. So
+  GLM does not *reliably* distinguish transposed wide from wide/long on n=1.
+- **I4 is an informative FAIL**, recorded as-is. Pass criteria were not
+  relaxed. The 3-probe I1/I2/I3 PASS (`f3c3a9a`) is **not** retroactively
+  changed — I4 is graded separately (stage `i4`, `judgements/I4.json`).
+
+## What this does NOT establish
+
+- **n=1, no seed control.** GLM said `wide` once. It may say `unknown` on
+  another sample; reliability is unmeasured. This is a single existence sample
+  of the failure, not a frequency.
+- **No candidate rule v2 is extracted.** The macro-saver lifecycle's
+  interesting example requires the *agent* to solve the instance the macro
+  cannot; here the agent also failed, so there is no successful judgement to
+  distil into a v2 rule. A v2 rule (distinguish "months down a single label
+  column with one value column" = long, from "months down a label column with
+  several entity columns" = transposed wide / unknown) can be *designed* from
+  the structural definition, but it is not *discovered* from this run.
+- **Not** a production architecture; classification only; hard stop honored.
+
+## Where this points (not a commitment, not authorization)
+
+The macro-discovery question is now sharper. I4 showed the macro v1 is wrong
+on transposed wide — but the agent did not, on this single sample, provide the
+correct judgement to learn from. Candidate next probes (each needs its own
+freeze):
+
+1. **Re-run I4 across samples / seeds** — does GLM ever say `unknown` here?
+   n=1 so far; reliability of the contextual judgement is the open question.
+2. **A prompted/contextual I4 variant** — give the agent the canonical long
+   definition explicitly contrasted with transposed wide, and see whether it
+   then returns `unknown`. This tests whether the failure is a capability gap
+   or a contract-clarity gap.
+3. **Design macro v2 by hand** (not discovered) — encode "months down a label
+   column with several entity columns → unknown", and verify it classifies
+   I1–I4 correctly. This would be the deterministic-first path catching up to
+   the structural distinction, by design rather than discovery.
+
+The honest summary: I4 is the first probe where the saved macro is wrong, and
+on this single run the agent was wrong too — so the macro was not improved by
+the agent this time. The `dl≥3 → long` rule is falsified; what is *not*
+established is that the agent can reliably supply the judgement the macro
+lacks. That is the reliability question, now foregrounded.
