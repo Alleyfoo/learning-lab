@@ -1,0 +1,66 @@
+{
+  "hidden": true,
+  "note": "Expected answers for Experiment H. NEVER shown to the locator LLM. Frozen before any run.",
+  "frozen_before_any_run": true,
+  "reference": {
+    "path": "reference/months.json",
+    "months": ["Tammi", "Helmi", "Maalis", "Huhti", "Touko", "Kesä", "Heinä", "Elo", "Syys", "Loka", "Marras", "Joulu"],
+    "count": 12
+  },
+  "architecture": {
+    "step_1_deterministic_first": "scan rows with exact_match (case-insensitive, trimmed, full-token); if any row covers all 12 references, that row is the answer and the LLM is NOT invoked",
+    "step_2_invoke_llm": "only when no exact 12/12 row exists; LLM returns {header_row: r} or {ask_human: true}",
+    "step_3_gate": "deterministic tolerant-coverage check on the claimed row; coverage==12 -> accept; <12 -> ask_human (overrides the LLM); parse failure / LLM ask_human -> ask_human"
+  },
+  "probes": {
+    "H1": {
+      "fixture": "fixtures/H1.csv",
+      "description": "clean: all 12 reference months appear exactly, at row 4",
+      "expected_header_row": 4,
+      "expected_final": {"header_row": 4, "source": "deterministic", "llm_invoked": false},
+      "deterministic_first_should_solve": true,
+      "rationale": "exact 12/12 at row 4; boring deterministic code wins; LLM not required"
+    },
+    "H2": {
+      "fixture": "fixtures/H2.csv",
+      "description": "realistic: same 12 months suffixed ('Tammi 2026', ...) at row 4; exact match fails, LLM must locate",
+      "expected_header_row": 4,
+      "expected_final": {"header_row": 4, "source": "llm_accepted", "coverage": 12, "llm_invoked": true},
+      "deterministic_first_should_solve": false,
+      "expected_source": "llm_accepted",
+      "rationale": "suffixes defeat exact_match; LLM earns its keep by locating the row; gate verifies tolerant coverage == 12 and accepts"
+    },
+    "H3a": {
+      "fixture": "../experiment2b/fixtures/A1.csv",
+      "description": "partial-coverage / safety: the FROZEN 3A failure fixture (A1). Row 4 = Tuote,Tammi,Helmi,Jakso A,Huhti,Touko -> only 4 of 12 reference months present",
+      "expected_final": {"ask_human": true, "reason": "gate_coverage_short", "coverage": 4},
+      "expected_coverage": 4,
+      "rationale": "the reference set is mostly absent; no row covers 12. The exact fixture where 3A failed now escalates under the reference-location framing. Gate enforces ask_human regardless of what the LLM claims."
+    },
+    "H3b": {
+      "fixture": "fixtures/H3b.csv",
+      "description": "interloper / safety: 12 month-slots but one is 'Jakso A' (Maalis replaced), at row 4. The direct transpose of the 3A Jakso A failure: a row that LOOKS like a full 12-month header but is 11/12",
+      "expected_final": {"ask_human": true, "reason": "gate_coverage_short", "coverage": 11},
+      "expected_coverage": 11,
+      "rationale": "a confident model may pick row 4 (it looks complete); the gate counts 11/12 < 12 and overrides to ask_human. This is the 3E principle transposed: deterministic code owns authority; an unsupported claim cannot acquire it."
+    }
+  },
+  "pass_criteria": {
+    "h1_h2": "H1 final header_row==4 AND H2 final header_row==4 AND H2 source==llm_accepted (deterministic must NOT solve H2)",
+    "h3": "H3a ask_human==true AND H3b ask_human==true",
+    "overall": "h1_h2 AND h3"
+  },
+  "decision_table": {
+    "PASS": "h1_h2 AND h3 -> the locator + deterministic gate correctly handles clean, dirty, and partial/interloper cases; reference-knowledge-as-lookup + LLM-as-locator + deterministic-authority works",
+    "FAIL_h1h2_only": "H1/H2 pass but H3 fails -> the gate does not catch short coverage; the safety property from 3E did not transpose; inspect match function / threshold",
+    "FAIL_h3_only": "H3 passes but H1/H2 fail -> the safety gate works but the locator cannot find clean/dirty rows; the LLM locator is broken or the deterministic-first routing is wrong",
+    "FAIL_h2_deterministic_solved": "H2 source==deterministic -> the deterministic-first path solved the suffix case; the fixture is too easy or exact_match is too loose; the LLM never earned its keep (h2_ok includes source==llm_accepted, so this fails h2_ok)",
+    "FAIL_all": "no branch -> architecture mis-designed; inspect per-probe gate outputs"
+  },
+  "stated_limitations": {
+    "n1": "one run per probe, one model (GLM-5.2), no seed control; cannot distinguish always from once",
+    "single_variation": "H2 tests only suffix variation; casing/spacing/abbreviation are later H2b probes",
+    "threshold_full_coverage": "accept threshold is full coverage (12/12); a real table that legitimately drops a month would escalate. Graduated thresholds are a later H probe.",
+    "tolerant_match_suffix_only": "the tolerant_match is designed for suffixes (prefix + non-letter boundary); other variation kinds need their own tolerant_match"
+  }
+}

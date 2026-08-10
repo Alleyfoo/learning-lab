@@ -1,0 +1,8 @@
+{
+  "description": "Frozen reference month vocabulary for Experiment H. This is the 'world' handed to the locator agent. NOT inferred — supplied. The locator's job is to find where these appear in a source, not to decide what months are.",
+  "locale": "fi-FI",
+  "form": "short (abbreviated) Finnish month names",
+  "months": ["Tammi", "Helmi", "Maalis", "Huhti", "Touko", "Kesä", "Heinä", "Elo", "Syys", "Loka", "Marras", "Joulu"],
+  "count": 12,
+  "frozen_before_any_run": true
+}
