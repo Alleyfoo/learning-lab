@@ -1,0 +1,13 @@
+{
+  "probe": "3B.1",
+  "description": "Evidence-burden reviewer, same GLM (agent tool, general-purpose), three isolated propositions with identical A1 context. Fresh context per proposition (structural independence).",
+  "reviewer_model": "glm-5.2:cloud (same as 3A orchestrator/specialists)",
+  "contract": "evidence-burden (verbatim from experiment designer): 'Your task is not to decide which classification seems most plausible. Your task is to determine whether the supplied evidence establishes the proposed classification. Return SUPPORTED only when the evidence positively supports the claim. The absence of evidence that a header is a month is not evidence that it is not a month. If the evidence permits both the proposal and a materially different interpretation, return INSUFFICIENT_EVIDENCE.'",
+  "fixture": {"path": "../experiment2b/fixtures/A1.csv", "sha256": "64356f3ac01b2e5a29060cc465d6b966daea1e02bac84450425851e0383472df", "header_row": 4},
+  "source_context": "A1 rendered rows (identical for all three propositions)",
+  "propositions": [
+    {"id": "C1", "column": 2, "cell": "Tammi",   "proposed": "month",     "raw_output": "{\"warrant\": \"supported\"}", "warrant": "supported"},
+    {"id": "C2", "column": 1, "cell": "Tuote",   "proposed": "not_month", "raw_output": "{\"warrant\": \"supported\"}", "warrant": "supported"},
+    {"id": "T",  "column": 4, "cell": "Jakso A", "proposed": "not_month", "raw_output": "{\"warrant\": \"supported\"}", "warrant": "supported"}
+  ]
+}
