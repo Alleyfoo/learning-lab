@@ -1,0 +1,29 @@
+{
+  "probe": "3C",
+  "reviewer": {
+    "model": "glm-5.2:cloud",
+    "contract": "evidence-burden (3B.1 verbatim)"
+  },
+  "pattern": {
+    "F1": "supported",
+    "F2": "insufficient_evidence",
+    "M1": "insufficient_evidence",
+    "M2": "supported"
+  },
+  "all_parse_ok": true,
+  "anchor": "blind_spot_reproduced",
+  "anchor_note": "F1 = supported: the 3B.1 blind spot reproduced on a fresh run. Mechanism axes are grounded.",
+  "primary": "directional_prior",
+  "secondary": "lexical_origin",
+  "m2_corroboration": "masking_inverts_to_month_default",
+  "combined_mechanism": "directional_prior + lexical_origin",
+  "diagnostic": true,
+  "per_cond_normative_ok": {
+    "F1": false,
+    "F2": true,
+    "M1": true,
+    "M2": false
+  },
+  "normative_all_insufficient": false,
+  "pass_criterion": "diagnostic: F1=supported (blind spot reproduced) so primary x secondary mechanism is grounded"
+}

@@ -1,0 +1,14 @@
+{
+  "probe": "3C",
+  "description": "Proposal-direction x evidence probe. GLM-5.2 evidence-burden reviewer (3B.1 clean arm), four isolated conditions, fresh context each (structural independence). Same contract as 3B.1; only proposal direction (not_month/month) and evidence masking (full/[TARGET]) vary.",
+  "reviewer_model": "glm-5.2:cloud",
+  "contract": "evidence-burden (verbatim from 3B.1)",
+  "fixture": {"path": "../experiment2b/fixtures/A1.csv", "sha256": "64356f3ac01b2e5a29060cc465d6b966daea1e02bac84450425851e0383472df", "header_row": 4},
+  "masking": "Full = A1 rendered rows verbatim. Masked = full with one substitution: row 4 col 4 'Jakso A' -> '[TARGET]'. All other cells (incl. data values 9, 14 under col 4) preserved.",
+  "conditions": [
+    {"id": "F1", "evidence": "full",   "target_cell": "Jakso A",  "proposal": "not_month", "raw_output": "{\"warrant\": \"supported\"}",              "warrant": "supported"},
+    {"id": "F2", "evidence": "full",   "target_cell": "Jakso A",  "proposal": "month",     "raw_output": "{\"warrant\": \"insufficient_evidence\"}", "warrant": "insufficient_evidence"},
+    {"id": "M1", "evidence": "masked", "target_cell": "[TARGET]", "proposal": "not_month", "raw_output": "{\"warrant\": \"insufficient_evidence\"}", "warrant": "insufficient_evidence"},
+    {"id": "M2", "evidence": "masked", "target_cell": "[TARGET]", "proposal": "month",     "raw_output": "{\"warrant\": \"supported\"}",              "warrant": "supported"}
+  ]
+}
