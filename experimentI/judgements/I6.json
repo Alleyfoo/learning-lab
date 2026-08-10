@@ -1,0 +1,20 @@
+{
+  "probe": "I6",
+  "stage": "i6",
+  "classifier_model": "glm-5.2:cloud",
+  "contract": "matched-language contrastive: two Finnish category prototypes (WIDE + LONG) shown first, then the target, 'Use unknown if it matches neither supplied representation.' Same labels, JSON output only. ONLY change from I5 is prototype language (English -> Finnish).",
+  "fixture": "fixtures/I4.csv (frozen, reused by path; unchanged from I4/I5)",
+  "description": "matched-language I5: removes the cross-language confound (English prototypes -> Finnish, matching the target)",
+  "frozen_predictions": {
+    "det_classify": "long",
+    "det_classify_note": "UNCHANGED: dl=12 -> long. Wrong; left unchanged on purpose across I4/I5/I6.",
+    "expected": "unknown",
+    "grader": "oracle"
+  },
+  "I6": {
+    "llm_invoked": true,
+    "raw_output": "{\"format\": \"wide\"}",
+    "llm_answer": {"format": "wide"},
+    "note": "GLM returned wide, NOT unknown -- the SAME label as I4 (word defs) and I5 (English prototypes), now with matched-language Finnish prototypes. The cross-language confound is RULED OUT. Per the frozen decision table, the boundary is LOCATED: GLM's intuitive wide/long classification is not reliable for transposed monthly layouts. GLM again keyed on column-spread (products across -> wide), not the canonical-structure match (neither prototype matches -> unknown), despite the prototypes now being in the target's own vocabulary (Kuukausi column + one Myynti value column = long; the target has Kuukausi + several ART columns = not long). Recorded as-is; pass criteria not relaxed. n=1, no seed control. Per designer: STOP tightening after this (no seed sweep, no further probes); hand-designing macro v2 by human review is now legitimate."
+  }
+}

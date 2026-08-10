@@ -1,0 +1,36 @@
+{
+  "probe": "I6",
+  "stage": "i6",
+  "result": "FAIL (boundary located)",
+  "i6_pass": false,
+  "overall": false,
+  "per_probe": {
+    "I6": {
+      "expected": "unknown",
+      "llm_label": "wide",
+      "det_classify": "long",
+      "hw": 0,
+      "dl": 12,
+      "supported": false,
+      "grader": "oracle",
+      "i_pass": false,
+      "det_ok": false,
+      "read": "matched-language Finnish prototypes; GLM still said wide. Cross-language confound ruled out."
+    }
+  },
+  "counterfactual": [
+    {"fixture": "fixtures/I4.csv", "det_classify": "long", "hw": 0, "dl": 12, "K_w": 3, "K_l": 3}
+  ],
+  "i4_i5_i6_sequence": {
+    "I4_word_definitions": "wide",
+    "I5_english_prototypes": "wide",
+    "I6_finnish_prototypes": "wide",
+    "interpretation": "Three contracts tried (word definitions; English canonical prototypes; matched-language Finnish prototypes). GLM said wide on all three. The cross-language confound (I5's last caveat) is ruled out. Per the frozen decision table and the designer's stop rule: the boundary is LOCATED -- GLM's intuitive wide/long classification is not reliable for transposed monthly layouts."
+  },
+  "summary": "I6 FAILS as run: GLM said wide with matched-language Finnish prototypes, the same as I4 and I5. The cross-language explanation is ruled out. Boundary located: GLM's intuitive wide/long classification is not reliable for transposed monthly layouts (n=1 across I4/I5/I6, no seed control). Per the designer's stop rule, tightening stops here -- no seed sweep, no further probes on this fixture. The deterministic macro v1 (dl>=3 -> long) is falsified; a hand-designed v2 (months down a label column with several entity columns -> unknown) by human review is now the legitimate next step (separate freeze, not this run).",
+  "caveats": [
+    "n=1 on each of I4/I5/I6, no seed control: existence of the failure, not frequency. The boundary is located on three single samples, not a frequency measurement.",
+    "The I3-mechanism hypothesis (token-absence-driven) stays a hypothesis; not isolated by these probes.",
+    "Classification only; hard stop honored; no fourth label; no transformation."
+  ]
+}

@@ -456,3 +456,139 @@ neither produces the `unknown` the contract expects. The `dl≥3 → long` rule
 is falsified, and the agent did not supply the judgement to replace it. The
 reliability question — and whether a matched-language or rule-naming contract
 changes this — remains open.
+
+---
+
+# AMENDMENT 4 — I6 result (matched-language Finnish prototypes): FAIL — boundary located
+
+**I6 FAILS as run, and this locates the boundary.** GLM said `wide` with
+matched-language Finnish prototypes — the same label as I4 (word definitions)
+and I5 (English prototypes). The cross-language confound, I5's last stated
+caveat, is **ruled out**.
+
+```text
+                       contract                   GLM       expected
+I4  word definitions    (no prototypes)            wide      unknown   (FAIL)
+I5  English prototypes  (Product/Month/Sales)      wide      unknown   (FAIL)
+I6  Finnish prototypes  (Tuote/Kuukausi/Myynti)    wide      unknown   (FAIL)
+```
+
+Three contracts were tried on the same frozen transposed-monthly fixture;
+GLM said `wide` on all three. Per the frozen decision table and the designer's
+stop rule, the boundary is **located**: **GLM's intuitive wide/long
+classification is not reliable for transposed monthly layouts** (n=1 across
+I4/I5/I6, no seed control).
+
+## Why matched-language prototypes did not help
+
+The Finnish prototypes sharpened both structural contrasts in the target's own
+vocabulary:
+
+```text
+LONG prototype: Tuote | Kuukausi | Myynti   (Kuukausi col + ONE value col)
+target:         Kuukausi | ART-001 | ART-002 | ART-003  (Kuukausi col + SEVERAL entity cols)
+WIDE prototype: Tuote | Tammi | Helmi | Maalis  (months ACROSS header)
+target:         Kuukausi | ART-001 | ...            (products across, not months)
+```
+
+So the model could now compare role-for-role in one language: the target shares
+LONG's `Kuukausi`-with-months-down column but has *several* entity columns where
+LONG has *one* value column (→ not long); and the target has products across
+where WIDE has months across (→ not wide). It still said `wide`. So GLM is not
+doing role-for-role canonical matching; it keys on the surface cue "values
+spread across columns → wide," and that cue overrides the prototype contrast
+even within a shared vocabulary.
+
+The error-direction contrast holds across all three probes:
+
+```text
+macro v1:  months DOWN a column      → long   (month-orientation heuristic)
+GLM:       products ACROSS columns   → wide   (column-spread heuristic)
+expected:  neither prototype matches → unknown (canonical-structure match)
+```
+
+## What this establishes
+
+- **The boundary is located.** Three contract variants — definitions, English
+  prototypes, matched-language prototypes — all fail to make GLM return
+  `unknown` on a transposed monthly table. The cross-language explanation is
+  ruled out (I6). On n=1 per variant, GLM's intuitive wide/long classification
+  is not reliable for this layout.
+- **The failure is a surface-shape heuristic, not a contract gap.** GLM keys on
+  "values across columns → wide"; it does not perform the role-for-role
+  canonical match the contract asks for, even when the prototypes are in the
+  target's own vocabulary.
+- **I6 is an informative FAIL**, recorded as-is. Pass criteria not relaxed.
+  I1/I2/I3 frozen PASS and I4/I5 FAIL are unchanged; I6 graded separately
+  (stage `i6`).
+
+## What this does NOT establish
+
+- **n=1 per variant, no seed control.** Three single samples (I4, I5, I6) of
+  the same `wide` failure. Reliability/frequency is unmeasured. The boundary is
+  located on three single samples, not a frequency measurement — GLM may say
+  `unknown` on other samples; this establishes existence of the failure, not
+  its rate.
+- **The I3-mechanism hypothesis stays a hypothesis.** Not isolated by these
+  probes.
+- **Not** a production architecture; classification only; hard stop honored.
+
+## Stop rule — honored
+
+Per the designer's instruction: after matched-language I6 still returns
+`wide`, **stop tightening** — no seed sweep, no further contract variants on
+this fixture. Three things have now been tried (definitions; contrastive
+canonical examples; matched-language contrastive examples); the useful
+engineering conclusion is that GLM's wide/long classification is not reliable
+for transposed monthly layouts, and that is an acceptable thing for this lab
+to find.
+
+## On macro v2 — now legitimate (designer's clarified position)
+
+The macro-saver model does not require the agent to be the sole inventor of the
+automation. A human reviewing a failed case and amending the saved recipe is
+still macro-saver behaviour. With the boundary located and the agent not
+supplying the judgement on three tries, the legitimate next step is a
+**human-designed macro v2** (a separate, later freeze, not this run):
+
+```text
+v1:  months across header -> wide ;  months down a column -> long
+     I4/I5/I6 falsify: months down a column with several entity columns
+     is neither canonical long nor canonical wide.
+v2:  months down a label column + multiple entity columns across -> UNKNOWN
+```
+
+Real provider automations evolve by accumulating reliable procedures from
+experience, whether the correction came from the agent or from a human
+reviewing the failure. v2 is not authorized here; it would need its own freeze
+(what counts as "v2 classifies I1–I6 correctly," whether the `dl≥3 → long`
+rule is replaced or guarded, and whether the LLM is then invoked only when v2
+returns `unknown`).
+
+## Capability boundary after I
+
+```text
+2B.1  locate header              PASS
+2B.2  identify month columns     PASS
+2B.3  refuse when unresolved     FAIL   (silent omission)
+2B.4  aggregate + uncertainty    INCONCLUSIVE
+2B.5  atomic classification      6/7
+3A–3E judgement + gate           PASS   (failure blocked end-to-end)
+H    reference-vocabulary location  PASS (4/4; collapses to deterministic macro)
+I1–I3 wide/long/unknown (in-contract) PASS (3/3; macro subsumes LLM)
+I4   transposed (word contract)     FAIL (macro long, GLM wide)
+I5   transposed (English prototypes) FAIL (GLM wide)
+I6   transposed (Finnish prototypes) FAIL (GLM wide) — boundary located
+```
+
+The programme now has three complementary results:
+1. **3A→3E:** when a task genuinely requires judgement, symmetric independent
+   review + a deterministic comparison gate blocks the failure end-to-end.
+2. **H + I1–I3:** when a task is within the macro's applicability (locate a
+   month row; classify in-contract wide/long/unknown), intelligence is in
+   discovery, not runtime — the rule subsumes the LLM.
+3. **I4–I6:** when a task is *outside* the macro's applicability (transposed
+   monthly), neither the macro nor the LLM (on n=1, three contracts) reliably
+   supplies the correct `unknown` — the boundary is located, and the path
+   forward is a human-amended macro v2 plus the gate refusing what neither
+   resolves.
