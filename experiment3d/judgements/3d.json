@@ -1,0 +1,14 @@
+{
+  "probe": "3D",
+  "description": "Symmetric-classification reviewer. GLM-5.2, no handed proposal: the reviewer independently answers A/B/C for the target column. Four isolated probes, fresh context each (structural independence). Same fixture and evidence-burden standard as 3B.1/3C; only the review framing changes (symmetric A/B/C vs a handed proposition). All four show the full (or masked) A1 pointed at the target column; only the target column differs.",
+  "reviewer_model": "glm-5.2:cloud",
+  "contract": "symmetric A/B/C, no handed proposal; evidence-burden standard ('absence of evidence that the target is a month is not evidence that it is not a month'; neither established -> C)",
+  "fixture": {"path": "../experiment2b/fixtures/A1.csv", "sha256": "64356f3ac01b2e5a29060cc465d6b966daea1e02bac84450425851e0383472df", "header_row": 4},
+  "masking": "Full = A1 rendered rows verbatim. Masked = full with one substitution: row 4 col 4 'Jakso A' -> '[TARGET]'. All other cells preserved.",
+  "probes": [
+    {"id": "CTRL-MONTH", "evidence": "full", "target_column": 2, "target_cell": "Tammi", "raw_output": "{\"established\": \"A\"}", "established": "A"},
+    {"id": "CTRL-NONMONTH", "evidence": "full", "target_column": 1, "target_cell": "Tuote", "raw_output": "{\"established\": \"B\"}", "established": "B"},
+    {"id": "3D-FULL", "evidence": "full", "target_column": 4, "target_cell": "Jakso A", "raw_output": "{\"established\": \"C\"}", "established": "C"},
+    {"id": "3D-MASKED", "evidence": "masked", "target_column": 4, "target_cell": "[TARGET]", "raw_output": "{\"established\": \"A\"}", "established": "A"}
+  ]
+}

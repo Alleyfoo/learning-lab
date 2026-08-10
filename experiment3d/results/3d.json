@@ -1,0 +1,30 @@
+{
+  "probe": "3D",
+  "reviewer": {
+    "model": "glm-5.2:cloud",
+    "contract": "symmetric A/B/C, no handed proposal"
+  },
+  "pattern": {
+    "CTRL-MONTH": "A",
+    "CTRL-NONMONTH": "B",
+    "3D-FULL": "C",
+    "3D-MASKED": "A"
+  },
+  "all_parse_ok": true,
+  "per_probe_ok": {
+    "CTRL-MONTH": true,
+    "CTRL-NONMONTH": true,
+    "3D-FULL": true,
+    "3D-MASKED": true
+  },
+  "controls_status": "controls_pass",
+  "controls_pass": true,
+  "primary": "framing_was_the_problem",
+  "secondary": "structure_establishes_month",
+  "combined_mechanism": "framing_was_the_problem + structure_establishes_month (clean win)",
+  "clean_win": true,
+  "partial_pass": false,
+  "framing_solves_escalation": true,
+  "pass_criterion": "controls_pass AND 3D-FULL=C AND 3D-MASKED=A",
+  "interpretation_note": "framing_solves_escalation = controls pass AND Jakso A -> C (the gate would receive the escalation signal on the failure cell). clean_win additionally requires [TARGET] -> A."
+}
