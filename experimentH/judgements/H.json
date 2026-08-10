@@ -1,0 +1,18 @@
+{
+  "probe": "H",
+  "stage": "H1_H2",
+  "locator_model": "glm-5.2:cloud",
+  "contract": "header-row locator: given the 12-name reference vocabulary and rendered source rows, identify the single row whose cells cover the reference set (allowing harmless formatting variation), or ask_human. Output only JSON.",
+  "reference_source": "reference/months.json",
+  "H1": {
+    "llm_invoked": false,
+    "llm_answer": null,
+    "note": "deterministic-first solved H1 (exact 12/12 at row 4); LLM not invoked per frozen architecture"
+  },
+  "H2": {
+    "llm_invoked": true,
+    "raw_output": "{\"header_row\": 4}",
+    "llm_answer": {"header_row": 4},
+    "note": "deterministic-first failed on H2 (suffixes defeat exact match); LLM invoked, proposed row 4"
+  }
+}

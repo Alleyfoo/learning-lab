@@ -1,0 +1,58 @@
+{
+  "probe": "H",
+  "stage": "H1_H2",
+  "graded": [
+    "H1",
+    "H2"
+  ],
+  "per_probe": {
+    "H1": {
+      "header_row": 4,
+      "source": "deterministic",
+      "coverage": 12,
+      "llm_invoked": false,
+      "counterfactual_tolerant_scan": {
+        "rows_reaching_12": [
+          4
+        ],
+        "unique_12": true,
+        "max_coverage": 12,
+        "rows_at_max": [
+          4
+        ],
+        "max_unique": true,
+        "note": "non-scoring; does not affect the H result"
+      }
+    },
+    "H2": {
+      "header_row": 4,
+      "source": "llm_accepted",
+      "coverage": 12,
+      "llm_invoked": true,
+      "counterfactual_tolerant_scan": {
+        "rows_reaching_12": [
+          4
+        ],
+        "unique_12": true,
+        "max_coverage": 12,
+        "rows_at_max": [
+          4
+        ],
+        "max_unique": true,
+        "note": "non-scoring; does not affect the H result"
+      }
+    }
+  },
+  "h1_ok": true,
+  "h2_ok": true,
+  "h3a_ok": null,
+  "h3b_ok": null,
+  "h1h2_pass": true,
+  "h3_pass": null,
+  "overall": null,
+  "pass_criteria": {
+    "h1_h2": "H1 final header_row==4 AND H2 final header_row==4 AND H2 source==llm_accepted (deterministic must NOT solve H2)",
+    "h3": "H3a ask_human==true AND H3b ask_human==true",
+    "overall": "h1_h2 AND h3"
+  }
+}
