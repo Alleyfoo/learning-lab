@@ -1,0 +1,64 @@
+{
+  "hidden": true,
+  "note": "Expected answers for Experiment 3E. NEVER shown to any reviewer or orchestrator.",
+  "frozen_before_any_run": true,
+  "fixture": {"path": "../experiment2b/fixtures/A1.csv", "sha256": "64356f3ac01b2e5a29060cc465d6b966daea1e02bac84450425851e0383472df", "header_row": 4},
+  "frozen_specialist_source": "experiment3a/judgements/G3.json (reused verbatim; classifier NOT re-run)",
+  "frozen_specialist": {
+    "1": {"cell": "Tuote",   "classification": "not_month"},
+    "2": {"cell": "Tammi",   "classification": "month"},
+    "3": {"cell": "Helmi",   "classification": "month"},
+    "4": {"cell": "Jakso A", "classification": "not_month"},
+    "5": {"cell": "Huhti",   "classification": "month"},
+    "6": {"cell": "Touko",   "classification": "month"}
+  },
+  "reviewer": {"model": "glm-5.2:cloud", "contract": "symmetric A/B/C (3D framing), no handed proposal", "invocation": "Claude Code agent tool, general-purpose, fresh isolated context per column"},
+  "expected_reviewer_verdicts": {
+    "1": "B",
+    "2": "A",
+    "3": "A",
+    "4": "C",
+    "5": "A",
+    "6": "A"
+  },
+  "expected_reviewer_basis": {
+    "1": "measured: 3D CTRL-NONMONTH (Tuote->B)",
+    "2": "measured: 3D CTRL-MONTH (Tammi->A)",
+    "3": "predicted (obvious Finnish month, analogy to Tammi)",
+    "4": "measured: 3D FULL (Jakso A->C, load-bearing)",
+    "5": "predicted (analogy to Tammi)",
+    "6": "predicted (analogy to Tammi)"
+  },
+  "comparison_gate_logic": {
+    "reviewer_C": "HUMAN (insufficient warrant)",
+    "specialist_month_AND_reviewer_A": "ACCEPT month",
+    "specialist_not_month_AND_reviewer_B": "ACCEPT not_month",
+    "disagreement": "HUMAN (specialist/reviewer disagree)",
+    "parse_failure": "HUMAN (conservative)"
+  },
+  "expected_gate_output": {
+    "per_column": {
+      "1": {"specialist": "not_month", "reviewer": "B", "gate": "ACCEPT not_month"},
+      "2": {"specialist": "month", "reviewer": "A", "gate": "ACCEPT month"},
+      "3": {"specialist": "month", "reviewer": "A", "gate": "ACCEPT month"},
+      "4": {"specialist": "not_month", "reviewer": "C", "gate": "HUMAN (insufficient warrant)"},
+      "5": {"specialist": "month", "reviewer": "A", "gate": "ACCEPT month"},
+      "6": {"specialist": "month", "reviewer": "A", "gate": "ACCEPT month"}
+    },
+    "month_columns": [2, 3, 5, 6],
+    "human_columns": [4],
+    "ask_human": true
+  },
+  "pass_criterion": "ask_human=true AND month_columns=[2,3,5,6] AND human_columns=[4] AND cols {1,2,3,5,6} all ACCEPT (not HUMAN)",
+  "decision_table": {
+    "PASS_failure_blocked": "ask_human=true, month_columns=[2,3,5,6], human_columns=[4], five resolvable ACCEPT -> 3D fix blocks the 3A G3 failure end-to-end",
+    "FAIL_fix_did_not_block": "ask_human=false (Jakso A not escalated) -> symmetric reviewer did not return C for Jakso A in the six-column replay; 3D result did not survive",
+    "FAIL_paranoid": "ask_human=true but a resolvable cell (1,2,3,5,6) also escalated -> fix turned paranoid",
+    "FAIL_partial": "ask_human=true, Jakso A escalated, but month_columns wrong -> partial; inspect"
+  },
+  "secondary_orchestrator_measurement": {
+    "description": "One GLM-5.2 orchestrator-disposition call seeing the six specialist+reviewer pairs; non-authoritative. Records whether orchestrator.ask_human == gate.ask_human and orchestrator.month_columns == gate.month_columns.",
+    "expected_if_reasoning_layer_understands": {"ask_human": true, "month_columns": [2, 3, 5, 6]},
+    "not_required_for_success": true
+  }
+}
