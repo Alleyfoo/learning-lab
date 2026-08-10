@@ -1,0 +1,29 @@
+{
+  "probe": "I",
+  "stage": "full",
+  "classifier_model": "glm-5.2:cloud",
+  "contract": "wide/long/unknown monthly-representation classification: given the rendered header + data rows, output only JSON {\"format\": \"wide\"|\"long\"|\"unknown\"}. Monthly representation specifically; generic pivot shape is not wide.",
+  "reference_source": "../experimentH/reference/months.json (frozen, by path)",
+  "thresholds": {"K_w": 3, "K_l": 3},
+  "I1": {
+    "llm_invoked": true,
+    "fixture": "fixtures/I1.csv",
+    "raw_output": "{\"format\": \"wide\"}",
+    "llm_answer": {"format": "wide"},
+    "note": "wide control: header has 6 month-name columns (Tammi..Kesä); LLM correctly returned wide"
+  },
+  "I2": {
+    "llm_invoked": true,
+    "fixture": "fixtures/I2.csv",
+    "raw_output": "{\"format\": \"long\"}",
+    "llm_answer": {"format": "long"},
+    "note": "long control: Product|Kuukausi|Myynti, one row per product-month; LLM correctly returned long"
+  },
+  "I3": {
+    "llm_invoked": true,
+    "fixture": "fixtures/I3.csv",
+    "raw_output": "{\"format\": \"unknown\"}",
+    "llm_answer": {"format": "unknown"},
+    "note": "unknown control: quarterly Q1-Q4 (not monthly); LLM correctly returned unknown rather than classifying generic pivot shape as wide"
+  }
+}

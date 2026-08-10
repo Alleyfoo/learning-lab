@@ -1,0 +1,19 @@
+{
+  "probe": "I",
+  "stage": "full",
+  "result": "PASS",
+  "overall": true,
+  "i1_i2_pass": true,
+  "all_probes_pass": true,
+  "per_probe": {
+    "I1": {"expected": "wide",   "llm_label": "wide",   "det_classify": "wide",   "hw": 6, "dl": 0, "supported": true, "i_pass": true, "det_ok": true},
+    "I2": {"expected": "long",   "llm_label": "long",   "det_classify": "long",   "hw": 0, "dl": 3, "supported": true, "i_pass": true, "det_ok": true},
+    "I3": {"expected": "unknown","llm_label": "unknown", "det_classify": "unknown","hw": 0, "dl": 0, "supported": true, "i_pass": true, "det_ok": true}
+  },
+  "counterfactual": [
+    {"fixture": "fixtures/I1.csv", "det_classify": "wide",   "hw": 6, "dl": 0},
+    {"fixture": "fixtures/I2.csv", "det_classify": "long",   "hw": 0, "dl": 3},
+    {"fixture": "fixtures/I3.csv", "det_classify": "unknown","hw": 0, "dl": 0}
+  ],
+  "summary": "All three controls pass: LLM correct AND supported on each; deterministic heuristic correct on each (det_ok all true). LLM not needed for these clean shapes. I3 confirms GLM classifies monthly representation (returned unknown on quarterly, not wide for generic pivot shape)."
+}
