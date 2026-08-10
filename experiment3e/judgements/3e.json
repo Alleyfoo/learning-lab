@@ -1,0 +1,30 @@
+{
+  "probe": "3E",
+  "description": "Architectural replay of 3A G3. Frozen 3A G3 classifier outputs (specialist, NOT re-run) + six fresh symmetric A/B/C reviewer calls (GLM-5.2, 3D framing, one per column, fresh context each) + one orchestrator-disposition call (secondary, non-authoritative). Deterministic comparison gate in harness/compose_3e.py is authoritative.",
+  "frozen_specialist_source": "experiment3a/judgements/G3.json (verbatim; classifier NOT re-run)",
+  "frozen_specialist": {
+    "1": {"cell": "Tuote",   "classification": "not_month"},
+    "2": {"cell": "Tammi",   "classification": "month"},
+    "3": {"cell": "Helmi",   "classification": "month"},
+    "4": {"cell": "Jakso A", "classification": "not_month"},
+    "5": {"cell": "Huhti",   "classification": "month"},
+    "6": {"cell": "Touko",   "classification": "month"}
+  },
+  "reviewer_model": "glm-5.2:cloud",
+  "reviewer_contract": "symmetric A/B/C (3D framing), no handed proposal; evidence-burden standard",
+  "fixture": {"path": "../experiment2b/fixtures/A1.csv", "sha256": "64356f3ac01b2e5a29060cc465d6b966daea1e02bac84450425851e0383472df", "header_row": 4},
+  "reviewer_verdicts": [
+    {"column": 1, "cell": "Tuote",   "raw_output": "{\"established\": \"B\"}", "established": "B"},
+    {"column": 2, "cell": "Tammi",   "raw_output": "{\"established\": \"A\"}", "established": "A"},
+    {"column": 3, "cell": "Helmi",   "raw_output": "{\"established\": \"A\"}", "established": "A"},
+    {"column": 4, "cell": "Jakso A", "raw_output": "{\"established\": \"C\"}", "established": "C"},
+    {"column": 5, "cell": "Huhti",   "raw_output": "{\"established\": \"A\"}", "established": "A"},
+    {"column": 6, "cell": "Touko",   "raw_output": "{\"established\": \"A\"}", "established": "A"}
+  ],
+  "orchestrator_disposition": {
+    "role": "secondary, non-authoritative; sees the six specialist+reviewer pairs + full A1 evidence",
+    "raw_output": "{\"month_columns\": [2, 3, 5, 6], \"ask_human\": true}",
+    "month_columns": [2, 3, 5, 6],
+    "ask_human": true
+  }
+}

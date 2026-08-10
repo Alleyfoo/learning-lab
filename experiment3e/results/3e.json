@@ -1,0 +1,179 @@
+{
+  "probe": "3E",
+  "description": "Architectural replay of 3A G3 with frozen specialist + symmetric reviewer + deterministic comparison gate",
+  "frozen_specialist_source": "experiment3a/judgements/G3.json (verbatim; classifier NOT re-run)",
+  "reviewer_model": "glm-5.2:cloud",
+  "reviewer_contract": "symmetric A/B/C (3D framing), no handed proposal",
+  "per_column": {
+    "1": {
+      "cell": "Tuote",
+      "specialist": "not_month",
+      "reviewer": "B",
+      "specialist_parse_ok": true,
+      "reviewer_parse_ok": true,
+      "disposition": "accept_not_month",
+      "reason": "agree_not_month"
+    },
+    "2": {
+      "cell": "Tammi",
+      "specialist": "month",
+      "reviewer": "A",
+      "specialist_parse_ok": true,
+      "reviewer_parse_ok": true,
+      "disposition": "accept_month",
+      "reason": "agree_month"
+    },
+    "3": {
+      "cell": "Helmi",
+      "specialist": "month",
+      "reviewer": "A",
+      "specialist_parse_ok": true,
+      "reviewer_parse_ok": true,
+      "disposition": "accept_month",
+      "reason": "agree_month"
+    },
+    "4": {
+      "cell": "Jakso A",
+      "specialist": "not_month",
+      "reviewer": "C",
+      "specialist_parse_ok": true,
+      "reviewer_parse_ok": true,
+      "disposition": "human",
+      "reason": "insufficient_warrant"
+    },
+    "5": {
+      "cell": "Huhti",
+      "specialist": "month",
+      "reviewer": "A",
+      "specialist_parse_ok": true,
+      "reviewer_parse_ok": true,
+      "disposition": "accept_month",
+      "reason": "agree_month"
+    },
+    "6": {
+      "cell": "Touko",
+      "specialist": "month",
+      "reviewer": "A",
+      "specialist_parse_ok": true,
+      "reviewer_parse_ok": true,
+      "disposition": "accept_month",
+      "reason": "agree_month"
+    }
+  },
+  "gate_output": {
+    "month_columns": [
+      2,
+      3,
+      5,
+      6
+    ],
+    "human_columns": [
+      4
+    ],
+    "ask_human": true
+  },
+  "expected_gate_output": {
+    "per_column": {
+      "1": {
+        "specialist": "not_month",
+        "reviewer": "B",
+        "gate": "ACCEPT not_month"
+      },
+      "2": {
+        "specialist": "month",
+        "reviewer": "A",
+        "gate": "ACCEPT month"
+      },
+      "3": {
+        "specialist": "month",
+        "reviewer": "A",
+        "gate": "ACCEPT month"
+      },
+      "4": {
+        "specialist": "not_month",
+        "reviewer": "C",
+        "gate": "HUMAN (insufficient warrant)"
+      },
+      "5": {
+        "specialist": "month",
+        "reviewer": "A",
+        "gate": "ACCEPT month"
+      },
+      "6": {
+        "specialist": "month",
+        "reviewer": "A",
+        "gate": "ACCEPT month"
+      }
+    },
+    "month_columns": [
+      2,
+      3,
+      5,
+      6
+    ],
+    "human_columns": [
+      4
+    ],
+    "ask_human": true
+  },
+  "reviewer_verdict_ok": {
+    "1": {
+      "got": "B",
+      "expected": "B",
+      "ok": true
+    },
+    "2": {
+      "got": "A",
+      "expected": "A",
+      "ok": true
+    },
+    "3": {
+      "got": "A",
+      "expected": "A",
+      "ok": true
+    },
+    "4": {
+      "got": "C",
+      "expected": "C",
+      "ok": true
+    },
+    "5": {
+      "got": "A",
+      "expected": "A",
+      "ok": true
+    },
+    "6": {
+      "got": "A",
+      "expected": "A",
+      "ok": true
+    }
+  },
+  "gate_ok": {
+    "month_columns": true,
+    "human_columns": true,
+    "ask_human": true
+  },
+  "resolvable_all_accept": true,
+  "jakso_escalated": true,
+  "decision": "PASS_failure_blocked",
+  "passed": true,
+  "pass_criterion": "ask_human=true AND month_columns=[2,3,5,6] AND human_columns=[4] AND cols {1,2,3,5,6} all ACCEPT (not HUMAN)",
+  "secondary_orchestrator": {
+    "orchestrator_ask_human": true,
+    "orchestrator_month_columns": [
+      2,
+      3,
+      5,
+      6
+    ],
+    "gate_ask_human": true,
+    "gate_month_columns": [
+      2,
+      3,
+      5,
+      6
+    ],
+    "orchestrator_agrees_with_gate": true,
+    "non_authoritative": true
+  }
+}
