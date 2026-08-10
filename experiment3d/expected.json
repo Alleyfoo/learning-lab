@@ -1,0 +1,39 @@
+{
+  "hidden": true,
+  "note": "Expected answers for Experiment 3D. NEVER shown to any reviewer.",
+  "frozen_before_any_run": true,
+  "fixture": {"path": "../experiment2b/fixtures/A1.csv", "sha256": "64356f3ac01b2e5a29060cc465d6b966daea1e02bac84450425851e0383472df", "header_row": 4},
+  "reviewer": {"model": "glm-5.2:cloud", "contract": "symmetric A/B/C, no handed proposal", "invocation": "Claude Code agent tool, general-purpose, fresh isolated context per probe"},
+  "probes": [
+    {"id": "CTRL-MONTH", "evidence": "full", "target_column": 2, "target_cell": "Tammi", "expected": "A", "role": "control: symmetric contract must establish a real month"},
+    {"id": "CTRL-NONMONTH", "evidence": "full", "target_column": 1, "target_cell": "Tuote", "expected": "B", "role": "control: symmetric contract must establish a real non-month"},
+    {"id": "3D-FULL", "evidence": "full", "target_column": 4, "target_cell": "Jakso A", "expected": "C", "role": "target: 3A/3B/3C failure cell, no handed proposal"},
+    {"id": "3D-MASKED", "evidence": "masked", "target_column": 4, "target_cell": "[TARGET]", "expected": "A", "role": "structure-only: does 3C M2 month reading hold without a handed proposal?"}
+  ],
+  "pass_criterion": "controls_pass (CTRL-MONTH=A AND CTRL-NONMONTH=B) AND 3D-FULL=C AND 3D-MASKED=A",
+  "partial_pass_criterion": "controls_pass AND 3D-FULL=C AND 3D-MASKED=C (symmetric framing fixes the failure cell; masked structural confidence did not survive framing change)",
+  "decision_table": {
+    "controls": {
+      "A_and_B": "controls_pass -> proceed to target diagnosis",
+      "CTRL-MONTH=C": "control_broken_month -> symmetric contract over-withholds; target diagnosis moot",
+      "CTRL-NONMONTH=C": "control_broken_nonmonth -> symmetric contract over-withholds; target diagnosis moot",
+      "CTRL-MONTH=B": "control_misclassified_month -> gross error; inspect"
+    },
+    "primary_axis_3D-FULL": {
+      "C": "framing_was_the_problem (closed-world default required a handed not_month to fire; symmetric framing lets the model represent uncertainty -> switch to symmetric review)",
+      "B": "closed_world_prior_persists (model treats lexical non-recognition as positive evidence for non-membership even without a handed proposal; symmetric framing does not solve it)",
+      "A": "surprising_month_established (structure/context winning toward month even with text visible; unexpected, inspect)"
+    },
+    "secondary_axis_3D-MASKED": {
+      "A": "structure_establishes_month (consistent with 3C M2; reviewer independently concludes month from structure without a handed proposal)",
+      "C": "structure_insufficient_under_symmetric (3C M2 confidence depended on proposition framing; structure alone does not establish month under symmetric standard)",
+      "B": "masked_defaults_not_month (contradicts 3C M2; inspect)"
+    },
+    "combined_headline_outcomes": {
+      "FULL=C_MASKED=A": "framing_was_the_problem + structure_establishes_month (clean win; symmetric framing solves escalation)",
+      "FULL=B_MASKED=A": "closed_world_prior_persists + structure_establishes_month (symmetric framing does not solve; prior deeper than framing)",
+      "FULL=C_MASKED=C": "framing_was_the_problem + structure_insufficient_under_symmetric (partial: framing inflates confidence in both directions; gate still escalates on Jakso A)",
+      "FULL=B_MASKED=C": "closed_world_persists + structure_insufficient (symmetric framing does not solve; structural confidence also lost)"
+    }
+  }
+}
