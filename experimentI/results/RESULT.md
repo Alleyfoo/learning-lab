@@ -350,3 +350,109 @@ on this single run the agent was wrong too — so the macro was not improved by
 the agent this time. The `dl≥3 → long` rule is falsified; what is *not*
 established is that the agent can reliably supply the judgement the macro
 lacks. That is the reliability question, now foregrounded.
+
+---
+
+# AMENDMENT 3 — I5 result (contrastive prototypes): FAIL
+
+**I5 FAILS as run.** GLM said `wide` — the same label it gave on I4 — even with
+the two canonical prototypes shown first. The contrastive probe did **not**
+isolate a contract-underspecification fix.
+
+```text
+                        contract              GLM          expected
+I4  word definitions     (no prototypes)       wide          unknown   (FAIL)
+I5  two prototypes       (WIDE + LONG)         wide          unknown   (FAIL)
+```
+
+I5 used the **same frozen I4 fixture**, the **same labels**, the **same
+expected `unknown`**, and the **same oracle grader**. The only change was the
+contract: word definitions → two canonical prototypes, then "Use unknown if it
+matches neither supplied representation." The deterministic classifier was left
+unchanged (`det_classify = long`, wrong, on both).
+
+## The branch resolved — toward a contextual-classification limitation
+
+Per the frozen decision table, `I5 → wide` is the branch for **stronger
+evidence of a genuine contextual-classification limitation** rather than mere
+contract ambiguity. GLM did not match the target against the prototypes and
+refuse; it again classified generic pivot shape ("products across columns →
+`wide`"), ignoring that in the WIDE prototype the columns are *months*, not
+products.
+
+A useful contrast in error direction: the macro and GLM are wrong in
+**different ways**.
+
+```text
+macro v1:  months DOWN a column      -> long   (keys on month orientation)
+GLM:       products ACROSS columns   -> wide   (keys on column spread)
+expected:  neither prototype matches -> unknown (keys on canonical structure)
+```
+
+Neither keys on the canonical-structure match the prototypes were meant to
+establish. So on this single sample, examples did not carry the category
+boundary that words did not.
+
+## What this establishes
+
+- **Prototypes did not fix it.** I4→`wide` and I5→`wide` on the same fixture.
+  The I4 failure was not solved by supplying canonical examples — so it is not
+  *merely* contract underspecification (on n=1, with the cross-language caveat).
+- **The failure is structural, not lexical.** GLM is not following the
+  macro's "months down → long" cue; it is following a "values across columns →
+  wide" cue. Both are surface-shape heuristics; neither is the canonical-structure
+  judgement the contract asks for.
+- **I5 is an informative FAIL**, recorded as-is. Pass criteria not relaxed.
+  I1/I2/I3 frozen PASS and I4 FAIL are unchanged; I5 is graded separately
+  (stage `i5`).
+
+## What this does NOT establish
+
+- **n=1, no seed control.** GLM said `wide` once with prototypes. It may say
+  `unknown` on another sample; reliability is unmeasured. This is one sample
+  of the prototypes *not* working, not a frequency.
+- **Cross-language caveat.** Prototypes are English (`Product/Month/Sales`,
+  `Jan/Feb/Mar`); the target is Finnish (`Kuukausi`, `Tammi..`). The
+  cross-language match was deliberate (tests structural, not lexical,
+  generalization) but is a stated caveat: a matched-language I5 could in
+  principle flip the result, and would be the cleaner isolation. GLM is
+  multilingual and the structure is language-independent, so the language
+  difference is a secondary explanation, not the primary one — but it is not
+  ruled out.
+- **The I3-mechanism hypothesis stays a hypothesis.** I5 does not isolate
+  whether I3's `unknown` was token-absence-driven; that needs a controlled
+  contrast (a 3C-style 2×2), not these single samples.
+- **Not** a production architecture; classification only; hard stop honored.
+
+## Where this points (not a commitment, not authorization)
+
+I5 operationalized the I4 "candidate #2" (contract-clarity vs capability gap)
+in the designer's chosen form — prototypes, no rule-naming. The answer on this
+single sample: prototypes did not fix it. The candidate next probes (each needs
+its own freeze):
+
+1. **Matched-language I5** — Finnish prototypes (same vocabulary as the target)
+   to remove the cross-language caveat and re-test. Cheapest way to tighten
+   the inference.
+2. **Re-run I4/I5 across samples / seeds** — does GLM *ever* say `unknown`
+   here? n=1 so far; reliability is the open question.
+3. **A rule-naming variant** — explicitly contrast canonical long with
+   transposed wide by *rule* ("long requires one row per product-month;
+   months down a label column with several entity columns is not long"). This
+   crosses the line the designer held (let examples, not rules, establish the
+   distinction), so it is a different test — but it would separate "no amount
+   of contract helps" from "rules help where examples didn't."
+4. **Hand-design macro v2** (not discovered) — encode "months down a label
+   column with several entity columns → unknown" and verify it classifies
+   I1–I5 correctly. The deterministic-first path catching up by design. The
+   designer's stated preference: only design v2 *after* finding out whether a
+   compact skill can teach the agent the distinction — I5 suggests, on n=1,
+   that two examples alone do not.
+
+The honest summary: I4 and I5 together show that, on this single sample, GLM
+classifies the transposed monthly table as `wide` whether or not it is given
+canonical prototypes. The macro is wrong (`long`); the agent is wrong (`wide`);
+neither produces the `unknown` the contract expects. The `dl≥3 → long` rule
+is falsified, and the agent did not supply the judgement to replace it. The
+reliability question — and whether a matched-language or rule-naming contract
+changes this — remains open.

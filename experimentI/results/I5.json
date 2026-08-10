@@ -1,0 +1,35 @@
+{
+  "probe": "I5",
+  "stage": "i5",
+  "result": "FAIL",
+  "i5_pass": false,
+  "overall": false,
+  "per_probe": {
+    "I5": {
+      "expected": "unknown",
+      "llm_label": "wide",
+      "det_classify": "long",
+      "hw": 0,
+      "dl": 12,
+      "supported": false,
+      "grader": "oracle",
+      "i_pass": false,
+      "det_ok": false,
+      "read": "with prototypes GLM still said wide (same as I4 without prototypes). Prototypes did not flip it to unknown."
+    }
+  },
+  "counterfactual": [
+    {"fixture": "fixtures/I4.csv", "det_classify": "long", "hw": 0, "dl": 12, "K_w": 3, "K_l": 3}
+  ],
+  "i4_i5_branch": {
+    "I4_word_contract": "wide",
+    "I5_prototype_contract": "wide",
+    "interpretation": "Adding canonical prototypes did NOT flip GLM to unknown. Per the frozen decision table this is the 'genuine contextual-classification limitation' branch -- stronger evidence than I4 alone that the I4 failure is not mere contract underspecification. GLM keys on column-spread (products across -> wide); the macro keys on month-orientation (months down -> long); neither keys on the canonical-structure match (neither prototype matches -> unknown)."
+  },
+  "summary": "I5 FAILS as run: GLM said wide even with the two canonical prototypes, the same label it gave on I4 without them. The contrastive probe did not isolate a contract-underspecification fix; instead it strengthens the contextual-classification-limitation reading (n=1, with the cross-language caveat). Recorded as-is; pass criteria not relaxed. I1/I2/I3 frozen PASS and I4 FAIL unchanged; I5 graded separately (stage i5).",
+  "caveats": [
+    "n=1, no seed control: a single I5 sample. Reliability unmeasured.",
+    "Cross-language: English prototypes, Finnish target. A matched-language follow-up would be cleaner; the language difference is a caveat on the inference (though GLM is multilingual and the structure is language-independent).",
+    "The I3-mechanism hypothesis (token-absence-driven) stays a hypothesis; I5 does not isolate it."
+  ]
+}

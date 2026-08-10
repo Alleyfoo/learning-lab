@@ -1,0 +1,20 @@
+{
+  "probe": "I5",
+  "stage": "i5",
+  "classifier_model": "glm-5.2:cloud",
+  "contract": "contrastive: two category prototypes (WIDE + LONG) shown first, then the target, 'Use unknown if it matches neither supplied representation.' Same labels wide/long/unknown, JSON output only. No word 'transposed wide', no rule -- examples establish the distinction.",
+  "fixture": "fixtures/I4.csv (frozen, reused by path; unchanged from I4)",
+  "description": "contrastive probe: same transposed-monthly fixture as I4, ONLY the contract changes (word definitions -> two canonical prototypes)",
+  "frozen_predictions": {
+    "det_classify": "long",
+    "det_classify_note": "UNCHANGED from I4: dl=12 -> long. Wrong; left unchanged on purpose.",
+    "expected": "unknown",
+    "grader": "oracle"
+  },
+  "I5": {
+    "llm_invoked": true,
+    "raw_output": "{\"format\": \"wide\"}",
+    "llm_answer": {"format": "wide"},
+    "note": "GLM returned wide, NOT unknown -- the SAME label it gave on I4 without prototypes. Adding canonical prototypes did NOT flip GLM to unknown. Per the frozen decision table, this is the 'genuine contextual-classification limitation' branch (stronger evidence than I4 alone). GLM again classified generic pivot shape (products across columns -> wide), not the canonical-structure match (neither prototype matches -> unknown). Note GLM's error direction differs from the macro: macro keys on month-orientation (months down -> long); GLM keys on column-spread (products across -> wide). Both wrong (expected unknown). Cross-language caveat applies (English prototypes, Finnish target). Recorded as-is; pass criteria not relaxed. n=1, no seed control."
+  }
+}
