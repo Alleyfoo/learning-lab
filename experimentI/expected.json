@@ -1,0 +1,46 @@
+{
+  "probe": "I",
+  "purpose": "wide/long/unknown representation classification (classification, NOT transformation)",
+  "per_probe": {
+    "I1": {
+      "fixture": "fixtures/I1.csv",
+      "description": "wide control: product + 6 month-name columns, numeric data rows",
+      "expected_format": "wide",
+      "expected_det_classify": "wide",
+      "role": "positive wide control"
+    },
+    "I2": {
+      "fixture": "fixtures/I2.csv",
+      "description": "long control: Product | Kuukausi | Myynti with one row per product-month",
+      "expected_format": "long",
+      "expected_det_classify": "long",
+      "role": "positive long control"
+    },
+    "I3": {
+      "fixture": "fixtures/I3.csv",
+      "description": "unknown control: quarterly summary (Q1-Q4 + Vuosi), no month-name tokens",
+      "expected_format": "unknown",
+      "expected_det_classify": "unknown",
+      "role": "refusal/odd control (run-later per design)"
+    }
+  },
+  "thresholds": {"K_w": 3, "K_l": 3},
+  "pass_criteria": {
+    "i_pass_per_probe": "llm_label == expected_format AND gate.supported",
+    "i1_i2_pass": "I1.i_pass AND I2.i_pass",
+    "overall": "I1 AND I2 AND I3 all i_pass"
+  },
+  "counterfactual": "det_classify == expected_format (would a rule alone suffice? non-scoring for pass, recorded per probe)",
+  "decision_table": [
+    {"probes": "I1 & I2 pass, I3 not run", "outcome": "i1_i2 PASS; I3 deferred", "stage": "i1_i2"},
+    {"probes": "I1 & I2 & I3 all pass", "outcome": "PASS", "stage": "full"},
+    {"probes": "any control fails", "outcome": "FAIL (record, do not relax)", "stage": "full"}
+  ],
+  "stated_limitations": [
+    "The deterministic classifier is a coarse month-token heuristic. It is correct on the clean wide/long controls and on the no-month (quarterly) case. It is WRONG on a transposed wide table (months as rows): months land in a data column and the rule says 'long'. That case is deferred and noted as where the LLM would add value.",
+    "The gate is a VERIFIER, not an authority: it checks the LLM's label is objectively supported by the token criteria; it does not substitute its own answer (the criteria are too coarse to be authoritative, unlike H's coverage==12).",
+    "n=1 on GLM-5.2, no seed control: existence, not reliability.",
+    "Classification only. No unpivot/reshape/transformation is produced or evaluated (hard stop honored)."
+  ],
+  "hidden": true
+}
