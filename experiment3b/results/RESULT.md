@@ -3,11 +3,14 @@
 **3B.1 FAIL (still_overconfident). 3B.2 FAIL (target still supported).**
 **3B.1-replay not run** (conditional on 3B.1 passing).
 
-Neither fix generated the escalation signal. The evidence-burden contract on the
-same model (3B.1) did not change the reviewer's judgement, and a different model
-family under the original neutral contract (3B.2) still endorsed the unsupported
-assertion. The `Jakso A = not_month` proposal — the exact failure isolated in 3A —
-acquired warrant in both probes. This is the preregistered **"ambiguity is harder
+Neither the tested policy change nor the tested alternative reviewer generated
+the escalation signal. The evidence-burden contract on the same model (3B.1) did
+not change the reviewer's judgement, and the one alternative model family tested
+(llama3.1:8b, 3B.2) still endorsed the unsupported assertion. The 3B.2 negative
+rests on a single alternative family whose C1 control also failed, so it is not
+yet evidence against model diversity generally — only against that one reviewer
+on this one cell. The `Jakso A = not_month` proposal — the exact failure isolated
+in 3A — acquired warrant in both probes. This is the preregistered **"ambiguity is harder
 than the reviewer design assumes"** branch, reached via the **fail / fail
 (target supported)** cell of the 3B.2 decision table, with one additional signal
 described below.
@@ -131,6 +134,9 @@ not appear under model diversity.
 `Jakso A = not_month` has now acquired warrant/authority on **three** model
 families: `qwen3.5:9b` (2B.5, silent omission), `GLM-5.2` (3A endorsement; 3B.1
 endorsement under a stricter contract), and `llama3.1:8b` (3B.2 endorsement). The
+first two are clean (controls behaved); the llama3.1:8b datapoint endorsed the
+target but also failed its own C1 control, so it corroborates the target
+endorsement while being a weaker witness on the model-diversity question. The
 failure is not a property of one model's weakness or one contract's phrasing. It
 is a property of the task as presented to these models.
 
@@ -144,15 +150,18 @@ cell. Combined with 3B.2 — where a model with a *naturally* stricter threshold
 also endorsed the target — the evidence is that a stricter standard alone is not
 the fix.
 
-### 3. Model diversity does not help on this cell
+### 3. The one tested alternative model did not help on this cell
 
-3B.2 tested whether a different family's prior avoids the blind spot. It does
-not. A 3B.2 pass would have been evidence that *this* other model does not share
-the prior; the failure is evidence that, on this cell, it does — or at least that
-it reaches the same unsupported conclusion by a different route. Per the
-preregistration's terminology note, model diversity ≠ epistemic independence, so
-this is not a general claim about diverse models; it is a specific negative
-result on this cell with this one alternative family.
+3B.2 tested whether a different family's prior avoids the blind spot. It did not
+— but with an important caveat: this is n=1 alternative family, and its C1
+control failed, so it is **not yet evidence against model diversity generally**.
+A 3B.2 pass would have been evidence that *this* other model does not share the
+prior; the failure is evidence only that, on this cell, *this* reviewer reaches
+the same unsupported conclusion by a different route. Per the preregistration's
+terminology note, model diversity ≠ epistemic independence, so this was never
+going to be a general claim about diverse models; it is a specific negative
+result on this cell with this one alternative family. The wider model-diversity
+question is deliberately parked.
 
 ### 4. The gate remains correct and unimplicated — again
 
