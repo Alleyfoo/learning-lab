@@ -378,3 +378,108 @@ relaxed.
 
 I5 is classification only. No transformation, no macro-v2 implementation, no
 fourth label. The deterministic classifier is left unchanged on purpose.
+
+---
+
+# AMENDMENT 3 — I6 (matched-language prototypes), added before the I6 run
+
+**Status: FROZEN before the I6 run.** I5 ran and FAILED (`beffae7`): GLM said
+`wide` even with English prototypes — same as I4. I5's last stated caveat was
+the **cross-language confound** (English prototypes, Finnish target). I6
+removes it: same fixture, same labels, same expected, same oracle grader —
+**only the prototype language changes, English → Finnish**, matching the
+target.
+
+## The probe — only the prototype language changes
+
+I6 uses the **same frozen I4 fixture** (`fixtures/I4.csv`, unchanged), the
+**same three labels**, the **same expected `unknown`**, the **same oracle
+grader** (verifier suspended; `dl=12` evidence, not long-support), and the
+**same "use unknown if it matches neither supplied representation"** wording.
+The deterministic classifier is **unchanged** (`det_classify=long`, wrong).
+
+The **only** change from I5 is the prototype language. The prototypes are the
+designer's Finnish ones:
+
+```text
+WIDE example
+Tuote | Tammi | Helmi | Maalis
+A     | 10    | 12    | 8
+B     | 7     | 9     | 11
+
+LONG example
+Tuote | Kuukausi | Myynti
+A     | Tammi    | 10
+A     | Helmi    | 12
+B     | Tammi    | 7
+
+[then the unchanged I4 fixture, in its standard ROW N rendering]
+
+Classify the monthly representation as: wide / long / unknown.
+Use unknown if it matches neither supplied representation.
+```
+
+This sharpens both structural contrasts in the target's own vocabulary: in
+LONG, `Kuukausi` is a column with months down it and **one** `Myynti` value
+column; the target has `Kuukausi` with months down it but **several** `ART`
+columns — so not long. In WIDE, months are across the header; the target has
+products across — so not wide. The model can now compare role-for-role in one
+language.
+
+## Frozen expectations
+
+```text
+det_classify(I6) = long    (UNCHANGED, WRONG; same fixture as I4/I5)
+expected(I6)     = unknown
+grader           = oracle  (i_pass = llm_label == unknown; verifier suspended)
+```
+
+## The binary interpretation
+
+```text
+I4  word definitions       -> wide   (FAIL)
+I5  English prototypes     -> wide   (FAIL)
+I6  Finnish prototypes     -> ?      (this run)
+```
+
+- **I6 → `unknown`**: the earlier failure was **cross-language role transfer**,
+  not inability to compare structures. GLM recognized the broad visual pattern
+  but failed to transfer the *roles* across languages. Practical upshot for
+  future provider skills: examples / reference material should be
+  **linguistically aligned with the source**.
+- **I6 → `wide` (or `long`)**: even matched-language prototypes do not fix it.
+  The cross-language confound is ruled out. **Boundary located**: GLM's
+  intuitive wide/long classification is **not reliable for transposed monthly
+  layouts**. **Stop tightening** (no seed sweep, no further interrogation).
+
+Either outcome is recorded as-is; pass criteria are not relaxed.
+
+## On macro v2 after I6 (designer's clarified position)
+
+The designer clarified that hand-designing macro v2 is **not premature after
+I6**. The macro-saver model does not require the agent to be the sole inventor
+of the automation; a human reviewing a failed case and amending the saved
+recipe is still macro-saver behaviour:
+
+```text
+v1:  months across header -> wide ;  months down column -> long
+     (I4 falsifies: months down a column with several entity columns is neither)
+v2:  months down a label column + multiple entity columns across -> UNKNOWN
+```
+
+Real provider automations evolve by accumulating reliable procedures from
+experience, whether the correction came from the agent or from a human. So if
+I6 fails, the legitimate next step is to hand-design v2 by human review of the
+I4/I5/I6 failure — but that is a separate, later freeze, not this run.
+
+## What I6 does NOT establish
+
+- **n=1, no seed control.** A single I6 sample.
+- **The I3-mechanism hypothesis stays a hypothesis** (not isolated by these
+  single-sample probes).
+- **Classification only**; hard stop honored; no fourth label.
+
+## Hard stop — still honored
+
+I6 is classification only. No transformation, no macro-v2 implementation in
+this run. The deterministic classifier is left unchanged on purpose.

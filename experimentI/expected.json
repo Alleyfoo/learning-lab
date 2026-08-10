@@ -40,36 +40,48 @@
       "role": "contrastive probe: same fixture/labels/expected as I4, ONLY change is the contract (word definitions -> two canonical prototypes). det_classify stays long (macro unchanged, wrong).",
       "grader": "oracle",
       "grader_note": "Same oracle grader as I4: i_pass = (llm_label == unknown); verifier suspended; dl=12 evidence not long-support. The prototypes are the ONLY change from I4. Do NOT name 'transposed wide' or give a rule like 'long requires one row per product-month' -- let the examples establish the distinction."
+    },
+    "I6": {
+      "fixture": "fixtures/I4.csv",
+      "description": "MATCHED-LANGUAGE contrastive probe: same frozen I4 fixture, same labels/expected as I5, ONLY change from I5 is the prototype LANGUAGE (English -> Finnish), matching the target's language. Removes the cross-language confound that was I5's last stated caveat.",
+      "expected_format": "unknown",
+      "expected_det_classify": "long",
+      "role": "matched-language I5: isolates cross-language role transfer. Finnish prototypes: WIDE = Tuote|Tammi|Helmi|Maalis; LONG = Tuote|Kuukausi|Myynti. det_classify stays long (macro unchanged, wrong).",
+      "grader": "oracle",
+      "grader_note": "Same oracle grader as I4/I5: i_pass = (llm_label == unknown); verifier suspended. Finnish prototypes are the ONLY change from I5. If I6 -> unknown: earlier failure was cross-language role transfer (examples should be linguistically aligned with source). If I6 -> wide/long: GLM wide/long not reliable for transposed monthly -- boundary located; stop tightening."
     }
   },
   "thresholds": {"K_w": 3, "K_l": 3},
-  "grader_per_probe": {"I1": "verifier", "I2": "verifier", "I3": "verifier", "I4": "oracle", "I5": "oracle"},
+  "grader_per_probe": {"I1": "verifier", "I2": "verifier", "I3": "verifier", "I4": "oracle", "I5": "oracle", "I6": "oracle"},
   "pass_criteria": {
     "i_pass_verifier_probes": "llm_label == expected_format AND gate.supported  (I1/I2/I3)",
-    "i_pass_oracle_probes": "llm_label == expected_format (unknown); verifier support SUSPENDED; dl=12 is evidence, not long-support  (I4/I5)",
+    "i_pass_oracle_probes": "llm_label == expected_format (unknown); verifier support SUSPENDED; dl=12 is evidence, not long-support  (I4/I5/I6)",
     "i1_i2_pass": "I1.i_pass AND I2.i_pass",
     "i1_i2_i3_pass": "I1 AND I2 AND I3 all i_pass (frozen 3-probe classifier result, committed f3c3a9a)",
     "i4_pass": "I4.i_pass (LLM says unknown on word-definition contract)",
-    "i5_pass": "I5.i_pass (LLM says unknown on prototype contract)",
+    "i5_pass": "I5.i_pass (LLM says unknown on English-prototype contract)",
+    "i6_pass": "I6.i_pass (LLM says unknown on Finnish-prototype contract)",
     "overall": "all present probes i_pass"
   },
-  "counterfactual": "det_classify == expected_format per probe (non-scoring for pass, recorded). For I4 AND I5 det_classify=long != expected=unknown -> recorded counterfactual MISS (the saved macro is wrong on this representation; unchanged across I4 and I5).",
+  "counterfactual": "det_classify == expected_format per probe (non-scoring for pass, recorded). For I4/I5/I6 det_classify=long != expected=unknown -> recorded counterfactual MISS (the saved macro is wrong on this representation; unchanged across I4/I5/I6).",
   "decision_table": [
     {"probes": "I1 & I2 pass, I3 not run", "outcome": "i1_i2 PASS; I3 deferred", "stage": "i1_i2"},
     {"probes": "I1 & I2 & I3 all pass", "outcome": "3-probe PASS (frozen)", "stage": "i1_i2_i3"},
     {"probes": "I4: LLM says unknown", "outcome": "I4 PASS -- macro wrong, GLM caught it (word contract)", "stage": "i4"},
     {"probes": "I4: LLM says long (or wide)", "outcome": "I4 FAIL -- GLM did not catch it (word contract)", "stage": "i4"},
-    {"probes": "I5: LLM says unknown", "outcome": "I5 PASS -- prototypes fixed it: contract was UNDERSPECIFIED, not a capability limit. Skill needs canonical examples.", "stage": "i5"},
-    {"probes": "I5: LLM says wide (or long)", "outcome": "I5 FAIL -- even with prototypes GLM does not distinguish: stronger evidence of a contextual-classification LIMITATION", "stage": "i5"},
+    {"probes": "I5: LLM says unknown", "outcome": "I5 PASS -- prototypes fixed it: contract UNDERSPECIFIED", "stage": "i5"},
+    {"probes": "I5: LLM says wide (or long)", "outcome": "I5 FAIL -- prototypes did not fix it (English prototypes)", "stage": "i5"},
+    {"probes": "I6: LLM says unknown", "outcome": "I6 PASS -- Finnish prototypes fixed it: earlier failure was CROSS-LANGUAGE role transfer (align examples with source language)", "stage": "i6"},
+    {"probes": "I6: LLM says wide (or long)", "outcome": "I6 FAIL -- even matched-language prototypes do not fix it: boundary LOCATED (GLM wide/long not reliable for transposed monthly). STOP tightening.", "stage": "i6"},
     {"probes": "any of I1/I2/I3 fails", "outcome": "FAIL (record, do not relax)", "stage": "full"}
   ],
   "stated_limitations": [
-    "The deterministic classifier is a coarse month-token heuristic. It is correct on the clean wide/long controls and the no-month (quarterly) case. It is KNOWINGLY WRONG on I4/I5 (transposed wide): months land in a data column and the rule says 'long', but the expected label is 'unknown'. I4/I5 exist to demonstrate/test this; the classifier is left unchanged.",
+    "The deterministic classifier is a coarse month-token heuristic. It is correct on the clean wide/long controls and the no-month (quarterly) case. It is KNOWINGLY WRONG on I4/I5/I6 (transposed wide): months land in a data column and the rule says 'long', but the expected label is 'unknown'. The classifier is left unchanged.",
     "The gate is a VERIFIER, not an authority: it checks the LLM's label is objectively supported by the token criteria; it does not substitute its own answer (the criteria are too coarse to be authoritative, unlike H's coverage==12).",
-    "For I4/I5 the verifier is SUSPENDED as the grader: dl=12 would make gate.supported(long)=true and gate.supported(unknown)=false, but that evidence rule is exactly what I4 falsified. The frozen fixture expectation (oracle) grades I4/I5. The verifier's support values are still recorded as evidence.",
-    "I5's prototypes are in English (Product/Month/Sales, Jan/Feb/Mar); the target I4 fixture is Finnish (Kuukausi, Tammi..). This is deliberate: the prototypes are generic category illustrations and the cross-language match tests STRUCTURAL (not lexical) generalization. A fully controlled follow-up could use matched-language prototypes; the language difference is a stated caveat on the inference.",
+    "For I4/I5/I6 the verifier is SUSPENDED as the grader: dl=12 would make gate.supported(long)=true and gate.supported(unknown)=false, but that evidence rule is exactly what I4 falsified. The frozen fixture expectation (oracle) grades these probes. The verifier's support values are still recorded as evidence.",
+    "I5 prototypes are English; I6 prototypes are Finnish (matched to the target). I6 removes the cross-language confound that was I5's caveat. If I6 still fails, the cross-language explanation is ruled out and the boundary is located.",
     "n=1 on GLM-5.2, no seed control: existence, not reliability.",
-    "Classification only. No unpivot/reshape/transformation is produced or evaluated (hard stop honored). No 'transposed_wide' fourth label is added -- I4/I5 test whether the existing three-way contract correctly rejects an out-of-contract representation."
+    "Classification only. No unpivot/reshape/transformation is produced or evaluated (hard stop honored). No 'transposed_wide' fourth label is added."
   ],
   "hidden": true
 }
