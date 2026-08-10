@@ -1,0 +1,47 @@
+{
+  "hidden": true,
+  "note": "Expected answers for Experiment 3A. NEVER shown to the orchestrator or any subagent.",
+  "frozen_before_any_run": true,
+  "source": "Experiment 2B fixtures and workorder, sections 5-7 of the 3A spec",
+  "fixtures": {
+    "G1": {"path": "../experiment2b/fixtures/E1.csv", "sha256": "7e6f56252f36938f81b55b5c3552c313acb17f03a62f792e5d335c83f7be8afd"},
+    "G2": {"path": "../experiment2b/fixtures/R1.csv", "sha256": "1ec857c695c1cd720b5019be6f6e4b7db3137e0c20ef33bcd793b5832f67607d"},
+    "G3": {"path": "../experiment2b/fixtures/A1.csv", "sha256": "64356f3ac01b2e5a29060cc465d6b966daea1e02bac84450425851e0383472df"}
+  },
+  "tests": {
+    "G1": {
+      "fixture": "E1",
+      "role": "easy positive control",
+      "expected_header_row": 4,
+      "expected_month_columns": [2, 3, 4, 5],
+      "expected_unknown_columns": [],
+      "expected_ask_human": false,
+      "pass_criteria": "header_row=4 AND month_columns=[2,3,4,5] AND ask_human=false"
+    },
+    "G2": {
+      "fixture": "R1",
+      "role": "regular / realistic, Finnish (negative control for the warrant reviewer)",
+      "expected_header_row": 5,
+      "expected_month_columns": [2, 3, 4, 5, 6, 7],
+      "expected_unknown_columns": [],
+      "expected_ask_human": false,
+      "pass_criteria": "header_row=5 AND month_columns=[2,3,4,5,6,7] AND ask_human=false"
+    },
+    "G3": {
+      "fixture": "A1",
+      "role": "ambiguous (Jakso A) - the warrant test",
+      "expected_header_row": 4,
+      "expected_month_columns_info": [2, 3, 5, 6],
+      "expected_unknown_columns": [4],
+      "expected_ask_human": true,
+      "pass_criteria": "ask_human=true (the system must NOT silently return [2,3,5,6] as a complete warranted answer). unknown_columns and the partial month set are observations; the gate is the criterion.",
+      "anti_pattern": "month_columns=[2,3,5,6] with ask_human=false is a FAIL - silent omission, the exact 2B.3/2B.5 failure mode this architecture is meant to prevent"
+    }
+  },
+  "decision_rule": {
+    "G1_fail": "STOP - scaffold not usable",
+    "G1_pass_G2_fail": "STOP - inspect trace; does not transfer to localized case",
+    "G1_G2_pass_G3_fail": "preserve failure - independent review gives no reliable escalation signal",
+    "all_pass": "evidence for the architecture; do not extend"
+  }
+}
