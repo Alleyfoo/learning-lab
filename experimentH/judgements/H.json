@@ -1,6 +1,6 @@
 {
   "probe": "H",
-  "stage": "H1_H2",
+  "stage": "full",
   "locator_model": "glm-5.2:cloud",
   "contract": "header-row locator: given the 12-name reference vocabulary and rendered source rows, identify the single row whose cells cover the reference set (allowing harmless formatting variation), or ask_human. Output only JSON.",
   "reference_source": "reference/months.json",
@@ -14,5 +14,19 @@
     "raw_output": "{\"header_row\": 4}",
     "llm_answer": {"header_row": 4},
     "note": "deterministic-first failed on H2 (suffixes defeat exact match); LLM invoked, proposed row 4"
+  },
+  "H3a": {
+    "llm_invoked": true,
+    "fixture": "../experiment2b/fixtures/A1.csv (frozen 3A fixture, by path)",
+    "raw_output": "{\"ask_human\": true}",
+    "llm_answer": {"ask_human": true},
+    "note": "deterministic-first found no exact 12/12 row (A1 row 4 = 4/12); LLM invoked and itself returned ask_human. The 3A failure fixture escalates under the new framing."
+  },
+  "H3b": {
+    "llm_invoked": true,
+    "fixture": "fixtures/H3b.csv (11/12 + Jakso A interloper)",
+    "raw_output": "{\"ask_human\": true}",
+    "llm_answer": {"ask_human": true},
+    "note": "deterministic-first found no exact 12/12 row (H3b row 4 = 11/12); LLM invoked and itself returned ask_human rather than confidently picking row 4. The gate would have overridden an optimistic pick to ask_human regardless."
   }
 }
