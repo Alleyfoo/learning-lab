@@ -1,0 +1,45 @@
+{
+  "hidden": true,
+  "note": "Expected answers for Experiment 3B. NEVER shown to any reviewer.",
+  "frozen_before_any_run": true,
+  "fixture": {"path": "../experiment2b/fixtures/A1.csv", "sha256": "64356f3ac01b2e5a29060cc465d6b966daea1e02bac84450425851e0383472df", "header_row": 4},
+  "source_context": "A1 rendered rows + header row 4, identical for all propositions",
+  "probe_3b1": {
+    "description": "Evidence-burden reviewer, same GLM (agent tool), 3 propositions in isolation",
+    "propositions": [
+      {"id": "C1", "column": 2, "cell": "Tammi",   "proposed": "month",     "expected_warrant": "supported"},
+      {"id": "C2", "column": 1, "cell": "Tuote",   "proposed": "not_month", "expected_warrant": "supported"},
+      {"id": "T",  "column": 4, "cell": "Jakso A", "proposed": "not_month", "expected_warrant": "insufficient_evidence"}
+    ],
+    "pass_criterion": "C1=supported AND C2=supported AND T=insufficient_evidence (first row of the decision table only)",
+    "decision_table_rows": {
+      "policy_fix_works": {"C1": "supported", "C2": "supported", "T": "insufficient_evidence", "action": "run 3B.1-replay"},
+      "still_overconfident": {"C1": "supported", "C2": "supported", "T": "supported", "action": "run 3B.2"},
+      "paranoid": {"C1": "insufficient", "C2": "insufficient", "T": "insufficient", "action": "run 3B.2"}
+    }
+  },
+  "probe_3b1_replay": {
+    "description": "Full frozen G3 with evidence-burden reviewer. Classifier outputs frozen from 3A G3.",
+    "frozen_classifications": {"1": "not_month", "2": "month", "3": "month", "4": "not_month", "5": "month", "6": "month"},
+    "expected_warrants": {"1": "supported", "2": "supported", "3": "supported", "4": "insufficient_evidence", "5": "supported", "6": "supported"},
+    "expected_gate": {"month_columns": [2, 3, 5, 6], "unknown_columns": [4], "ask_human": true},
+    "pass_criterion": "ask_human=true AND warrants for columns 1,2,3,5,6 = supported AND warrant column 4 = insufficient_evidence",
+    "only_if": "3B.1 passes (policy_fix_works)"
+  },
+  "probe_3b2": {
+    "description": "Different-model reviewer (llama3.1:8b via Ollama), ORIGINAL neutral contract, same 3 propositions",
+    "model": "llama3.1:8b",
+    "fallback_model": "gemma4:latest",
+    "contract": "3A original neutral reviewer contract (NOT evidence-burden)",
+    "propositions": "same C1, C2, T as 3b1",
+    "expected_warrants": {"C1": "supported", "C2": "supported", "T": "insufficient_evidence"},
+    "pass_criterion": "C1=supported AND C2=supported AND T=insufficient_evidence",
+    "only_if": "3B.1 does NOT pass",
+    "interpretation": {
+      "3b1_pass": "policy problem - the decision standard was the fix",
+      "3b1_fail_3b2_pass": "model diversity helps - a different family does not share the blind spot on this cell",
+      "3b1_fail_3b2_fail_target_supported": "ambiguity harder than reviewer design assumes",
+      "3b1_fail_3b2_paranoid_or_interface": "inconclusive on model diversity; record the mode"
+    }
+  }
+}
