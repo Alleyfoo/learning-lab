@@ -1,0 +1,38 @@
+{
+  "hidden": true,
+  "note": "Expected answers for Experiment 3C. NEVER shown to any reviewer.",
+  "frozen_before_any_run": true,
+  "fixture": {"path": "../experiment2b/fixtures/A1.csv", "sha256": "64356f3ac01b2e5a29060cc465d6b966daea1e02bac84450425851e0383472df", "header_row": 4},
+  "reviewer": {"model": "glm-5.2:cloud", "contract": "evidence-burden (verbatim from 3B.1)", "invocation": "Claude Code agent tool, general-purpose, fresh isolated context per condition"},
+  "conditions": [
+    {"id": "F1", "evidence": "full", "target_cell": "Jakso A", "proposal": "not_month", "expected_warrant": "insufficient_evidence", "role": "re-probe of 3B.1 T (anchor)"},
+    {"id": "F2", "evidence": "full", "target_cell": "Jakso A", "proposal": "month",     "expected_warrant": "insufficient_evidence", "role": "direction inversion on full text"},
+    {"id": "M1", "evidence": "masked", "target_cell": "[TARGET]", "proposal": "not_month", "expected_warrant": "insufficient_evidence", "role": "lexical mask, not_month direction"},
+    {"id": "M2", "evidence": "masked", "target_cell": "[TARGET]", "proposal": "month",     "expected_warrant": "insufficient_evidence", "role": "lexical mask, month direction"}
+  ],
+  "normative_note": "All four expected_warrant = insufficient_evidence. Jakso A / [TARGET] is in the March position between Helmi (Feb) and Huhti (Apr); a materially different interpretation is always permitted, so the evidence-burden standard withholds regardless of proposal direction or masking.",
+  "predicted_observed": {
+    "note": "Based on 3B.1, the predicted observed F1 = supported (blind spot reproduces). F2/M1/M2 are the open variables. The decision table interprets whatever is observed.",
+    "F1": "supported"
+  },
+  "decision_table": {
+    "anchor": {"F1_supported": "blind spot reproduced -> proceed to mechanism axes", "F1_insufficient": "run_variance -> 3B.1 supported was not run-stable; mechanism moot; record and stop"},
+    "primary_axis": {
+      "F1_S_F2_I": "directional_prior (unfamiliar token defaults to not_month; closed-world)",
+      "F1_S_F2_S": "proposition_ratifying (reviewer endorses whichever direction it is handed)",
+      "F1_I_F2_I": "calibrated_on_cell (both withheld; blind spot not reproduced)",
+      "F1_I_F2_S": "inverse_directional (unfamiliar defaults to month; unexpected, inspect)"
+    },
+    "secondary_axis": {
+      "F1_S_M1_I": "lexical_origin (seeing Jakso A creates the unwarranted not_month; masking restores withholding)",
+      "F1_S_M1_S": "structural_exclusion (structure sustains not_month even without the lexical token)"
+    },
+    "m2_corroboration": {
+      "M1_I_M2_I": "masking restores calibration in both directions",
+      "M1_S_M2_S": "masking does not help; proposition_ratifying persists structurally",
+      "M1_I_M2_S": "masking inverts default to month (structural position pushes toward month)",
+      "M1_S_M2_I": "masked still defaults to not_month (directional_prior is structural, not lexical)"
+    }
+  },
+  "pass_criterion": "Diagnostic, not pass/fail. The probe is 'diagnostic' if F1=supported (blind spot reproduced) so the primary and secondary axes are grounded. A named combined mechanism is then reported. If F1=insufficient_evidence the outcome is run_variance."
+}
