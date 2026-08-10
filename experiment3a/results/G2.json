@@ -1,0 +1,114 @@
+{
+  "test": "G2",
+  "fixture": "R1",
+  "header_row": 5,
+  "header_located": true,
+  "header_row_correct": true,
+  "per_cell": [
+    {
+      "column": 1,
+      "cell": "Tuote",
+      "classification": "not_month",
+      "classification_parse_ok": true,
+      "warrant": "supported",
+      "warrant_parse_ok": true
+    },
+    {
+      "column": 2,
+      "cell": "Tammi",
+      "classification": "month",
+      "classification_parse_ok": true,
+      "warrant": "supported",
+      "warrant_parse_ok": true
+    },
+    {
+      "column": 3,
+      "cell": "Helmi",
+      "classification": "month",
+      "classification_parse_ok": true,
+      "warrant": "supported",
+      "warrant_parse_ok": true
+    },
+    {
+      "column": 4,
+      "cell": "Maalis",
+      "classification": "month",
+      "classification_parse_ok": true,
+      "warrant": "supported",
+      "warrant_parse_ok": true
+    },
+    {
+      "column": 5,
+      "cell": "Huhti",
+      "classification": "month",
+      "classification_parse_ok": true,
+      "warrant": "supported",
+      "warrant_parse_ok": true
+    },
+    {
+      "column": 6,
+      "cell": "Touko",
+      "classification": "month",
+      "classification_parse_ok": true,
+      "warrant": "supported",
+      "warrant_parse_ok": true
+    },
+    {
+      "column": 7,
+      "cell": "Kesä",
+      "classification": "month",
+      "classification_parse_ok": true,
+      "warrant": "supported",
+      "warrant_parse_ok": true
+    }
+  ],
+  "orchestrator_disposition": {
+    "rule": "2B.5 classification-only (no warrant)",
+    "month_columns": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "ask_human": false
+  },
+  "deterministic_gate": {
+    "rule": "classification + warrant; insufficient_evidence or unknown -> ask_human",
+    "month_columns": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "unknown_columns": [],
+    "ask_human": false,
+    "reason": "all_warranted",
+    "diverges_from_orchestrator": false
+  },
+  "expected": {
+    "header_row": 5,
+    "month_columns": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "unknown_columns": [],
+    "ask_human": false
+  },
+  "verdict": {
+    "passed": true,
+    "header_ok": true,
+    "months_ok": true,
+    "ask_human_ok": true,
+    "criterion": "header_row=5 AND month_columns=[2,3,4,5,6,7] AND ask_human=false"
+  },
+  "fixture_sha256": "1ec857c695c1cd720b5019be6f6e4b7db3137e0c20ef33bcd793b5832f67607d",
+  "fixture_sha256_matches_frozen": true
+}

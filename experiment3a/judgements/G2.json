@@ -1,0 +1,21 @@
+{
+  "test": "G2",
+  "fixture": "R1",
+  "fixture_path": "experiment2b/fixtures/R1.csv",
+  "header_locator": {
+    "raw_output": "{\"header_row\": 5}",
+    "parsed": {"header_row": 5}
+  },
+  "header_located": true,
+  "header_row": 5,
+  "cells": [
+    {"column": 1, "cell": "Tuote",   "classification": "not_month", "classification_raw": "{\"classification\": \"not_month\"}", "warrant": "supported", "warrant_raw": "{\"warrant\": \"supported\"}"},
+    {"column": 2, "cell": "Tammi",   "classification": "month",      "classification_raw": "{\"classification\": \"month\"}",      "warrant": "supported", "warrant_raw": "{\"warrant\": \"supported\"}"},
+    {"column": 3, "cell": "Helmi",   "classification": "month",      "classification_raw": "{\"classification\": \"month\"}",      "warrant": "supported", "warrant_raw": "{\"warrant\": \"supported\"}"},
+    {"column": 4, "cell": "Maalis",  "classification": "month",      "classification_raw": "{\"classification\": \"month\"}",      "warrant": "supported", "warrant_raw": "{\"warrant\": \"supported\"}"},
+    {"column": 5, "cell": "Huhti",   "classification": "month",      "classification_raw": "{\"classification\": \"month\"}",      "warrant": "supported", "warrant_raw": "{\"warrant\": \"supported\"}"},
+    {"column": 6, "cell": "Touko",   "classification": "month",      "classification_raw": "{\"classification\": \"month\"}",      "warrant": "supported", "warrant_raw": "{\"warrant\": \"supported\"}"},
+    {"column": 7, "cell": "Kesä",    "classification": "month",      "classification_raw": "{\"classification\": \"month\"}",      "warrant": "supported", "warrant_raw": "{\"warrant\": \"supported\"}"}
+  ],
+  "orchestrator_requested_disposition": "proceed"
+}
