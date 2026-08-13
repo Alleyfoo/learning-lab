@@ -1,0 +1,191 @@
+{
+  "probe": "J",
+  "purpose": "Macro v2: compile a human-reviewed failure (Experiment I's I4/I5/I6 boundary) into the deterministic saved recipe, and measure whether the amendment regresses previously supported shapes. NO LLM is invoked anywhere in J.",
+  "framed_question": "Can a human-reviewed failure be compiled into macro v2 without regressing previously supported provider shapes?",
+  "frozen_before_implementation": true,
+  "reference": {
+    "months_json": "experimentH/reference/months.json",
+    "months_json_sha256": "6393181b7623ebd7773e7f2bdbb68c2e48c8c2de413e57b0c3d23d8bb0c1ca99",
+    "v1_source": "experimentI/harness/gate_I.py",
+    "v1_source_sha256": "da76ed982614a7874b0272f390f9b898cef47b64b2983645a21feb25ff95a941",
+    "v1_note": "v1 (det_classify) and tolerant_match are imported VERBATIM from gate_I.py. If the hash differs at run time the run is VOID."
+  },
+  "thresholds": {"K_w": 3, "K_l": 3, "retuned_in_J": false},
+  "labels": ["wide", "long", "unknown"],
+  "label_semantics": {
+    "wide": "one row per entity; month axis ACROSS the header",
+    "long": "one row per (entity, month); month axis DOWN one column; measure in its own column",
+    "unknown": "neither cleanly holds -- REFUSAL / escalate to human (includes transposed layouts and non-monthly granularities)"
+  },
+  "v2_rule_text": [
+    "R1  if hw >= K_w                  -> wide",
+    "R2  elif len(month_cols) == 1:",
+    "R2a   if n_num >= 2               -> unknown   (month axis down a column AND values spread across >= 2 columns: transposed / out of contract)",
+    "R2b   elif n_num == 1             -> long      (exactly one measure column: canonical long)",
+    "R2c   else                        -> unknown   (no measure column found)",
+    "R3  elif len(month_cols) >= 2     -> unknown   (ambiguous month axis)",
+    "R4  else                          -> unknown",
+    "where hw = distinct reference months matched in header (tolerant); month_cols = data columns with >= K_l distinct months matched; other_cols = data columns not in month_cols; numeric(c) = column has >= 1 non-empty cell and EVERY non-empty cell parses as a number; n_num = count of numeric other_cols."
+  ],
+  "per_fixture": {
+    "I1": {
+      "fixture": "../experimentI/fixtures/I1.csv",
+      "sha256": "d8359268af8defd3bcd0fa468f0d5aa5f7501ece607478b0434aea508bca3f30",
+      "set": "retained",
+      "shape": "Tuote | Tammi..Kesa (6 months) + numeric rows",
+      "ground_truth": "wide",
+      "v1_expected": "wide",
+      "v2_predicted": "wide",
+      "rule_predicted": "R1",
+      "role": "wide control (frozen I PASS)"
+    },
+    "I2": {
+      "fixture": "../experimentI/fixtures/I2.csv",
+      "sha256": "1f18d247293c363a252681565f8d8a22a4a56355ea91cef3fec22101df337fd8",
+      "set": "retained",
+      "shape": "Tuote | Kuukausi | Myynti",
+      "ground_truth": "long",
+      "v1_expected": "long",
+      "v2_predicted": "long",
+      "rule_predicted": "R2b",
+      "role": "long control (frozen I PASS)"
+    },
+    "I3": {
+      "fixture": "../experimentI/fixtures/I3.csv",
+      "sha256": "ee35a4d26a811c57cd485b8dd9337da79e2180f06194246bdb70fb02bd7f1c86",
+      "set": "retained",
+      "shape": "Tuote | Q1..Q4 | Vuosi (quarterly, no month tokens)",
+      "ground_truth": "unknown",
+      "v1_expected": "unknown",
+      "v2_predicted": "unknown",
+      "rule_predicted": "R4",
+      "role": "unknown control (frozen I PASS)"
+    },
+    "I4": {
+      "fixture": "../experimentI/fixtures/I4.csv",
+      "sha256": "cd9257c88f5140b3a893497b9597a1b1c41b35a3eadd79be86d8dcc59064a63b",
+      "set": "retained",
+      "shape": "Kuukausi | ART-001 | ART-002 | ART-003, 12 months DOWN rows (transposed)",
+      "ground_truth": "unknown",
+      "v1_expected": "long",
+      "v2_predicted": "unknown",
+      "rule_predicted": "R2a",
+      "role": "THE reviewed failure. v2 was written to fix this; fixing it is NOT a finding, it is the premise."
+    },
+    "J1": {
+      "fixture": "fixtures/J1_wide_with_total.csv",
+      "sha256": "cdb311f6075d3acae4c24f0bbb7cce37d400feb77c7dbcf81e4353ed0f5d698a",
+      "set": "held_out",
+      "shape": "Tuote | Tammi..Huhti | Yhteensa (wide + non-month numeric column)",
+      "ground_truth": "wide",
+      "v1_expected": "wide",
+      "v2_predicted": "wide",
+      "rule_predicted": "R1",
+      "role": "does the long-branch amendment disturb the wide branch?"
+    },
+    "J2": {
+      "fixture": "fixtures/J2_long_extra_labels.csv",
+      "sha256": "90aa3b0935021f5abb6fa54eea36da9cb7147f62c9f677331b2e3511e059f59e",
+      "set": "held_out",
+      "shape": "Tuote | Maa | Kuukausi | Myynti (genuine long, several columns beside the month axis)",
+      "ground_truth": "long",
+      "v1_expected": "long",
+      "v2_predicted": "long",
+      "rule_predicted": "R2b",
+      "role": "REGRESSION TRAP for a naive 'multiple columns across -> unknown' reading. Label columns are not numeric, so n_num=1."
+    },
+    "J3": {
+      "fixture": "fixtures/J3_long_two_measures.csv",
+      "sha256": "3be275dcbc8e16d033115143ffa99ce1ae071289a6048a84fb36137d2a0fa5bf",
+      "set": "held_out",
+      "shape": "Tuote | Kuukausi | Myynti | Kate (genuine long, TWO measure columns)",
+      "ground_truth": "long",
+      "v1_expected": "long",
+      "v2_predicted": "unknown",
+      "rule_predicted": "R2a",
+      "role": "PREREGISTERED REGRESSION. n_num=2 cannot distinguish 'two measures' from 'two entity instances'. Frozen against v2 on the definition; v2 takes the miss. Do NOT fix v2 to pass this after the run."
+    },
+    "J4": {
+      "fixture": "fixtures/J4_transposed_two_entities.csv",
+      "sha256": "471f0ac8efa7b4f950f04c1ebb1293f0d9ec613eb8d9a817b4a8e5e2de9b279a",
+      "set": "held_out",
+      "shape": "Kuukausi | Myymala-A | Myymala-B, 6 months DOWN rows (transposed, minimum spread = 2)",
+      "ground_truth": "unknown",
+      "v1_expected": "long",
+      "v2_predicted": "unknown",
+      "rule_predicted": "R2a",
+      "role": "HELD-OUT REPAIR. A transposed shape v2 was not designed on: different vocabulary, different entity type, exactly 2 spread columns. This is the finding I4 cannot be."
+    },
+    "J5": {
+      "fixture": "fixtures/J5_transposed_single_series.csv",
+      "sha256": "0e4c267ffa169c0049c0ec381df003fefb9ff7c7bb84a813e2bca14ef8090909",
+      "set": "held_out",
+      "shape": "Kuukausi | Myynti (single time series: months down, ONE measure)",
+      "ground_truth": "long",
+      "v1_expected": "long",
+      "v2_predicted": "long",
+      "rule_predicted": "R2b",
+      "role": "SHARP BOUNDARY. Months down a column is not by itself transposed. v2 must not over-refuse here."
+    },
+    "J6": {
+      "fixture": "fixtures/J6_wide_two_months.csv",
+      "sha256": "6bada1767b73c7fb97e22a2eb2737cdf63bdfa80e868f785ee0c825cfaf96b5f",
+      "set": "held_out",
+      "shape": "Tuote | Tammi | Helmi (wide, only 2 month columns -- below K_w)",
+      "ground_truth": "wide",
+      "v1_expected": "unknown",
+      "v2_predicted": "unknown",
+      "rule_predicted": "R4",
+      "role": "SHARED LIMITATION (not a regression): the K_w=3 evidence threshold is carried into v2 unchanged. Both macros miss."
+    },
+    "J7": {
+      "fixture": "fixtures/J7_unknown_no_time.csv",
+      "sha256": "b0b39e7175ebb71418e671384edf1eb75589c0e018e73fb196d358c6ad453941",
+      "set": "held_out",
+      "shape": "Tuote | Asiakas | Maara (no time axis at all)",
+      "ground_truth": "unknown",
+      "v1_expected": "unknown",
+      "v2_predicted": "unknown",
+      "rule_predicted": "R4",
+      "role": "unknown control in a second direction (I3 is quarterly; this has no time axis)"
+    }
+  },
+  "predicted_totals": {
+    "v1_correct": 8,
+    "v2_correct": 9,
+    "n_fixtures": 11,
+    "repairs": ["I4", "J4"],
+    "regressions": ["J3"],
+    "shared_misses": ["J6"]
+  },
+  "grading": {
+    "v1_ok": "v1(f) == ground_truth(f)",
+    "v2_ok": "v2(f) == ground_truth(f)",
+    "repairs": "{ f : not v1_ok(f) and v2_ok(f) }",
+    "regressions": "{ f : v1_ok(f) and not v2_ok(f) }",
+    "fidelity": "for all f: v2(f) == v2_predicted(f)  -- a check on the AUTHOR's hand-simulation, not on v2's correctness",
+    "fixes_i4": "v2(I4) == unknown",
+    "preserves_controls": "v2(I1)==wide and v2(I2)==long and v2(I3)==unknown"
+  },
+  "decision_table": [
+    {"condition": "fixes_i4 and preserves_controls and regressions == []", "outcome": "CLEAN_COMPILE -- yes, without regression"},
+    {"condition": "fixes_i4 and preserves_controls and regressions == ['J3']", "outcome": "COMPILE_WITH_PREDICTED_COST -- yes on the located shape, at a named and predicted cost; the cost identifies the v3 question"},
+    {"condition": "fixes_i4 and preserves_controls and regressions contains any fixture other than J3", "outcome": "FAIL_UNPREDICTED_REGRESSION -- the amendment broke a shape its author did not anticipate. Record; do NOT patch and re-run"},
+    {"condition": "not fixes_i4", "outcome": "FAIL_COMPILE -- the hand-written rule does not do what it claims on the case it was written for"},
+    {"condition": "not preserves_controls", "outcome": "FAIL_CONTROLS_BROKEN"}
+  ],
+  "fidelity_policy": {
+    "code_deviates_from_frozen_rule_text": "BUG. Fix the code, re-run, record BOTH runs and the diff in RESULT.md. The rule text is authority.",
+    "code_matches_rule_text_but_prediction_was_wrong": "RESULT, not a bug. Rule text stands, output stands. Record that the author did not correctly predict their own rule. Do NOT amend the rule text or the prediction."
+  },
+  "stated_limitations": [
+    "v2 is HAND-designed knowing I4. 'v2 fixes I4' is the premise, not a finding. The load-bearing measurements are J4 (held-out repair), J3 (predicted cost), and the regression set.",
+    "n_num >= 2 cannot distinguish entity-instance columns (ART-001, Myymala-A) from distinct measure columns (Myynti, Kate). The stricter reading requires a semantic judgement and is deliberately NOT implemented; J3 measures what that costs.",
+    "K_w = K_l = 3 are carried unchanged. J6 shows the threshold is a real limitation of BOTH macros; J does not retune it.",
+    "The month reference vocabulary is Finnish short forms only (months.json). No cross-language generalization is claimed or tested in J.",
+    "11 fixtures, all authored in-lab; this is a controlled replay, not a sample of real provider files. It cannot estimate how often each shape occurs -- that is the UQ-1 question, kept separate.",
+    "Deterministic and fully repeatable: no LLM, no seeds, no sampling. Reliability of the MACRO is total; reliability of the AGENT is not at issue in J.",
+    "unknown is a refusal (escalate to human). A wrong unknown is a false refusal (safe direction); a wrong wide/long is a false assertion (unsafe). J scores them identically but reports the direction separately."
+  ],
+  "hidden": true
+}
