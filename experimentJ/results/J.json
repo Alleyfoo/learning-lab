@@ -1,0 +1,298 @@
+{
+  "probe": "J",
+  "llm_invoked": false,
+  "v1_source_sha256": "da76ed982614a7874b0272f390f9b898cef47b64b2983645a21feb25ff95a941",
+  "n_fixtures": 11,
+  "per_fixture": {
+    "I1": {
+      "set": "retained",
+      "shape": "Tuote | Tammi..Kesa (6 months) + numeric rows",
+      "ground_truth": "wide",
+      "v1": "wide",
+      "v1_ok": true,
+      "v1_expected": "wide",
+      "v1_as_predicted": true,
+      "v2": "wide",
+      "v2_ok": true,
+      "v2_predicted": "wide",
+      "v2_as_predicted": true,
+      "rule_fired": "R1",
+      "rule_predicted": "R1",
+      "rule_as_predicted": true,
+      "hw": 6,
+      "month_cols": [],
+      "n_num": 6,
+      "v1_miss_direction": null,
+      "v2_miss_direction": null
+    },
+    "I2": {
+      "set": "retained",
+      "shape": "Tuote | Kuukausi | Myynti",
+      "ground_truth": "long",
+      "v1": "long",
+      "v1_ok": true,
+      "v1_expected": "long",
+      "v1_as_predicted": true,
+      "v2": "long",
+      "v2_ok": true,
+      "v2_predicted": "long",
+      "v2_as_predicted": true,
+      "rule_fired": "R2b",
+      "rule_predicted": "R2b",
+      "rule_as_predicted": true,
+      "hw": 0,
+      "month_cols": [
+        1
+      ],
+      "n_num": 1,
+      "v1_miss_direction": null,
+      "v2_miss_direction": null
+    },
+    "I3": {
+      "set": "retained",
+      "shape": "Tuote | Q1..Q4 | Vuosi (quarterly, no month tokens)",
+      "ground_truth": "unknown",
+      "v1": "unknown",
+      "v1_ok": true,
+      "v1_expected": "unknown",
+      "v1_as_predicted": true,
+      "v2": "unknown",
+      "v2_ok": true,
+      "v2_predicted": "unknown",
+      "v2_as_predicted": true,
+      "rule_fired": "R4",
+      "rule_predicted": "R4",
+      "rule_as_predicted": true,
+      "hw": 0,
+      "month_cols": [],
+      "n_num": 5,
+      "v1_miss_direction": null,
+      "v2_miss_direction": null
+    },
+    "I4": {
+      "set": "retained",
+      "shape": "Kuukausi | ART-001 | ART-002 | ART-003, 12 months DOWN rows (transposed)",
+      "ground_truth": "unknown",
+      "v1": "long",
+      "v1_ok": false,
+      "v1_expected": "long",
+      "v1_as_predicted": true,
+      "v2": "unknown",
+      "v2_ok": true,
+      "v2_predicted": "unknown",
+      "v2_as_predicted": true,
+      "rule_fired": "R2a",
+      "rule_predicted": "R2a",
+      "rule_as_predicted": true,
+      "hw": 0,
+      "month_cols": [
+        0
+      ],
+      "n_num": 3,
+      "v1_miss_direction": "false_assertion",
+      "v2_miss_direction": null
+    },
+    "J1": {
+      "set": "held_out",
+      "shape": "Tuote | Tammi..Huhti | Yhteensa (wide + non-month numeric column)",
+      "ground_truth": "wide",
+      "v1": "wide",
+      "v1_ok": true,
+      "v1_expected": "wide",
+      "v1_as_predicted": true,
+      "v2": "wide",
+      "v2_ok": true,
+      "v2_predicted": "wide",
+      "v2_as_predicted": true,
+      "rule_fired": "R1",
+      "rule_predicted": "R1",
+      "rule_as_predicted": true,
+      "hw": 4,
+      "month_cols": [],
+      "n_num": 5,
+      "v1_miss_direction": null,
+      "v2_miss_direction": null
+    },
+    "J2": {
+      "set": "held_out",
+      "shape": "Tuote | Maa | Kuukausi | Myynti (genuine long, several columns beside the month axis)",
+      "ground_truth": "long",
+      "v1": "long",
+      "v1_ok": true,
+      "v1_expected": "long",
+      "v1_as_predicted": true,
+      "v2": "long",
+      "v2_ok": true,
+      "v2_predicted": "long",
+      "v2_as_predicted": true,
+      "rule_fired": "R2b",
+      "rule_predicted": "R2b",
+      "rule_as_predicted": true,
+      "hw": 0,
+      "month_cols": [
+        2
+      ],
+      "n_num": 1,
+      "v1_miss_direction": null,
+      "v2_miss_direction": null
+    },
+    "J3": {
+      "set": "held_out",
+      "shape": "Tuote | Kuukausi | Myynti | Kate (genuine long, TWO measure columns)",
+      "ground_truth": "long",
+      "v1": "long",
+      "v1_ok": true,
+      "v1_expected": "long",
+      "v1_as_predicted": true,
+      "v2": "unknown",
+      "v2_ok": false,
+      "v2_predicted": "unknown",
+      "v2_as_predicted": true,
+      "rule_fired": "R2a",
+      "rule_predicted": "R2a",
+      "rule_as_predicted": true,
+      "hw": 0,
+      "month_cols": [
+        1
+      ],
+      "n_num": 2,
+      "v1_miss_direction": null,
+      "v2_miss_direction": "false_refusal"
+    },
+    "J4": {
+      "set": "held_out",
+      "shape": "Kuukausi | Myymala-A | Myymala-B, 6 months DOWN rows (transposed, minimum spread = 2)",
+      "ground_truth": "unknown",
+      "v1": "long",
+      "v1_ok": false,
+      "v1_expected": "long",
+      "v1_as_predicted": true,
+      "v2": "unknown",
+      "v2_ok": true,
+      "v2_predicted": "unknown",
+      "v2_as_predicted": true,
+      "rule_fired": "R2a",
+      "rule_predicted": "R2a",
+      "rule_as_predicted": true,
+      "hw": 0,
+      "month_cols": [
+        0
+      ],
+      "n_num": 2,
+      "v1_miss_direction": "false_assertion",
+      "v2_miss_direction": null
+    },
+    "J5": {
+      "set": "held_out",
+      "shape": "Kuukausi | Myynti (single time series: months down, ONE measure)",
+      "ground_truth": "long",
+      "v1": "long",
+      "v1_ok": true,
+      "v1_expected": "long",
+      "v1_as_predicted": true,
+      "v2": "long",
+      "v2_ok": true,
+      "v2_predicted": "long",
+      "v2_as_predicted": true,
+      "rule_fired": "R2b",
+      "rule_predicted": "R2b",
+      "rule_as_predicted": true,
+      "hw": 0,
+      "month_cols": [
+        0
+      ],
+      "n_num": 1,
+      "v1_miss_direction": null,
+      "v2_miss_direction": null
+    },
+    "J6": {
+      "set": "held_out",
+      "shape": "Tuote | Tammi | Helmi (wide, only 2 month columns -- below K_w)",
+      "ground_truth": "wide",
+      "v1": "unknown",
+      "v1_ok": false,
+      "v1_expected": "unknown",
+      "v1_as_predicted": true,
+      "v2": "unknown",
+      "v2_ok": false,
+      "v2_predicted": "unknown",
+      "v2_as_predicted": true,
+      "rule_fired": "R4",
+      "rule_predicted": "R4",
+      "rule_as_predicted": true,
+      "hw": 2,
+      "month_cols": [],
+      "n_num": 2,
+      "v1_miss_direction": "false_refusal",
+      "v2_miss_direction": "false_refusal"
+    },
+    "J7": {
+      "set": "held_out",
+      "shape": "Tuote | Asiakas | Maara (no time axis at all)",
+      "ground_truth": "unknown",
+      "v1": "unknown",
+      "v1_ok": true,
+      "v1_expected": "unknown",
+      "v1_as_predicted": true,
+      "v2": "unknown",
+      "v2_ok": true,
+      "v2_predicted": "unknown",
+      "v2_as_predicted": true,
+      "rule_fired": "R4",
+      "rule_predicted": "R4",
+      "rule_as_predicted": true,
+      "hw": 0,
+      "month_cols": [],
+      "n_num": 1,
+      "v1_miss_direction": null,
+      "v2_miss_direction": null
+    }
+  },
+  "v1_correct": 8,
+  "v2_correct": 9,
+  "repairs": [
+    "I4",
+    "J4"
+  ],
+  "regressions": [
+    "J3"
+  ],
+  "shared_misses": [
+    "J6"
+  ],
+  "held_out_repairs": [
+    "J4"
+  ],
+  "v2_false_refusals": [
+    "J3",
+    "J6"
+  ],
+  "v2_false_assertions": [],
+  "v1_false_assertions": [
+    "I4",
+    "J4"
+  ],
+  "fixes_i4": true,
+  "preserves_controls": true,
+  "fidelity": true,
+  "rule_fidelity": true,
+  "v1_fidelity": true,
+  "fidelity_deviations": [],
+  "predicted_totals": {
+    "v1_correct": 8,
+    "v2_correct": 9,
+    "n_fixtures": 11,
+    "repairs": [
+      "I4",
+      "J4"
+    ],
+    "regressions": [
+      "J3"
+    ],
+    "shared_misses": [
+      "J6"
+    ]
+  },
+  "totals_as_predicted": true,
+  "outcome": "COMPILE_WITH_PREDICTED_COST"
+}
