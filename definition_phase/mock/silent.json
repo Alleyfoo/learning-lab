@@ -1,0 +1,14 @@
+{
+  "_mock": "HAND-WRITTEN by the harness author to test the instrument. NOT model output. No LLM produced this.",
+  "_role": "confident summariser: describes the file fluently, notices nothing. The dangerous failure -- the total row and total column go straight into the project definition as data.",
+  "observations": [],
+  "questions": [],
+  "structure": {
+    "header_row": 1,
+    "grain": "one row per product",
+    "time_axis": ["col:Tammi", "col:Helmi", "col:Maalis", "col:Yhteensä"],
+    "keys": ["col:Tuote"],
+    "measures": ["col:Tammi", "col:Helmi", "col:Maalis", "col:Yhteensä"]
+  },
+  "notes": "A clean wide monthly sales table with four periods and a product key. Ready to load."
+}

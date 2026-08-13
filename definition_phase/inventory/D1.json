@@ -1,0 +1,57 @@
+{
+  "fixture": "fixtures/D1_myyntiraportti.csv",
+  "status": "DRAFT -- illustrates the design; NOT frozen, no probe authorized",
+  "header_row": 4,
+  "note": "Inventory must be TOTAL over the observation channel: every column and every row of the fixture appears in exactly one of findables/clean_regions. Without totality an agent escapes the noise metric by flagging unlisted objects.",
+  "findables": [
+    {
+      "id": "F1",
+      "description": "A grand-total row is mixed into the data rows -- a grain violation. Consumed as data it double-counts.",
+      "accepted_referents": ["row:9", "cell:Tuote@9"],
+      "accepted_classes": ["aggregate_row", "total_row", "grain_violation"],
+      "critical": true
+    },
+    {
+      "id": "F2",
+      "description": "Yhteensa is a derived total column, not a period. Treated as a month it invents a 4th period.",
+      "accepted_referents": ["col:Yhteensä"],
+      "accepted_classes": ["aggregate_column", "total_column", "not_a_period", "derived_column"],
+      "critical": true
+    },
+    {
+      "id": "F3",
+      "description": "The header is not the first row: two title/metadata rows and a blank row precede it.",
+      "accepted_referents": ["row:1", "row:2", "row:3", "row:4"],
+      "accepted_classes": ["header_row_not_first", "title_rows", "metadata_rows", "preamble"],
+      "critical": true
+    },
+    {
+      "id": "F4",
+      "description": "Kommentti is a sparse free-text annotation column; whether it qualifies the figures is not stated.",
+      "accepted_referents": ["col:Kommentti", "cell:Kommentti@6", "row:6"],
+      "accepted_classes": ["free_text_column", "annotation_column", "sparse_column"],
+      "critical": false
+    }
+  ],
+  "clean_regions": ["col:Tuote", "col:Tammi", "col:Helmi", "col:Maalis", "row:5", "row:7", "row:8"],
+  "ambiguities": [
+    {
+      "id": "A1",
+      "description": "'korjattu' (corrected) on ART-002: does it mean those figures were restated? The material does not say. Unresolvable from the source alone.",
+      "accepted_referents": ["col:Kommentti", "cell:Kommentti@6", "row:6"]
+    }
+  ],
+  "resolvables": ["col:Tuote", "col:Tammi", "col:Helmi", "col:Maalis"],
+  "resolvables_note": "The material plainly establishes these. Asking a human about them is a false escalation. The question channel is deliberately NOT total: questions about unlisted referents are non-scoring, because some (e.g. 'is Yhteensa a total?') are defensible.",
+  "structure_expected": {
+    "header_row": 4,
+    "grain": "one row per product",
+    "time_axis": ["col:Tammi", "col:Helmi", "col:Maalis"],
+    "keys": ["col:Tuote"],
+    "measures": ["col:Tammi", "col:Helmi", "col:Maalis"]
+  },
+  "predicted_before_any_run": {
+    "note": "Frozen prediction placeholder -- to be filled and frozen when a real probe is preregistered.",
+    "located_gg_characterized": "located rate expected to exceed characterized rate (H vs I precedent)"
+  }
+}

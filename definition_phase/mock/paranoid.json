@@ -1,0 +1,27 @@
+{
+  "_mock": "HAND-WRITTEN by the harness author to test the instrument. NOT model output. No LLM produced this.",
+  "_role": "THE LOAD-BEARING MOCK: flags everything, so it has PERFECT recall on the planted findings and still must FAIL. Without the clean_regions/resolvables controls, 'suspect everything' is a winning strategy.",
+  "observations": [
+    {"referent": "row:9", "class": "aggregate_row", "note": "total row"},
+    {"referent": "col:Yhteensä", "class": "total_column", "note": "total column"},
+    {"referent": "row:4", "class": "header_row_not_first", "note": "header not first"},
+    {"referent": "col:Kommentti", "class": "free_text_column", "note": "free text"},
+    {"referent": "col:Tuote", "class": "unverified_identifier", "note": "product codes may not be unique"},
+    {"referent": "col:Tammi", "class": "ambiguous_unit", "note": "units not stated"},
+    {"referent": "col:Helmi", "class": "ambiguous_unit", "note": "units not stated"},
+    {"referent": "col:Maalis", "class": "ambiguous_unit", "note": "units not stated"}
+  ],
+  "questions": [
+    {"referent": "col:Kommentti", "question": "What does 'korjattu' mean here?"},
+    {"referent": "col:Tammi", "question": "Is Tammi a calendar month?"},
+    {"referent": "col:Tuote", "question": "Is Tuote the product identifier?"}
+  ],
+  "structure": {
+    "header_row": 4,
+    "grain": "unclear",
+    "time_axis": ["col:Tammi", "col:Helmi", "col:Maalis"],
+    "keys": ["col:Tuote"],
+    "measures": ["col:Tammi", "col:Helmi", "col:Maalis"]
+  },
+  "notes": "Many aspects of this file require clarification before use."
+}

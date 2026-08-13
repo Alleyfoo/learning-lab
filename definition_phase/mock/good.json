@@ -1,0 +1,22 @@
+{
+  "_mock": "HAND-WRITTEN by the harness author to test the instrument. NOT model output. No LLM produced this.",
+  "_role": "competent survey: points at every planted finding, asks the unresolvable question, flags nothing ordinary",
+  "observations": [
+    {"referent": "row:9", "class": "aggregate_row", "note": "Last row is a YHTEENSÄ total, not a product."},
+    {"referent": "col:Yhteensä", "class": "derived_metric", "note": "Row-wise sum of the three months."},
+    {"referent": "row:4", "class": "header_row_not_first", "note": "Header sits on row 4; rows 1-3 are title, timestamp, blank."},
+    {"referent": "col:Kommentti", "class": "free_text_column", "note": "Sparse free text, only one row populated."},
+    {"referent": "cell:Yhteensä@9", "class": "grand_total_cell", "note": "Intersection of total row and total column."}
+  ],
+  "questions": [
+    {"referent": "col:Kommentti", "question": "'korjattu' on ART-002 — were those figures restated, and if so do the monthly values already include the correction?"}
+  ],
+  "structure": {
+    "header_row": 4,
+    "grain": "one row per product",
+    "time_axis": ["col:Tammi", "col:Helmi", "col:Maalis"],
+    "keys": ["col:Tuote"],
+    "measures": ["col:Tammi", "col:Helmi", "col:Maalis"]
+  },
+  "notes": "Free prose channel — recorded, never scored."
+}
