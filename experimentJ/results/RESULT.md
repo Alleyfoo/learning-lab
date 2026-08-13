@@ -1,5 +1,9 @@
 # Experiment J — Result: COMPILE WITH PREDICTED COST
 
+**STATUS: FROZEN (2026-08-13), tag `expJ-final`.** No further probes on this
+line. The wide/long/transposed thread is closed at v2 — see "Stop rule" at the
+end of this document before proposing v3.
+
 **Question (designer's, verbatim):** *Can a human-reviewed failure be compiled
 into macro v2 without regressing previously supported provider shapes?*
 
@@ -153,3 +157,36 @@ architecture works.
 **Not authorized here. It needs its own preregistration** — what counts as the
 rule being extracted, what the held-out replay is, and what the gate does when
 the agent's answer is not established.
+
+## Stop rule — the line is frozen here (designer, 2026-08-13)
+
+**v3 is NOT the next experiment, and the wide/long/transposed thread is closed.**
+The designer's ruling on freezing J:
+
+> This is a laboratory and experimental, so we shouldn't go too deep into one
+> issue. We are trying to find ways to use agents in the initial phase when
+> defining the project, but a higher-level LLM should take care of the whole
+> project as a kind of analyzer for the system.
+
+Read against the record, that is a scope judgement, not a dissatisfaction with
+the result. The 3A→3E→H→I→J line has now been pushed to the point of diminishing
+return on **one** representation question: five experiments, three contract
+variants, two macro versions, and a measured cost. Continuing to v3 would buy
+one more predicate on one more table shape. The lab's purpose is **breadth of
+agent-use patterns**, not depth on wide/long.
+
+What J contributes to that purpose is the transferable part:
+
+- a failure the agent could not correct still compiled into the deterministic
+  system, and the compile was validated on shapes it was not designed for;
+- the cost of an amendment can be *predicted and measured* rather than assumed;
+- the safe error direction (refuse) can be bought with a named, bounded number
+  of extra escalations.
+
+Those hold regardless of whether the table was wide, long or transposed. The
+next line asks a different question — see `.handoff.md`, "Redirection".
+
+**Anyone picking this repo up: do not resume v3, do not tune v2 to pass J3, and
+do not add a fourth label.** If the measure-vs-entity question is ever wanted, it
+is a fresh preregistration and it should be justified on its own merits, not as
+"the obvious continuation."
