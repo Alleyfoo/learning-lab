@@ -5,9 +5,9 @@ Spec: `design/referent_grammar_v1.md`. The spec is authority; if this file and
 the spec disagree, this file is wrong.
 
 A referent is a deterministic address into a workbook — the primitive every
-definition-phase layer speaks. Surface form is A1-style and 1-BASED; the
-internal form is a frozen dataclass. Text in, object compared, canonical text
-out.
+definition-phase layer speaks. Surface form is A1-style; ALL INDICES ARE
+0-BASED, so they drop straight into pandas/openpyxl consumers without
+arithmetic.
 
     workbook:                      the workbook under definition
     sheetset:Months                a declared set of sheets
@@ -17,6 +17,18 @@ out.
     sheet:Sales!D                  column        sheet:Sales!D:P      column range
     sheet:Sales!@Myynti            column BY HEADER NAME
     sheet:'Myynti 2026'!A1         quoted sheet name
+
+TWO NUMBER SPACES, ONE BOUNDARY (spec sec.5)
+--------------------------------------------
+A1 notation is 1-based by definition: `D5` is what Excel shows in row 5,
+column D. Python, pandas, and this project's recipes are 0-based. Both are kept,
+and the conversion happens in exactly two functions -- `parse()` and `render()`:
+
+    "sheet:Sales!D5"  --parse-->  row0=4, col0=3   --render-->  "sheet:Sales!D5"
+
+Every field and parameter carrying an index is suffixed `0` (`row0`, `col0`,
+`header_rows0`) so the convention is visible at each call site rather than
+remembered. Nothing between parse and render ever sees a 1-based number.
 
 Binding mode is explicit and load-bearing: `!D` survives a rename and breaks on
 an inserted column; `!@Myynti` survives an insert and breaks on a rename. The
@@ -37,11 +49,11 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Mapping, Optional, Sequence
+from typing import Mapping, Optional, Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
 
-MAX_COL = 16384  # XFD, Excel's limit
+MAX_COL = 16384  # XFD, Excel's limit (a COUNT, so valid col0 is 0..MAX_COL-1)
 KINDS = (
     "workbook", "sheetset", "sheet",
     "cell", "cellrange", "row", "rowrange", "col", "colrange", "namedcol",
@@ -64,10 +76,10 @@ class ReferentSyntaxError(ValueError):
 
 
 # ---------------------------------------------------------------------------
-# Column letters <-> 1-based index
+# Column letters <-> 0-based index.  A->0, Z->25, AA->26, XFD->16383
 # ---------------------------------------------------------------------------
 
-def col_to_index(letters: str) -> int:
+def col_to_index0(letters: str) -> int:
     n = 0
     for ch in letters.upper():
         if not ("A" <= ch <= "Z"):
@@ -75,35 +87,36 @@ def col_to_index(letters: str) -> int:
         n = n * 26 + (ord(ch) - 64)
     if not 1 <= n <= MAX_COL:
         raise ReferentSyntaxError(f"column out of range: {letters!r}")
-    return n
+    return n - 1
 
 
-def index_to_col(index: int) -> str:
-    if not 1 <= index <= MAX_COL:
-        raise ReferentSyntaxError(f"column index out of range: {index}")
+def index0_to_col(index0: int) -> str:
+    if not 0 <= index0 < MAX_COL:
+        raise ReferentSyntaxError(f"column index out of range: {index0}")
+    n = index0 + 1
     out = ""
-    while index:
-        index, rem = divmod(index - 1, 26)
+    while n:
+        n, rem = divmod(n - 1, 26)
         out = chr(65 + rem) + out
     return out
 
 
 # ---------------------------------------------------------------------------
-# The object
+# The object — every index is 0-based and inclusive
 # ---------------------------------------------------------------------------
 
 @dataclass(frozen=True)
 class Referent:
     kind: str
     sheet: Optional[str] = None
-    name: Optional[str] = None          # sheetset name, or header text for namedcol
-    row1: Optional[int] = None
-    row2: Optional[int] = None
-    col1: Optional[int] = None
-    col2: Optional[int] = None
+    name: Optional[str] = None            # sheetset name, or header text
+    row0: Optional[int] = None            # first row, 0-based
+    row0_last: Optional[int] = None       # last row, 0-based INCLUSIVE
+    col0: Optional[int] = None
+    col0_last: Optional[int] = None
 
     def render(self) -> str:
-        """Canonical surface form."""
+        """Canonical A1 surface form (converts 0-based back to 1-based)."""
         if self.kind == "workbook":
             return "workbook:"
         if self.kind == "sheetset":
@@ -118,26 +131,22 @@ class Referent:
         if k == "namedcol":
             return f"@{self.name}"
         if k == "cell":
-            return f"{index_to_col(self.col1)}{self.row1}"
+            return f"{index0_to_col(self.col0)}{self.row0 + 1}"
         if k == "cellrange":
-            return (f"{index_to_col(self.col1)}{self.row1}:"
-                    f"{index_to_col(self.col2)}{self.row2}")
+            return (f"{index0_to_col(self.col0)}{self.row0 + 1}:"
+                    f"{index0_to_col(self.col0_last)}{self.row0_last + 1}")
         if k == "row":
-            return str(self.row1)
+            return str(self.row0 + 1)
         if k == "rowrange":
-            return f"{self.row1}:{self.row2}"
+            return f"{self.row0 + 1}:{self.row0_last + 1}"
         if k == "col":
-            return index_to_col(self.col1)
+            return index0_to_col(self.col0)
         if k == "colrange":
-            return f"{index_to_col(self.col1)}:{index_to_col(self.col2)}"
+            return f"{index0_to_col(self.col0)}:{index0_to_col(self.col0_last)}"
         raise ValueError(f"unrenderable kind: {k}")
 
     def key(self) -> str:
-        """Comparison key: two referents are the SAME referent iff keys match.
-
-        Casefold + collapse internal whitespace over the canonical form. This is
-        design v0's matcher, extended -- the grader compares on this.
-        """
+        """Comparison key: two referents are the SAME referent iff keys match."""
         return " ".join(self.render().casefold().split())
 
     def __str__(self) -> str:  # pragma: no cover - convenience
@@ -151,7 +160,7 @@ def _render_sheet_name(name: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Parsing
+# Parsing — the only place a 1-based number exists
 # ---------------------------------------------------------------------------
 
 _CELLRANGE = re.compile(r"([A-Za-z]{1,3})([1-9]\d*):([A-Za-z]{1,3})([1-9]\d*)")
@@ -213,8 +222,6 @@ def _split_sheet_and_span(rest: str) -> tuple[str, Optional[str]]:
             name, span = rest.split("!", 1)
         else:
             name, span = rest, None
-        # A bare name may not contain the characters that would make it
-        # ambiguous -- those require quoting.
         if any(ch in _NEEDS_QUOTE for ch in name):
             raise ReferentSyntaxError(
                 f"sheet name {name!r} must be quoted: contains one of space ! : '"
@@ -227,6 +234,7 @@ def _split_sheet_and_span(rest: str) -> tuple[str, Optional[str]]:
 
 
 def _parse_span(sheet: str, span: str) -> Referent:
+    """A1 text (1-based) -> Referent (0-based). The conversion lives here."""
     m = _NAMED.fullmatch(span)
     if m:
         header = m.group(1).strip()
@@ -236,31 +244,34 @@ def _parse_span(sheet: str, span: str) -> Referent:
 
     m = _CELLRANGE.fullmatch(span)
     if m:
-        c1, r1, c2, r2 = col_to_index(m.group(1)), int(m.group(2)), col_to_index(m.group(3)), int(m.group(4))
+        c_a, r_a = col_to_index0(m.group(1)), int(m.group(2)) - 1
+        c_b, r_b = col_to_index0(m.group(3)), int(m.group(4)) - 1
         return Referent(kind="cellrange", sheet=sheet,
-                        row1=min(r1, r2), row2=max(r1, r2),
-                        col1=min(c1, c2), col2=max(c1, c2))
+                        row0=min(r_a, r_b), row0_last=max(r_a, r_b),
+                        col0=min(c_a, c_b), col0_last=max(c_a, c_b))
 
     m = _CELL.fullmatch(span)
     if m:
         return Referent(kind="cell", sheet=sheet,
-                        row1=int(m.group(2)), col1=col_to_index(m.group(1)))
+                        row0=int(m.group(2)) - 1, col0=col_to_index0(m.group(1)))
 
     m = _ROWRANGE.fullmatch(span)
     if m:
-        a, b = int(m.group(1)), int(m.group(2))
-        return Referent(kind="rowrange", sheet=sheet, row1=min(a, b), row2=max(a, b))
+        a, b = int(m.group(1)) - 1, int(m.group(2)) - 1
+        return Referent(kind="rowrange", sheet=sheet,
+                        row0=min(a, b), row0_last=max(a, b))
 
     if _ROW.fullmatch(span):
-        return Referent(kind="row", sheet=sheet, row1=int(span))
+        return Referent(kind="row", sheet=sheet, row0=int(span) - 1)
 
     m = _COLRANGE.fullmatch(span)
     if m:
-        a, b = col_to_index(m.group(1)), col_to_index(m.group(2))
-        return Referent(kind="colrange", sheet=sheet, col1=min(a, b), col2=max(a, b))
+        a, b = col_to_index0(m.group(1)), col_to_index0(m.group(2))
+        return Referent(kind="colrange", sheet=sheet,
+                        col0=min(a, b), col0_last=max(a, b))
 
     if _COL.fullmatch(span):
-        return Referent(kind="col", sheet=sheet, col1=col_to_index(span))
+        return Referent(kind="col", sheet=sheet, col0=col_to_index0(span))
 
     raise ReferentSyntaxError(f"unparseable span: {span!r}")
 
@@ -268,45 +279,55 @@ def _parse_span(sheet: str, span: str) -> Referent:
 def from_legacy_pointer(sheet: str, pointer: Mapping[str, object]) -> Referent:
     """Convert a Data-agents-demo `manual_recipe` source_pointer to a Referent.
 
-    Legacy pointers are 0-BASED; this grammar is 1-based. The conversion lives
-    here, once, with a test -- a silent off-by-one would mis-bind every field in
-    a recipe while still producing a plausible table (spec sec.5).
+    Legacy pointers are 0-based and so is this grammar, so there is NO
+    arithmetic here -- the indices carry across unchanged. That is the point of
+    choosing 0-based internals: the adapter cannot introduce an off-by-one.
     """
     if "column" in pointer:
         return Referent(kind="namedcol", sheet=sheet, name=str(pointer["column"]))
     if "row" in pointer and "col" in pointer:
-        return Referent(
-            kind="cell", sheet=sheet,
-            row1=int(pointer["row"]) + 1, col1=int(pointer["col"]) + 1,
-        )
+        return Referent(kind="cell", sheet=sheet,
+                        row0=int(pointer["row"]), col0=int(pointer["col"]))
     if "column_index" in pointer:
-        return Referent(kind="col", sheet=sheet, col1=int(pointer["column_index"]) + 1)
+        return Referent(kind="col", sheet=sheet, col0=int(pointer["column_index"]))
     raise ReferentSyntaxError(f"unrecognised legacy pointer: {dict(pointer)!r}")
 
 
 # ---------------------------------------------------------------------------
-# Resolution
+# Resolution — 0-based inclusive bounds, plus half-open slices for pandas
 # ---------------------------------------------------------------------------
 
 @dataclass(frozen=True)
 class Resolution:
     ok: bool
     referent: Optional[Referent] = None
-    sheet: Optional[str] = None          # the workbook's ACTUAL spelling
-    sheets: Optional[tuple[str, ...]] = None   # for workbook:/sheetset:
-    row1: Optional[int] = None
-    row2: Optional[int] = None
-    col1: Optional[int] = None
-    col2: Optional[int] = None
+    sheet: Optional[str] = None                 # the workbook's ACTUAL spelling
+    sheets: Optional[tuple[str, ...]] = None    # for workbook:/sheetset:
+    row0: Optional[int] = None
+    row0_last: Optional[int] = None             # INCLUSIVE
+    col0: Optional[int] = None
+    col0_last: Optional[int] = None             # INCLUSIVE
     reason: Optional[str] = None
     detail: Optional[str] = None
 
+    def row_slice(self) -> tuple[int, int]:
+        """Half-open (start, stop) for df.iloc — no +1 at the call site."""
+        return self.row0, self.row0_last + 1
+
+    def col_slice(self) -> tuple[int, int]:
+        return self.col0, self.col0_last + 1
+
 
 class WorkbookView:
-    """Read-only view of a workbook: sheet names, used range, header values."""
+    """Read-only view: sheet names, used-range COUNTS, header values.
+
+    `dims()` returns counts (n_rows, n_cols), not max indices, so a bounds check
+    is `row0 < n_rows` with no off-by-one to get wrong. openpyxl is 1-based; the
+    conversion is confined to this class.
+    """
 
     def __init__(self, path: str | Path):
-        from openpyxl import load_workbook  # imported here: parsing needs no deps
+        from openpyxl import load_workbook  # parsing itself needs no deps
 
         self.path = Path(path)
         self._wb = load_workbook(self.path, data_only=True)
@@ -320,19 +341,25 @@ class WorkbookView:
         ws = self._wb[actual_sheet]
         return int(ws.max_row or 0), int(ws.max_column or 0)
 
-    def row_values(self, actual_sheet: str, row: int) -> list[str]:
+    def row_values(self, actual_sheet: str, row0: int) -> list[str]:
         ws = self._wb[actual_sheet]
-        values = next(ws.iter_rows(min_row=row, max_row=row, values_only=True), ())
+        one_based = row0 + 1
+        values = next(ws.iter_rows(min_row=one_based, max_row=one_based,
+                                   values_only=True), ())
         return ["" if v is None else str(v).strip() for v in values]
 
 
 def resolve(
     referent: Referent | str,
     wb: WorkbookView,
-    header_rows: Optional[Mapping[str, int]] = None,
+    header_rows0: Optional[Mapping[str, int]] = None,
     sheetsets: Optional[Mapping[str, Sequence[str]]] = None,
 ) -> Resolution:
-    """Resolve a referent against a workbook. Failure is a hard error."""
+    """Resolve a referent against a workbook. Failure is a hard error.
+
+    `header_rows0` maps sheet name -> 0-BASED header row index. A header on the
+    row Excel labels 4 is `3` here.
+    """
     if isinstance(referent, str):
         try:
             referent = parse(referent)
@@ -345,14 +372,14 @@ def resolve(
     if referent.kind == "sheetset":
         declared = (sheetsets or {}).get(referent.name or "")
         if declared is None:
-            return Resolution(ok=False, referent=referent, reason="sheetset_not_declared",
-                              detail=referent.name)
+            return Resolution(ok=False, referent=referent,
+                              reason="sheetset_not_declared", detail=referent.name)
         members: list[str] = []
         for member in declared:
             actual = wb.actual_sheet(member)
             if actual is None:
-                return Resolution(ok=False, referent=referent, reason="sheet_not_found",
-                                  detail=member)
+                return Resolution(ok=False, referent=referent,
+                                  reason="sheet_not_found", detail=member)
             members.append(actual)
         return Resolution(ok=True, referent=referent, sheets=tuple(members))
 
@@ -360,23 +387,24 @@ def resolve(
     if actual is None:
         return Resolution(ok=False, referent=referent, reason="sheet_not_found",
                           detail=referent.sheet)
-    max_row, max_col = wb.dims(actual)
+    n_rows, n_cols = wb.dims(actual)
 
     if referent.kind == "sheet":
         return Resolution(ok=True, referent=referent, sheet=actual,
-                          row1=1, row2=max_row, col1=1, col2=max_col)
+                          row0=0, row0_last=n_rows - 1,
+                          col0=0, col0_last=n_cols - 1)
 
     if referent.kind == "namedcol":
-        header_row = _header_row_for(actual, header_rows)
-        if header_row is None:
+        header_row0 = _header_row0_for(actual, header_rows0)
+        if header_row0 is None:
             return Resolution(ok=False, referent=referent, sheet=actual,
                               reason="header_row_not_declared", detail=actual)
-        if header_row > max_row:
+        if header_row0 >= n_rows:
             return Resolution(ok=False, referent=referent, sheet=actual,
                               reason="out_of_bounds",
-                              detail=f"header row {header_row} > max_row {max_row}")
+                              detail=f"header row0 {header_row0} >= {n_rows} rows")
         wanted = (referent.name or "").casefold()
-        hits = [i + 1 for i, v in enumerate(wb.row_values(actual, header_row))
+        hits = [i for i, v in enumerate(wb.row_values(actual, header_row0))
                 if v.casefold() == wanted]
         if not hits:
             return Resolution(ok=False, referent=referent, sheet=actual,
@@ -386,31 +414,37 @@ def resolve(
             # evidence does not establish.
             return Resolution(ok=False, referent=referent, sheet=actual,
                               reason="header_ambiguous",
-                              detail=f"{referent.name} at columns {hits}")
-        col = hits[0]
+                              detail=f"{referent.name} at col0 {hits}")
         return Resolution(ok=True, referent=referent, sheet=actual,
-                          row1=1, row2=max_row, col1=col, col2=col)
+                          row0=0, row0_last=n_rows - 1,
+                          col0=hits[0], col0_last=hits[0])
 
-    row1, row2 = referent.row1, referent.row2 or referent.row1
-    col1, col2 = referent.col1, referent.col2 or referent.col1
+    row0 = referent.row0
+    row0_last = referent.row0_last if referent.row0_last is not None else referent.row0
+    col0 = referent.col0
+    col0_last = referent.col0_last if referent.col0_last is not None else referent.col0
     if referent.kind in ("row", "rowrange"):
-        col1, col2 = 1, max_col
+        col0, col0_last = 0, n_cols - 1
     if referent.kind in ("col", "colrange"):
-        row1, row2 = 1, max_row
+        row0, row0_last = 0, n_rows - 1
 
-    if (row2 or 0) > max_row or (col2 or 0) > max_col:
-        return Resolution(ok=False, referent=referent, sheet=actual, reason="out_of_bounds",
-                          detail=f"used range is {max_row} rows x {max_col} cols")
+    if (row0_last is not None and row0_last >= n_rows) or \
+       (col0_last is not None and col0_last >= n_cols):
+        return Resolution(ok=False, referent=referent, sheet=actual,
+                          reason="out_of_bounds",
+                          detail=f"used range is {n_rows} rows x {n_cols} cols")
     return Resolution(ok=True, referent=referent, sheet=actual,
-                      row1=row1, row2=row2, col1=col1, col2=col2)
+                      row0=row0, row0_last=row0_last,
+                      col0=col0, col0_last=col0_last)
 
 
-def _header_row_for(actual_sheet: str, header_rows: Optional[Mapping[str, int]]) -> Optional[int]:
-    if not header_rows:
+def _header_row0_for(actual_sheet: str,
+                     header_rows0: Optional[Mapping[str, int]]) -> Optional[int]:
+    if not header_rows0:
         return None
-    for name, row in header_rows.items():
+    for name, row0 in header_rows0.items():
         if name.casefold() == actual_sheet.casefold():
-            return int(row)
+            return int(row0)
     return None
 
 
@@ -442,6 +476,21 @@ def _self_test() -> int:
         check(r.render() == text, f"round-trip {text!r} -> {r.render()!r}")
         check(r.kind in KINDS, f"unknown kind for {text!r}: {r.kind}")
 
+    # --- THE BOUNDARY: A1 text is 1-based, the object is 0-based -------------
+    a1 = parse("sheet:Sales!D5")
+    check((a1.row0, a1.col0) == (4, 3),
+          f"A1 'D5' must be row0=4 col0=3, got ({a1.row0}, {a1.col0})")
+    check(parse("sheet:Sales!A1").row0 == 0 and parse("sheet:Sales!A1").col0 == 0,
+          "A1 'A1' must be row0=0 col0=0")
+    check(parse("sheet:Sales!5").row0 == 4, "A1 row 5 must be row0=4")
+    check(parse("sheet:Sales!D").col0 == 3, "A1 col D must be col0=3")
+    rng = parse("sheet:Sales!B2:D5")
+    check((rng.row0, rng.row0_last, rng.col0, rng.col0_last) == (1, 4, 1, 3),
+          f"B2:D5 must be rows 1..4 cols 1..3 (0-based), got {rng}")
+    # Rendering converts back, so the string a human sees never shifts.
+    check(Referent(kind="cell", sheet="S", row0=0, col0=0).render() == "sheet:S!A1",
+          "row0=0/col0=0 must render as A1")
+
     # --- comparison key ------------------------------------------------------
     check(parse("sheet:sales!d5").key() == parse("sheet:Sales!D5").key(),
           "key should be case-insensitive")
@@ -466,24 +515,27 @@ def _self_test() -> int:
     check(parse("sheet:Sales!96:5").render() == "sheet:Sales!5:96", "rowrange must sort")
     check(parse("sheet:Sales!P:D").render() == "sheet:Sales!D:P", "colrange must sort")
 
-    # --- 1-based enforcement -------------------------------------------------
-    for bad in ("sheet:Sales!A0", "sheet:Sales!0", "sheet:Sales!0:5", "sheet:Sales!@", "sheet:!A1"):
+    # --- A1 has no row 0 / no column 0 ---------------------------------------
+    for bad in ("sheet:Sales!A0", "sheet:Sales!0", "sheet:Sales!0:5",
+                "sheet:Sales!@", "sheet:!A1"):
         try:
             parse(bad)
-            failures.append(f"{bad!r} must be rejected (1-based / non-empty)")
+            failures.append(f"{bad!r} must be rejected (A1 has no row 0)")
         except ReferentSyntaxError:
             pass
 
-    # --- column letter maths -------------------------------------------------
-    for letters, idx in (("A", 1), ("Z", 26), ("AA", 27), ("XFD", 16384)):
-        check(col_to_index(letters) == idx, f"col_to_index({letters}) != {idx}")
-        check(index_to_col(idx) == letters, f"index_to_col({idx}) != {letters}")
+    # --- column letter maths, 0-based ----------------------------------------
+    for letters, idx0 in (("A", 0), ("Z", 25), ("AA", 26), ("XFD", 16383)):
+        check(col_to_index0(letters) == idx0, f"col_to_index0({letters}) != {idx0}")
+        check(index0_to_col(idx0) == letters, f"index0_to_col({idx0}) != {letters}")
 
-    # --- legacy 0-based conversion (spec sec.5) ------------------------------
-    check(from_legacy_pointer("Sales", {"row": 0, "col": 0}).render() == "sheet:Sales!A1",
-          "legacy (0,0) must be A1")
-    check(from_legacy_pointer("Sales", {"row": 1, "col": 1}).render() == "sheet:Sales!B2",
-          "legacy (1,1) must be B2")
+    # --- legacy pointers are ALREADY 0-based: no arithmetic ------------------
+    legacy = from_legacy_pointer("Sales", {"row": 0, "col": 0})
+    check((legacy.row0, legacy.col0) == (0, 0), "legacy (0,0) must stay (0,0)")
+    check(legacy.render() == "sheet:Sales!A1", "legacy (0,0) renders as A1")
+    legacy2 = from_legacy_pointer("Sales", {"row": 1, "col": 1})
+    check((legacy2.row0, legacy2.col0) == (1, 1), "legacy (1,1) must stay (1,1)")
+    check(legacy2.render() == "sheet:Sales!B2", "legacy (1,1) renders as B2")
     check(from_legacy_pointer("Sales", {"column": "Myynti"}).render() == "sheet:Sales!@Myynti",
           "legacy named column")
 
@@ -493,39 +545,45 @@ def _self_test() -> int:
         failures.append(f"fixture missing: {fixture} (run make_w1.py)")
     else:
         wb = WorkbookView(fixture)
-        headers = {"Sales": 4, "Dup": 1, "Myynti 2026": 1}
+        # Sales headers sit on the row Excel labels 4 -> row0 = 3.
+        headers0 = {"Sales": 3, "Dup": 0, "Myynti 2026": 0}
 
         def res(text: str, **kw) -> Resolution:
-            r = resolve(text, wb, header_rows=kw.pop("headers", headers), **kw)
+            r = resolve(text, wb, header_rows0=kw.pop("headers0", headers0), **kw)
             if r.reason:
                 seen_reasons.add(r.reason)
             return r
 
         ok = res("sheet:Sales!A4")
-        check(ok.ok and ok.sheet == "Sales" and (ok.row1, ok.col1) == (4, 1),
-              f"Sales!A4 -> {ok}")
+        check(ok.ok and ok.sheet == "Sales" and (ok.row0, ok.col0) == (3, 0),
+              f"Sales!A4 -> row0 3, col0 0; got {ok}")
+        check(ok.row_slice() == (3, 4) and ok.col_slice() == (0, 1),
+              f"half-open slices for iloc: {ok.row_slice()}, {ok.col_slice()}")
 
         lower = res("sheet:sales!A1")
         check(lower.ok and lower.sheet == "Sales",
               "sheet lookup must be case-insensitive and report actual spelling")
 
         named = res("sheet:Sales!@Tuote")
-        check(named.ok and named.col1 == 1, f"@Tuote should resolve to column 1: {named}")
+        check(named.ok and named.col0 == 0, f"@Tuote should be col0 0: {named}")
         named2 = res("sheet:Sales!@Yhteensä")
-        check(named2.ok and named2.col1 == 5, f"@Yhteensä should be column 5: {named2}")
+        check(named2.ok and named2.col0 == 4, f"@Yhteensä should be col0 4: {named2}")
 
-        nodecl = res("sheet:Sales!@Tuote", headers=None)
-        check(nodecl.reason == "header_row_not_declared", f"expected header_row_not_declared: {nodecl}")
+        nodecl = res("sheet:Sales!@Tuote", headers0=None)
+        check(nodecl.reason == "header_row_not_declared",
+              f"expected header_row_not_declared: {nodecl}")
 
         ambig = res("sheet:Dup!@Myynti")
         check(ambig.reason == "header_ambiguous",
               f"duplicate headers must REFUSE, not pick the first: {ambig}")
-        check("[2, 3]" in (ambig.detail or ""), f"ambiguity should name the columns: {ambig.detail}")
+        check("[1, 2]" in (ambig.detail or ""),
+              f"ambiguity should name the 0-based columns: {ambig.detail}")
 
         check(res("sheet:Sales!@Nope").reason == "header_not_found", "missing header")
         check(res("sheet:Nope!A1").reason == "sheet_not_found", "missing sheet")
-        check(res("sheet:Sales!G1").reason == "out_of_bounds", "col 7 > max_col 6")
-        check(res("sheet:Sales!A10").reason == "out_of_bounds", "row 10 > max_row 9")
+        check(res("sheet:Sales!G1").reason == "out_of_bounds", "col0 6 >= 6 cols")
+        check(res("sheet:Sales!A10").reason == "out_of_bounds", "row0 9 >= 9 rows")
+        check(res("sheet:Sales!F9").ok, "F9 is the last cell of the used range")
         check(res("sheet:Sales!(").reason == "malformed", "unparseable span")
 
         spaced = res("sheet:'Myynti 2026'!B2")
@@ -541,11 +599,10 @@ def _self_test() -> int:
         check(whole.ok and len(whole.sheets or ()) == 6, f"workbook: -> {whole.sheets}")
 
         sheet_only = res("sheet:Sales")
-        check(sheet_only.ok and (sheet_only.row2, sheet_only.col2) == (9, 6),
-              f"sheet: should span the used range: {sheet_only}")
+        check(sheet_only.ok and (sheet_only.row0_last, sheet_only.col0_last) == (8, 5),
+              f"sheet: spans the used range as 0-based inclusive: {sheet_only}")
 
-        # Every declared failure reason must actually be exercised, so a reason
-        # cannot be declared in the enum and never tested.
+        # Every declared failure reason must actually be exercised.
         untested = set(REASONS) - seen_reasons
         check(not untested, f"declared but untested failure reasons: {sorted(untested)}")
 
@@ -553,9 +610,10 @@ def _self_test() -> int:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
         return 1
     sys.stdout.write(
-        "SELF-TEST PASSED (round-trips / keys / quoting + apostrophes / range ordering / "
-        "1-based / column maths / legacy 0-based conversion / resolution on a real "
-        "6-sheet workbook / all 7 failure reasons exercised incl. header_ambiguous)\n"
+        "SELF-TEST PASSED (round-trips / A1<->0-based boundary / keys / quoting + "
+        "apostrophes / range ordering / no row 0 in A1 / column maths / legacy "
+        "pointers carry across with no arithmetic / resolution + iloc slices on a "
+        "real 6-sheet workbook / all 7 failure reasons exercised)\n"
     )
     return 0
 

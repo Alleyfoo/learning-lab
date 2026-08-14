@@ -1,8 +1,9 @@
 # Referent grammar v1 — spec
 
-**STATUS: v1 proposed, self-test passing. Ready to freeze pending the designer's
-call on §2.** Step 1 of plan v1 §10. Nothing downstream should be built until
-this is frozen, because every layer speaks it.
+**STATUS: both open decisions settled by the designer 2026-08-14 — A1 surface
+form (§2), 0-based indices in code (§5). Self-test passing. READY TO FREEZE.**
+Step 1 of plan v1 §10. Every layer speaks this, so it is frozen before the
+recipe format is built on top of it.
 
 A **referent** is a deterministic address into a workbook. It is the primitive
 the whole definition phase is built on: the browser emits them, evidence
@@ -34,10 +35,10 @@ namedcol    := "@" header-text            @Myynti
 COL         := 1-3 letters, A..XFD        ROW := positive integer
 ```
 
-**1-based, like A1 and like what the user sees in Excel.** See §5 — this is a
-real hazard against the existing code.
+The **surface text** is A1, so `ROW` is a positive integer and there is no row 0
+— that is what A1 means. Every **index in code** is 0-based. See §5.
 
-## 2. Why A1 and not a structured form (open decision §9.1, decided provisionally)
+## 2. Why A1 and not a structured form (**DECIDED by the designer, 2026-08-14**)
 
 A1-style wins on the two things that matter here:
 
@@ -52,8 +53,7 @@ form, a typed object is the internal form.** Text is parsed to a frozen
 dataclass, compared structurally, and rendered back to canonical A1. Code diffs
 the object; humans and models read the string.
 
-Reject if you disagree — it propagates everywhere, so it is worth the argument
-now rather than after step 2.
+**Approved 2026-08-14**, together with the 0-based-indices decision in §5.
 
 ## 3. Binding mode is explicit, and that is the point
 
@@ -96,19 +96,48 @@ Sheet and header lookup is **case-insensitive**; resolution reports the
 workbook's actual spelling, so canonicalisation against a real workbook is a
 resolution result, not a string operation.
 
-## 5. Off-by-one hazard — 1-based here, 0-based there
+## 5. Two number spaces, one boundary (designer, 2026-08-14)
 
-`Data-agents-demo`'s `manual_recipe.json` uses **0-based** pointers:
+**Decision: A1 on the surface, 0-based everywhere in code.**
 
-```json
-{"source_pointer": {"row": 1, "col": 1}}     -> this grammar: sheet:X!B2
+These are not in conflict, but they are easy to conflate, so the rule is exact:
+
+- **A1 notation is 1-based by definition.** `D5` is the cell Excel shows in row
+  5, column D. The string is what a human reads and what they see when they
+  click that cell in Excel.
+- **Every index in code is 0-based**, because the consumers are Python, pandas
+  and openpyxl — and because `Data-agents-demo`'s existing `manual_recipe`
+  pointers are 0-based too.
+
+```text
+"sheet:Sales!D5"  --parse-->  row0=4, col0=3  --render-->  "sheet:Sales!D5"
 ```
 
-This grammar is **1-based**. Any adapter between them must convert explicitly, and
-a silent off-by-one would mis-bind every field in a recipe while still producing
-a plausible-looking table — the exact class of failure the programme is about.
-`from_legacy_pointer()` exists so the conversion has one implementation and one
-test, rather than being open-coded at each call site.
+The conversion happens in exactly two functions, `parse()` and `render()`.
+Nothing between them ever sees a 1-based number.
+
+**What was explicitly NOT done:** reinterpreting the A1 *string* as 0-based
+(so that `D5` would mean pandas row 5). That would make a recipe disagree with
+what the human sees in Excel by exactly one row, silently, on every binding —
+the precise failure class this programme exists to study.
+
+Three mechanisms keep the boundary from leaking:
+
+1. **Every index-bearing field and parameter is suffixed `0`** — `row0`,
+   `col0`, `row0_last`, `col0_last`, `header_rows0`. The convention is visible
+   at each call site rather than remembered. A header on the row Excel labels 4
+   is `header_rows0={"Sales": 3}`.
+2. **`WorkbookView.dims()` returns counts, not max indices** — `(9, 6)` for
+   `Sales`, so bounds are `row0 < n_rows` with no off-by-one available. openpyxl
+   is 1-based and that conversion is confined inside `WorkbookView`.
+3. **`Resolution.row_slice()` / `col_slice()` return half-open `(start, stop)`**
+   for `df.iloc`, so no caller writes `+1` by hand. Ranges are stored 0-based
+   *inclusive*; the slice helpers are the only sanctioned conversion.
+
+A welcome consequence: `from_legacy_pointer()` now does **no arithmetic at
+all** — legacy pointers are already 0-based, so the indices carry across
+unchanged. Choosing 0-based internals deleted that hazard rather than managing
+it.
 
 ## 6. Resolution
 
@@ -166,10 +195,17 @@ of truth). Six sheets, each earning its place:
 
 ## 9. Status
 
-Parser, renderer, comparison key, resolver and `from_legacy_pointer` are
-implemented in `harness/referents.py` with a self-test covering round-trips,
-canonicalisation, quoting, range ordering, 1-based enforcement, legacy
-conversion, and every failure reason including `header_ambiguous` against the
-real workbook.
+Parser, renderer, comparison key, resolver, slice helpers and
+`from_legacy_pointer` are implemented in `harness/referents.py` with a self-test
+covering round-trips, the A1↔0-based boundary in both directions, comparison
+keys, quoting including doubled apostrophes, range ordering, the absence of row 0
+in A1, column-letter maths to XFD, legacy pointers carrying across without
+arithmetic, `iloc` slice helpers, and every failure reason — including
+`header_ambiguous` — against the real workbook.
 
-**Awaiting: the §2 decision, then freeze.**
+```bash
+python definition_phase/harness/referents.py --self-test
+```
+
+Both open decisions are settled. **Ready to freeze; step 2 (recipe format +
+validator) can start.**
