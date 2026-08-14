@@ -44,6 +44,20 @@ TYPES = ("string", "number", "date", "boolean")
 REMAINDER = "remainder"
 EXCLUDE_RULE_OPS = ("label_in", "row_blank")
 
+# v1.2 -- row-shape expectation (Experiment K, C13). Declare what a data row
+# LOOKS LIKE, so a row that does not qualify escalates instead of being
+# absorbed by a `remainder` region.
+#
+# Both constraints are TYPE-LEVEL: they ask what KIND of value sits in a cell,
+# never what it says. No patterns, no regex, no value lists -- a predicate
+# language over untrusted cell content is an expression language arriving
+# through the back door.
+#
+# This is the first check that reads data-row CONTENT. It is bounded on
+# purpose: the validator learns only blank/numeric/neither per cell, so a
+# hostile workbook can force an ESCALATION and nothing else.
+ROW_SHAPE_CONSTRAINTS = ("require_non_blank", "require_numeric")
+
 # Which referent kinds a field role may bind (spec sec.2).
 COLUMN_KINDS = ("col", "colrange", "namedcol")
 COLUMN_BOUND_ROLES = ("id", "measure", "period_measure")
@@ -97,6 +111,24 @@ class Ambiguity:
 
 
 @dataclass(frozen=True)
+class RowShape:
+    require_non_blank: tuple[str, ...] = ()   # column referents
+    require_numeric: tuple[str, ...] = ()
+
+    @staticmethod
+    def from_json(raw: Mapping[str, Any]) -> "RowShape":
+        return RowShape(
+            require_non_blank=tuple(str(v) for v in raw.get("require_non_blank", ()) or ()),
+            require_numeric=tuple(str(v) for v in raw.get("require_numeric", ()) or ()),
+        )
+
+    def columns(self) -> tuple[tuple[str, str], ...]:
+        return tuple(
+            [("require_non_blank", c) for c in self.require_non_blank]
+            + [("require_numeric", c) for c in self.require_numeric])
+
+
+@dataclass(frozen=True)
 class SheetEntry:
     sheet: str                              # 'sheet:X' or 'sheetset:Y'
     role: str
@@ -107,6 +139,7 @@ class SheetEntry:
     fields: tuple[Field, ...] = ()
     exclude: tuple[Exclusion, ...] = ()
     ambiguities: tuple[Ambiguity, ...] = ()
+    data_row_shape: Optional[RowShape] = None
 
     @property
     def is_sheetset(self) -> bool:
@@ -179,6 +212,8 @@ def recipe_from_json(raw: Mapping[str, Any]) -> Recipe:
                           blocking=bool(a.get("blocking", False)))
                 for a in entry.get("ambiguities", ()) or ()
             ),
+            data_row_shape=(RowShape.from_json(entry["data_row_shape"])
+                            if isinstance(entry.get("data_row_shape"), Mapping) else None),
         ))
     return Recipe(
         recipe_version=int(raw.get("recipe_version", -1)),

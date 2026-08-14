@@ -213,5 +213,20 @@
     "No changes to the frozen grammar or to any recorded result.",
     "NO patterns, regex or value lists in data_row_shape."
   ],
-  "hidden": true
+  "hidden": true,
+  "recipes": {
+    "approved": {
+      "path": "recipes/W1_sales_v12_approved.json",
+      "sha256": "6b9c5ca481c08f8826504b2da131fcd114fe8cefc4018da67850cbc230aa44a6",
+      "approved_recipe_sha256": "419c53dd2e0abe5bdcccd8d93ba5ed7da1a88bd9fc42d075f259800f72d4e4b7"
+    },
+    "edited_after_approval": {
+      "path": "recipes/W1_sales_edited_after_approval.json",
+      "sha256": "63b81c3b3e5ae290914ee0281cdcc9b4881fa8e0ae33ee3609674f98ef10fbb4"
+    },
+    "open_ambiguity": {
+      "path": "recipes/W1_sales_open_ambiguity.json",
+      "sha256": "790035ca1b9fa9a51ad7ddb4773645ea6e610972146a9843e561613b81fedf6a"
+    }
+  }
 }

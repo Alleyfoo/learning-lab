@@ -42,6 +42,13 @@ BINDING_CODES = ("unresolvable_referent",)
 COVERAGE_CODES = (
     "column_unclassified", "row_unclassified", "sheet_unclassified",
     "column_double_bound", "row_double_classified",
+    # v1.2. `spec/v12_row_shape.md` requires the front door to treat a row-shape
+    # violation as a coverage problem. Omitting it here made the first v1.2 run
+    # report FAIL_FIX: the validator raised the violation and the dispatcher
+    # ignored it, so C13 executed. Code-deviates-from-frozen-spec is a bug under
+    # the fidelity policy; run 1 is preserved in
+    # `results/superseded/K_v12_run1_spec_deviation.json`.
+    "row_shape_violation",
 )
 
 

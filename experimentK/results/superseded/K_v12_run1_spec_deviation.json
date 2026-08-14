@@ -1,0 +1,195 @@
+{
+  "probe": "K-v12",
+  "llm_invoked": false,
+  "n_cases": 13,
+  "per_case": {
+    "C1": {
+      "changed": "nothing",
+      "ground_truth": "EXECUTE",
+      "v1": "EXECUTE",
+      "v11": "EXECUTE",
+      "v12": "EXECUTE",
+      "v12_predicted": "EXECUTE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "approval intact",
+      "delta": []
+    },
+    "C2": {
+      "changed": "the filename only (byte-identical to C1)",
+      "ground_truth": "EXECUTE",
+      "v1": "EXECUTE",
+      "v11": "EXECUTE",
+      "v12": "EXECUTE",
+      "v12_predicted": "EXECUTE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "approval intact",
+      "delta": []
+    },
+    "C3": {
+      "changed": "two more products; the total row moves (A1:F11)",
+      "ground_truth": "EXECUTE",
+      "v1": "REDEFINE_SCOPED",
+      "v11": "EXECUTE",
+      "v12": "EXECUTE",
+      "v12_predicted": "EXECUTE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "approval intact",
+      "delta": []
+    },
+    "C4": {
+      "changed": "Tuote -> Tuotekoodi",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1": "REDEFINE_SCOPED",
+      "v11": "REDEFINE_SCOPED",
+      "v12": "REDEFINE_SCOPED",
+      "v12_predicted": "REDEFINE_SCOPED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "the recipe no longer fully accounts for this workbook",
+      "delta": [
+        "unresolvable_referent: sheet:Sales!@Tuote -> header_not_found (Tuote)",
+        "unresolvable_referent: sheet:Sales!@Tuote -> header_not_found (Tuote)",
+        "unresolvable_referent: sheet:Sales!@Tuote -> header_not_found (Tuote)"
+      ]
+    },
+    "C5": {
+      "changed": "a Maa column inserted at B (A1:G9)",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1": "REDEFINE_SCOPED",
+      "v11": "REDEFINE_SCOPED",
+      "v12": "REDEFINE_SCOPED",
+      "v12_predicted": "REDEFINE_SCOPED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "the recipe no longer fully accounts for this workbook",
+      "delta": [
+        "column_unclassified: col0 4 is claimed by nothing"
+      ]
+    },
+    "C6": {
+      "changed": "a new Kampanjat sheet",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1": "REDEFINE_SCOPED",
+      "v11": "REDEFINE_SCOPED",
+      "v12": "REDEFINE_SCOPED",
+      "v12_predicted": "REDEFINE_SCOPED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "the recipe no longer fully accounts for this workbook",
+      "delta": [
+        "sheet_unclassified: every sheet must be given a role"
+      ]
+    },
+    "C7": {
+      "changed": "Sales -> Myynnit",
+      "ground_truth": "DEFINE",
+      "v1": "DEFINE",
+      "v11": "DEFINE",
+      "v12": "DEFINE",
+      "v12_predicted": "DEFINE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "no recipe binds a data sheet present in this workbook",
+      "delta": []
+    },
+    "C8": {
+      "changed": "SAME dimensions (6 sheets, A1:F9, same headers); one product row is now a VÄLISUMMA subtotal",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1": "EXECUTE",
+      "v11": "EXECUTE",
+      "v12": "EXECUTE",
+      "v12_predicted": "EXECUTE",
+      "agree": false,
+      "fidelity": true,
+      "reason": "approval intact",
+      "delta": []
+    },
+    "C9": {
+      "changed": "nothing; the recipe store is empty",
+      "ground_truth": "DEFINE",
+      "v1": "DEFINE",
+      "v11": "DEFINE",
+      "v12": "DEFINE",
+      "v12_predicted": "DEFINE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "no recipe binds a data sheet present in this workbook",
+      "delta": []
+    },
+    "C10": {
+      "changed": "nothing; two recipes claim the same data sheet",
+      "ground_truth": "AMBIGUOUS",
+      "v1": "AMBIGUOUS",
+      "v11": "AMBIGUOUS",
+      "v12": "AMBIGUOUS",
+      "v12_predicted": "AMBIGUOUS",
+      "agree": true,
+      "fidelity": true,
+      "reason": "2 recipes claim this workbook",
+      "delta": []
+    },
+    "C11": {
+      "changed": "nothing in the workbook; the RECIPE was edited after approval",
+      "ground_truth": "BLOCKED",
+      "v1": "BLOCKED",
+      "v11": "BLOCKED",
+      "v12": "BLOCKED",
+      "v12_predicted": "BLOCKED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "recipe was edited after approval (faf4c3c94632… != 15bf894528ef…)",
+      "delta": []
+    },
+    "C12": {
+      "changed": "nothing in the workbook; the recipe has an open blocking ambiguity",
+      "ground_truth": "BLOCKED",
+      "v1": "BLOCKED",
+      "v11": "BLOCKED",
+      "v12": "BLOCKED",
+      "v12_predicted": "BLOCKED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "a blocking ambiguity is still open",
+      "delta": []
+    },
+    "C13": {
+      "changed": "a footnote row ('Huom: sisältää palautukset') appended BELOW the grand total",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1": "REDEFINE_SCOPED",
+      "v11": "EXECUTE",
+      "v12": "EXECUTE",
+      "v12_predicted": "REDEFINE_SCOPED",
+      "agree": false,
+      "fidelity": false,
+      "reason": "approval intact",
+      "delta": []
+    }
+  },
+  "agree": 11,
+  "false_execute": [
+    "C8",
+    "C13"
+  ],
+  "over_escalation": [],
+  "fidelity_all": false,
+  "fidelity_deviations": [
+    {
+      "case": "C13",
+      "predicted": "REDEFINE_SCOPED",
+      "actual": "EXECUTE"
+    }
+  ],
+  "predicted_totals": {
+    "n_cases": 13,
+    "v12_agree": 12,
+    "v12_over_escalation": [],
+    "v12_false_execute": [
+      "C8"
+    ],
+    "headline": "v1.2 is predicted to be the first format that is unambiguously better: it keeps the C3 fix and pays back the C13 cost, leaving exactly one failure -- and that one is semantic, not structural."
+  },
+  "outcome": "FAIL_FIX"
+}

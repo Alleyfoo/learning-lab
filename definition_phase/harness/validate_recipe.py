@@ -39,9 +39,11 @@ sys.path.insert(0, str(HERE))
 
 from recipe import (  # noqa: E402
     COLUMN_BOUND_ROLES, COLUMN_KINDS, EXCLUDE_RULE_OPS, FIELD_ROLES, RECIPE_VERSIONS,
-    REMAINDER, SHEET_ROLES, TRANSFORM_OPS, TYPES, Exclusion, Recipe, SheetEntry,
-    load_recipe,
+    REMAINDER, ROW_SHAPE_CONSTRAINTS, SHEET_ROLES, TRANSFORM_OPS, TYPES, Exclusion,
+    Recipe, SheetEntry, load_recipe,
 )
+sys.path.insert(0, str(HERE.parent.parent / "experimentJ" / "harness"))
+from macro_v2 import is_number  # noqa: E402  (frozen numeric parse, Experiment J)
 from referents import (  # noqa: E402
     ReferentSyntaxError, Referent, WorkbookView, parse, resolve,
 )
@@ -57,7 +59,7 @@ PROBLEM_CODES = (
     "unresolvable_referent",
     # coverage
     "sheet_unclassified", "column_unclassified", "column_double_bound",
-    "row_unclassified", "row_double_classified",
+    "row_unclassified", "row_double_classified", "row_shape_violation",
     # sheetset
     "sheetset_member_layout_mismatch",
     # approval (does NOT make the recipe invalid)
@@ -148,6 +150,13 @@ def validate(recipe: Recipe, wb: WorkbookView) -> Report:
                                         "an exclusion needs exactly one of referent / rule"))
             if exc.rule and exc.rule.op not in EXCLUDE_RULE_OPS:
                 problems.append(Problem("unknown_exclude_rule_op", where, exc.rule.op))
+        if entry.data_row_shape:
+            for constraint, ref_text in entry.data_row_shape.columns():
+                ref = _parse_ref(ref_text, f"{where}:{constraint}", problems)
+                if ref is not None and ref.kind not in COLUMN_KINDS:
+                    problems.append(Problem("wrong_referent_kind", where,
+                                            f"data_row_shape.{constraint} needs a column "
+                                            f"referent, got {ref.kind}"))
         for fld in entry.fields:
             fwhere = f"{where}:{fld.target or '<no target>'}"
             if not fld.target:
@@ -217,6 +226,9 @@ def validate(recipe: Recipe, wb: WorkbookView) -> Report:
         for fld in entry.fields:
             if fld.source:
                 _resolve(fld.source, f"{entry.sheet}:{fld.target}")
+        if entry.data_row_shape:
+            for constraint, ref_text in entry.data_row_shape.columns():
+                _resolve(ref_text, f"{entry.sheet}:{constraint}")
 
     # ---- 3. coverage --------------------------------------------------------
     declared: set[str] = set()
@@ -357,6 +369,9 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
                 problems.append(Problem("metadata_cell_in_data_region",
                                         f"{entry.sheet}:{fld.target}", fld.source))
 
+    if entry.data_row_shape:
+        _check_row_shape(entry, wb, sheet, sorted(data_rows), header_rows0, problems)
+
     for r in range(n_rows):
         labels = row_claims.get(r, [])
         if not labels:
@@ -379,6 +394,43 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
         "rows": {r: row_claims.get(r, []) for r in range(n_rows)},
         "cols": {c: col_claims.get(c, []) for c in range(n_cols)},
     }
+
+
+def _check_row_shape(entry: SheetEntry, wb: WorkbookView, sheet: str,
+                     data_rows: list[int], header_rows0: dict,
+                     problems: list[Problem]) -> None:
+    """Every data row must satisfy the declared shape (v1.2).
+
+    TYPE-LEVEL only: blank / numeric / neither. The validator never branches on
+    what a cell SAYS, so a hostile workbook can force an escalation and nothing
+    else -- the widened input surface buys detection without buying authority.
+    """
+    from referents import parse as _parse
+
+    shape = entry.data_row_shape
+    if shape is None:
+        return
+    resolved: list[tuple[str, str, int]] = []
+    for constraint, ref_text in shape.columns():
+        r = resolve(ref_text, wb, header_rows0=header_rows0)
+        if not r.ok:
+            continue                      # already reported as unresolvable
+        for col0 in range(r.col0, r.col0_last + 1):
+            resolved.append((constraint, ref_text, col0))
+
+    for row0 in data_rows:
+        values = wb.row_values(sheet, row0)
+        for constraint, ref_text, col0 in resolved:
+            cell = values[col0] if col0 < len(values) else ""
+            if constraint == "require_non_blank" and cell.strip() == "":
+                problems.append(Problem(
+                    "row_shape_violation", entry.sheet,
+                    f"row0 {row0} (A1 row {row0 + 1}): {ref_text} col0 {col0} is blank"))
+            elif constraint == "require_numeric" and not is_number(cell):
+                problems.append(Problem(
+                    "row_shape_violation", entry.sheet,
+                    f"row0 {row0} (A1 row {row0 + 1}): {ref_text} col0 {col0} "
+                    f"is not numeric ({cell.strip()[:24]!r})"))
 
 
 def _rule_rows(exc: Exclusion, wb: WorkbookView, sheet: str, n_rows: int,
@@ -546,6 +598,32 @@ def _self_test() -> int:
     check(not [p for p in rep11_more.problems if p.code != "blocking_ambiguity"],
           f"v1.1 must have no coverage problems on C3: "
           f"{[str(p) for p in rep11_more.problems]}")
+
+    # --- v1.2: row-shape expectation (Experiment K, C13) ---------------------
+    v12 = load_recipe(ROOT / "recipes" / "W1_sales_v12.json")
+    rep12 = validate(v12, wb)
+    seen_codes |= rep12.codes()
+    check(rep12.valid, f"W1_sales_v12 should be valid on W1: "
+                       f"{[str(p) for p in rep12.problems]}")
+    # The footnote fixture is what the shape rule exists to catch.
+    wb_foot = WorkbookView(ROOT.parent / "experimentK" / "fixtures" / "C13_footnote_row.xlsx")
+    rep12_foot = validate(v12, wb_foot)
+    seen_codes |= rep12_foot.codes()
+    check("row_shape_violation" in rep12_foot.codes(),
+          f"a footnote row with blank measures must violate the shape: "
+          f"{sorted(rep12_foot.codes())}")
+    # ...and the subtotal fixture is what it provably CANNOT catch: VÄLISUMMA is
+    # non-blank and its measures are numeric, so it has exactly a data row's
+    # shape. This asserts the boundary, not a capability.
+    wb_sub = WorkbookView(ROOT.parent / "experimentK" / "fixtures" / "C8_silent_subtotal.xlsx")
+    rep12_sub = validate(v12, wb_sub)
+    check("row_shape_violation" not in rep12_sub.codes(),
+          "a subtotal row has a data row's SHAPE; a type-level rule must not "
+          "claim to catch it")
+    # v1.1 (no shape declared) must be unaffected by any of this.
+    check("row_shape_violation" not in validate(
+        load_recipe(ROOT / "recipes" / "W1_sales_v11.json"), wb_foot).codes(),
+        "a recipe without data_row_shape must not gain the check")
 
     # --- v1.1 structural failures -------------------------------------------
     from recipe import recipe_from_json as _rfj
@@ -738,7 +816,8 @@ def _self_test() -> int:
     sys.stdout.write(
         "SELF-TEST PASSED (W1_sales valid but NOT approvable / sheetset recipe valid / "
         "missing total row -> row_unclassified / double-bound column + undeclared sheet / "
-        "legacy adapter round-trip / dry run pulls real values / all 19 problem codes "
+        "legacy adapter round-trip / dry run pulls real values / v1.2 row shape catches "
+        "the footnote and provably does NOT catch the subtotal / all 23 problem codes "
         "exercised)\n"
     )
     return 0
