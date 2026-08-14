@@ -1,0 +1,98 @@
+{
+  "mutations": 6,
+  "killed": 6,
+  "survivors": [],
+  "not_restored": [],
+  "results": [
+    {
+      "primitive": "no_partial_honour",
+      "mutation": "detector always returns None",
+      "canary_before": {
+        "reached": true,
+        "fired": true
+      },
+      "canary_after": {
+        "reached": true,
+        "fired": false
+      },
+      "verdict": "killed",
+      "restored_ok": true,
+      "detail": "did NOT fire with the guard removed"
+    },
+    {
+      "primitive": "no_undeclared_output",
+      "mutation": "detector always returns None",
+      "canary_before": {
+        "reached": true,
+        "fired": true
+      },
+      "canary_after": {
+        "reached": true,
+        "fired": false
+      },
+      "verdict": "killed",
+      "restored_ok": true,
+      "detail": "did NOT fire on an undeclared output column"
+    },
+    {
+      "primitive": "no_undeclared_interpretation",
+      "mutation": "detector always returns None",
+      "canary_before": {
+        "reached": true,
+        "fired": true
+      },
+      "canary_after": {
+        "reached": true,
+        "fired": false
+      },
+      "verdict": "killed",
+      "restored_ok": true,
+      "detail": "did NOT fire on an undeclared string->int coercion"
+    },
+    {
+      "primitive": "no_undeclared_interpretation",
+      "mutation": "compares by str(), dropping (type, value) identity",
+      "canary_before": {
+        "reached": true,
+        "fired": true
+      },
+      "canary_after": {
+        "reached": true,
+        "fired": false
+      },
+      "verdict": "killed",
+      "restored_ok": true,
+      "detail": "did NOT fire on '123'->123, which differs ONLY by type -- the detector is not applying (type, value)"
+    },
+    {
+      "primitive": "no_silent_loss_on_admission",
+      "mutation": "detector always returns None",
+      "canary_before": {
+        "reached": true,
+        "fired": true
+      },
+      "canary_after": {
+        "reached": true,
+        "fired": false
+      },
+      "verdict": "killed",
+      "restored_ok": true,
+      "detail": "detector did not fire"
+    },
+    {
+      "primitive": "no_silent_loss_on_admission",
+      "mutation": "treats any formula as fine, cached or not",
+      "canary_before": {
+        "reached": true,
+        "fired": true
+      },
+      "canary_after": {
+        "reached": true,
+        "fired": false
+      },
+      "verdict": "killed",
+      "restored_ok": true,
+      "detail": "detector did not fire"
+    }
+  ]
+}

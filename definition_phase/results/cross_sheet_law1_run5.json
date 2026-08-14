@@ -1,0 +1,128 @@
+{
+  "cases": 3,
+  "results": [
+    {
+      "case": "sheet_name_case",
+      "same_origin": true,
+      "origin_detail": "sheet:Sales!A1 -> Sales[0:0,0:0] | sheet:SALES!A1 -> Sales[0:0,0:0]",
+      "baseline": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A",
+            1
+          ],
+          [
+            "B",
+            2
+          ]
+        ]
+      },
+      "mutated": {
+        "refused": true,
+        "codes": [
+          "sheet_origin_aliased"
+        ]
+      },
+      "paths": [
+        "sheet:Sales",
+        "sheet:SALES"
+      ],
+      "verdict": "refuse",
+      "why": "validation refused the aliased relationship: ['sheet_origin_aliased']"
+    },
+    {
+      "case": "named_vs_positional",
+      "same_origin": true,
+      "origin_detail": "sheet:Sales!@Tuote -> Sales[0:2,0:0] | sheet:Sales!A:A -> Sales[0:2,0:0]",
+      "baseline": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A",
+            1
+          ],
+          [
+            "B",
+            2
+          ]
+        ]
+      },
+      "mutated": {
+        "refused": true,
+        "codes": [
+          "column_double_bound"
+        ]
+      },
+      "paths": [
+        "sheet:Sales!@Tuote",
+        "sheet:Sales!A:A"
+      ],
+      "verdict": "refuse",
+      "why": "validation refused the aliased relationship: ['column_double_bound']"
+    },
+    {
+      "case": "distinct_sheets_same_content",
+      "same_origin": false,
+      "origin_detail": "sheet:Jan!A1 -> Jan[0:0,0:0] | sheet:Feb!A1 -> Feb[0:0,0:0]",
+      "baseline": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A",
+            1
+          ],
+          [
+            "B",
+            2
+          ]
+        ]
+      },
+      "mutated": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A",
+            1
+          ],
+          [
+            "B",
+            2
+          ],
+          [
+            "A",
+            1
+          ],
+          [
+            "B",
+            2
+          ]
+        ]
+      },
+      "paths": [
+        "sheet:Jan",
+        "sheet:Feb"
+      ],
+      "control": true,
+      "verdict": "legitimate",
+      "why": "distinct origins both contributed (2 -> 4 rows); the law did not fire on identical content"
+    }
+  ],
+  "violations": []
+}

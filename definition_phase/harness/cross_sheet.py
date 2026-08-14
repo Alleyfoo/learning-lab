@@ -266,7 +266,11 @@ def case_distinct_sheets_same_content(tmp: Path) -> dict:
     view = WorkbookView(path)
     same, detail = assert_same_origin(view, "sheet:Jan!A1", "sheet:Feb!A1")
 
-    baseline = _outcome(path, _recipe([_entry("sheet:Jan", _fields("sheet:Jan"))]))
+    # Feb must be CLASSIFIED in the baseline, or the recipe is refused for
+    # sheet_unclassified and the control demonstrates nothing (run 2's mistake).
+    ignored = {"sheet": "sheet:Feb", "role": "ignore", "fields": [], "exclude": [],
+               "ambiguities": []}
+    baseline = _outcome(path, _recipe([_entry("sheet:Jan", _fields("sheet:Jan")), ignored]))
     both = _outcome(path, _recipe([_entry("sheet:Jan", _fields("sheet:Jan")),
                                    _entry("sheet:Feb", _fields("sheet:Feb", "_b"))]))
     return {"case": "distinct_sheets_same_content", "same_origin": same,

@@ -67,6 +67,8 @@ PROBLEM_CODES = (
     "sheet_unclassified", "column_unclassified", "column_double_bound",
     "row_unclassified", "row_double_classified", "row_shape_violation",
     "reconciliation_failure",
+    # origin aliasing: one sheet reached by two declarations (PRO-2 instance 10)
+    "sheet_origin_aliased",
     # sheetset
     "sheetset_member_layout_mismatch",
     # approval (does NOT make the recipe invalid)
@@ -299,6 +301,9 @@ def validate(recipe: Recipe, wb: WorkbookView) -> Report:
     for entry in recipe.sheets:
         if entry.is_sheetset and entry.role == "data":
             _check_sheetset_layout(recipe, entry, wb, header_rows0, problems)
+
+    # ---- 4b. one origin, two declarations (PRO-2 instance 10) ---------------
+    _check_sheet_origin_aliasing(recipe, wb, problems)
 
     # ---- verdict ------------------------------------------------------------
     for entry in recipe.sheets:
@@ -568,6 +573,44 @@ def _rule_rows(exc: Exclusion, wb: WorkbookView, sheet: str, n_rows: int,
                 normalize_for("label_in", values[resolved.col0]) in wanted:
             hits.add(r)
     return hits
+
+
+def _check_sheet_origin_aliasing(recipe: Recipe, wb: WorkbookView,
+                                 problems: list[Problem]) -> None:
+    """Two declarations must not resolve to one sheet ORIGIN (PRO-2 instance 10).
+
+    `column_double_bound` had the right idea already — it keys the claim map by
+    resolved `col0` rather than by referent text — but the coverage map is built
+    per sheet entry, so two entries naming one sheet each got their own map and
+    neither could see the other. This is the same rule at recipe scope.
+
+    Identity is ORIGIN, never content: two sheets holding byte-identical data
+    are two sources and both contribute. What is refused is one origin reached
+    twice, because nothing in the language authorises contributing it twice.
+    """
+    by_origin: dict[str, list[str]] = {}
+    for entry in recipe.sheets:
+        if entry.role == "ignore":
+            continue                       # ignored material contributes nothing
+        try:
+            ref = parse(entry.sheet)
+        except ReferentSyntaxError:
+            continue                       # reported as malformed_referent
+        if ref.kind != "sheet":
+            continue                       # sheetsets are law 2, not this one
+        actual = wb.actual_sheet(ref.sheet or "")
+        if actual is None:
+            continue                       # reported as unresolvable_referent
+        by_origin.setdefault(actual, []).append(entry.sheet)
+
+    for actual, spellings in by_origin.items():
+        if len(spellings) > 1:
+            problems.append(Problem(
+                "sheet_origin_aliased", actual,
+                f"{len(spellings)} declarations resolve to one sheet origin "
+                f"{actual!r}: {spellings}. Nothing in the language authorises a "
+                f"source contributing more than once, so this is refused rather "
+                f"than silently duplicated."))
 
 
 def _check_sheetset_layout(recipe: Recipe, entry: SheetEntry, wb: WorkbookView,

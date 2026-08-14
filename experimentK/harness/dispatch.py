@@ -65,6 +65,10 @@ STRUCTURAL_CODES = (
     "metadata_cell_in_data_region", "malformed_exclude",
     "unknown_exclude_rule_op", "executor_cannot_honour",
     "sheetset_member_layout_mismatch",
+    # Cross-sheet law 1. Two declarations resolving to one sheet ORIGIN is a
+    # defect in the recipe's structure, not a coverage gap in the workbook —
+    # every row and column may be perfectly classified in each entry's own map.
+    "sheet_origin_aliased",
 )
 APPROVAL_CODES = ("blocking_ambiguity",)
 
