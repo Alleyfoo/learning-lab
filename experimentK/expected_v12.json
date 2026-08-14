@@ -1,0 +1,217 @@
+{
+  "probe": "K-v12",
+  "purpose": "Row-shape expectation: declare what a data row looks like so rows that do not qualify escalate. Third separate measurement; K and the C3-fix replay stand as measured.",
+  "frozen_before_implementation": true,
+  "llm_invoked": false,
+  "correction_to_the_record": "results/RESULT_c3fix.md speculated a row-shape rule 'would plausibly recover C13 and C8 both'. Working it through before building shows only C13 is recoverable this way: a subtotal row has exactly the shape of a data row and differs only in meaning. The corrected prediction is frozen here.",
+  "format_v12": {
+    "key": "data_row_shape, one optional key per data-sheet entry",
+    "constraints": [
+      "require_non_blank",
+      "require_numeric"
+    ],
+    "closed_enum": true,
+    "security_note": "Both constraints are TYPE-LEVEL: they ask what KIND of value sits in a cell, never what it says. No patterns, no regex, no value lists -- a predicate language over untrusted cell content is an expression language through the back door.",
+    "cost": "v1.2 makes the validator read data-row CONTENT, where v1/v1.1 read structure plus the header row. Bounded deliberately: it learns only blank/numeric/neither per cell and never branches on what a cell says, so a malicious workbook can cause an ESCALATION and nothing else. Escalation is the safe direction, so the widened surface buys detection without buying authority."
+  },
+  "per_case": {
+    "C1": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "approved"
+      ],
+      "changed": "nothing",
+      "ground_truth": "EXECUTE",
+      "v1_measured": "EXECUTE",
+      "v11_measured": "EXECUTE",
+      "v12_predicted": "EXECUTE"
+    },
+    "C2": {
+      "workbook": "fixtures/C2_renamed_file.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "approved"
+      ],
+      "changed": "the filename only (byte-identical to C1)",
+      "ground_truth": "EXECUTE",
+      "v1_measured": "EXECUTE",
+      "v11_measured": "EXECUTE",
+      "v12_predicted": "EXECUTE"
+    },
+    "C3": {
+      "workbook": "fixtures/C3_more_rows.xlsx",
+      "sha256": "cbf34221def03391b9b1431027b5aa627f9575ea19f51c22e4c78fd812ad594a",
+      "store": [
+        "approved"
+      ],
+      "changed": "two more products; the total row moves (A1:F11)",
+      "ground_truth": "EXECUTE",
+      "v1_measured": "REDEFINE_SCOPED",
+      "v11_measured": "EXECUTE",
+      "v12_predicted": "EXECUTE"
+    },
+    "C4": {
+      "workbook": "fixtures/C4_column_renamed.xlsx",
+      "sha256": "89ba1f8345d611654005d4d29a4de6d246a8ec735f0f6cff736adc7c92059ea2",
+      "store": [
+        "approved"
+      ],
+      "changed": "Tuote -> Tuotekoodi",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1_measured": "REDEFINE_SCOPED",
+      "v11_measured": "REDEFINE_SCOPED",
+      "v12_predicted": "REDEFINE_SCOPED"
+    },
+    "C5": {
+      "workbook": "fixtures/C5_column_inserted.xlsx",
+      "sha256": "fca29cf15ad169ba3f166b64eeb6a07c42e640b232773fc4ceaf4bba7bdd45dd",
+      "store": [
+        "approved"
+      ],
+      "changed": "a Maa column inserted at B (A1:G9)",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1_measured": "REDEFINE_SCOPED",
+      "v11_measured": "REDEFINE_SCOPED",
+      "v12_predicted": "REDEFINE_SCOPED"
+    },
+    "C6": {
+      "workbook": "fixtures/C6_sheet_added.xlsx",
+      "sha256": "7dc3d09986e89d8fcba0dc80cfda6a80cf8945d86885de71397d84b579cab2a3",
+      "store": [
+        "approved"
+      ],
+      "changed": "a new Kampanjat sheet",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1_measured": "REDEFINE_SCOPED",
+      "v11_measured": "REDEFINE_SCOPED",
+      "v12_predicted": "REDEFINE_SCOPED"
+    },
+    "C7": {
+      "workbook": "fixtures/C7_sheet_renamed.xlsx",
+      "sha256": "9b50be7dfc22f87022864cb83df6e4be0ab88f3a36f52c861a2892cee4e585a7",
+      "store": [
+        "approved"
+      ],
+      "changed": "Sales -> Myynnit",
+      "ground_truth": "DEFINE",
+      "v1_measured": "DEFINE",
+      "v11_measured": "DEFINE",
+      "v12_predicted": "DEFINE"
+    },
+    "C8": {
+      "workbook": "fixtures/C8_silent_subtotal.xlsx",
+      "sha256": "713ffb5be743d59adc5afe55aa12a7f356cf03b151b542867d3fa3dec875843e",
+      "store": [
+        "approved"
+      ],
+      "changed": "SAME dimensions (6 sheets, A1:F9, same headers); one product row is now a VÄLISUMMA subtotal",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1_measured": "EXECUTE",
+      "v11_measured": "EXECUTE",
+      "v12_predicted": "EXECUTE",
+      "why": "STILL NOT CAUGHT, and this is the point: VÄLISUMMA is non-blank and 17/21/19 are numeric, so the subtotal has EXACTLY the shape of a data row. It differs only in what the label MEANS. RESULT_c3fix.md speculated v1.2 would recover C8; that speculation is corrected here, before building."
+    },
+    "C9": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [],
+      "changed": "nothing; the recipe store is empty",
+      "ground_truth": "DEFINE",
+      "v1_measured": "DEFINE",
+      "v11_measured": "DEFINE",
+      "v12_predicted": "DEFINE"
+    },
+    "C10": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "approved",
+        "open_ambiguity"
+      ],
+      "changed": "nothing; two recipes claim the same data sheet",
+      "ground_truth": "AMBIGUOUS",
+      "v1_measured": "AMBIGUOUS",
+      "v11_measured": "AMBIGUOUS",
+      "v12_predicted": "AMBIGUOUS"
+    },
+    "C11": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "edited_after_approval"
+      ],
+      "changed": "nothing in the workbook; the RECIPE was edited after approval",
+      "ground_truth": "BLOCKED",
+      "v1_measured": "BLOCKED",
+      "v11_measured": "BLOCKED",
+      "v12_predicted": "BLOCKED"
+    },
+    "C12": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "open_ambiguity"
+      ],
+      "changed": "nothing in the workbook; the recipe has an open blocking ambiguity",
+      "ground_truth": "BLOCKED",
+      "v1_measured": "BLOCKED",
+      "v11_measured": "BLOCKED",
+      "v12_predicted": "BLOCKED"
+    },
+    "C13": {
+      "workbook": "fixtures/C13_footnote_row.xlsx",
+      "sha256": "ff07e43c19696c011afb032a8a6e3c83d16b0c54652e3788708bac59bc3ff80e",
+      "store": [
+        "approved"
+      ],
+      "changed": "a footnote row ('Huom: sisältää palautukset') appended BELOW the grand total",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1_measured": "REDEFINE_SCOPED",
+      "v11_measured": "EXECUTE",
+      "v12_predicted": "REDEFINE_SCOPED",
+      "why": "RECOVERED: the footnote's measure cells are BLANK, so it fails require_numeric -> row_shape_violation -> REDEFINE_SCOPED."
+    }
+  },
+  "predicted_totals": {
+    "n_cases": 13,
+    "v12_agree": 12,
+    "v12_over_escalation": [],
+    "v12_false_execute": [
+      "C8"
+    ],
+    "headline": "v1.2 is predicted to be the first format that is unambiguously better: it keeps the C3 fix and pays back the C13 cost, leaving exactly one failure -- and that one is semantic, not structural."
+  },
+  "decision_table": [
+    {
+      "condition": "every v1.2 cell matches the prediction",
+      "outcome": "PASS_AS_PREDICTED"
+    },
+    {
+      "condition": "C13 is not recovered",
+      "outcome": "FAIL_FIX"
+    },
+    {
+      "condition": "C3 regresses from EXECUTE",
+      "outcome": "FAIL_REGRESSION"
+    },
+    {
+      "condition": "C8 is caught",
+      "outcome": "RESULT_BETTER_THAN_PREDICTED -- investigate WHY before celebrating; a structural rule catching a semantic difference means the fixture, not the rule, is doing the work"
+    },
+    {
+      "condition": "a false EXECUTE appears outside {C8}",
+      "outcome": "FAIL_UNSAFE -- record, do not tune"
+    },
+    {
+      "condition": "any v1/v1.1 cell differs from its recorded result",
+      "outcome": "VOID"
+    }
+  ],
+  "hard_stop": [
+    "No LLM.",
+    "No changes to the frozen grammar or to any recorded result.",
+    "NO patterns, regex or value lists in data_row_shape."
+  ],
+  "hidden": true
+}
