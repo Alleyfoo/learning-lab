@@ -1,0 +1,42 @@
+{
+  "recipe_version": 1,
+  "recipe_id": "M_S4",
+  "workbook": {},
+  "sheets": [
+    {
+      "sheet": "sheet:Sales",
+      "role": "data",
+      "header_row": "sheet:Sales!1",
+      "data_region": "remainder",
+      "fields": [
+        {
+          "target": "tuote",
+          "source": "sheet:Sales!@Tuote",
+          "role": "id",
+          "type": "string"
+        },
+        {
+          "target": "kuukausi",
+          "source": "sheet:Sales!@Kuukausi",
+          "role": "id",
+          "type": "string"
+        },
+        {
+          "target": "myynti",
+          "source": "sheet:Sales!@Myynti",
+          "role": "measure",
+          "type": "number"
+        }
+      ],
+      "exclude": [],
+      "ambiguities": []
+    }
+  ],
+  "applicability": null,
+  "provenance": {
+    "proposed_by": "human",
+    "approved_by": "designer",
+    "approved_at": "2026-08-14",
+    "approved_recipe_sha256": "b95e1ec9c113cdfdcb7b2c20e34fb401de7d8758af9d29de86c40da0cc547008"
+  }
+}

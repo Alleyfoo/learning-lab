@@ -1,0 +1,277 @@
+{
+  "probe": "M",
+  "llm_invoked": false,
+  "per_shape": {
+    "S1_clean_wide": {
+      "predicted": "EXPRESSIBLE",
+      "predicted_missing_capability": null,
+      "predicted_silent_wrong": false,
+      "valid": true,
+      "problem_codes": [],
+      "implied_rows": 6,
+      "executed": true,
+      "columns": [
+        "tuote",
+        "kuukausi",
+        "myynti"
+      ],
+      "n_rows": 6,
+      "unhonoured_types": [],
+      "classification": "EXPRESSIBLE",
+      "silent_wrong": false,
+      "behaviour": "correct table",
+      "sample": [
+        [
+          "ART-001",
+          "Tammi",
+          10
+        ],
+        [
+          "ART-001",
+          "Helmi",
+          12
+        ],
+        [
+          "ART-001",
+          "Maalis",
+          8
+        ],
+        [
+          "ART-002",
+          "Tammi",
+          7
+        ]
+      ],
+      "as_predicted": true,
+      "silent_wrong_as_predicted": true
+    },
+    "S2_stacked_header": {
+      "predicted": "GAP",
+      "predicted_missing_capability": "multi_row_header",
+      "predicted_silent_wrong": false,
+      "valid": true,
+      "problem_codes": [],
+      "implied_rows": 6,
+      "executed": true,
+      "columns": [
+        "tuote",
+        "kuukausi",
+        "myynti"
+      ],
+      "n_rows": 6,
+      "unhonoured_types": [],
+      "classification": "EXPRESSIBLE",
+      "silent_wrong": false,
+      "behaviour": "correct table",
+      "sample": [
+        [
+          "ART-001",
+          "Tammi",
+          10
+        ],
+        [
+          "ART-001",
+          "Helmi",
+          12
+        ],
+        [
+          "ART-001",
+          "Maalis",
+          8
+        ],
+        [
+          "ART-002",
+          "Tammi",
+          7
+        ]
+      ],
+      "as_predicted": false,
+      "silent_wrong_as_predicted": true
+    },
+    "S3_two_measure_blocks": {
+      "predicted": "GAP",
+      "predicted_missing_capability": "multiple_unpivots",
+      "predicted_silent_wrong": false,
+      "valid": true,
+      "problem_codes": [],
+      "implied_rows": 8,
+      "executed": true,
+      "columns": [
+        "tuote",
+        "kuukausi_eur",
+        "eur"
+      ],
+      "n_rows": 4,
+      "unhonoured_types": [],
+      "classification": "GAP",
+      "silent_wrong": true,
+      "behaviour": "validated and executed, but produced 4/8 rows",
+      "sample": [
+        [
+          "ART-001",
+          "Tammi eur",
+          100
+        ],
+        [
+          "ART-001",
+          "Helmi eur",
+          120
+        ],
+        [
+          "ART-002",
+          "Tammi eur",
+          70
+        ],
+        [
+          "ART-002",
+          "Helmi eur",
+          90
+        ]
+      ],
+      "as_predicted": true,
+      "silent_wrong_as_predicted": false
+    },
+    "S4_already_long": {
+      "predicted": "EXPRESSIBLE",
+      "predicted_missing_capability": null,
+      "predicted_silent_wrong": false,
+      "valid": true,
+      "problem_codes": [],
+      "implied_rows": 3,
+      "executed": true,
+      "columns": [
+        "tuote",
+        "kuukausi",
+        "myynti"
+      ],
+      "n_rows": 3,
+      "unhonoured_types": [],
+      "classification": "EXPRESSIBLE",
+      "silent_wrong": false,
+      "behaviour": "correct table",
+      "sample": [
+        [
+          "ART-001",
+          "Tammi",
+          10
+        ],
+        [
+          "ART-001",
+          "Helmi",
+          12
+        ],
+        [
+          "ART-002",
+          "Tammi",
+          7
+        ]
+      ],
+      "as_predicted": true,
+      "silent_wrong_as_predicted": true
+    },
+    "S5_formatted_numbers": {
+      "predicted": "GAP",
+      "predicted_missing_capability": "number_format_declaration",
+      "predicted_silent_wrong": false,
+      "valid": true,
+      "problem_codes": [],
+      "implied_rows": 4,
+      "executed": true,
+      "columns": [
+        "tuote",
+        "kuukausi",
+        "myynti"
+      ],
+      "n_rows": 4,
+      "unhonoured_types": [
+        {
+          "target": "myynti",
+          "declared": "number",
+          "reason": "value '1 234,50' does not parse as a number"
+        }
+      ],
+      "classification": "GAP",
+      "silent_wrong": true,
+      "behaviour": "validated and executed, but produced 4/4 rows and left ['myynti'] untyped",
+      "sample": [
+        [
+          "ART-001",
+          "Tammi",
+          "1 234,50"
+        ],
+        [
+          "ART-001",
+          "Helmi",
+          "12 %"
+        ],
+        [
+          "ART-002",
+          "Tammi",
+          "2 000,00"
+        ],
+        [
+          "ART-002",
+          "Helmi",
+          "8 %"
+        ]
+      ],
+      "as_predicted": true,
+      "silent_wrong_as_predicted": false
+    },
+    "S6_interleaved_note": {
+      "predicted": "GAP",
+      "predicted_missing_capability": "unforeseen_row_detection",
+      "predicted_silent_wrong": true,
+      "valid": false,
+      "problem_codes": [
+        "row_shape_violation"
+      ],
+      "implied_rows": 4,
+      "executed": false,
+      "classification": "GAP",
+      "silent_wrong": false,
+      "behaviour": "recipe INVALID -- the system refuses rather than producing a wrong table",
+      "as_predicted": true,
+      "silent_wrong_as_predicted": false
+    }
+  },
+  "n_expressible": 3,
+  "n_gap": 3,
+  "expressible": [
+    "S1_clean_wide",
+    "S2_stacked_header",
+    "S4_already_long"
+  ],
+  "gaps": [
+    "S3_two_measure_blocks",
+    "S5_formatted_numbers",
+    "S6_interleaved_note"
+  ],
+  "silent_wrong": [
+    "S3_two_measure_blocks",
+    "S5_formatted_numbers"
+  ],
+  "more_capable_than_predicted": [
+    "S2_stacked_header"
+  ],
+  "less_capable_than_predicted": [],
+  "unpredicted_silent_wrong": [
+    "S3_two_measure_blocks",
+    "S5_formatted_numbers"
+  ],
+  "predicted_totals": {
+    "n_shapes": 6,
+    "n_expressible": 2,
+    "n_gap": 4,
+    "gaps": [
+      "S2_stacked_header",
+      "S3_two_measure_blocks",
+      "S5_formatted_numbers",
+      "S6_interleaved_note"
+    ],
+    "silent_wrong": [
+      "S6_interleaved_note"
+    ]
+  },
+  "outcome": "RESULT_UNPREDICTED_SILENT_WRONG"
+}
