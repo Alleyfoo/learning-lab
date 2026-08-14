@@ -1,8 +1,27 @@
 # Grading open-ended definition-phase output — design v0
 
-**STATUS: DRAFT for designer review. NOT frozen. No probe has been run and none
-is authorized.** Open decisions are listed at the end; the thresholds in §7 are
-proposals, not frozen values.
+**STATUS: SCOPE SUPERSEDED by [`integrated_plan_v1.md`](integrated_plan_v1.md)
+(2026-08-14). NOT frozen. No probe has been run and none is authorized.**
+
+The designer's clarification: the definition phase must produce an **executable
+interpretation of an unknown workbook** — which sheets matter, where the table
+starts, what is header/metadata/total/note/data, what needs unpivoting, what
+needs a human — not an inventory of suspicious regions.
+
+**What survives, and is promoted:** the referent mechanism (§2), the four-set
+both-directions inventory (§4), totality (§4), the located/characterized split
+(§5), SILENCE/NOISE with silence as the unsafe direction (§6), the unscored
+novel channel (§10), and the running instrument (§13). `Data-agents-demo`'s
+`manual_recipe.json` binds a target to a `source_pointer` — the same object as a
+referent — so the mechanism is the architecture's spine, not just a grading trick.
+
+**What changes:** the graded object is a **recipe**, not an observation list, so
+the frozen inventory becomes a frozen expected recipe and grading gains a third
+level (execute the recipe, compare the output). See plan v1 §7.
+
+Read this document for the mechanism; read plan v1 for the scope.
+
+Open decisions at the end are still open; the thresholds in §7 are proposals.
 
 ## 1. The problem
 
