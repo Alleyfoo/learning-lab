@@ -377,7 +377,7 @@
 </div>
 
 <h2>Open, and load-bearing</h2>
-<p class="section-note">Named because they are untested, not because they are unlikely.</p>
+<p class="section-note">Named because they are untested, not because they are unlikely. OPEN-2 has since been built and is kept here with its evidence.</p>
 
 <div class="claim">
   <div class="claim-head"><span class="cid">OPEN-1</span><span class="grade g-untest">Untested</span></div>
@@ -386,9 +386,11 @@
 </div>
 
 <div class="claim">
-  <div class="claim-head"><span class="cid">OPEN-2</span><span class="grade g-untest">Untested</span></div>
-  <h3>Whether a human reviewing a recipe sees what the machine read.</h3>
-  <p><span class="lbl">Why it matters</span>Approval binds a hash of the recipe, not of the region a person looked at. White text, hidden rows and <code>;;;</code> formats are all visible to the machine and invisible on screen. "A human reads it first" is only a control when the human is shown what the machine reads — and no experiment has put a human in that loop.</p>
+  <div class="claim-head"><span class="cid">OPEN-2</span><span class="grade g-det">Deterministic</span><span class="grade g-fixed">Built</span></div>
+  <h3>An approval now records what evidence the reviewer actually had.</h3>
+  <p><span class="lbl">Evidence</span>An approval record binds four hashes — recipe, machine-readable source region, detector findings, and the exact rendered review view — plus the <strong>renderer version</strong>. Verification fails <em>per relationship</em>, so a broken link says which one. The sharpest case passes: a cell made white-on-white with <strong>no value changed</strong> leaves the source hash intact and fails on findings, so a document that became less honest cannot verify.</p>
+  <p><span class="lbl">Two verdicts</span><code>historically_valid</code> (every link recomputes under the record&rsquo;s <em>own</em> renderer) is kept separate from <code>meets_current_review_policy</code> (…and that renderer is the current one). An approval made under an older renderer stays valid as history and <strong>does not silently acquire the newer renderer&rsquo;s protections</strong>.</p>
+  <p class="caveat"><span class="lbl">Caveat</span>It records what was shown; it cannot record whether anyone looked. And the source-region hash covers declared sheets&rsquo; values — a change in an undeclared corner of the file is outside it.</p>
 </div>
 
 <div class="claim">

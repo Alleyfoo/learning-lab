@@ -15,9 +15,20 @@ exactly what Experiment M's S3 was.
 
 So the three levels are:
 
-    declared?   the format enum lists it
-    consumed?   the contract classifies it and the dispatcher acts on it
-    identical?  it has an OBSERVABLE INVARIANT, demonstrated end to end
+    Level 1  declaration completeness   the format enum lists it
+    Level 2  consumption completeness   the contract classifies it and the
+                                        dispatcher acts on it
+    Level 3  semantic parity            it has an OBSERVABLE INVARIANT,
+                                        demonstrated end to end
+
+Running MORE cases against these invariants is not a level four. It is
+**evidence depth** -- generated variation around each invariant. Numbering it
+would suggest a fourth architectural boundary, and there isn't one: level three
+already asks the last structural question. What is missing after it is
+confidence, not another kind of check.
+
+    proven here          there is at least one passing demonstration per construct
+    NOT proven here      the invariant holds across the construct's input domain
 
 This module is the third. Each supported construct registers an invariant
 expressed in terms of the pipeline's observable output, and

@@ -167,7 +167,35 @@ The design stands; implementing it is open work.
 
 ## What remains
 
-The parity tests demonstrate meaning **on the cases they exercise**. A construct
-whose invariant holds on a two-row fixture and breaks on a fifty-row one would
-still pass. Property-based generation over the invariants — rather than one
-worked example each — is the obvious next strengthening, and it is not built.
+```text
+proven        there is at least one passing demonstration per supported construct
+NOT proven    the invariant holds across the construct's valid input domain
+```
+
+Generated variation around each invariant is the obvious next step, and it is
+**not a level four**. Numbering it that way would imply a fourth architectural
+boundary; there isn't one. Level three already asks the last structural question,
+and what is missing after it is **evidence depth** — confidence in a boundary
+that now exists, rather than another kind of check.
+
+## Why this sequence matters more than the bug count
+
+The chronology is the result, and it should be preserved in this order:
+
+1. Seven instances were not found and then generalised. **The family was named
+   first** — *producer declares → consumer interprets → nobody proves they mean
+   the same thing* — from three instances observed during experiments.
+2. A detector was built **for the class, not for the known bugs**: an invariant
+   per supported construct, plus a coverage assertion that a construct without
+   one may not be claimed supported.
+3. **On its first execution it found a previously unknown seventh instance** —
+   the executor cannot run a sheetset — of precisely the predicted class, in a
+   place level two structurally could not reach.
+
+So the claim is not *"we found seven integration bugs."* It is:
+
+> A cross-layer semantic-parity check, derived from an observed defect family,
+> found a previously unknown instance of that family on its first application.
+
+The prediction → mechanism → novel finding sequence is what gives it teeth, and
+it is why the dates and commit order are worth keeping legible.
