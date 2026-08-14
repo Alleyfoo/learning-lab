@@ -1,0 +1,29 @@
+{
+  "checked": 22,
+  "executed": 22,
+  "findings": [
+    {
+      "case": "single_space",
+      "written": "' '",
+      "admitted": "str(' ')",
+      "emitted": "str('')",
+      "detail": "UNDECLARED INTERPRETATION: admitted str(' ') with declared type 'string'; a string declaration authorises representation as ' ', but execution emitted str('')"
+    },
+    {
+      "case": "bool_padded",
+      "written": "' true '",
+      "admitted": "str(' true ')",
+      "emitted": "str('true')",
+      "detail": "UNDECLARED INTERPRETATION: admitted str(' true ') with declared type 'string'; a string declaration authorises representation as ' true ', but execution emitted str('true')"
+    },
+    {
+      "case": "trailing_space",
+      "written": "'abc '",
+      "admitted": "str('abc ')",
+      "emitted": "str('abc')",
+      "detail": "UNDECLARED INTERPRETATION: admitted str('abc ') with declared type 'string'; a string declaration authorises representation as 'abc ', but execution emitted str('abc')"
+    }
+  ],
+  "n_findings": 3,
+  "observations": []
+}

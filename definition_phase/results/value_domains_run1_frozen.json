@@ -1,0 +1,63 @@
+{
+  "what": "Expansion 2 of grammar-derived generation: the VALUE DOMAIN axis, taken alone",
+  "why_alone": "Multiplicity is frozen; cross-sheet interaction is NOT opened. Same staging rule as before: if something breaks, the cause must be attributable to one new dimension.",
+  "schema_held_fixed": {
+    "id": "string",
+    "value": "string",
+    "why": "Anything found here is attributable to INTERPRETATION rather than to composition again. Only the source value changes."
+  },
+  "observation_boundary": "The machine-readable TYPED VALUE ADMITTED BY INGESTION compared against the TYPED VALUE EMITTED BY EXECUTION, under the accepted recipe. Not Excel's visual rendering. Ingestion means what the system itself can see (openpyxl, data_only=True) -- so this measures interpretation, not ingestion policy.",
+  "value_identity": "(type, value). str('1') and int(1) are different values.",
+  "authorised_under_a_string_declaration": "representation as text, and nothing else",
+  "measured": {
+    "value_cases": 22,
+    "executed": 22,
+    "interpretation_violations": 3
+  },
+  "finding": {
+    "id": "PRO-2 instance 9",
+    "status": "FROZEN UNFIXED -- see fixes/PRO2-instance-9-UNFIXED.md",
+    "defect": "Ingestion strips leading and trailing whitespace, so a value declared 'string' does not survive the boundary intact.",
+    "mechanism": "referents.py:349 WorkbookView.row_values -> str(v).strip()",
+    "cases": [
+      "single_space",
+      "bool_padded",
+      "trailing_space"
+    ],
+    "sharpest": "single_space: str(' ') -> str(''). Not a cosmetic tidy -- a change of blank/non-blank semantics. Anything downstream distinguishing 'present but blank' from 'absent' reads a different fact than the file contains.",
+    "family": "Instance 8 was a declared effect silently LOST. Instance 9 is a value silently CHANGED. Same shape: one layer applies an interpretation another layer never declared, and nothing compares the two."
+  },
+  "negative_results_recorded_deliberately": {
+    "unicode_normalisation": "DID NOT OCCUR. Composed and decomposed e-acute both survived byte-identical. Built expecting a live question; it is not one for this ingestion path.",
+    "numeric_coercion": "None. '00123', '1.0', '1,0', '1e6', 'NaN' all unchanged.",
+    "date_parsing": "None. '03/04/2026' and '3.2.2026' unchanged. Gap G1 remains a DECLARED-BUT-UNHONOURED type rather than a silent guess -- the correct side of that boundary.",
+    "real_numeric_cells": "int 123 and float 1.5 emitted as '123' / '1.5' under a string declaration: authorised representation, not a violation.",
+    "why_recorded": "Absence of a finding is only informative if it is stated."
+  },
+  "boundary_question_not_called_a_defect": "'=SUM(A1:A2)' was admitted as None (data_only=True, no cached value) and emitted as ''. Under the stated rule that is authorised representation of an absent value, and the invariant correctly did not fire. But a person opening that workbook in Excel sees a number where the system sees nothing -- that is the WHITE-TEXT family, human and machine reading the same file differently, and belongs with that question. A synthetic fixture carries no cached value, so it cannot settle it.",
+  "method_chronology": {
+    "author_written_property_generation": {
+      "cases": 720,
+      "novel_defects": 0
+    },
+    "grammar_derived_composition": {
+      "cases": 606,
+      "novel_defects": 1,
+      "found": "instance 8"
+    },
+    "value_domain_corpus": {
+      "cases": 22,
+      "novel_defects": 1,
+      "found": "instance 9"
+    },
+    "reading": "Both generated corpora found a defect on first application; the hand-written suite found none. Same reason both times: nobody writes a test for a value that is merely a space. It is not an interesting value, and a corpus enumerating value shapes has no sense of interesting. This is TWO data points, and two is not a trend."
+  },
+  "third_primitive_registered": {
+    "name": "no_undeclared_interpretation",
+    "canary": "'00123' -> 123 under a declared string is caught",
+    "inverse_control": "must NOT fire when 'number' IS declared -- otherwise the detector would only be proving that coercion happens, not that it was undeclared",
+    "reachability": "fired AND reached, per the standing harness rule"
+  },
+  "next_axis_not_opened": "cross-sheet interactions -- entered last, and entered with the primitives doing as much of the work as possible",
+  "hidden": true
+}

@@ -222,6 +222,103 @@ def no_undeclared_output(case, out) -> Optional[str]:
 
 
 # ---------------------------------------------------------------------------
+# 3. No Undeclared Interpretation
+# ---------------------------------------------------------------------------
+#
+# The observation boundary, stated explicitly because Excel makes it non-trivial:
+#
+#     compare the machine-readable TYPED VALUE ADMITTED BY INGESTION against the
+#     TYPED VALUE EMITTED BY EXECUTION, under the accepted recipe.
+#
+# Not Excel's visual rendering. Comparing rendered text would treat FORMATTING as
+# semantics -- a number 123 displayed as "00123" is not secretly the string
+# "00123" -- and would drag this straight back into the review-rendering problem
+# that approval provenance already solved.
+#
+# Value identity is (type, value).
+#
+# Three outcomes, and only the fourth is a defect:
+#
+#     declaration absent      preserve semantic identity
+#     declaration supported   perform EXACTLY the declared interpretation
+#     declaration ambiguous   refuse, or mark explicitly unhonoured
+#     never                   guess
+#
+# The word doing the work is UNDECLARED. An invariant that forbade all
+# interpretation would be No Interpretation, which is a different and useless
+# property -- hence the inverse control in the canary.
+
+def _typed(value) -> tuple:
+    return (type(value).__name__, value)
+
+
+def interpretation_violation(admitted, emitted, declared_type) -> Optional[str]:
+    """Did a value acquire semantics the recipe never authorised?"""
+    a_type, a_val = _typed(admitted)
+    e_type, e_val = _typed(emitted)
+
+    if declared_type in (None, "string"):
+        # A declared string authorises REPRESENTATION as text and nothing else.
+        # Not whitespace removal, not numeric parsing, not case folding.
+        expected = "" if admitted is None else str(admitted)
+        if e_val != expected:
+            return (f"UNDECLARED INTERPRETATION: admitted {a_type}({a_val!r}) with "
+                    f"declared type {declared_type!r}; a string declaration authorises "
+                    f"representation as {expected!r}, but execution emitted "
+                    f"{e_type}({e_val!r})")
+        return None
+
+    if declared_type == "number":
+        # Numeric interpretation IS authorised here; only silence about failure
+        # would be a defect, and that is no_partial_honour's business.
+        return None
+
+    if declared_type == "date":
+        # The historical case. Without a format or locale there is no uniquely
+        # correct answer, so the contract is: do not invent the missing one.
+        if isinstance(admitted, str) and e_val != admitted:
+            return (f"UNDECLARED INTERPRETATION: {a_val!r} declared as a date with no "
+                    f"format or locale in the language, and execution emitted "
+                    f"{e_type}({e_val!r}) rather than preserving it or marking it "
+                    f"unhonoured")
+        return None
+    return None
+
+
+def _canary_interpretation(tmp: Path):
+    """A mutated executor coerces "00123" -> 123 under a string declaration.
+
+    Plus the INVERSE CONTROL: with a numeric declaration the same coercion is
+    authorised and must NOT fire. Without that control this would be building
+    No Interpretation rather than No UNdeclared Interpretation.
+    """
+    admitted = "00123"
+
+    fired_when_undeclared = interpretation_violation(admitted, 123, "string") is not None
+    fired_when_declared = interpretation_violation(admitted, 123, "number") is not None
+
+    if not fired_when_undeclared:
+        return CanaryResult(False, True,
+                            "did NOT fire on an undeclared string->int coercion")
+    if fired_when_declared:
+        return CanaryResult(False, True,
+                            "fired even when the recipe DECLARED numeric coercion -- "
+                            "this is No Interpretation, not No Undeclared Interpretation")
+    return CanaryResult(
+        fired=True, reached=True,
+        detail="undeclared '00123'->123 caught; declared numeric coercion correctly allowed")
+
+
+PRIMITIVES["no_undeclared_interpretation"] = Primitive(
+    "no_undeclared_interpretation",
+    "values may acquire only semantics explicitly authorised by the accepted "
+    "recipe. Typed value in, typed value out; never a guess.",
+    lambda case, out: None,          # driven by value_domains.py, which has the
+                                     # admitted values; not a per-case check here
+    _canary_interpretation)
+
+
+# ---------------------------------------------------------------------------
 # canary enforcement
 # ---------------------------------------------------------------------------
 
