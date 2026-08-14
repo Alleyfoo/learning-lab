@@ -291,22 +291,33 @@ def _canary_interpretation(tmp: Path):
     Plus the INVERSE CONTROL: with a numeric declaration the same coercion is
     authorised and must NOT fire. Without that control this would be building
     No Interpretation rather than No UNdeclared Interpretation.
-    """
-    admitted = "00123"
 
-    fired_when_undeclared = interpretation_violation(admitted, 123, "string") is not None
-    fired_when_declared = interpretation_violation(admitted, 123, "number") is not None
+    Plus a TYPE-ONLY stimulus, added after mutation testing showed this canary
+    was weaker than the detector's claim. `"00123" -> 123` differs by plain
+    string comparison, so a detector that had lost `(type, value)` identity
+    entirely still passed. `"123" -> 123` differs ONLY by type, so it exercises
+    the value-identity rule the invariant actually claims.
+    """
+    fired_when_undeclared = interpretation_violation("00123", 123, "string") is not None
+    fired_when_declared = interpretation_violation("00123", 123, "number") is not None
+    # str("123") == str(123): invisible to anything not comparing types.
+    fired_on_type_only = interpretation_violation("123", 123, "string") is not None
 
     if not fired_when_undeclared:
         return CanaryResult(False, True,
                             "did NOT fire on an undeclared string->int coercion")
+    if not fired_on_type_only:
+        return CanaryResult(False, True,
+                            "did NOT fire on '123'->123, which differs ONLY by type -- "
+                            "the detector is not applying (type, value) identity")
     if fired_when_declared:
         return CanaryResult(False, True,
                             "fired even when the recipe DECLARED numeric coercion -- "
                             "this is No Interpretation, not No Undeclared Interpretation")
     return CanaryResult(
         fired=True, reached=True,
-        detail="undeclared '00123'->123 caught; declared numeric coercion correctly allowed")
+        detail="undeclared '00123'->123 and type-only '123'->123 both caught; "
+               "declared numeric coercion correctly allowed")
 
 
 PRIMITIVES["no_undeclared_interpretation"] = Primitive(

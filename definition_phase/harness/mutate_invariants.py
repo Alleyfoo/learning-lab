@@ -179,9 +179,14 @@ def _self_test() -> int:
         sys.stdout.write(f"  {r['verdict']:9} {r['primitive']:30} {r['mutation'][:46]}\n")
     sys.stdout.write(f"\n  {out['killed']}/{out['mutations']} mutants killed\n")
 
-    (HERE.parent / "results").mkdir(parents=True, exist_ok=True)
-    (HERE.parent / "results" / "mutation_run1.json").write_text(
+    results = HERE.parent / "results"
+    results.mkdir(parents=True, exist_ok=True)
+    n = 1
+    while (results / f"mutation_run{n}.json").exists():
+        n += 1
+    (results / f"mutation_run{n}.json").write_text(
         json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+    sys.stdout.write(f"  written to mutation_run{n}.json\n")
 
     if out["not_restored"]:
         sys.stdout.write("\nFAILED: a mutation was not cleanly restored — later results "
