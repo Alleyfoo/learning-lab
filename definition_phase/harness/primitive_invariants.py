@@ -319,6 +319,31 @@ PRIMITIVES["no_undeclared_interpretation"] = Primitive(
 
 
 # ---------------------------------------------------------------------------
+# BOUNDARY A: no silent loss on admission
+#
+# The three primitives above all observe at or after ingestion, so none of them
+# can see a source property destroyed on the way IN. Without this one, every
+# invariant here could report green over an already corrupted representation.
+# ---------------------------------------------------------------------------
+
+def _canary_admission_loss(tmp: Path) -> CanaryResult:
+    from admission import _canary_admission
+
+    reached, fired, detail = _canary_admission(tmp)
+    return CanaryResult(fired=fired, reached=reached, detail=detail)
+
+
+PRIMITIVES["no_silent_loss_on_admission"] = Primitive(
+    "no_silent_loss_on_admission",
+    "source properties within the language's semantic budget must be preserved, "
+    "explicitly normalised, or explicitly declared unavailable/unsupported — "
+    "never collapsed into a different source fact.",
+    lambda case, out: None,          # driven by admission.py, which reads the
+                                     # source; not a per-case check here
+    _canary_admission_loss)
+
+
+# ---------------------------------------------------------------------------
 # canary enforcement
 # ---------------------------------------------------------------------------
 
