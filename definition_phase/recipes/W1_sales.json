@@ -1,0 +1,59 @@
+{
+  "recipe_version": 1,
+  "recipe_id": "W1_sales",
+  "workbook": {"source_hint": "W1_multisheet.xlsx"},
+  "sheets": [
+    {
+      "sheet": "sheet:Sales",
+      "role": "data",
+      "header_row": "sheet:Sales!4",
+      "data_region": "sheet:Sales!5:8",
+      "fields": [
+        {
+          "target": "paivitetty",
+          "source": "sheet:Sales!B2",
+          "role": "metadata",
+          "type": "date"
+        },
+        {
+          "target": "tuote",
+          "source": "sheet:Sales!@Tuote",
+          "role": "id",
+          "type": "string"
+        },
+        {
+          "target": "myynti",
+          "source": "sheet:Sales!B:D",
+          "role": "period_measure",
+          "type": "number",
+          "transform": {"op": "unpivot", "var_target": "kuukausi", "value_target": "myynti"}
+        }
+      ],
+      "exclude": [
+        {"referent": "sheet:Sales!1:3", "reason": "title, timestamp and blank row sit above the header"},
+        {"referent": "sheet:Sales!9", "reason": "YHTEENSÄ grand-total row: an aggregate, not a product"},
+        {"referent": "sheet:Sales!@Yhteensä", "reason": "row total derived from the three months, not a period"},
+        {"referent": "sheet:Sales!@Kommentti", "reason": "free-text annotation, not data"}
+      ],
+      "ambiguities": [
+        {
+          "referent": "sheet:Sales!F6",
+          "question": "'korjattu' on ART-002 — were those figures restated, and do the monthly values already include the correction?",
+          "blocking": true
+        }
+      ]
+    },
+    {"sheet": "sheet:'Myynti 2026'", "role": "ignore", "reason": "a different report; out of scope for this recipe"},
+    {"sheet": "sheet:Dup", "role": "ignore", "reason": "duplicate-header sample sheet, not provider data"},
+    {"sheet": "sheet:Notes", "role": "ignore", "reason": "free text, no table"},
+    {"sheet": "sheet:2026-01", "role": "ignore", "reason": "monthly sheets are handled by recipe W1_months"},
+    {"sheet": "sheet:2026-02", "role": "ignore", "reason": "monthly sheets are handled by recipe W1_months"}
+  ],
+  "applicability": null,
+  "provenance": {
+    "proposed_by": "human",
+    "approved_by": null,
+    "approved_recipe_sha256": null,
+    "note": "Worked example for recipe format v1. Not approved: one blocking ambiguity is open."
+  }
+}

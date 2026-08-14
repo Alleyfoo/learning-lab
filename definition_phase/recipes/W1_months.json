@@ -1,0 +1,37 @@
+{
+  "recipe_version": 1,
+  "recipe_id": "W1_months",
+  "workbook": {"source_hint": "W1_multisheet.xlsx"},
+  "sheetsets": {"Months": ["2026-01", "2026-02"]},
+  "sheets": [
+    {
+      "sheet": "sheetset:Months",
+      "role": "data",
+      "layout_from": "sheet:2026-01",
+      "header_row": "sheet:2026-01!1",
+      "data_region": "sheet:2026-01!2:3",
+      "fields": [
+        {"target": "tuote", "source": "sheet:2026-01!@Tuote", "role": "id", "type": "string"},
+        {"target": "myynti", "source": "sheet:2026-01!@Myynti", "role": "measure", "type": "number"},
+        {
+          "target": "kausi",
+          "role": "derived",
+          "type": "string",
+          "transform": {"op": "derive", "from": "sheet_name"}
+        }
+      ],
+      "exclude": []
+    },
+    {"sheet": "sheet:Sales", "role": "ignore", "reason": "handled by recipe W1_sales"},
+    {"sheet": "sheet:'Myynti 2026'", "role": "ignore", "reason": "a different report"},
+    {"sheet": "sheet:Dup", "role": "ignore", "reason": "duplicate-header sample sheet"},
+    {"sheet": "sheet:Notes", "role": "ignore", "reason": "free text, no table"}
+  ],
+  "applicability": null,
+  "provenance": {
+    "proposed_by": "human",
+    "approved_by": null,
+    "approved_recipe_sha256": null,
+    "note": "Demonstrates a sheetset: several sheets share one layout and union, with the period derived from the sheet name."
+  }
+}
