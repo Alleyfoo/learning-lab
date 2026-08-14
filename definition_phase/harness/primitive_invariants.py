@@ -32,6 +32,23 @@ What a canary establishes is narrow and worth stating exactly:
 
     established      the invariant is sensitive to at least one known violation
     NOT established  the generator can reach every violating shape
+
+## Canary reachability
+
+    A canary is valid only if the deliberately defective behaviour is
+    demonstrated to have REACHED the invariant's observation point.
+
+Learned the hard way. The second canary written here failed while the detector
+was perfectly sound: its stimulus never crossed validation, so the invariant
+observed nothing and correctly reported nothing. A canary that mutates something
+and expects red, without proving the mutation arrived, is a reassuring ritual
+that says nothing at all.
+
+So every canary reports three things, and validity needs the first two:
+
+    fired    the invariant reported a violation
+    reached  the defective behaviour arrived at the observation point
+    detail   what was seen
 """
 from __future__ import annotations
 
@@ -46,6 +63,17 @@ HERE = Path(__file__).resolve().parent
 LAB = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(LAB / "experimentL" / "harness"))
+
+
+@dataclass
+class CanaryResult:
+    fired: bool
+    reached: bool
+    detail: str
+
+    @property
+    def valid(self) -> bool:
+        return self.fired and self.reached
 
 
 @dataclass
@@ -107,7 +135,14 @@ def _canary_partial(tmp: Path):
         vr.pairing_reason, vr.MAX_UNPIVOTS_PER_SHEET = original_pairing, original_max
 
     why = no_partial_honour(case, out)
-    return (why is not None), (why or "did NOT fire with the guard removed")
+    # Reachability: this invariant observes EXECUTED output, so the defective
+    # recipe must have crossed validation into the executor.
+    return CanaryResult(
+        fired=why is not None,
+        reached=out.executed,
+        detail=(why or ("stimulus never reached the observation point: the recipe "
+                        f"was refused ({sorted(out.codes)})" if not out.executed
+                        else "did NOT fire with the guard removed")))
 
 
 @primitive("no_partial_honour",
@@ -159,7 +194,16 @@ def _canary_undeclared(tmp: Path):
         pp.execute = original
 
     why = no_undeclared_output(case, out)
-    return (why is not None), (why or "did NOT fire on an undeclared output column")
+    # Reachability: the mutated executor must actually have run AND emitted the
+    # smuggled column, or the invariant was never given anything to catch.
+    reached = out.executed and "smuggled" in (out.columns or [])
+    return CanaryResult(
+        fired=why is not None,
+        reached=reached,
+        detail=(why or ("stimulus never reached the observation point: "
+                        f"executed={out.executed} columns={out.columns}"
+                        if not reached else
+                        "did NOT fire on an undeclared output column")))
 
 
 @primitive("no_undeclared_output",
@@ -188,11 +232,14 @@ def assert_canaries_fire() -> list[str]:
         tmp = Path(td)
         for name, p in sorted(PRIMITIVES.items()):
             try:
-                fired, detail = p.canary(tmp)
+                res = p.canary(tmp)
             except Exception as exc:
-                fired, detail = False, f"{type(exc).__name__}: {exc}"
-            if not fired:
-                problems.append(f"{name}: canary did not fire — {detail}")
+                res = CanaryResult(False, False, f"{type(exc).__name__}: {exc}")
+            if not res.reached:
+                problems.append(f"{name}: canary UNREACHABLE — the defective behaviour "
+                                f"never arrived at the observation point: {res.detail}")
+            elif not res.fired:
+                problems.append(f"{name}: canary did not fire — {res.detail}")
     return problems
 
 
@@ -207,9 +254,10 @@ def _self_test() -> int:
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         for name, p in sorted(PRIMITIVES.items()):
-            fired, detail = p.canary(tmp)
-            mark = "ok  " if fired else "FAIL"
-            sys.stdout.write(f"  {mark} canary {name:24} {detail[:64]}\n")
+            res = p.canary(tmp)
+            mark = "ok  " if res.valid else "FAIL"
+            sys.stdout.write(f"  {mark} canary {name:22} reached={str(res.reached):5} "
+                             f"fired={str(res.fired):5} {res.detail[:42]}\n")
 
     if problems:
         sys.stderr.write("\nCANARIES FAILED — a primitive invariant that cannot detect "

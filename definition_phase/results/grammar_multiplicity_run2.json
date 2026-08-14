@@ -1,0 +1,38 @@
+{
+  "what": "Multiplicity axis, run 2 — after the generator was repaired",
+  "supersedes": "grammar_multiplicity_run1.json, which is preserved: run 1's numbers were correct but two of its axes were non-evidential",
+  "generator_repairs": [
+    "sheetset_members: the case now addresses header, fields and exclusions against the PROTOTYPE MEMBER and classifies every other sheet. Fixing the generator does not mean enabling sheetsets -- it means producing a VALID representation of an UNSUPPORTED construct, so the INTENDED refusal is what fires. Run 1 refused with column_unclassified / unresolvable_referent / sheet_unclassified as well: the right outcome for the wrong reasons, and therefore no evidence about the axis.",
+    "period_measures: each declaration now binds a DISTINCT source column. Binding the same range twice added column_double_bound to the refusal, contaminating it the same way."
+  ],
+  "measured": {
+    "generated": 24,
+    "authoritative_executions": 19,
+    "correct_refusals": 5,
+    "refusals_for_the_intended_reason_only": 5,
+    "findings": 0,
+    "axes_actually_exercising_multiplicity": 4,
+    "axes_bounded_by_the_language": 2
+  },
+  "why_the_breakdown_matters": "'24 cases, 0 findings' is less useful than the breakdown. A correct refusal is evidence for the REFUSAL BOUNDARY; it is not evidence about the semantics behind that boundary. Reporting one number would conflate the two.",
+  "claims_by_axis": {
+    "measures": "0..3 all executed, m0..m2 each present -- multiplicity honoured in full",
+    "derived": "0..3 all executed, d0..d2 each present -- multiplicity honoured in full",
+    "exclusions": "0..3 all executed; absent-label exclusions correctly no-ops",
+    "ignored_sheets": "0..3 all executed; ignored material does not affect the output",
+    "period_measures": "0..1 executed. 2..3 deterministically REFUSED. The claim is NOT 'multiple period measures are handled correctly' -- it is 'multiplicity greater than one is OUTSIDE THE EXECUTABLE LANGUAGE and is deterministically refused'. That is cleaner: a deliberately small language is not a weakness when the boundary is explicit.",
+    "sheetset_members": "1..3 deterministically REFUSED for the intended reason only. Same claim shape: sheetsets are outside the executable language, and the refusal is now shown to be the intended one rather than an accident of a malformed case."
+  },
+  "canary_reachability": "A canary is valid only if the deliberately defective behaviour is demonstrated to have REACHED the invariant's observation point. Now enforced: each canary reports fired AND reached, and an unreachable stimulus is reported distinctly from a detector that failed to fire. Demonstrated by deliberately blocking a stimulus at validation and observing CANARY UNREACHABLE.",
+  "composition_corpus_unchanged": {
+    "combinations": 606,
+    "agree": 606,
+    "disagreements": 0,
+    "primitive_findings": 0
+  },
+  "next_axes_not_opened": [
+    "value domains, with No Undeclared Interpretation",
+    "cross-sheet interactions"
+  ],
+  "hidden": true
+}

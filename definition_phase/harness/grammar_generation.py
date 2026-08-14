@@ -221,8 +221,52 @@ def build_case(sheet_ref: str, sheet_role: str, field_role: str, source_kind: st
 MULTIPLICITIES = (0, 1, 2, 3)
 
 
+def _build_sheetset_case(n: int) -> Case:
+    """A VALID representation of an unsupported construct.
+
+    Fixing this generator does not mean enabling sheetsets. It means producing a
+    sheetset recipe whose only defect is that sheetsets are unsupported, so the
+    INTENDED refusal is what fires. The first version mixed sheet:S references
+    into a sheetset entry and left S unclassified, so it refused with
+    column_unclassified / unresolvable_referent / sheet_unclassified as well --
+    the right outcome for the wrong reasons, and therefore no evidence about the
+    axis at all.
+    """
+    sheets = {name: [list(r) for r in rows] for name, rows in SHEETS.items()}
+    members = []
+    for i in range(n):
+        name = f"Mem{i}"
+        sheets[name] = [list(r) for r in SHEETS["S"]]
+        members.append(name)
+
+    if not members:                       # degenerate: no sheetset to speak of
+        return build_multiplicity_case("measures", 0)
+
+    proto = members[0]
+    entry = {"sheet": "sheetset:M", "role": "data", "layout_from": f"sheet:{proto}",
+             "header_row": f"sheet:{proto}!1", "data_region": "remainder",
+             "layout_note": "everything addressed against the prototype member",
+             "fields": [{"target": "id", "source": f"sheet:{proto}!@Tuote",
+                         "role": "id", "type": "string"}],
+             "exclude": [{"referent": f"sheet:{proto}!@{c}", "reason": "coverage"}
+                         for c in ("A", "B", "Note")],
+             "ambiguities": []}
+    entry.pop("layout_note")
+
+    entries = [entry] + [{"sheet": f"sheet:{name}", "role": "ignore",
+                          "reason": "not part of the set"}
+                         for name in sheets if name not in members]
+    raw = {"recipe_version": 1, "recipe_id": "multiplicity", "workbook": {},
+           "sheetsets": {"M": members}, "sheets": entries, "applicability": None,
+           "provenance": {"proposed_by": "grammar", "approved_by": "grammar",
+                          "approved_recipe_sha256": None}}
+    return Case("multiplicity", sheets, raw, note=f"sheetset_members={n}")
+
+
 def build_multiplicity_case(what: str, n: int) -> Case:
     """Vary how MANY of one construct a recipe declares, holding all else fixed."""
+    if what == "sheetset_members":
+        return _build_sheetset_case(n)
     sheets = {name: [list(r) for r in rows] for name, rows in SHEETS.items()}
     cols = ["Tuote", "A", "B", "Note"]
 
@@ -240,8 +284,12 @@ def build_multiplicity_case(what: str, n: int) -> Case:
             fields.append({"target": f"m{i}", "source": f"sheet:S!@{col}",
                            "role": "measure", "type": "string"})
     elif what == "period_measures":
+        # Distinct source columns per declaration. Binding the same range twice
+        # made the refusal report column_double_bound alongside the intended
+        # executor_cannot_honour -- the right outcome for partly the wrong
+        # reason, which is no evidence about the axis.
         for i in range(n):
-            fields.append({"target": f"p{i}", "source": "sheet:S!B:C",
+            fields.append({"target": f"p{i}", "source": f"sheet:S!{chr(66 + i)}",
                            "role": "period_measure", "type": "number",
                            "transform": {"op": "unpivot", "var_target": f"kk{i}",
                                          "value_target": f"p{i}"}})
@@ -260,16 +308,6 @@ def build_multiplicity_case(what: str, n: int) -> Case:
             sheets[name] = [["x"], ["y"]]
             extra_sheets.append({"sheet": f"sheet:{name}", "role": "ignore",
                                  "reason": "generated"})
-    elif what == "sheetset_members":
-        members = []
-        for i in range(n):
-            name = f"Mem{i}"
-            sheets[name] = [list(r) for r in SHEETS["S"]]
-            members.append(name)
-        if members:
-            sheetsets = {"M": members}
-            sheet_token = "sheetset:M"
-            layout_from = f"sheet:{members[0]}"
 
     # coverage held constant: every column of S bound or excluded
     bound = {"Tuote"}
@@ -279,6 +317,8 @@ def build_multiplicity_case(what: str, n: int) -> Case:
             bound.add(src.split("@")[1])
         elif src == "sheet:S!B:C":
             bound |= {"A", "B"}
+        elif src in ("sheet:S!B", "sheet:S!C", "sheet:S!D"):
+            bound.add({"sheet:S!B": "A", "sheet:S!C": "B", "sheet:S!D": "Note"}[src])
     exclude += [{"referent": f"sheet:S!@{c}", "reason": "coverage"}
                 for c in cols if c not in bound]
 
