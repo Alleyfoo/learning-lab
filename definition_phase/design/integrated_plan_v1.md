@@ -290,6 +290,105 @@ quarantine, repeat processing. Ideas yes; code no (§2.3).
 validator (structural / resolvable / coverage); applicability predicate; the
 definition dialogue's tool surface (recipe operations only); grader levels 1–3.
 
+## 8.5 Front-door dispatch (designer, 2026-08-14)
+
+The designer's control flow:
+
+> is there a schema for the file → yes, use it if it's current → no, prompt the
+> user to help create the schema first
+
+This is right, and it is the H-shape at the entry point: *establish
+applicability, or refuse.* It also relocates recall from an optimisation to
+**the front door** — which is where it belongs, because it decides whether a
+model is invoked at all. Two things in it need sharpening.
+
+### 8.5.1 The key is the FORMAT, not the file
+
+"A schema for the file" must mean *a schema for this provider format*, of which
+the file is one instance. Twelve monthly files from one provider share one
+recipe. Keying on the file is exactly DA-2's bug: the filename is in the hash, so
+`sales_2026_02.xlsx` misses the recipe built for `sales_2026_01.xlsx` — recall
+fails on the only case it exists for.
+
+### 8.5.2 "Current" is three questions, and they fail differently
+
+Collapsing them is how a false-apply happens:
+
+```text
+EXISTS      does a recipe claim this format?            -> lookup
+MATCHES     does THIS file still satisfy that recipe's
+            declared applicability predicate?           -> structural check
+APPROVED    is the recipe's content hash still the
+            human-approved one, and not revoked?        -> governance check
+```
+
+`MATCHES` is not a timestamp and `APPROVED` is not a match. A recipe edited after
+approval must not execute even though it matches perfectly — the approval binds
+to a **content hash**, so a post-approval edit invalidates it. That is 3E's
+principle (the deterministic gate owns authority) applied to governance.
+
+### 8.5.3 The middle branch — yes/no is one branch short
+
+The consequential case is neither "matches" nor "doesn't": it is **drifted**. A
+recipe matching 11 of 12 signals must not be run ("close enough" is the
+false-apply that produces wrong data which validates), but sending the human back
+to a blank definition is also wrong — they would redo work that is still correct.
+
+The third branch is **scoped redefinition**: carry the recipe forward, mark the
+delta, and open the dialogue **only on what changed** (a renamed column, one new
+sheet). That is where an agent genuinely earns its keep, and it is the cheapest
+possible human interaction — the J lesson, that refusal should be *bounded* and
+name what it cannot establish, rather than escalating wholesale.
+
+```text
+file arrives
+  |
+ [1] resolve candidates        by FORMAT signature, never by filename
+  |
+  +-- 0 candidates  ------------------------------> DEFINE            (cold start)
+  +-- >= 2 candidates ----------------------------> AMBIGUOUS         (human picks)
+  +-- 1 candidate
+        |
+      [2] applicability predicate re-evaluated on THIS file
+        |
+        +-- core signals fail -----------------> DEFINE                (format changed)
+        +-- passes with exceptions ------------> REDEFINE_SCOPED       (drift)
+        +-- passes fully
+              |
+            [3] approval: content hash == approved hash, not revoked?
+              |
+              +-- no -------------------------> BLOCKED                (never run)
+              +-- yes ------------------------> EXECUTE                (NO model)
+```
+
+**In the `EXECUTE` branch no model is invoked at all.** That is the macro-saver
+outcome made economic: intelligence is paid for once at definition time, not per
+file.
+
+### 8.5.4 This is the first experiment, and it needs no open-ended grading
+
+The dispatch decision is **a label** — `EXECUTE` / `REDEFINE_SCOPED` / `DEFINE` /
+`AMBIGUOUS` / `BLOCKED` — with a frozen expected value per fixture. So it grades
+exactly the way every probe in this repo already grades (`decision == expected`),
+and the open-ended grading problem does not have to be solved first. It only has
+to be solved for the dialogue branch.
+
+The two error directions are the sharpest in the programme so far:
+
+```text
+false EXECUTE      runs a stale recipe on a changed file -> wrong data that
+                   VALIDATES. The unsafe direction, and the exact failure
+                   repo_reuse_map.md found downstream (positional mapping)
+over-escalation    DEFINE on a file the recipe still handles -> the macro never
+                   pays off; the human is consulted about nothing
+```
+
+Fixtures are cheap and deterministic: one approved recipe plus files that are
+identical / renamed-file / column-renamed / column-inserted / sheet-added /
+materially restructured / edited-after-approval. **No LLM, fully repeatable** —
+the same character as Experiment J, and directly continuous with H's
+`coverage == 12 → accept, else ask_human`.
+
 ## 9. Open decisions
 
 1. **Referent syntax** — `sheet:Sales!D5` (A1-style) vs `sheet:Sales/col:D/row:5`.
@@ -308,19 +407,22 @@ definition dialogue's tool surface (recipe operations only); grader levels 1–3
    fixtures are single-sheet CSVs. Authored in-lab, or archive-derived under the
    UQ-1 ordering rule?
 
-## 10. Suggested sequence (no probe yet)
+## 10. Suggested sequence (revised after §8.5 — no probe yet)
 
 1. Freeze the **referent grammar + resolver**, with a self-test on a real
    multi-sheet workbook. Nothing else can be built honestly first.
-2. Build the **sheet-first browser** over it — sheet inventory before any
-   loading decision (fixes DA-1). Harvest from the two Streamlit demos.
-3. Define the **recipe format + validator**, and prove it by expressing an
+2. Define the **recipe format + validator** (§5–6), and prove it by expressing an
    existing `manual_recipe.json` in it and executing both to the same output.
-4. Redesign the **applicability predicate** (fixes DA-2). Cheap, self-contained,
-   and directly continuous with Experiment H — a candidate first experiment on
-   its own.
+3. Design the **applicability predicate + dispatch** (§8.5, fixes DA-2). This is
+   now the **first experiment**, not plumbing: its output is a frozen label, so
+   it grades the way the repo already grades and does not wait on the open-ended
+   grading question. Needs a preregistration.
+4. Build the **sheet-first browser** over the resolver — sheet inventory before
+   any loading decision (fixes DA-1). Harvest from the two Streamlit demos.
+   Instrument, not experiment.
 5. Only then design the **definition-dialogue probe**, with grading levels 1–3
    and the v0 SILENCE/NOISE controls attached to a frozen expected recipe.
 
-Steps 1–4 are instrument-building and need no preregistration. Step 5 is an
-experiment and needs a freeze.
+Steps 1, 2 and 4 are instrument-building and need no preregistration. Steps 3 and
+5 are experiments and need freezes. The reordering is the point: §8.5 made a real
+experiment available *before* the hard grading problem is solved.
