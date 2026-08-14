@@ -160,6 +160,19 @@ def main(only: str | None = None) -> None:
         wb["Sales"].append(["Huom: sisältää palautukset", None, None, None, None, None])
         wb.save(OUT / "C13_footnote_row.xlsx")
 
+    # C14: the RESIDUAL after reconciliation. A VÄLISUMMA subtotal again, but
+    # this time the grand total was updated to include it, so the sheet is
+    # internally consistent AND double-counted. Arithmetic cannot tell.
+    if wanted("C14_reconciling_subtotal"):
+        quiet2 = [
+            ["ART-001", 10, 12, 8, 30, None],
+            ["ART-002", 7, 9, 11, 27, "korjattu"],
+            ["VÄLISUMMA", 17, 21, 19, 57, None],
+            ["ART-003", 5, 7, 6, 18, None],
+        ]
+        _build("Sales", SALES_HEADER, quiet2,
+               ["YHTEENSÄ", 39, 49, 44, 132, None]).save(OUT / "C14_reconciling_subtotal.xlsx")
+
     for stem in written:
         print(f"wrote {stem}.xlsx")
     if only is None:

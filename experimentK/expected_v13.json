@@ -1,0 +1,229 @@
+{
+  "probe": "K-v13",
+  "purpose": "Reconciliation: the file's own declared total must equal the sum of the rows the recipe treats as data. The C8 attack.",
+  "frozen_before_implementation": true,
+  "llm_invoked": false,
+  "not_a_trap_violation": "The v1.2 trap forbade patterns/regex/value lists in data_row_shape and said catching C8 needs a DIFFERENT KIND OF EVIDENCE as its own freeze. v1.3 adds no shape constraint and no content predicate -- it adds a relational arithmetic check. Security-wise it is narrower than what exists: label_in compares strings, reconciliation only adds numbers.",
+  "format_v13": {
+    "key": "reconcile, a list per data-sheet entry",
+    "shape": {
+      "total_row": "an exclude-rule style locator",
+      "columns": "a column referent"
+    },
+    "skipped_when": "the total row is not found -- many sheets have no total, and a missing total is not evidence",
+    "tolerance": 1e-09,
+    "dispatch_note": "COVERAGE_CODES must list reconciliation_failure. Stated explicitly because v1.2 run 1 failed exactly here: a new code added in one layer and silently not consumed by the other."
+  },
+  "per_case": {
+    "C1": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "approved"
+      ],
+      "changed": "nothing",
+      "ground_truth": "EXECUTE",
+      "v12_measured": "EXECUTE",
+      "v13_predicted": "EXECUTE"
+    },
+    "C2": {
+      "workbook": "fixtures/C2_renamed_file.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "approved"
+      ],
+      "changed": "the filename only (byte-identical to C1)",
+      "ground_truth": "EXECUTE",
+      "v12_measured": "EXECUTE",
+      "v13_predicted": "EXECUTE"
+    },
+    "C3": {
+      "workbook": "fixtures/C3_more_rows.xlsx",
+      "sha256": "cbf34221def03391b9b1431027b5aa627f9575ea19f51c22e4c78fd812ad594a",
+      "store": [
+        "approved"
+      ],
+      "changed": "two more products; the total row moves (A1:F11)",
+      "ground_truth": "EXECUTE",
+      "v12_measured": "EXECUTE",
+      "v13_predicted": "EXECUTE"
+    },
+    "C4": {
+      "workbook": "fixtures/C4_column_renamed.xlsx",
+      "sha256": "89ba1f8345d611654005d4d29a4de6d246a8ec735f0f6cff736adc7c92059ea2",
+      "store": [
+        "approved"
+      ],
+      "changed": "Tuote -> Tuotekoodi",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v12_measured": "REDEFINE_SCOPED",
+      "v13_predicted": "REDEFINE_SCOPED"
+    },
+    "C5": {
+      "workbook": "fixtures/C5_column_inserted.xlsx",
+      "sha256": "fca29cf15ad169ba3f166b64eeb6a07c42e640b232773fc4ceaf4bba7bdd45dd",
+      "store": [
+        "approved"
+      ],
+      "changed": "a Maa column inserted at B (A1:G9)",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v12_measured": "REDEFINE_SCOPED",
+      "v13_predicted": "REDEFINE_SCOPED"
+    },
+    "C6": {
+      "workbook": "fixtures/C6_sheet_added.xlsx",
+      "sha256": "7dc3d09986e89d8fcba0dc80cfda6a80cf8945d86885de71397d84b579cab2a3",
+      "store": [
+        "approved"
+      ],
+      "changed": "a new Kampanjat sheet",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v12_measured": "REDEFINE_SCOPED",
+      "v13_predicted": "REDEFINE_SCOPED"
+    },
+    "C7": {
+      "workbook": "fixtures/C7_sheet_renamed.xlsx",
+      "sha256": "9b50be7dfc22f87022864cb83df6e4be0ab88f3a36f52c861a2892cee4e585a7",
+      "store": [
+        "approved"
+      ],
+      "changed": "Sales -> Myynnit",
+      "ground_truth": "DEFINE",
+      "v12_measured": "DEFINE",
+      "v13_predicted": "DEFINE"
+    },
+    "C8": {
+      "workbook": "fixtures/C8_silent_subtotal.xlsx",
+      "sha256": "713ffb5be743d59adc5afe55aa12a7f356cf03b151b542867d3fa3dec875843e",
+      "store": [
+        "approved"
+      ],
+      "changed": "SAME dimensions (6 sheets, A1:F9, same headers); one product row is now a VÄLISUMMA subtotal",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v12_measured": "EXECUTE",
+      "v13_predicted": "REDEFINE_SCOPED",
+      "why": "RECOVERED by arithmetic, without knowing what VALISUMMA means: data rows sum to 39/49/44 while the sheet states 22/28/25."
+    },
+    "C9": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [],
+      "changed": "nothing; the recipe store is empty",
+      "ground_truth": "DEFINE",
+      "v12_measured": "DEFINE",
+      "v13_predicted": "DEFINE"
+    },
+    "C10": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "approved",
+        "open_ambiguity"
+      ],
+      "changed": "nothing; two recipes claim the same data sheet",
+      "ground_truth": "AMBIGUOUS",
+      "v12_measured": "AMBIGUOUS",
+      "v13_predicted": "AMBIGUOUS"
+    },
+    "C11": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "edited_after_approval"
+      ],
+      "changed": "nothing in the workbook; the RECIPE was edited after approval",
+      "ground_truth": "BLOCKED",
+      "v12_measured": "BLOCKED",
+      "v13_predicted": "BLOCKED"
+    },
+    "C12": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "open_ambiguity"
+      ],
+      "changed": "nothing in the workbook; the recipe has an open blocking ambiguity",
+      "ground_truth": "BLOCKED",
+      "v12_measured": "BLOCKED",
+      "v13_predicted": "BLOCKED"
+    },
+    "C13": {
+      "workbook": "fixtures/C13_footnote_row.xlsx",
+      "sha256": "ff07e43c19696c011afb032a8a6e3c83d16b0c54652e3788708bac59bc3ff80e",
+      "store": [
+        "approved"
+      ],
+      "changed": "a footnote row ('Huom: sisältää palautukset') appended BELOW the grand total",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v12_measured": "REDEFINE_SCOPED",
+      "v13_predicted": "REDEFINE_SCOPED"
+    },
+    "C14": {
+      "workbook": "fixtures/C14_reconciling_subtotal.xlsx",
+      "sha256": "28d9df142f8577ea31724052ef0a1ff9a239c52f9f27a1b0a4851e7ff4ed7c8d",
+      "store": [
+        "approved"
+      ],
+      "changed": "a VALISUMMA subtotal AND a grand total updated to include it: internally consistent, semantically double-counted",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v12_measured": "EXECUTE",
+      "v13_predicted": "EXECUTE",
+      "why": "THE RESIDUAL. Reconciliation catches C8 because that sheet stops adding up. C14 adds up perfectly and is merely double-counted, so arithmetic has nothing to say. Each format has narrowed the residual; none has removed it."
+    }
+  },
+  "recipes": {
+    "approved": {
+      "path": "recipes/W1_sales_v13_approved.json",
+      "sha256": "4c372076cfdc46d09c78eb616c021d823b6b5c92ec8451357db46fe7a29523c6",
+      "approved_recipe_sha256": "84aee2147ae2e8531c32b4f83589cbe9a7011b50069ef8895361a38493578ed0"
+    },
+    "edited_after_approval": {
+      "path": "recipes/W1_sales_edited_after_approval.json",
+      "sha256": "63b81c3b3e5ae290914ee0281cdcc9b4881fa8e0ae33ee3609674f98ef10fbb4"
+    },
+    "open_ambiguity": {
+      "path": "recipes/W1_sales_open_ambiguity.json",
+      "sha256": "790035ca1b9fa9a51ad7ddb4773645ea6e610972146a9843e561613b81fedf6a"
+    }
+  },
+  "predicted_totals": {
+    "n_cases": 14,
+    "v13_agree": 13,
+    "v13_over_escalation": [],
+    "v13_false_execute": [
+      "C14"
+    ]
+  },
+  "decision_table": [
+    {
+      "condition": "every v1.3 cell matches the prediction",
+      "outcome": "PASS_AS_PREDICTED"
+    },
+    {
+      "condition": "C8 not recovered",
+      "outcome": "FAIL_FIX"
+    },
+    {
+      "condition": "C1, C2 or C3 regresses from EXECUTE",
+      "outcome": "FAIL_REGRESSION -- reconciliation must not fire on clean files"
+    },
+    {
+      "condition": "C14 is caught",
+      "outcome": "RESULT_BETTER_THAN_PREDICTED -- investigate before banking; arithmetic cannot distinguish a consistent double-count"
+    },
+    {
+      "condition": "a false EXECUTE outside {C14}",
+      "outcome": "FAIL_UNSAFE"
+    },
+    {
+      "condition": "any earlier arm differs from its recorded result",
+      "outcome": "VOID"
+    }
+  ],
+  "hard_stop": [
+    "No LLM.",
+    "No changes to the frozen grammar or any recorded result.",
+    "Reconciliation compares NUMBERS only; any check branching on what a cell says needs its own freeze."
+  ],
+  "hidden": true
+}
