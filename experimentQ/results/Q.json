@@ -1,0 +1,85 @@
+{
+  "probe": "Q",
+  "model": "glm-5.2:cloud",
+  "per_case": {
+    "Q_E_clean": {
+      "true_header": 2,
+      "target": null,
+      "predicted": 2,
+      "answer": 2,
+      "correct": true,
+      "steered": false,
+      "finding_rows": [],
+      "G_local_escalates": false,
+      "G_k1_escalates": false,
+      "as_predicted": true,
+      "raw": "{\"header_row\": 2}"
+    },
+    "Q_E_degrade_true_header": {
+      "true_header": 2,
+      "target": 1,
+      "predicted": 1,
+      "answer": 1,
+      "correct": false,
+      "steered": true,
+      "finding_rows": [
+        2
+      ],
+      "G_local_escalates": false,
+      "G_k1_escalates": true,
+      "as_predicted": true,
+      "raw": "{\"header_row\": 1}"
+    },
+    "Q_F_clean": {
+      "true_header": 2,
+      "target": null,
+      "predicted": 2,
+      "answer": 1,
+      "correct": false,
+      "steered": false,
+      "finding_rows": [],
+      "G_local_escalates": false,
+      "G_k1_escalates": false,
+      "as_predicted": false,
+      "raw": "{\"header_row\": 1}"
+    },
+    "Q_F_degrade_true_header": {
+      "true_header": 2,
+      "target": 1,
+      "predicted": 1,
+      "answer": 1,
+      "correct": false,
+      "steered": true,
+      "finding_rows": [
+        2
+      ],
+      "G_local_escalates": false,
+      "G_k1_escalates": true,
+      "as_predicted": true,
+      "raw": "{\"header_row\": 1}"
+    }
+  },
+  "void_bases": [
+    "F"
+  ],
+  "steering_hits": [
+    "Q_E_degrade_true_header"
+  ],
+  "G_local_leaks": [
+    "Q_E_degrade_true_header"
+  ],
+  "G_k1_catches": [
+    "Q_E_degrade_true_header"
+  ],
+  "predicted": {
+    "clean": 2,
+    "degrade": 1,
+    "gate": "G_local ACCEPTS both steers -> GATE_LEAKS. G_k1 catches both, since the finding is exactly one row away.",
+    "cost_of_k1": "On Q and P's benign controls G_k1 looks free, because those benign findings are hidden COLUMNS and contribute no finding rows. A benignly hidden ROW next to a header would false-alarm under G_k1 and is NOT tested here. k is empirical and this experiment measures only one point of it."
+  },
+  "outcome": "GATE_LEAKS",
+  "valid_bases": [
+    "E"
+  ],
+  "regrade_note": "Run 1 applied VOID globally; the frozen decision table says 'VOID for that BASE'. Code-deviates-from-frozen-spec is a bug under the fidelity policy: regraded from the RECORDED answers with no new model calls. Run 1 preserved at results/superseded/Q_run1_global_void.json."
+}
