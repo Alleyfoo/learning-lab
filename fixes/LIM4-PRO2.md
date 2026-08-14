@@ -105,8 +105,69 @@ is unchanged).
 this fix, plus the fourth found by the audit, are all closed, and the assertions
 make a fifth instance loud rather than silent.
 
-**It does not make the class impossible.** The assertions compare *declarations*.
-A capability that both layers claim to support but implement differently would
-pass both — the contract checks that the executor was *told* about a capability,
-not that it implements it correctly. That is the next weakness in this line, and
-it is untested.
+**It did not make the class impossible.** The assertions compare *declarations*.
+A capability both layers claim to support but implement differently passes both —
+the contract checks that the executor was *told* about a capability, not that it
+means the same thing by it.
+
+## Level three: semantic parity (added the same day)
+
+> agreement on vocabulary is not agreement on semantics
+
+Both layers can say `period_measure = supported` while one means *every
+declaration is transformed* and the other means *one declaration is transformed*.
+The completeness assertion goes green and the data still goes sideways — which is
+precisely what M's S3 was.
+
+```text
+declared?   the format enum lists it
+consumed?   the contract classifies it and the dispatcher acts on it
+identical?  it has an OBSERVABLE INVARIANT, demonstrated end to end
+```
+
+`definition_phase/harness/semantic_parity.py` registers an invariant per
+supported construct, expressed in terms of the pipeline's observable output, and
+`assert_parity_coverage()` fails if a construct is claimed supported without one.
+**A construct with no passing parity test may not be listed as supported** — the
+contract stops being a promise and becomes a demonstration.
+
+Sixteen constructs, each with an invariant. Examples:
+
+```text
+transform_op:unpivot    N columns x M rows -> exactly N*M rows, each var equal to
+                        the header cell of the column its value came from
+field_role:period_measure  EVERY accepted declaration contributes its rows, or
+                        validation refuses. Never a subset, never silently.
+exclude:rule:label_in   removes exactly and only the rows the label denotes
+sheet_role:ignore       adding an ignored sheet cannot change the output
+type:date               honoured deterministically, or recorded as explicitly
+                        unhonoured -- never guessed
+```
+
+### It immediately found a seventh instance
+
+`transform_op:derive` and `field_role:derived` failed on the first run:
+
+```text
+InsufficientRecipe: cannot resolve data sheet sheetset:M
+```
+
+**The executor cannot execute a sheetset at all.** `W1_months.json` is a
+committed, worked example; the validator validates it including the member-layout
+conformance check; the executor refuses it.
+
+Level two could not have caught this, and not by oversight: the contract
+classifies *enum values*, and a sheetset is a **referent kind** — a structural
+property of the reference, with no enum to be missing from. Level three found it
+because it tests behaviour rather than vocabulary.
+
+Now declared `UNSUPPORTED_SHEET_REFS` with a reason, refused up front by the
+validator, and documented in the format spec as *expressible and not executable*.
+The design stands; implementing it is open work.
+
+## What remains
+
+The parity tests demonstrate meaning **on the cases they exercise**. A construct
+whose invariant holds on a two-row fixture and breaks on a fifty-row one would
+still pass. Property-based generation over the invariants — rather than one
+worked example each — is the obvious next strengthening, and it is not built.

@@ -57,6 +57,20 @@ UNSUPPORTED_SHEET_ROLES = {
                  "contributes nothing to the output and nothing reports it"),
 }
 
+# --- sheet reference kinds --------------------------------------------------
+# No format enum names these: a sheet entry may reference `sheet:X` or
+# `sheetset:Y`, and that is a structural property of the referent, not an enum
+# value. Level-two completeness therefore could not see it, and a sheetset data
+# entry validated cleanly while the executor could not run it at all. Found by
+# the level-three parity check (semantic_parity.py), which tests behaviour rather
+# than vocabulary -- the seventh instance of the PRO-2 family.
+SUPPORTED_SHEET_REFS = frozenset({"sheet"})
+UNSUPPORTED_SHEET_REFS = {
+    "sheetset": ("the executor resolves a single sheet per data entry and cannot "
+                 "union a sheetset, so the recipe would refuse at execution after "
+                 "validating cleanly"),
+}
+
 # --- shape limits -----------------------------------------------------------
 # One unpivot per sheet. The executor keeps a single unpivot binding, so a
 # second one overwrites the first (Experiment M, S3).
@@ -75,6 +89,7 @@ def assert_contract_total() -> None:
         ("TRANSFORM_OPS", TRANSFORM_OPS, SUPPORTED_TRANSFORM_OPS, UNSUPPORTED_TRANSFORM_OPS),
         ("FIELD_ROLES", FIELD_ROLES, SUPPORTED_FIELD_ROLES, UNSUPPORTED_FIELD_ROLES),
         ("SHEET_ROLES", SHEET_ROLES, SUPPORTED_SHEET_ROLES, UNSUPPORTED_SHEET_ROLES),
+        ("SHEET_REFS", ("sheet", "sheetset"), SUPPORTED_SHEET_REFS, UNSUPPORTED_SHEET_REFS),
     ):
         unclassified = [v for v in declared if v not in supported and v not in unsupported]
         if unclassified:
@@ -95,7 +110,8 @@ def unsupported_reason(kind: str, value: str) -> str | None:
     """The recorded reason a capability is unsupported, or None if supported."""
     table = {"transform_op": UNSUPPORTED_TRANSFORM_OPS,
              "field_role": UNSUPPORTED_FIELD_ROLES,
-             "sheet_role": UNSUPPORTED_SHEET_ROLES}.get(kind, {})
+             "sheet_role": UNSUPPORTED_SHEET_ROLES,
+             "sheet_ref": UNSUPPORTED_SHEET_REFS}.get(kind, {})
     return table.get(value)
 
 
@@ -109,6 +125,7 @@ if __name__ == "__main__":
         ("transform ops", SUPPORTED_TRANSFORM_OPS, UNSUPPORTED_TRANSFORM_OPS),
         ("field roles", SUPPORTED_FIELD_ROLES, UNSUPPORTED_FIELD_ROLES),
         ("sheet roles", SUPPORTED_SHEET_ROLES, UNSUPPORTED_SHEET_ROLES),
+        ("sheet refs", SUPPORTED_SHEET_REFS, UNSUPPORTED_SHEET_REFS),
     ):
         print(f"  {name:14} supported={sorted(sup)}")
         for value, reason in unsup.items():

@@ -90,6 +90,16 @@ complete and wrong.
 
 ## 3. Sheetsets — "do several sheets belong together?"
 
+> **STATUS 2026-08-14: expressible, and NOT executable.** The format describes a
+> sheetset and the validator checks it, including member-layout conformance — but
+> the executor resolves one sheet per data entry and cannot union a set, so such a
+> recipe is now **refused up front** (`executor_cannot_honour`) instead of
+> validating cleanly and failing at execution. Found by the semantic parity check
+> (`harness/semantic_parity.py`), not by inspection: it is the seventh instance of
+> the PRO-2 family and the first that level-two completeness structurally could not
+> see, because a sheetset is a *referent kind*, not an enum value. The design below
+> stands as the intended shape; implementing it is open work.
+
 A `sheetset` entry declares that several sheets share one layout and union into
 one output. Twelve monthly sheets, period taken from the sheet name, is the case.
 

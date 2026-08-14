@@ -148,6 +148,13 @@ def validate(recipe: Recipe, wb: WorkbookView) -> Report:
             if why:
                 problems.append(Problem("executor_cannot_honour", where,
                                         f"sheet role {entry.role!r}: {why}"))
+        if entry.role == "data":
+            ref = _parse_ref(entry.sheet, where, problems)
+            if ref is not None:
+                why = unsupported_reason("sheet_ref", ref.kind)
+                if why:
+                    problems.append(Problem("executor_cannot_honour", where,
+                                            f"{ref.kind} data entry: {why}"))
         # One unpivot per sheet: a second silently overwrote the first, which is
         # how Experiment M's S3 lost half the data.
         unpivots = [f for f in entry.fields
@@ -817,8 +824,18 @@ def _self_test() -> int:
     months = load_recipe(ROOT / "recipes" / "W1_months.json")
     rep_m = validate(months, wb)
     seen_codes |= rep_m.codes()
-    check(rep_m.valid and rep_m.approvable,
-          f"W1_months should be valid and approvable; problems: {[str(p) for p in rep_m.problems]}")
+    # A sheetset recipe is STRUCTURALLY well-formed -- sheets, header, region,
+    # fields and the member-layout check all pass -- and the executor cannot run
+    # it, because it resolves one sheet per data entry. Semantic parity found
+    # that (semantic_parity.py); before the check existed, W1_months validated
+    # cleanly and failed at execution. It is now refused up front, which is the
+    # honest state and not a regression.
+    check(not rep_m.valid and "executor_cannot_honour" in rep_m.codes(),
+          f"a sheetset data entry must be refused as unexecutable, not validated: "
+          f"{[str(p) for p in rep_m.problems]}")
+    check({p.code for p in rep_m.problems} == {"executor_cannot_honour"},
+          f"...and refused for THAT reason only, with the rest of the recipe sound: "
+          f"{sorted(rep_m.codes())}")
 
     # --- broken 1: the SILENCE case, caught statically -----------------------
     b1 = load_recipe(ROOT / "recipes" / "broken" / "W1_sales_missing_total_row.json")
@@ -973,7 +990,7 @@ def _self_test() -> int:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
         return 1
     sys.stdout.write(
-        "SELF-TEST PASSED (W1_sales valid but NOT approvable / sheetset recipe valid / "
+        "SELF-TEST PASSED (W1_sales valid but NOT approvable / sheetset recipe refused as unexecutable / "
         "missing total row -> row_unclassified / double-bound column + undeclared sheet / "
         "legacy adapter round-trip / dry run pulls real values / v1.2 row shape catches "
         "the footnote / v1.3 reconciliation catches the C8 subtotal and provably does NOT "
