@@ -347,7 +347,7 @@
   <p class="caveat"><span class="lbl">Caveat</span>No measurement of the world here at all — <em>p</em> is a property of a provider and has never been measured for a real one. Below roughly a 5–10% change rate the architecture wins; above it, reading every file is cheaper. The security argument does not depend on this, but adoption does.</p>
 </div>
 
-<h2>Process<span class="count">2 claims</span></h2>
+<h2>Process<span class="count">5 claims</span></h2>
 
 <div class="claim">
   <div class="claim-head"><span class="cid">PRO-1</span><span class="grade g-det">Deterministic</span></div>
@@ -363,6 +363,29 @@
   <p><span class="lbl">Guarded</span>Three levels now. <strong>Declared?</strong> the format enum lists it. <strong>Consumed?</strong> a single contract classifies it and the dispatcher acts on it — both assertions run at import. <strong>Identical?</strong> every supported construct registers an <em>observable invariant</em> demonstrated end to end, and a construct without one may not be claimed supported.</p>
   <p><span class="lbl">Level 3</span>Sixteen constructs, each with a tested meaning — e.g. <em>every accepted <code>period_measure</code> declaration contributes its rows, or validation refuses; never a subset, never silently</em>. It found a seventh instance on its first run: <strong>the executor cannot execute a sheetset at all</strong>, while the validator validated one including its member-layout check. Level two structurally could not see it — a sheetset is a referent <em>kind</em>, not an enum value.</p>
   <p class="caveat"><span class="lbl">Caveat</span>Parity demonstrates meaning <em>on the cases it exercises</em>. An invariant that holds on a two-row fixture and breaks on a fifty-row one still passes. Property-based generation over the invariants is the obvious next step and is not built.</p>
+</div>
+
+<div class="claim">
+  <div class="claim-head"><span class="cid">PRO-3</span><span class="grade g-det">Deterministic</span></div>
+  <h3>The canary validates the detector, not the domain coverage.</h3>
+  <p><span class="lbl">Evidence</span>The property suite removes the LIM-4 guard, feeds itself the two-unpivot shape, and requires <code>no_partial_honour</code> to fire. It does. That rules out the embarrassing case — a universal property wired wrong and reporting green regardless of behaviour.</p>
+  <p><span class="lbl">Three claims, kept apart</span><strong>1.</strong> The guard prevents the known LIM-4 failure — <em>established</em>. <strong>2.</strong> The property catches that failure when the guard is removed — <em>established</em>. <strong>3.</strong> Accepted recipes can never be partially honoured — <strong>not established</strong>. Collapsing 2 into 3 is jumping two floors in one sentence.</p>
+  <p class="caveat"><span class="lbl">Caveat</span>Two different uncertainties: <em>can the property recognise the defect?</em> (the canary answers this) and <em>can the generator produce every relevant defect shape?</em> (completely open).</p>
+</div>
+
+<div class="claim">
+  <div class="claim-head"><span class="cid">PRO-4</span><span class="grade g-det">Deterministic</span></div>
+  <h3>720 generated cases found no eighth defect — recorded as evidence depth, not discovery.</h3>
+  <p><span class="lbl">Evidence</span>Eight properties over four generation buckets, five seeds, plus <code>no_partial_honour</code> on every case. Zero failures. The honest statement is <em>"we pushed variation substantially beyond the hand-authored fixtures and did not find another instance"</em>.</p>
+  <p><span class="lbl">Frozen</span>Recorded before grammar-derived generation exists, so that a later eighth instance would be a statement about the <strong>testing method</strong> — <code>author-written generation → nothing</code> versus <code>grammar-derived → ?</code> — rather than a lucky find.</p>
+  <p class="caveat"><span class="lbl">Caveat</span>More seeds from the same grammar measures stochastic coverage inside the same imagination. The next qualitatively different evidence is independent generation, not more of this.</p>
+</div>
+
+<div class="claim">
+  <div class="claim-head"><span class="cid">PRO-5</span><span class="grade g-det">Deterministic</span></div>
+  <h3>The defect family has a ladder, and each rung was found by the rung below failing to be enough.</h3>
+  <p><span class="lbl">Evidence</span>Each question was forced by a real defect, not designed in advance: <code>Does it exist?</code> → <code>Does every layer recognise it?</code> (the dispatcher, authorising a recipe its own validator rejected) → <code>Do the layers mean the same thing?</code> (the sheetset, valid and unexecutable) → <code>Does that meaning survive variation?</code> (720 cases) → <code>How much of the domain did we vary over?</code></p>
+  <p class="caveat"><span class="lbl">Caveat</span>The last question does not go away unless the input space is finite enough to exhaust. It is not.</p>
 </div>
 
 <h2>What I would defend hardest, and what I would not</h2>

@@ -1,0 +1,49 @@
+{
+  "what": "Author-written property generation — the baseline for a method comparison",
+  "frozen_before": "grammar-derived generation exists",
+  "why_frozen": "If a grammar-derived generator later finds an eighth defect instance, the comparison is only meaningful if this result was recorded first. Frozen so the chronology distinguishes 'author-written generation -> no novel defects' from whatever the grammar-derived run produces. That difference would be a statement about the TESTING METHOD, not about the software.",
+  "suite": "definition_phase/harness/parity_properties.py",
+  "properties": 8,
+  "buckets": [
+    "ordinary_valid",
+    "boundary_valid",
+    "invalid",
+    "structurally_surprising"
+  ],
+  "seeds": [
+    20260814,
+    1,
+    7,
+    42,
+    99
+  ],
+  "cases_per_seed": 144,
+  "cases_total": 720,
+  "failures": 0,
+  "novel_defects_found": 0,
+  "canary": {
+    "fires": true,
+    "what_it_proves": "the property suite is sensitive to at least ONE known instance of partial honour",
+    "what_it_does_NOT_prove": "that the generator can reach every other possible partial-honour shape",
+    "sentence": "The canary validates the DETECTOR, not the domain coverage."
+  },
+  "three_claims_kept_separate": [
+    {
+      "claim": "The guard prevents the known LIM-4 failure.",
+      "status": "ESTABLISHED",
+      "evidence": "deterministic; five defect cases BLOCKED, control still EXECUTEs"
+    },
+    {
+      "claim": "The property catches the known LIM-4 failure when the guard is removed.",
+      "status": "ESTABLISHED",
+      "evidence": "the canary fires; the property is discriminating rather than vacuous"
+    },
+    {
+      "claim": "Accepted recipes can never be partially honoured.",
+      "status": "NOT ESTABLISHED",
+      "evidence": "720 generated cases support it. The generators are author-written and explore the shapes their author imagined. Quantifying over all recipes is two floors above what the evidence carries."
+    }
+  ],
+  "stated_limitation": "More seeds from the same generator grammar mostly measures stochastic coverage inside the same imagination. Diminishing returns are expected, so the next qualitatively different evidence is INDEPENDENT generation, not more of this.",
+  "hidden": true
+}
