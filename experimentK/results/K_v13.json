@@ -1,0 +1,195 @@
+{
+  "probe": "K-v13",
+  "llm_invoked": false,
+  "n_cases": 14,
+  "per_case": {
+    "C1": {
+      "changed": "nothing",
+      "ground_truth": "EXECUTE",
+      "v12": "EXECUTE",
+      "v13": "EXECUTE",
+      "v13_predicted": "EXECUTE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "approval intact",
+      "delta": []
+    },
+    "C2": {
+      "changed": "the filename only (byte-identical to C1)",
+      "ground_truth": "EXECUTE",
+      "v12": "EXECUTE",
+      "v13": "EXECUTE",
+      "v13_predicted": "EXECUTE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "approval intact",
+      "delta": []
+    },
+    "C3": {
+      "changed": "two more products; the total row moves (A1:F11)",
+      "ground_truth": "EXECUTE",
+      "v12": "EXECUTE",
+      "v13": "EXECUTE",
+      "v13_predicted": "EXECUTE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "approval intact",
+      "delta": []
+    },
+    "C4": {
+      "changed": "Tuote -> Tuotekoodi",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v12": "REDEFINE_SCOPED",
+      "v13": "REDEFINE_SCOPED",
+      "v13_predicted": "REDEFINE_SCOPED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "the recipe no longer fully accounts for this workbook",
+      "delta": [
+        "unresolvable_referent: sheet:Sales!@Tuote -> header_not_found (Tuote)",
+        "unresolvable_referent: sheet:Sales!@Tuote -> header_not_found (Tuote)",
+        "unresolvable_referent: sheet:Sales!@Tuote -> header_not_found (Tuote)"
+      ]
+    },
+    "C5": {
+      "changed": "a Maa column inserted at B (A1:G9)",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v12": "REDEFINE_SCOPED",
+      "v13": "REDEFINE_SCOPED",
+      "v13_predicted": "REDEFINE_SCOPED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "the recipe no longer fully accounts for this workbook",
+      "delta": [
+        "row_shape_violation: row0 4 (A1 row 5): sheet:Sales!B:D col0 1 is not numeric ('FI')",
+        "row_shape_violation: row0 5 (A1 row 6): sheet:Sales!B:D col0 1 is not numeric ('FI')",
+        "row_shape_violation: row0 6 (A1 row 7): sheet:Sales!B:D col0 1 is not numeric ('FI')"
+      ]
+    },
+    "C6": {
+      "changed": "a new Kampanjat sheet",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v12": "REDEFINE_SCOPED",
+      "v13": "REDEFINE_SCOPED",
+      "v13_predicted": "REDEFINE_SCOPED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "the recipe no longer fully accounts for this workbook",
+      "delta": [
+        "sheet_unclassified: every sheet must be given a role"
+      ]
+    },
+    "C7": {
+      "changed": "Sales -> Myynnit",
+      "ground_truth": "DEFINE",
+      "v12": "DEFINE",
+      "v13": "DEFINE",
+      "v13_predicted": "DEFINE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "no recipe binds a data sheet present in this workbook",
+      "delta": []
+    },
+    "C8": {
+      "changed": "SAME dimensions (6 sheets, A1:F9, same headers); one product row is now a VÄLISUMMA subtotal",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v12": "EXECUTE",
+      "v13": "REDEFINE_SCOPED",
+      "v13_predicted": "REDEFINE_SCOPED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "the recipe no longer fully accounts for this workbook",
+      "delta": [
+        "reconciliation_failure: col0 1: data rows sum to 39 but row0 8 (A1 row 9) states 22",
+        "reconciliation_failure: col0 2: data rows sum to 49 but row0 8 (A1 row 9) states 28",
+        "reconciliation_failure: col0 3: data rows sum to 44 but row0 8 (A1 row 9) states 25"
+      ]
+    },
+    "C9": {
+      "changed": "nothing; the recipe store is empty",
+      "ground_truth": "DEFINE",
+      "v12": "DEFINE",
+      "v13": "DEFINE",
+      "v13_predicted": "DEFINE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "no recipe binds a data sheet present in this workbook",
+      "delta": []
+    },
+    "C10": {
+      "changed": "nothing; two recipes claim the same data sheet",
+      "ground_truth": "AMBIGUOUS",
+      "v12": "AMBIGUOUS",
+      "v13": "AMBIGUOUS",
+      "v13_predicted": "AMBIGUOUS",
+      "agree": true,
+      "fidelity": true,
+      "reason": "2 recipes claim this workbook",
+      "delta": []
+    },
+    "C11": {
+      "changed": "nothing in the workbook; the RECIPE was edited after approval",
+      "ground_truth": "BLOCKED",
+      "v12": "BLOCKED",
+      "v13": "BLOCKED",
+      "v13_predicted": "BLOCKED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "recipe was edited after approval (faf4c3c94632… != 15bf894528ef…)",
+      "delta": []
+    },
+    "C12": {
+      "changed": "nothing in the workbook; the recipe has an open blocking ambiguity",
+      "ground_truth": "BLOCKED",
+      "v12": "BLOCKED",
+      "v13": "BLOCKED",
+      "v13_predicted": "BLOCKED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "a blocking ambiguity is still open",
+      "delta": []
+    },
+    "C13": {
+      "changed": "a footnote row ('Huom: sisältää palautukset') appended BELOW the grand total",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v12": "REDEFINE_SCOPED",
+      "v13": "REDEFINE_SCOPED",
+      "v13_predicted": "REDEFINE_SCOPED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "the recipe no longer fully accounts for this workbook",
+      "delta": [
+        "row_shape_violation: row0 9 (A1 row 10): sheet:Sales!B:D col0 1 is not numeric ('')",
+        "row_shape_violation: row0 9 (A1 row 10): sheet:Sales!B:D col0 2 is not numeric ('')",
+        "row_shape_violation: row0 9 (A1 row 10): sheet:Sales!B:D col0 3 is not numeric ('')"
+      ]
+    },
+    "C14": {
+      "changed": "a VALISUMMA subtotal AND a grand total updated to include it: internally consistent, semantically double-counted",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v12": "EXECUTE",
+      "v13": "EXECUTE",
+      "v13_predicted": "EXECUTE",
+      "agree": false,
+      "fidelity": true,
+      "reason": "approval intact",
+      "delta": []
+    }
+  },
+  "agree": 13,
+  "false_execute": [
+    "C14"
+  ],
+  "over_escalation": [],
+  "fidelity_all": true,
+  "fidelity_deviations": [],
+  "predicted_totals": {
+    "n_cases": 14,
+    "v13_agree": 13,
+    "v13_over_escalation": [],
+    "v13_false_execute": [
+      "C14"
+    ]
+  },
+  "outcome": "PASS_AS_PREDICTED"
+}

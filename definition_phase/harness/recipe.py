@@ -58,6 +58,17 @@ EXCLUDE_RULE_OPS = ("label_in", "row_blank")
 # hostile workbook can force an ESCALATION and nothing else.
 ROW_SHAPE_CONSTRAINTS = ("require_non_blank", "require_numeric")
 
+# v1.3 -- reconciliation (Experiment K, the C8 attack).
+#
+# A RELATIONAL check, not a content predicate: the file's own declared total
+# must equal the sum of the rows the recipe treats as data. It catches a
+# subtotal row without knowing what its label MEANS -- the evidence is
+# arithmetic the provider put in the file.
+#
+# Narrower than what already exists: label_in compares strings,
+# reconciliation only adds numbers.
+RECONCILE_TOLERANCE = 1e-9
+
 # Which referent kinds a field role may bind (spec sec.2).
 COLUMN_KINDS = ("col", "colrange", "namedcol")
 COLUMN_BOUND_ROLES = ("id", "measure", "period_measure")
@@ -129,6 +140,20 @@ class RowShape:
 
 
 @dataclass(frozen=True)
+class Reconcile:
+    total_row: Optional[ExcludeRule] = None   # located the same way an exclusion is
+    columns: Optional[str] = None             # column referent to sum
+    reason: Optional[str] = None
+
+    @staticmethod
+    def from_json(raw: Mapping[str, Any]) -> "Reconcile":
+        tr = raw.get("total_row")
+        return Reconcile(
+            total_row=ExcludeRule.from_json(tr) if isinstance(tr, Mapping) else None,
+            columns=raw.get("columns"), reason=raw.get("reason"))
+
+
+@dataclass(frozen=True)
 class SheetEntry:
     sheet: str                              # 'sheet:X' or 'sheetset:Y'
     role: str
@@ -140,6 +165,7 @@ class SheetEntry:
     exclude: tuple[Exclusion, ...] = ()
     ambiguities: tuple[Ambiguity, ...] = ()
     data_row_shape: Optional[RowShape] = None
+    reconcile: tuple[Reconcile, ...] = ()
 
     @property
     def is_sheetset(self) -> bool:
@@ -214,6 +240,9 @@ def recipe_from_json(raw: Mapping[str, Any]) -> Recipe:
             ),
             data_row_shape=(RowShape.from_json(entry["data_row_shape"])
                             if isinstance(entry.get("data_row_shape"), Mapping) else None),
+            reconcile=tuple(Reconcile.from_json(r)
+                            for r in entry.get("reconcile", ()) or ()
+                            if isinstance(r, Mapping)),
         ))
     return Recipe(
         recipe_version=int(raw.get("recipe_version", -1)),

@@ -39,8 +39,8 @@ sys.path.insert(0, str(HERE))
 
 from recipe import (  # noqa: E402
     COLUMN_BOUND_ROLES, COLUMN_KINDS, EXCLUDE_RULE_OPS, FIELD_ROLES, RECIPE_VERSIONS,
-    REMAINDER, ROW_SHAPE_CONSTRAINTS, SHEET_ROLES, TRANSFORM_OPS, TYPES, Exclusion,
-    Recipe, SheetEntry, load_recipe,
+    RECONCILE_TOLERANCE, REMAINDER, ROW_SHAPE_CONSTRAINTS, SHEET_ROLES, TRANSFORM_OPS,
+    TYPES, Exclusion, Recipe, SheetEntry, load_recipe,
 )
 sys.path.insert(0, str(HERE.parent.parent / "experimentJ" / "harness"))
 from macro_v2 import is_number  # noqa: E402  (frozen numeric parse, Experiment J)
@@ -60,6 +60,7 @@ PROBLEM_CODES = (
     # coverage
     "sheet_unclassified", "column_unclassified", "column_double_bound",
     "row_unclassified", "row_double_classified", "row_shape_violation",
+    "reconciliation_failure",
     # sheetset
     "sheetset_member_layout_mismatch",
     # approval (does NOT make the recipe invalid)
@@ -371,6 +372,9 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
 
     if entry.data_row_shape:
         _check_row_shape(entry, wb, sheet, sorted(data_rows), header_rows0, problems)
+    if entry.reconcile:
+        _check_reconcile(entry, wb, sheet, sorted(data_rows), n_rows,
+                         header_rows0, problems)
 
     for r in range(n_rows):
         labels = row_claims.get(r, [])
@@ -394,6 +398,51 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
         "rows": {r: row_claims.get(r, []) for r in range(n_rows)},
         "cols": {c: col_claims.get(c, []) for c in range(n_cols)},
     }
+
+
+def _check_reconcile(entry: SheetEntry, wb: WorkbookView, sheet: str,
+                     data_rows: list[int], n_rows: int, header_rows0: dict,
+                     problems: list[Problem]) -> None:
+    """The file's own declared total must equal the sum of the data rows (v1.3).
+
+    RELATIONAL, not a content predicate: it catches a subtotal row without
+    knowing what its label MEANS, because the evidence is arithmetic the
+    provider put in the file. Narrower than label_in, which compares strings --
+    this only adds numbers.
+
+    A missing total row SKIPS the check rather than failing it: many sheets have
+    no total, and its absence is not evidence of anything.
+    """
+    for rec in entry.reconcile:
+        if rec.total_row is None or not rec.columns:
+            problems.append(Problem("malformed_exclude", entry.sheet,
+                                    "reconcile needs total_row and columns"))
+            continue
+        locator = Exclusion(rule=rec.total_row, reason=rec.reason or "reconcile")
+        total_rows = sorted(_rule_rows(locator, wb, sheet, n_rows, header_rows0, problems))
+        if not total_rows:
+            continue                      # no declared total -> nothing to check
+        resolved = resolve(rec.columns, wb, header_rows0=header_rows0)
+        if not resolved.ok:
+            continue                      # already reported as unresolvable
+        for total_row0 in total_rows:
+            stated_values = wb.row_values(sheet, total_row0)
+            for col0 in range(resolved.col0, resolved.col0_last + 1):
+                stated_cell = stated_values[col0] if col0 < len(stated_values) else ""
+                if not is_number(stated_cell):
+                    continue
+                stated = float(stated_cell.strip().replace(",", "."))
+                summed = 0.0
+                for row0 in data_rows:
+                    values = wb.row_values(sheet, row0)
+                    cell = values[col0] if col0 < len(values) else ""
+                    if is_number(cell):
+                        summed += float(cell.strip().replace(",", "."))
+                if abs(summed - stated) > RECONCILE_TOLERANCE:
+                    problems.append(Problem(
+                        "reconciliation_failure", entry.sheet,
+                        f"col0 {col0}: data rows sum to {summed:g} but row0 "
+                        f"{total_row0} (A1 row {total_row0 + 1}) states {stated:g}"))
 
 
 def _check_row_shape(entry: SheetEntry, wb: WorkbookView, sheet: str,
@@ -625,6 +674,36 @@ def _self_test() -> int:
         load_recipe(ROOT / "recipes" / "W1_sales_v11.json"), wb_foot).codes(),
         "a recipe without data_row_shape must not gain the check")
 
+    # --- v1.3: reconciliation (Experiment K, the C8 attack) ------------------
+    v13 = load_recipe(ROOT / "recipes" / "W1_sales_v13.json")
+    kfix = ROOT.parent / "experimentK" / "fixtures"
+    rep13 = validate(v13, wb)
+    seen_codes |= rep13.codes()
+    check(rep13.valid,
+          f"W1_sales_v13 must reconcile on the clean workbook: "
+          f"{[str(p) for p in rep13.problems]}")
+
+    # POSITIVE: the C8 subtotal makes the sheet stop adding up.
+    rep13_sub = validate(v13, WorkbookView(kfix / "C8_silent_subtotal.xlsx"))
+    seen_codes |= rep13_sub.codes()
+    check("reconciliation_failure" in rep13_sub.codes(),
+          f"a subtotal counted as data must break reconciliation: "
+          f"{sorted(rep13_sub.codes())}")
+
+    # NEGATIVE 1: more products must still reconcile -- the fix must not fire on
+    # the ordinary monthly case.
+    rep13_more = validate(v13, WorkbookView(kfix / "C3_more_rows.xlsx"))
+    check("reconciliation_failure" not in rep13_more.codes(),
+          f"a clean file with more rows must reconcile: {sorted(rep13_more.codes())}")
+
+    # NEGATIVE 2: THE RESIDUAL. C14 is the same subtotal with the grand total
+    # updated to include it -- internally consistent, semantically double
+    # counted. Arithmetic provably cannot see it, and this asserts that limit.
+    rep13_rec = validate(v13, WorkbookView(kfix / "C14_reconciling_subtotal.xlsx"))
+    check("reconciliation_failure" not in rep13_rec.codes(),
+          "a subtotal folded into the grand total ADDS UP; arithmetic must not "
+          "claim to catch it")
+
     # --- v1.1 structural failures -------------------------------------------
     from recipe import recipe_from_json as _rfj
 
@@ -817,7 +896,8 @@ def _self_test() -> int:
         "SELF-TEST PASSED (W1_sales valid but NOT approvable / sheetset recipe valid / "
         "missing total row -> row_unclassified / double-bound column + undeclared sheet / "
         "legacy adapter round-trip / dry run pulls real values / v1.2 row shape catches "
-        "the footnote and provably does NOT catch the subtotal / all 23 problem codes "
+        "the footnote / v1.3 reconciliation catches the C8 subtotal and provably does NOT "
+        "catch the C14 consistent double-count / all 24 problem codes "
         "exercised)\n"
     )
     return 0

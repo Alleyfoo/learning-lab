@@ -49,6 +49,9 @@ COVERAGE_CODES = (
     # the fidelity policy; run 1 is preserved in
     # `results/superseded/K_v12_run1_spec_deviation.json`.
     "row_shape_violation",
+    # v1.3. The freeze states this explicitly, because v1.2 run 1 failed by
+    # adding a code in one layer and not consuming it in this one.
+    "reconciliation_failure",
 )
 
 

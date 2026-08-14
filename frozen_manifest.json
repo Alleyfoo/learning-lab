@@ -26,6 +26,11 @@
       "note": "adopted 2026-08-14"
     },
     {
+      "path": "definition_phase/recipes/W1_sales_v13.json",
+      "sha256": "c539d15e31c6402ff68af4e67334d78aa3a5dd41347babeb4190fb58d12b2b1a",
+      "note": "adopted 2026-08-14"
+    },
+    {
       "path": "definition_phase/recipes/broken/W1_sales_double_bound.json",
       "sha256": "a366736535cfce2a405f1775048d2c4a986651b2dfa13d7164295c4c6344decd",
       "note": "adopted 2026-08-14"
