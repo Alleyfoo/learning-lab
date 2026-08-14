@@ -1,0 +1,102 @@
+{
+  "probe": "M",
+  "purpose": "Breadth: across plausible provider shapes, how many can recipe format v1.3 express, and what exactly is missing from the rest?",
+  "frozen_before_implementation": true,
+  "llm_invoked": false,
+  "why_it_is_a_security_measurement": "The containment argument rests on transforms being a CLOSED ENUM rather than an expression language. Each shape the enum cannot express is pressure to add an escape hatch, and an escape hatch is where arbitrary computation -- and the injection surface -- comes back. Counting gaps is counting pressure on the boundary.",
+  "method": [
+    "attempt a recipe using ONLY frozen format v1.3",
+    "validate it",
+    "execute it with Experiment L's executor",
+    "classify EXPRESSIBLE or GAP and NAME the missing capability",
+    "the format is NOT extended during M; a gap is recorded, never patched"
+  ],
+  "per_shape": {
+    "S1_clean_wide": {
+      "fixture": "fixtures/S1_clean_wide.xlsx",
+      "sha256": "7bfcf25f5178794b6f4095f0564f49a8ba1c863325478136f99e6b5a2534308a",
+      "predicted": "EXPRESSIBLE",
+      "predicted_missing_capability": null,
+      "note": "the shape the format was designed on",
+      "predicted_silent_wrong": false
+    },
+    "S2_stacked_header": {
+      "fixture": "fixtures/S2_stacked_header.xlsx",
+      "sha256": "2c97e9042a41aee24be346c14ded9e46ea64fc0268cbd224b870e85f3dbf58b2",
+      "predicted": "GAP",
+      "predicted_missing_capability": "multi_row_header",
+      "note": "a single header_row cannot name a two-row header ('2026' over 'Tammi'); needs multi-row header flattening",
+      "predicted_silent_wrong": false
+    },
+    "S3_two_measure_blocks": {
+      "fixture": "fixtures/S3_two_measure_blocks.xlsx",
+      "sha256": "cba82e98fdc007524238d6dfccf10266200b0105bb1a926c7413d73bd0e6a150",
+      "predicted": "GAP",
+      "predicted_missing_capability": "multiple_unpivots",
+      "note": "one unpivot per sheet; needs two, plus a way to say which columns belong to which measure",
+      "predicted_silent_wrong": false
+    },
+    "S4_already_long": {
+      "fixture": "fixtures/S4_already_long.xlsx",
+      "sha256": "6bbfd6a54ab57cc5aec495562bbd5efa9308f9556d2d6ce741ebadfe8bf1428d",
+      "predicted": "EXPRESSIBLE",
+      "predicted_missing_capability": null,
+      "note": "id + measure fields, no unpivot",
+      "predicted_silent_wrong": false
+    },
+    "S5_formatted_numbers": {
+      "fixture": "fixtures/S5_formatted_numbers.xlsx",
+      "sha256": "aaf27f180e50d2a34204708c582110441e6ff7493d3a64b0dfedeaa723f6316a",
+      "predicted": "GAP",
+      "predicted_missing_capability": "number_format_declaration",
+      "note": "type: number has no format declaration for thousands separators or percent; same family as L's gap G1. Judged a GAP before the run because the recipe cannot produce the correct table -- a downstream sum would fail",
+      "predicted_silent_wrong": false
+    },
+    "S6_interleaved_note": {
+      "fixture": "fixtures/S6_interleaved_note.xlsx",
+      "sha256": "bbf520eb4212cd692dcca3ce5d6cbbeed10275a2ed6bdd6ed361c4c81af6aee9",
+      "predicted": "GAP",
+      "predicted_missing_capability": "unforeseen_row_detection",
+      "note": "label_in needs the literal text in advance; an unforeseen note in the MIDDLE of the data is absorbed by remainder, and unlike K's C13 it is not at the bottom where a shape rule catches it. Predicted SILENT_WRONG: executes with a wrong extra row",
+      "predicted_silent_wrong": true
+    }
+  },
+  "predicted_totals": {
+    "n_shapes": 6,
+    "n_expressible": 2,
+    "n_gap": 4,
+    "gaps": [
+      "S2_stacked_header",
+      "S3_two_measure_blocks",
+      "S5_formatted_numbers",
+      "S6_interleaved_note"
+    ],
+    "silent_wrong": [
+      "S6_interleaved_note"
+    ]
+  },
+  "decision_table": [
+    {
+      "condition": "every shape classified as predicted",
+      "outcome": "PASS_AS_PREDICTED"
+    },
+    {
+      "condition": "a predicted GAP turns out expressible",
+      "outcome": "RESULT_MORE_CAPABLE -- record how"
+    },
+    {
+      "condition": "a predicted EXPRESSIBLE turns out a gap",
+      "outcome": "RESULT_LESS_CAPABLE -- the more important direction"
+    },
+    {
+      "condition": "a shape executes to a WRONG TABLE while the recipe validates",
+      "outcome": "flag SILENT_WRONG separately -- the unsafe class, categorically worse than a refusal"
+    }
+  ],
+  "hard_stop": [
+    "No LLM.",
+    "No changes to the frozen grammar, format v1.3, L's executor, or any recorded result.",
+    "No capability is added to the format during M, however obvious the fix looks."
+  ],
+  "hidden": true
+}
