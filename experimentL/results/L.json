@@ -1,0 +1,256 @@
+{
+  "probe": "L",
+  "llm_invoked": false,
+  "recipe": "../experimentK/recipes/W1_sales_v13_approved.json",
+  "recipe_sha256": "4c372076cfdc46d09c78eb616c021d823b6b5c92ec8451357db46fe7a29523c6",
+  "cases": {
+    "L1": {
+      "workbook": "../definition_phase/fixtures/W1_multisheet.xlsx",
+      "columns": [
+        "paivitetty",
+        "tuote",
+        "kuukausi",
+        "myynti"
+      ],
+      "expected_columns": [
+        "paivitetty",
+        "tuote",
+        "kuukausi",
+        "myynti"
+      ],
+      "columns_match": true,
+      "n_expected": 12,
+      "n_got": 12,
+      "rows_match": true,
+      "diff": [],
+      "unhonoured_types": [
+        {
+          "target": "paivitetty",
+          "declared": "date",
+          "gap": "G1",
+          "reason": "the recipe format has no date format string or locale, so the declared type cannot be honoured without guessing"
+        }
+      ],
+      "rows": [
+        [
+          "3.2.2026",
+          "ART-001",
+          "Tammi",
+          10
+        ],
+        [
+          "3.2.2026",
+          "ART-001",
+          "Helmi",
+          12
+        ],
+        [
+          "3.2.2026",
+          "ART-001",
+          "Maalis",
+          8
+        ],
+        [
+          "3.2.2026",
+          "ART-002",
+          "Tammi",
+          7
+        ],
+        [
+          "3.2.2026",
+          "ART-002",
+          "Helmi",
+          9
+        ],
+        [
+          "3.2.2026",
+          "ART-002",
+          "Maalis",
+          11
+        ],
+        [
+          "3.2.2026",
+          "ART-003",
+          "Tammi",
+          5
+        ],
+        [
+          "3.2.2026",
+          "ART-003",
+          "Helmi",
+          7
+        ],
+        [
+          "3.2.2026",
+          "ART-003",
+          "Maalis",
+          6
+        ],
+        [
+          "3.2.2026",
+          "ART-004",
+          "Tammi",
+          8
+        ],
+        [
+          "3.2.2026",
+          "ART-004",
+          "Helmi",
+          11
+        ],
+        [
+          "3.2.2026",
+          "ART-004",
+          "Maalis",
+          7
+        ]
+      ]
+    },
+    "L2": {
+      "workbook": "../experimentK/fixtures/C3_more_rows.xlsx",
+      "columns": [
+        "paivitetty",
+        "tuote",
+        "kuukausi",
+        "myynti"
+      ],
+      "expected_columns": [
+        "paivitetty",
+        "tuote",
+        "kuukausi",
+        "myynti"
+      ],
+      "columns_match": true,
+      "n_expected": 18,
+      "n_got": 18,
+      "rows_match": true,
+      "diff": [],
+      "unhonoured_types": [
+        {
+          "target": "paivitetty",
+          "declared": "date",
+          "gap": "G1",
+          "reason": "the recipe format has no date format string or locale, so the declared type cannot be honoured without guessing"
+        }
+      ],
+      "rows": [
+        [
+          "3.2.2026",
+          "ART-001",
+          "Tammi",
+          10
+        ],
+        [
+          "3.2.2026",
+          "ART-001",
+          "Helmi",
+          12
+        ],
+        [
+          "3.2.2026",
+          "ART-001",
+          "Maalis",
+          8
+        ],
+        [
+          "3.2.2026",
+          "ART-002",
+          "Tammi",
+          7
+        ],
+        [
+          "3.2.2026",
+          "ART-002",
+          "Helmi",
+          9
+        ],
+        [
+          "3.2.2026",
+          "ART-002",
+          "Maalis",
+          11
+        ],
+        [
+          "3.2.2026",
+          "ART-003",
+          "Tammi",
+          5
+        ],
+        [
+          "3.2.2026",
+          "ART-003",
+          "Helmi",
+          7
+        ],
+        [
+          "3.2.2026",
+          "ART-003",
+          "Maalis",
+          6
+        ],
+        [
+          "3.2.2026",
+          "ART-004",
+          "Tammi",
+          8
+        ],
+        [
+          "3.2.2026",
+          "ART-004",
+          "Helmi",
+          11
+        ],
+        [
+          "3.2.2026",
+          "ART-004",
+          "Maalis",
+          7
+        ],
+        [
+          "3.2.2026",
+          "ART-005",
+          "Tammi",
+          6
+        ],
+        [
+          "3.2.2026",
+          "ART-005",
+          "Helmi",
+          8
+        ],
+        [
+          "3.2.2026",
+          "ART-005",
+          "Maalis",
+          9
+        ],
+        [
+          "3.2.2026",
+          "ART-006",
+          "Tammi",
+          4
+        ],
+        [
+          "3.2.2026",
+          "ART-006",
+          "Helmi",
+          5
+        ],
+        [
+          "3.2.2026",
+          "ART-006",
+          "Maalis",
+          3
+        ]
+      ]
+    }
+  },
+  "insufficient": [],
+  "gaps_found": [
+    "G1"
+  ],
+  "predicted_gaps": [
+    "G1"
+  ],
+  "outcome": "PASS_AS_PREDICTED"
+}
