@@ -1,0 +1,174 @@
+{
+  "probe": "K",
+  "purpose": "Front-door dispatch: decide deterministically whether a saved recipe still applies to an arriving workbook. Plan v1 sec.8.5 / sec.10 step 3. NO LLM is invoked anywhere in K.",
+  "framed_question": "When an unknown workbook arrives, can a deterministic front door decide whether a saved recipe still applies -- without the filename, without silently running a stale recipe, and without escalating files it should have handled?",
+  "frozen_before_implementation": true,
+  "design_claim": "The applicability predicate is not a new artifact: it is the step-2 recipe validator re-run against the candidate file. A recipe already declares everything its correctness depends on (bound sheets, header row, positional vs named columns, exclusions, and coverage totality), so re-validation answers 'does this still apply?' and the problem codes say what drifted.",
+  "replaces": "Data-agents-demo _compute_structural_hash (DA-2): 5 preview rows + the filename. Too strict (next month's file never matches) and too shallow (blind to sheet identity and anything below row 5).",
+  "outcomes": ["EXECUTE", "REDEFINE_SCOPED", "DEFINE", "AMBIGUOUS", "BLOCKED"],
+  "dispatch_algorithm": [
+    "[1] LOOKUP  recipes whose data-role sheets ALL exist in the candidate (case-insensitive; the FORMAT is the key, never the filename). 0 -> DEFINE; >=2 -> AMBIGUOUS; 1 -> R",
+    "[2] APPLICABILITY  report = validate(R, candidate). If no field binding resolves at all -> DEFINE. Else if any binding or coverage problem -> REDEFINE_SCOPED with the delta named. Else -> [3]",
+    "[3] APPROVAL  content_sha256 == provenance.approved_recipe_sha256 AND approved_by set AND no blocking ambiguity -> EXECUTE (no model invoked); otherwise -> BLOCKED"
+  ],
+  "recipes": {
+    "approved": {
+      "path": "recipes/W1_sales_approved.json",
+      "sha256": "360323cd8fe2ed9cdeeba598ac759f5a8287d7271068d7ae597e1ae4f1488f0c",
+      "approved_recipe_sha256": "15bf894528ef51cafe4ff9fa07ef70babc2aca9eeb22abe33b6db96e33483eb5"
+    },
+    "edited_after_approval": {
+      "path": "recipes/W1_sales_edited_after_approval.json",
+      "sha256": "63b81c3b3e5ae290914ee0281cdcc9b4881fa8e0ae33ee3609674f98ef10fbb4",
+      "note": "body changed after approval; the stored approval hash is kept, so the content hash no longer matches"
+    },
+    "open_ambiguity": {
+      "path": "recipes/W1_sales_open_ambiguity.json",
+      "sha256": "790035ca1b9fa9a51ad7ddb4773645ea6e610972146a9843e561613b81fedf6a",
+      "note": "never approved; one blocking ambiguity still open"
+    }
+  },
+  "per_case": {
+    "C1": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": ["approved"],
+      "changed": "nothing",
+      "ground_truth": "EXECUTE",
+      "predicted": "EXECUTE",
+      "why": "clean re-validation, approval intact"
+    },
+    "C2": {
+      "workbook": "fixtures/C2_renamed_file.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": ["approved"],
+      "changed": "the filename only (byte-identical to C1)",
+      "ground_truth": "EXECUTE",
+      "predicted": "EXECUTE",
+      "why": "THE DA-2 FIX: the filename is never consulted"
+    },
+    "C3": {
+      "workbook": "fixtures/C3_more_rows.xlsx",
+      "sha256": "cbf34221def03391b9b1431027b5aa627f9575ea19f51c22e4c78fd812ad594a",
+      "store": ["approved"],
+      "changed": "two more products; the total row moves (A1:F11)",
+      "ground_truth": "EXECUTE",
+      "predicted": "REDEFINE_SCOPED",
+      "why": "PREREGISTERED OVER-ESCALATION (safe direction). More data rows is the ordinary monthly case, so EXECUTE is right. Recipe format v1 anchors data_region absolutely (Sales!5:8) and the total-row exclusion positionally (Sales!9), so rows 9-10 are claimed by nothing and the exclusion now points at a real product. A real gap in the FORMAT, surfaced by building the front door. Do NOT patch it during K."
+    },
+    "C4": {
+      "workbook": "fixtures/C4_column_renamed.xlsx",
+      "sha256": "89ba1f8345d611654005d4d29a4de6d246a8ec735f0f6cff736adc7c92059ea2",
+      "store": ["approved"],
+      "changed": "Tuote -> Tuotekoodi",
+      "ground_truth": "REDEFINE_SCOPED",
+      "predicted": "REDEFINE_SCOPED",
+      "why": "the NAMED binding @Tuote hits header_not_found, and col0 0 is then claimed by nothing"
+    },
+    "C5": {
+      "workbook": "fixtures/C5_column_inserted.xlsx",
+      "sha256": "fca29cf15ad169ba3f166b64eeb6a07c42e640b232773fc4ceaf4bba7bdd45dd",
+      "store": ["approved"],
+      "changed": "a Maa column inserted at B (A1:G9)",
+      "ground_truth": "REDEFINE_SCOPED",
+      "predicted": "REDEFINE_SCOPED",
+      "why": "THE D1 CASE. The positional binding B:D silently shifts to Maa/Tammi/Helmi and Maalis is left claimed by nothing. Coverage totality catches the silent shift that repo_reuse_map.md defect D1 describes -- a non-obvious positive claim under test here."
+    },
+    "C6": {
+      "workbook": "fixtures/C6_sheet_added.xlsx",
+      "sha256": "7dc3d09986e89d8fcba0dc80cfda6a80cf8945d86885de71397d84b579cab2a3",
+      "store": ["approved"],
+      "changed": "a new Kampanjat sheet",
+      "ground_truth": "REDEFINE_SCOPED",
+      "predicted": "REDEFINE_SCOPED",
+      "why": "nothing breaks, but 'which sheets matter?' is a definition decision and there is now a new one. Escalating is CORRECT here, not noise."
+    },
+    "C7": {
+      "workbook": "fixtures/C7_sheet_renamed.xlsx",
+      "sha256": "9b50be7dfc22f87022864cb83df6e4be0ab88f3a36f52c861a2892cee4e585a7",
+      "store": ["approved"],
+      "changed": "Sales -> Myynnit",
+      "ground_truth": "DEFINE",
+      "predicted": "DEFINE",
+      "why": "lookup finds no recipe whose data sheet exists; nothing carries over"
+    },
+    "C8": {
+      "workbook": "fixtures/C8_silent_subtotal.xlsx",
+      "sha256": "713ffb5be743d59adc5afe55aa12a7f356cf03b151b542867d3fa3dec875843e",
+      "store": ["approved"],
+      "changed": "SAME dimensions (6 sheets, A1:F9, same headers); one product row is now a VÄLISUMMA subtotal",
+      "ground_truth": "REDEFINE_SCOPED",
+      "predicted": "EXECUTE",
+      "why": "PREREGISTERED FALSE EXECUTE (unsafe direction). Nothing about the shape changed, so re-validation is clean and the subtotal is consumed as a product, double-counting. A structural predicate CANNOT see this by construction. Included to measure the blind spot rather than discover it later. Do NOT add content heuristics during K."
+    },
+    "C9": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [],
+      "changed": "nothing; the recipe store is empty",
+      "ground_truth": "DEFINE",
+      "predicted": "DEFINE",
+      "why": "cold start"
+    },
+    "C10": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": ["approved", "open_ambiguity"],
+      "changed": "nothing; two recipes claim the same data sheet",
+      "ground_truth": "AMBIGUOUS",
+      "predicted": "AMBIGUOUS",
+      "why": "a human picks; the front door must not choose for them"
+    },
+    "C11": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": ["edited_after_approval"],
+      "changed": "nothing in the workbook; the RECIPE was edited after approval",
+      "ground_truth": "BLOCKED",
+      "predicted": "BLOCKED",
+      "why": "content hash != approved hash. 3E's gate-owns-authority applied to governance: a perfectly matching recipe must not run if the approval no longer covers it."
+    },
+    "C12": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": ["open_ambiguity"],
+      "changed": "nothing in the workbook; the recipe has an open blocking ambiguity",
+      "ground_truth": "BLOCKED",
+      "predicted": "BLOCKED",
+      "why": "a recipe with an unanswered human question must not execute"
+    }
+  },
+  "predicted_totals": {
+    "n_cases": 12,
+    "agree": 10,
+    "false_execute": ["C8"],
+    "over_escalation": ["C3"]
+  },
+  "grading": {
+    "agree": "dispatch(f) == ground_truth(f)",
+    "fidelity": "dispatch(f) == predicted(f) -- a check on the AUTHOR's hand-simulation, not on the algorithm's correctness",
+    "false_execute": "{ f : dispatch(f) == EXECUTE and ground_truth(f) != EXECUTE }",
+    "over_escalation": "{ f : ground_truth(f) == EXECUTE and dispatch(f) != EXECUTE }"
+  },
+  "decision_table": [
+    {"condition": "fidelity on all 12 AND false_execute == ['C8'] AND over_escalation == ['C3']", "outcome": "PASS_AS_PREDICTED -- the front door behaves exactly as designed, with two named costs"},
+    {"condition": "any unpredicted false EXECUTE", "outcome": "FAIL_UNSAFE -- a stale recipe would run on a changed file. Record; do not tune"},
+    {"condition": "any unpredicted over-escalation", "outcome": "FAIL_NOISE -- the macro does not pay off. Record; do not tune"},
+    {"condition": "C1 or C2 != EXECUTE", "outcome": "FAIL_BASELINE -- the repeat case does not work, which is the whole point"},
+    {"condition": "fidelity fails but the code matches the frozen spec", "outcome": "RESULT, not a bug: the author mis-predicted their own algorithm. Record; do not amend spec or prediction"}
+  ],
+  "hard_stop": [
+    "Dispatch only. No execution of any recipe (step 6).",
+    "No LLM anywhere.",
+    "No changes to the frozen referent grammar (referent-grammar-v1).",
+    "No changes to recipe format v1 -- including NOT adding data_region: 'remainder', however tempting C3 makes it. Fixing the format mid-experiment destroys the measurement.",
+    "No Streamlit / browser work (step 4)."
+  ],
+  "stated_limitations": [
+    "Lookup keys on 'the recipe's data sheets all exist', which is weak: many recipes could match on a common sheet name. C10 exercises the AMBIGUOUS branch but the lookup key itself is not the object under test here.",
+    "12 in-lab candidates derived from one workbook. A controlled replay, not a prevalence estimate of how providers actually change files (the UQ-1 question, kept separate).",
+    "The predicate is STRUCTURAL by construction. C8 measures exactly what that cannot see; catching content-semantics drift needs row-level evidence and is out of scope.",
+    "Deterministic and fully repeatable: no LLM, no seeds, no sampling. The n=1 reliability caveat attached to every LLM probe in this programme does not apply."
+  ],
+  "hidden": true
+}
