@@ -38,7 +38,8 @@ ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 
 from executor_contract import (  # noqa: E402
-    MAX_UNPIVOTS_PER_SHEET, SUPPORTED_DERIVE_SOURCES, unsupported_reason,
+    MAX_UNPIVOTS_PER_SHEET, SUPPORTED_DERIVE_SOURCES, pairing_reason,
+    unsupported_reason,
 )
 from recipe import (  # noqa: E402
     COLUMN_BOUND_ROLES, COLUMN_KINDS, EXCLUDE_RULE_OPS, FIELD_ROLES, RECIPE_VERSIONS,
@@ -216,6 +217,11 @@ def validate(recipe: Recipe, wb: WorkbookView) -> Report:
                 if why:
                     problems.append(Problem("executor_cannot_honour", fwhere,
                                             f"field role {fld.role!r}: {why}"))
+                # Legal COMPOSITION, not merely supported atoms (instance 8).
+                why = pairing_reason(fld.role,
+                                     fld.transform.op if fld.transform else None)
+                if why:
+                    problems.append(Problem("executor_cannot_honour", fwhere, why))
             # role <-> referent-kind pairing
             if fld.role == "derived":
                 if fld.source:

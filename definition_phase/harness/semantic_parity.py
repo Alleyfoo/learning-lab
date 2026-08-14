@@ -70,6 +70,7 @@ from validate_recipe import validate  # noqa: E402
 EXTRA_CONSTRUCTS = (
     "exclude:referent", "exclude:rule:label_in", "data_region:remainder",
     "data_row_shape", "reconcile", "type:number", "type:date",
+    "composition:role_x_transform",
 )
 
 
@@ -144,6 +145,62 @@ SIMPLE = [["Tuote", "Tammi", "Helmi"], ["A-1", 1, 2], ["A-2", 3, 4]]
 # ---------------------------------------------------------------------------
 # invariants
 # ---------------------------------------------------------------------------
+
+@parity("composition:role_x_transform",
+        "a declared transform is EITHER valid for the role it is attached to and "
+        "fully honoured, OR the recipe is refused. Every role x transform pair is "
+        "checked, not only the pairs observed to fail.")
+def _p_composition(tmp):
+    """PRO-2 instance 8 as an invariant, over the whole pairing space.
+
+    Patching the seven observed bad combinations would have been patching the
+    specimen again; this enumerates all of them.
+    """
+    from executor_contract import ROLE_TRANSFORM_PAIRS
+    from recipe import FIELD_ROLES, TRANSFORM_OPS
+
+    path = _wb(tmp, "composition", {"S": SIMPLE})
+    bad: list[str] = []
+    for role in FIELD_ROLES:
+        for op in (None,) + tuple(TRANSFORM_OPS):
+            field = {"target": "probe", "role": role, "type": "string"}
+            if role != "derived":
+                field["source"] = "sheet:S!@Tuote"
+            if op == "unpivot":
+                field["transform"] = {"op": "unpivot", "var_target": "kk",
+                                      "value_target": "probe"}
+            elif op == "derive":
+                field["transform"] = {"op": "derive", "from": "sheet_name"}
+            elif op is not None:
+                field["transform"] = {"op": op}
+
+            r = _recipe([_data("sheet:S", "sheet:S!1", "remainder", [field],
+                               exclude=[{"referent": "sheet:S!@Tammi", "reason": "c"},
+                                        {"referent": "sheet:S!@Helmi", "reason": "c"}])])
+            report, ex = _run(r, path)
+            legal = op in ROLE_TRANSFORM_PAIRS.get(role, frozenset())
+
+            if not legal:
+                if ex is not None:
+                    bad.append(f"{role} x {op}: illegal pairing EXECUTED")
+                continue
+            if ex is None:
+                # A legal pairing may still be refused for an unrelated reason
+                # (a role needing a source shape this probe does not give it).
+                if "executor_cannot_honour" in report.codes():
+                    bad.append(f"{role} x {op}: legal pairing refused as unhonourable")
+                continue
+            declared = {"probe"}
+            if op == "unpivot":
+                declared = {"kk", "probe"}
+            missing = declared - set(ex.columns)
+            if missing:
+                bad.append(f"{role} x {op}: accepted but {sorted(missing)} missing")
+    if bad:
+        return False, "; ".join(bad[:4])
+    n = len(FIELD_ROLES) * (len(TRANSFORM_OPS) + 1)
+    return True, f"all {n} role x transform pairs: honoured in full, or refused"
+
 
 @parity("transform_op:unpivot",
         "N period columns x M data rows produce exactly N*M output rows, and each "

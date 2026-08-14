@@ -1,0 +1,38 @@
+{
+  "what": "PRO-2 instance 8 fix, and the staged correction of the grammar oracle",
+  "why_staged": "Two changes were pending at once -- a contract fix and an oracle correction. Measuring between them keeps attribution possible; doing both and reading one number would have lost the ability to say which caused what.",
+  "corpus": "the SAME 606 enumerated combinations throughout; not expanded until this reproduces",
+  "stages": [
+    {
+      "stage": "A  run 1, before anything",
+      "disagreements": 177,
+      "partial_honour": 7,
+      "reading": "7 partial-honour hits are instance 8. All 177 disagreements are sheet_role=ignore -- the oracle's own modelling defect. Zero on data sheets."
+    },
+    {
+      "stage": "B  contract fixed (role x transform pairing), oracle untouched",
+      "disagreements": 191,
+      "partial_honour": 0,
+      "reading": "THE FIX WORKS: partial honour 7 -> 0. Disagreements ROSE by 14, all on data sheets, because the system now correctly refuses illegal pairings the oracle did not yet know were illegal."
+    },
+    {
+      "stage": "C  oracle correction (a): learns the pairing rule",
+      "disagreements": 191,
+      "partial_honour": 0,
+      "reading": "Data-sheet disagreements 14 -> 0. The total held at 191 because the SAME degeneracy widened by 14 on ignore sheets: the oracle now evaluated a pairing rule against a field the recipe does not contain."
+    },
+    {
+      "stage": "D  oracle correction (b): ignore degeneracy, both sites",
+      "disagreements": 0,
+      "partial_honour": 0,
+      "reading": "606/606 agreement. The second site was the sheetset restriction, which the contract places on DATA entries and the oracle applied unconditionally -- an IGNORED sheetset is coherent and the system was right."
+    }
+  ],
+  "attribution": {
+    "instance_8_closed_by": "the contract fix (stage B), independently of any oracle change",
+    "the_177_and_191": "oracle modelling defect, never system defects, and never on a data sheet",
+    "oracle_corrections_were_legitimate": "(a) the oracle learned a rule because the LANGUAGE gained one; (b) the oracle stopped applying data-entry rules to non-data entries. Neither was a case of adjusting the oracle until the system agreed -- both were modelled from the contract, and stage B's rise in disagreements is the evidence that the oracle was not being tuned toward green."
+  },
+  "not_expanded": "Grammar coverage is deliberately NOT widened yet. The same corpus reproduces cleanly first; expanding now would change two things at once again.",
+  "hidden": true
+}

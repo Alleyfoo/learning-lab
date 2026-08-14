@@ -58,6 +58,7 @@ sys.path.insert(0, str(LAB / "experimentL" / "harness"))
 from executor_contract import (  # noqa: E402
     MAX_UNPIVOTS_PER_SHEET, SUPPORTED_DERIVE_SOURCES, SUPPORTED_FIELD_ROLES,
     SUPPORTED_SHEET_REFS, SUPPORTED_SHEET_ROLES, SUPPORTED_TRANSFORM_OPS,
+    pairing_reason,
 )
 from parity_properties import Case, Outcome, no_partial_honour, run_case  # noqa: E402
 from recipe import (  # noqa: E402
@@ -100,12 +101,25 @@ def expected(sheet_ref: str, sheet_role: str, field_role: str, source_kind: str,
     """
     reasons: list[str] = []
 
-    if sheet_ref not in SUPPORTED_SHEET_REFS:
-        reasons.append(f"sheet ref {sheet_ref!r} is not supported")
     if sheet_role not in SHEET_ROLES:
         reasons.append(f"sheet role {sheet_role!r} is not a declared role")
     elif sheet_role not in SUPPORTED_SHEET_ROLES:
         reasons.append(f"sheet role {sheet_role!r} is declared but unsupported")
+
+    # ORACLE CORRECTION (b): when the sheet role is not `data`, build_case emits
+    # an entry with NO fields at all. Evaluating field rules against a field the
+    # recipe does not contain is this module's own modelling defect -- it produced
+    # 177 false disagreements in run 1, and 191 after correction (a) widened the
+    # same hole. Zero of them ever occurred on a data sheet.
+    if sheet_role != "data":
+        return Expectation(accept=not reasons, reasons=reasons)
+
+    # The sheetset restriction is on DATA entries specifically: the contract says
+    # the executor cannot union a sheetset it must read. An IGNORED sheetset is
+    # coherent -- its members are covered and never touched. Applying the rule
+    # unconditionally was the same modelling error in a second place.
+    if sheet_ref not in SUPPORTED_SHEET_REFS:
+        reasons.append(f"{sheet_ref} data entry is not supported")
 
     if field_role not in FIELD_ROLES:
         reasons.append(f"field role {field_role!r} is not a declared role")
@@ -127,10 +141,12 @@ def expected(sheet_ref: str, sheet_role: str, field_role: str, source_kind: str,
             reasons.append(f"transform {transform_op!r} is not declared")
         elif transform_op not in SUPPORTED_TRANSFORM_OPS:
             reasons.append(f"transform {transform_op!r} is declared but unsupported")
-    if field_role == "period_measure" and transform_op != "unpivot":
-        reasons.append("period_measure requires an unpivot transform")
-    if field_role == "derived" and transform_op != "derive":
-        reasons.append("derived requires a transform the executor implements")
+    # ORACLE CORRECTION (a): the language gained a role x transform pairing rule
+    # when instance 8 was fixed. The oracle models the LANGUAGE, so it learns the
+    # rule because the language has one -- not because the system disagreed.
+    why = pairing_reason(field_role, transform_op)
+    if why:
+        reasons.append(why)
     if n_unpivots > MAX_UNPIVOTS_PER_SHEET:
         reasons.append(f"{n_unpivots} unpivots exceeds {MAX_UNPIVOTS_PER_SHEET}")
 

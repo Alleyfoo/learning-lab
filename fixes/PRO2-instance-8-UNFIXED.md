@@ -1,4 +1,6 @@
-# PRO-2 instance 8 — found by grammar-derived generation. **NOT FIXED.**
+# PRO-2 instance 8 — found by grammar-derived generation
+
+> **FIXED 2026-08-14, after this record was frozen.** The freeze below is unedited; the fix and its staged measurement are appended at the end. The file name keeps its `-UNFIXED` suffix because that is what it was called when the finding was recorded, and renaming it would quietly tidy the chronology this document exists to preserve.
 
 **Status: frozen unfixed, deliberately.** The designer's instruction, and the
 right one: *if this run finds an eighth instance, don't immediately fix it before
@@ -111,3 +113,122 @@ enforced the way every other pairing now is. A parity invariant should follow it
 
 That work is **not started**, so that this record describes only what was known
 at the time it was written.
+
+
+---
+
+# The fix, and the staged correction that followed
+
+## Legal composition, not supported atoms
+
+Instance 8 is the clearest argument yet that a supported *token* was never
+enough. `unpivot` is supported. `id` is supported. **`id × unpivot` has no defined
+meaning** — the language admitted a sentence the executor only understood half of.
+
+So the contract now declares support per **pairing**:
+
+```python
+ROLE_TRANSFORM_PAIRS = {
+    "id":             {None},
+    "measure":        {None},
+    "metadata":       {None},
+    "period_measure": {"unpivot"},
+    "derived":        {"derive"},
+}
+```
+
+and enforces one rule:
+
+> every declared transform must either be valid for the role it is attached to and
+> be fully honoured, or validation must refuse the recipe
+
+There is deliberately **no** "ignore a meaningless transform because it probably
+wasn't intended" branch. That is exactly how partial honour sneaks back in.
+`assert_contract_total()` now also fails if a supported role has no pairing
+decision — the hole instance 8 came through.
+
+## The frozen counterexample now refuses
+
+```text
+field role=id, transform=unpivot
+
+before:  valid=True    executes         declared target 'kuukausi' missing
+after:   valid=False   BLOCKED          executor not authoritative
+```
+
+## The class, not the specimen
+
+A parity invariant covers **all 20 role × transform pairs**, not the seven
+observed to fail:
+
+```text
+ok  composition:role_x_transform   all 20 role x transform pairs: honoured in
+                                   full, or refused
+```
+
+## The staged correction — and why it was staged
+
+Two changes were pending at once: a contract fix and an oracle correction.
+Measuring between them keeps attribution possible.
+
+```text
+stage                                     disagreements   partial honour
+A  run 1, before anything                      177              7
+B  contract fixed, oracle untouched            191              0
+C  oracle learns the pairing rule              191              0
+D  oracle stops applying data rules to
+   non-data entries (both sites)                 0              0
+```
+
+**Stage B is the load-bearing measurement.** Partial honour went 7 → 0, so the
+fix works — and disagreements *rose* by 14, because the system began correctly
+refusing pairings the oracle did not yet know were illegal. A rise is the
+evidence that the oracle was not being tuned toward green.
+
+**Stage C** fixed those 14 and the total held at 191, because the same
+degeneracy widened by 14 on `ignore` sheets: the oracle now evaluated a pairing
+rule against a field the recipe does not contain.
+
+**Stage D** closed the degeneracy at both sites. The second was the sheetset
+restriction: the contract places it on **data** entries, and the oracle applied
+it unconditionally. An *ignored* sheetset is coherent — its members are covered
+and never read — so the system was right and the oracle was wrong.
+
+Both oracle corrections were modelled from the contract, not from the system's
+behaviour. That distinction is the whole difference between correcting a model
+and rewriting it until it agrees.
+
+## What is deliberately NOT done
+
+**Grammar coverage is not widened.** The same 606 combinations reproduce cleanly
+first. Expanding now would change two things at once again, and the next result
+would be unattributable.
+
+## No Partial Honour stays guarded
+
+It does **not** graduate because the counterexample is closed. If anything this
+result argues harder for keeping it provisional: grammar-derived exploration
+found exactly the sort of weird legal composition that hand-authored generation
+missed. Its evidence is now:
+
+> Guarded by validation and exercised by generated invariants; two historical
+> counterexamples demonstrate the class remains reachable when composition rules
+> are incomplete.
+
+## The test layers, named
+
+Instance 8 was found by the weakest-assumption layer, which is why it survived
+the oracle being wrong in 177 places:
+
+```text
+rich oracle         understands intended language semantics
+                    powerful, and vulnerable to author misunderstanding
+metamorphic oracle  understands only expected change / invariance
+                    narrower assumptions
+primitive invariant compares a declaration against its observable consequence
+                    weakest semantic assumptions -- "you declared this output
+                    effect; did it exist?"
+```
+
+The bottom layer does not route through the author's understanding of the
+language, and that is precisely why it kept working when the top layer did not.

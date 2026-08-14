@@ -71,6 +71,45 @@ UNSUPPORTED_SHEET_REFS = {
                  "validating cleanly"),
 }
 
+# --- legal COMPOSITION, not merely supported atoms ---------------------------
+# PRO-2 instance 8: `unpivot` is supported and `id` is supported, and the pair
+# `id x unpivot` has no defined meaning. The language admitted a sentence the
+# executor only understood half of -- it read the transform and dropped it, and
+# the declared var_target column never appeared.
+#
+# So support is declared per PAIRING. The rule enforced from it:
+#
+#     every declared transform must either be valid for the role it is attached
+#     to and be fully honoured, or validation must refuse the recipe
+#
+# There is deliberately no "ignore a meaningless transform because it probably
+# was not intended" branch. That is exactly how partial honour sneaks back in.
+#
+# None means "no transform", which is itself a pairing decision rather than an
+# absence: period_measure and derived REQUIRE theirs.
+ROLE_TRANSFORM_PAIRS: dict[str, frozenset] = {
+    "id":             frozenset({None}),
+    "measure":        frozenset({None}),
+    "metadata":       frozenset({None}),
+    "period_measure": frozenset({"unpivot"}),
+    "derived":        frozenset({"derive"}),
+}
+
+
+def pairing_reason(role: str, transform_op) -> str | None:
+    """Why this role/transform pairing cannot be honoured, or None if it can."""
+    allowed = ROLE_TRANSFORM_PAIRS.get(role)
+    if allowed is None:
+        return None                       # unknown role: reported elsewhere
+    if transform_op in allowed:
+        return None
+    shown = sorted(x for x in allowed if x) or ["no transform"]
+    got = transform_op or "no transform"
+    return (f"role {role!r} with {got!r}: the executor honours a transform only "
+            f"for the roles it is defined on, so this one would be read and "
+            f"silently dropped. {role!r} allows {shown}")
+
+
 # --- shape limits -----------------------------------------------------------
 # One unpivot per sheet. The executor keeps a single unpivot binding, so a
 # second one overwrites the first (Experiment M, S3).
