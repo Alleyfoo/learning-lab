@@ -60,7 +60,8 @@ from executor_contract import (  # noqa: E402
     SUPPORTED_SHEET_REFS, SUPPORTED_SHEET_ROLES, SUPPORTED_TRANSFORM_OPS,
     pairing_reason,
 )
-from parity_properties import Case, Outcome, no_partial_honour, run_case  # noqa: E402
+from parity_properties import Case, Outcome, run_case  # noqa: E402
+from primitive_invariants import check_all  # noqa: E402
 from recipe import (  # noqa: E402
     COLUMN_KINDS, FIELD_ROLES, SHEET_ROLES, TRANSFORM_OPS, TYPES,
 )
@@ -211,6 +212,123 @@ def build_case(sheet_ref: str, sheet_role: str, field_role: str, source_kind: st
                       f"source={source_kind} transform={transform_op} unpivots={n_unpivots}"))
 
 
+# --- multiplicity axis ------------------------------------------------------
+# The first expansion, taken alone. LIM-4 came from "two of something exists and
+# one layer effectively handles one", so multiplicity is both the cleanest next
+# axis and historically the most suspicious. Value domains and cross-sheet
+# interaction are deliberately NOT opened at the same time: if something breaks,
+# the cause has to be attributable to one new dimension.
+MULTIPLICITIES = (0, 1, 2, 3)
+
+
+def build_multiplicity_case(what: str, n: int) -> Case:
+    """Vary how MANY of one construct a recipe declares, holding all else fixed."""
+    sheets = {name: [list(r) for r in rows] for name, rows in SHEETS.items()}
+    cols = ["Tuote", "A", "B", "Note"]
+
+    fields = [_id_field := {"target": "id", "source": "sheet:S!@Tuote",
+                            "role": "id", "type": "string"}]
+    exclude = []
+    extra_sheets = []
+    sheetsets = {}
+    sheet_token = "sheet:S"
+    layout_from = None
+
+    if what == "measures":
+        for i in range(n):
+            col = cols[1 + (i % 3)]
+            fields.append({"target": f"m{i}", "source": f"sheet:S!@{col}",
+                           "role": "measure", "type": "string"})
+    elif what == "period_measures":
+        for i in range(n):
+            fields.append({"target": f"p{i}", "source": "sheet:S!B:C",
+                           "role": "period_measure", "type": "number",
+                           "transform": {"op": "unpivot", "var_target": f"kk{i}",
+                                         "value_target": f"p{i}"}})
+    elif what == "derived":
+        for i in range(n):
+            fields.append({"target": f"d{i}", "role": "derived", "type": "string",
+                           "transform": {"op": "derive", "from": "sheet_name"}})
+    elif what == "exclusions":
+        for i in range(n):
+            exclude.append({"rule": {"op": "label_in", "column": "sheet:S!@Tuote",
+                                     "values": [f"ABSENT{i}"]},
+                            "reason": "generated multiplicity"})
+    elif what == "ignored_sheets":
+        for i in range(n):
+            name = f"Ign{i}"
+            sheets[name] = [["x"], ["y"]]
+            extra_sheets.append({"sheet": f"sheet:{name}", "role": "ignore",
+                                 "reason": "generated"})
+    elif what == "sheetset_members":
+        members = []
+        for i in range(n):
+            name = f"Mem{i}"
+            sheets[name] = [list(r) for r in SHEETS["S"]]
+            members.append(name)
+        if members:
+            sheetsets = {"M": members}
+            sheet_token = "sheetset:M"
+            layout_from = f"sheet:{members[0]}"
+
+    # coverage held constant: every column of S bound or excluded
+    bound = {"Tuote"}
+    for f in fields:
+        src = f.get("source", "")
+        if src.startswith("sheet:S!@"):
+            bound.add(src.split("@")[1])
+        elif src == "sheet:S!B:C":
+            bound |= {"A", "B"}
+    exclude += [{"referent": f"sheet:S!@{c}", "reason": "coverage"}
+                for c in cols if c not in bound]
+
+    entry = {"sheet": sheet_token, "role": "data", "header_row": "sheet:S!1",
+             "data_region": "remainder", "fields": fields,
+             "exclude": exclude, "ambiguities": []}
+    if layout_from:
+        entry["layout_from"] = layout_from
+
+    entries = [entry] + extra_sheets
+    covered = {"S"} | {e["sheet"].split(":")[1] for e in extra_sheets}
+    if sheetsets:
+        covered |= set(sheetsets["M"])
+    for name in sheets:
+        if name not in covered:
+            entries.append({"sheet": f"sheet:{name}", "role": "ignore",
+                            "reason": "generated"})
+
+    raw = {"recipe_version": 1, "recipe_id": "multiplicity", "workbook": {},
+           "sheets": entries, "applicability": None,
+           "provenance": {"proposed_by": "grammar", "approved_by": "grammar",
+                          "approved_recipe_sha256": None}}
+    if sheetsets:
+        raw["sheetsets"] = sheetsets
+    return Case("multiplicity", sheets, raw, note=f"{what}={n}")
+
+
+MULTIPLICITY_AXES = ("measures", "period_measures", "derived", "exclusions",
+                     "ignored_sheets", "sheetset_members")
+
+
+def run_multiplicity() -> dict:
+    """Primitive invariants only. The rich oracle is not extended to this axis
+    yet -- one new dimension at a time, and the primitives carry no model of the
+    language that could be wrong here."""
+    findings: list[dict] = []
+    checked = 0
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        for what in MULTIPLICITY_AXES:
+            for n in MULTIPLICITIES:
+                case = build_multiplicity_case(what, n)
+                out = run_case(case, tmp)
+                checked += 1
+                for why in check_all(case, out):
+                    findings.append({"axis": f"{what}={n}", "detail": why,
+                                     "case": case.as_dict()})
+    return {"checked": checked, "findings": findings, "n_findings": len(findings)}
+
+
 def enumerate_cases():
     refs = ("sheet", "sheetset")
     sheet_roles = tuple(SHEET_ROLES)
@@ -253,8 +371,7 @@ def run_all() -> dict:
                     "system_refusal": out.refused_reason,
                     "case": case.as_dict(),
                 })
-            why = no_partial_honour(case, out)
-            if why:
+            for why in check_all(case, out):
                 partial.append({"combo": case.note, "detail": why,
                                 "case": case.as_dict()})
 

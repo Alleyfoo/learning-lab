@@ -1,0 +1,55 @@
+{
+  "what": "Expansion 1 of grammar-derived generation: the MULTIPLICITY axis, taken alone",
+  "why_alone": "Value domains and cross-sheet interaction are deliberately NOT opened at the same time. Same reason the oracle correction was staged: if something breaks, the cause must be attributable to one new dimension.",
+  "why_multiplicity_first": "LIM-4 came from 'two of something exists and one layer effectively handles one', so multiplicity is both the cleanest next axis and historically the most suspicious.",
+  "invariant_is_declaration_based": "The primitives compare DECLARED effects against OBSERVED effects, not row counts. Three declared effects could produce a correct row count through duplication and omission cancelling out; comparing declarations cannot be fooled that way.",
+  "checked": 24,
+  "executed": 19,
+  "refused": 5,
+  "findings": 0,
+  "primitives_applied": [
+    "no_partial_honour",
+    "no_undeclared_output"
+  ],
+  "per_axis": {
+    "measures": {
+      "0,1,2,3": "all executed; m0..m2 each present in the output"
+    },
+    "period_measures": {
+      "0,1": "executed; kk0/p0 present at n=1",
+      "2,3": "REFUSED (executor_cannot_honour) -- the MAX_UNPIVOTS guard from the LIM-4 fix. Multiplicity beyond 1 is untestable on this axis BY DESIGN, so it yields no multiplicity information."
+    },
+    "derived": {
+      "0,1,2,3": "all executed; d0..d2 each present -- multiple derived fields are all honoured"
+    },
+    "exclusions": {
+      "0,1,2,3": "all executed; absent-label exclusions correctly no-ops"
+    },
+    "ignored_sheets": {
+      "0,1,2,3": "all executed; output unchanged by ignored material"
+    },
+    "sheetset_members": {
+      "0": "executed (degenerate: no sheetset)",
+      "1,2,3": "REFUSED. NOT a clean multiplicity test: it hits the 'sheetsets are unsupported' wall, and the accompanying column_unclassified / unresolvable_referent / sheet_unclassified codes indicate the GENERATOR builds a malformed sheetset case. The refusal is correct behaviour either way, but this axis yields no multiplicity information and the generator needs work before it does."
+    }
+  },
+  "honest_coverage": "24 cases is the case count, not the information count. Two of six axes (period_measures>1, sheetset_members>0) hit walls rather than exercising multiplicity, so the effective multiplicity evidence covers four axes.",
+  "composition_corpus_unchanged": {
+    "combinations": 606,
+    "agree": 606,
+    "disagreements": 0,
+    "primitive_findings": 0,
+    "note": "Re-verified after adding the multiplicity axis; the previously frozen corpus still reproduces exactly."
+  },
+  "canaries": {
+    "no_partial_honour": "fires (pairing guard removed -> partial honour detected)",
+    "no_undeclared_output": "fires (executor mutated to emit a column nobody declared)",
+    "established": "each invariant is sensitive to at least one known violation",
+    "not_established": "that the generators reach every violating shape"
+  },
+  "next_axes_not_opened": [
+    "value domains (with No Silent Enrichment)",
+    "cross-sheet interactions"
+  ],
+  "hidden": true
+}
