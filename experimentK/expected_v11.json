@@ -1,0 +1,221 @@
+{
+  "probe": "K-c3fix",
+  "purpose": "Replay the K dispatch cases against recipe format v1.1 (relative row anchoring). A SEPARATE measurement; K's result stands as measured against v1.",
+  "frozen_before_implementation": true,
+  "llm_invoked": false,
+  "format_v11": {
+    "data_region": "the literal 'remainder': data is every row the header and exclusions leave behind",
+    "exclude_rule_ops": [
+      "label_in",
+      "row_blank"
+    ],
+    "principle": "anchor positionally from the stable end (a preamble), by rule from the unstable one (a grand total that moves every month)",
+    "security_note": "label_in takes a LITERAL value list -- no patterns, no regex. A rule is a predicate over untrusted cell content; a pattern language would be an expression language arriving through the back door."
+  },
+  "recipes": {
+    "approved": {
+      "path": "recipes/W1_sales_v11_approved.json",
+      "sha256": "0d6762f486b0ecffbaf1c1f286f52d6833aa4a8543d4ef8210434869d702d188",
+      "approved_recipe_sha256": "0fb7663d522de3fbe861997db331a6b04daf1e832a0fa38df96883b6f7e85b21"
+    },
+    "edited_after_approval": {
+      "path": "recipes/W1_sales_edited_after_approval.json",
+      "sha256": "63b81c3b3e5ae290914ee0281cdcc9b4881fa8e0ae33ee3609674f98ef10fbb4"
+    },
+    "open_ambiguity": {
+      "path": "recipes/W1_sales_open_ambiguity.json",
+      "sha256": "790035ca1b9fa9a51ad7ddb4773645ea6e610972146a9843e561613b81fedf6a"
+    }
+  },
+  "per_case": {
+    "C1": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "approved"
+      ],
+      "changed": "nothing",
+      "ground_truth": "EXECUTE",
+      "v1_measured": "EXECUTE",
+      "v11_predicted": "EXECUTE"
+    },
+    "C2": {
+      "workbook": "fixtures/C2_renamed_file.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "approved"
+      ],
+      "changed": "the filename only (byte-identical to C1)",
+      "ground_truth": "EXECUTE",
+      "v1_measured": "EXECUTE",
+      "v11_predicted": "EXECUTE"
+    },
+    "C3": {
+      "workbook": "fixtures/C3_more_rows.xlsx",
+      "sha256": "cbf34221def03391b9b1431027b5aa627f9575ea19f51c22e4c78fd812ad594a",
+      "store": [
+        "approved"
+      ],
+      "changed": "two more products; the total row moves (A1:F11)",
+      "ground_truth": "EXECUTE",
+      "v1_measured": "REDEFINE_SCOPED",
+      "v11_predicted": "EXECUTE",
+      "why": "THE FIX: remainder + label_in rule make the ordinary monthly case EXECUTE."
+    },
+    "C4": {
+      "workbook": "fixtures/C4_column_renamed.xlsx",
+      "sha256": "89ba1f8345d611654005d4d29a4de6d246a8ec735f0f6cff736adc7c92059ea2",
+      "store": [
+        "approved"
+      ],
+      "changed": "Tuote -> Tuotekoodi",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1_measured": "REDEFINE_SCOPED",
+      "v11_predicted": "REDEFINE_SCOPED"
+    },
+    "C5": {
+      "workbook": "fixtures/C5_column_inserted.xlsx",
+      "sha256": "fca29cf15ad169ba3f166b64eeb6a07c42e640b232773fc4ceaf4bba7bdd45dd",
+      "store": [
+        "approved"
+      ],
+      "changed": "a Maa column inserted at B (A1:G9)",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1_measured": "REDEFINE_SCOPED",
+      "v11_predicted": "REDEFINE_SCOPED"
+    },
+    "C6": {
+      "workbook": "fixtures/C6_sheet_added.xlsx",
+      "sha256": "7dc3d09986e89d8fcba0dc80cfda6a80cf8945d86885de71397d84b579cab2a3",
+      "store": [
+        "approved"
+      ],
+      "changed": "a new Kampanjat sheet",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1_measured": "REDEFINE_SCOPED",
+      "v11_predicted": "REDEFINE_SCOPED"
+    },
+    "C7": {
+      "workbook": "fixtures/C7_sheet_renamed.xlsx",
+      "sha256": "9b50be7dfc22f87022864cb83df6e4be0ab88f3a36f52c861a2892cee4e585a7",
+      "store": [
+        "approved"
+      ],
+      "changed": "Sales -> Myynnit",
+      "ground_truth": "DEFINE",
+      "v1_measured": "DEFINE",
+      "v11_predicted": "DEFINE"
+    },
+    "C8": {
+      "workbook": "fixtures/C8_silent_subtotal.xlsx",
+      "sha256": "713ffb5be743d59adc5afe55aa12a7f356cf03b151b542867d3fa3dec875843e",
+      "store": [
+        "approved"
+      ],
+      "changed": "SAME dimensions (6 sheets, A1:F9, same headers); one product row is now a VÄLISUMMA subtotal",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1_measured": "EXECUTE",
+      "v11_predicted": "EXECUTE"
+    },
+    "C9": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [],
+      "changed": "nothing; the recipe store is empty",
+      "ground_truth": "DEFINE",
+      "v1_measured": "DEFINE",
+      "v11_predicted": "DEFINE"
+    },
+    "C10": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "approved",
+        "open_ambiguity"
+      ],
+      "changed": "nothing; two recipes claim the same data sheet",
+      "ground_truth": "AMBIGUOUS",
+      "v1_measured": "AMBIGUOUS",
+      "v11_predicted": "AMBIGUOUS"
+    },
+    "C11": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "edited_after_approval"
+      ],
+      "changed": "nothing in the workbook; the RECIPE was edited after approval",
+      "ground_truth": "BLOCKED",
+      "v1_measured": "BLOCKED",
+      "v11_predicted": "BLOCKED"
+    },
+    "C12": {
+      "workbook": "fixtures/C1_identical.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "store": [
+        "open_ambiguity"
+      ],
+      "changed": "nothing in the workbook; the recipe has an open blocking ambiguity",
+      "ground_truth": "BLOCKED",
+      "v1_measured": "BLOCKED",
+      "v11_predicted": "BLOCKED"
+    },
+    "C13": {
+      "workbook": "fixtures/C13_footnote_row.xlsx",
+      "sha256": "ff07e43c19696c011afb032a8a6e3c83d16b0c54652e3788708bac59bc3ff80e",
+      "store": [
+        "approved"
+      ],
+      "changed": "a footnote row ('Huom: sisältää palautukset') appended BELOW the grand total",
+      "ground_truth": "REDEFINE_SCOPED",
+      "v1_measured": "REDEFINE_SCOPED",
+      "v11_predicted": "EXECUTE",
+      "why": "THE COST OF THE C3 FIX. v1 catches the footnote as row_unclassified. v1.1's `remainder` region absorbs whatever the header and exclusions leave behind, so the footnote silently becomes a data row. Predicted FALSE EXECUTE."
+    }
+  },
+  "predicted_totals": {
+    "n_cases": 13,
+    "v1_agree": 11,
+    "v1_over_escalation": [
+      "C3"
+    ],
+    "v1_false_execute": [
+      "C8"
+    ],
+    "v11_agree": 11,
+    "v11_over_escalation": [],
+    "v11_false_execute": [
+      "C8",
+      "C13"
+    ],
+    "headline": "The scores are predicted to TIE. v1.1 is not better -- it moves one failure from the safe direction to the unsafe one."
+  },
+  "decision_table": [
+    {
+      "condition": "every v1.1 cell matches the prediction",
+      "outcome": "PASS_AS_PREDICTED -- the fix works and its cost is exactly the one named"
+    },
+    {
+      "condition": "C3 is not EXECUTE under v1.1",
+      "outcome": "FAIL_FIX"
+    },
+    {
+      "condition": "a false EXECUTE appears outside {C8, C13}",
+      "outcome": "FAIL_UNSAFE -- record, do not tune"
+    },
+    {
+      "condition": "any v1 cell differs from K's measured result",
+      "outcome": "VOID -- the v1 arm must reproduce K exactly"
+    },
+    {
+      "condition": "v1.1 differs from prediction but the code matches the spec",
+      "outcome": "RESULT: the author mis-predicted. Record; amend nothing"
+    }
+  ],
+  "hard_stop": [
+    "Replay only. No recipe execution, no LLM.",
+    "No changes to the frozen referent grammar, to K's expected.json, or to K's recorded result.",
+    "NO v1.2 -- in particular no row-shape expectation to catch C13. That is the obvious next fix and it must be measured, not assumed."
+  ],
+  "hidden": true
+}

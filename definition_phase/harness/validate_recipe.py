@@ -38,8 +38,9 @@ ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 
 from recipe import (  # noqa: E402
-    COLUMN_BOUND_ROLES, COLUMN_KINDS, FIELD_ROLES, RECIPE_VERSIONS, SHEET_ROLES,
-    TRANSFORM_OPS, TYPES, Recipe, SheetEntry, load_recipe,
+    COLUMN_BOUND_ROLES, COLUMN_KINDS, EXCLUDE_RULE_OPS, FIELD_ROLES, RECIPE_VERSIONS,
+    REMAINDER, SHEET_ROLES, TRANSFORM_OPS, TYPES, Exclusion, Recipe, SheetEntry,
+    load_recipe,
 )
 from referents import (  # noqa: E402
     ReferentSyntaxError, Referent, WorkbookView, parse, resolve,
@@ -51,7 +52,7 @@ PROBLEM_CODES = (
     "unknown_field_role", "unknown_transform_op", "unknown_type",
     "duplicate_target", "malformed_referent", "wrong_referent_kind",
     "missing_exclude_reason", "field_source_kind_mismatch",
-    "metadata_cell_in_data_region",
+    "metadata_cell_in_data_region", "malformed_exclude", "unknown_exclude_rule_op",
     # resolution
     "unresolvable_referent",
     # coverage
@@ -140,7 +141,13 @@ def validate(recipe: Recipe, wb: WorkbookView) -> Report:
                     problems.append(Problem("missing_key", where, key))
         for exc in entry.exclude:
             if not (exc.reason or "").strip():
-                problems.append(Problem("missing_exclude_reason", where, exc.referent))
+                problems.append(Problem("missing_exclude_reason", where,
+                                        exc.referent or str(exc.rule)))
+            if bool(exc.referent) == bool(exc.rule):
+                problems.append(Problem("malformed_exclude", where,
+                                        "an exclusion needs exactly one of referent / rule"))
+            if exc.rule and exc.rule.op not in EXCLUDE_RULE_OPS:
+                problems.append(Problem("unknown_exclude_rule_op", where, exc.rule.op))
         for fld in entry.fields:
             fwhere = f"{where}:{fld.target or '<no target>'}"
             if not fld.target:
@@ -201,7 +208,10 @@ def validate(recipe: Recipe, wb: WorkbookView) -> Report:
     for entry in recipe.sheets:
         _resolve(entry.sheet, entry.sheet)
         for exc in entry.exclude:
-            _resolve(exc.referent, entry.sheet)
+            if exc.referent:
+                _resolve(exc.referent, entry.sheet)
+            elif exc.rule and exc.rule.column:
+                _resolve(exc.rule.column, entry.sheet)
         for amb in entry.ambiguities:
             _resolve(amb.referent, entry.sheet)
         for fld in entry.fields:
@@ -296,19 +306,15 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
         ref = parse(entry.header_row)
         if ref.kind == "row":
             claim_rows({ref.row0}, "header_row")
-    if entry.data_region:
-        ref = _parse_ref(entry.data_region, entry.sheet, problems)
-        if ref is not None:
-            if ref.kind not in ("row", "rowrange"):
-                problems.append(Problem("wrong_referent_kind", entry.sheet,
-                                        f"data_region must be rows, got {ref.kind}"))
-            else:
-                claim_rows(_expand_rows(ref, n_rows), "data_region")
 
-    data_rows = {r for r, labels in row_claims.items() if "data_region" in labels}
-
+    # Exclusions are resolved BEFORE the data region, because a `remainder`
+    # region is defined as whatever they leave behind (v1.1).
     for exc in entry.exclude:
-        ref = _parse_ref(exc.referent, entry.sheet, problems)
+        if exc.rule is not None:
+            claim_rows(_rule_rows(exc, wb, sheet, n_rows, header_rows0, problems),
+                       "exclude")
+            continue
+        ref = _parse_ref(exc.referent or "", entry.sheet, problems)
         if ref is None:
             continue
         if ref.kind in ("row", "rowrange"):
@@ -319,6 +325,21 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
         else:
             problems.append(Problem("wrong_referent_kind", entry.sheet,
                                     f"exclude must be rows or columns, got {ref.kind}"))
+
+    if entry.data_region == REMAINDER:
+        # The region grows with the file instead of being pinned to the row
+        # count of the day the recipe was written (Experiment K, C3).
+        claim_rows({r for r in range(n_rows) if r not in row_claims}, "data_region")
+    elif entry.data_region:
+        ref = _parse_ref(entry.data_region, entry.sheet, problems)
+        if ref is not None:
+            if ref.kind not in ("row", "rowrange"):
+                problems.append(Problem("wrong_referent_kind", entry.sheet,
+                                        f"data_region must be rows, got {ref.kind}"))
+            else:
+                claim_rows(_expand_rows(ref, n_rows), "data_region")
+
+    data_rows = {r for r, labels in row_claims.items() if "data_region" in labels}
 
     for fld in entry.fields:
         if not fld.source:
@@ -358,6 +379,42 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
         "rows": {r: row_claims.get(r, []) for r in range(n_rows)},
         "cols": {c: col_claims.get(c, []) for c in range(n_cols)},
     }
+
+
+def _rule_rows(exc: Exclusion, wb: WorkbookView, sheet: str, n_rows: int,
+               header_rows0: dict, problems: list[Problem]) -> set[int]:
+    """Rows matched by a content rule (v1.1).
+
+    Rules exist for things anchored to the BOTTOM of a sheet -- a grand-total
+    row moves every month, a preamble does not. The principle: anchor
+    positionally from the stable end, by rule from the unstable one.
+
+    `label_in` matches LITERAL values only. No patterns, no regex: a rule is a
+    predicate over untrusted cell content, and a pattern language would be an
+    expression language arriving through the back door.
+    """
+    rule = exc.rule
+    if rule is None or rule.op not in EXCLUDE_RULE_OPS:
+        return set()
+
+    if rule.op == "row_blank":
+        return {r for r in range(n_rows)
+                if all(v.strip() == "" for v in wb.row_values(sheet, r))}
+
+    # label_in
+    if not rule.column:
+        problems.append(Problem("malformed_exclude", sheet, "label_in needs a column"))
+        return set()
+    resolved = resolve(rule.column, wb, header_rows0=header_rows0)
+    if not resolved.ok:
+        return set()   # already reported as unresolvable_referent
+    wanted = {v.strip().casefold() for v in rule.values}
+    hits: set[int] = set()
+    for r in range(n_rows):
+        values = wb.row_values(sheet, r)
+        if resolved.col0 < len(values) and values[resolved.col0].strip().casefold() in wanted:
+            hits.add(r)
+    return hits
 
 
 def _check_sheetset_layout(recipe: Recipe, entry: SheetEntry, wb: WorkbookView,
@@ -464,6 +521,60 @@ def _self_test() -> int:
     check(cov["rows"][3] == ["header_row"], f"row0 3 is the header: {cov['rows'][3]}")
     check(cov["rows"][8] == ["exclude"], f"row0 8 is the total row, excluded: {cov['rows'][8]}")
     check(len(rep.content_sha256) == 64, "content hash for approval binding")
+
+    # --- v1.1: remainder region + rule-based exclusion (Experiment K, C3) ----
+    v11 = load_recipe(ROOT / "recipes" / "W1_sales_v11.json")
+    rep11 = validate(v11, wb)
+    seen_codes |= rep11.codes()
+    check(rep11.valid, f"W1_sales_v11 should be valid; {[str(p) for p in rep11.problems]}")
+    cov11 = rep11.coverage["sheet:Sales"]
+    check(all(len(v) == 1 for v in cov11["rows"].values()),
+          f"remainder must leave every row claimed exactly once: {cov11['rows']}")
+    check(cov11["rows"][8] == ["exclude"],
+          f"the YHTEENSÄ row must be excluded BY RULE, not by position: {cov11['rows'][8]}")
+    check(cov11["rows"][4] == ["data_region"] and cov11["rows"][7] == ["data_region"],
+          "the four product rows must fall to the remainder")
+    # The whole point: the same recipe must still be total when rows are ADDED.
+    wb_more = WorkbookView(ROOT.parent / "experimentK" / "fixtures" / "C3_more_rows.xlsx")
+    rep11_more = validate(v11, wb_more)
+    cov_more = rep11_more.coverage["sheet:Sales"]
+    check(cov_more["n_rows"] == 11, f"C3 has 11 rows, got {cov_more['n_rows']}")
+    check(all(len(v) == 1 for v in cov_more["rows"].values()),
+          f"remainder must absorb two extra products: {cov_more['rows']}")
+    check(cov_more["rows"][10] == ["exclude"],
+          f"the total row MOVED to row0 10 and must still be excluded: {cov_more['rows'][10]}")
+    check(not [p for p in rep11_more.problems if p.code != "blocking_ambiguity"],
+          f"v1.1 must have no coverage problems on C3: "
+          f"{[str(p) for p in rep11_more.problems]}")
+
+    # --- v1.1 structural failures -------------------------------------------
+    from recipe import recipe_from_json as _rfj
+
+    def _probe_raw(raw: dict) -> Report:
+        r = validate(_rfj(raw), wb)
+        seen_codes.update(r.codes())
+        return r
+
+    ignore_rest = [{"sheet": f"sheet:{n}" if " " not in n else f"sheet:'{n}'",
+                    "role": "ignore", "reason": "x"}
+                   for n in wb.sheet_names if n != "Dup"]
+    bad_rules = {
+        "recipe_version": 1, "recipe_id": "p",
+        "sheets": [{"sheet": "sheet:Dup", "role": "data", "header_row": "sheet:Dup!1",
+                    "data_region": "remainder",
+                    "fields": [{"target": "a", "source": "sheet:Dup!A:C",
+                                "role": "id", "type": "string"}],
+                    "exclude": [
+                        {"referent": "sheet:Dup!2", "rule": {"op": "label_in"},
+                         "reason": "both referent and rule"},
+                        {"rule": {"op": "levitate", "column": "sheet:Dup!A"},
+                         "reason": "unknown op"},
+                    ]}] + ignore_rest}
+    rep_rules = _probe_raw(bad_rules)
+    check("malformed_exclude" in rep_rules.codes(),
+          f"referent AND rule must be rejected: {sorted(rep_rules.codes())}")
+    check("unknown_exclude_rule_op" in rep_rules.codes(),
+          f"unknown rule op must be rejected: {sorted(rep_rules.codes())}")
 
     # --- sheetset recipe -----------------------------------------------------
     months = load_recipe(ROOT / "recipes" / "W1_months.json")

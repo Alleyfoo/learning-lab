@@ -84,37 +84,59 @@ def _build(sales_name: str, header: list, data: list, total: list,
     return wb
 
 
-def main() -> None:
+def main(only: str | None = None) -> None:
+    """Write the candidate fixtures.
+
+    `.xlsx` output is NOT byte-reproducible -- openpyxl embeds zip timestamps --
+    so regenerating a fixture whose hash is frozen elsewhere VOIDS that run.
+    Pass a filename stem to write a single fixture; that is the safe default
+    once anything is frozen.
+    """
     OUT.mkdir(parents=True, exist_ok=True)
+
+    written: list[str] = []
+
+    def wanted(stem: str) -> bool:
+        hit = only is None or only == stem
+        if hit:
+            written.append(stem)
+        return hit
 
     # C1 / C2: identical content. C2 differs ONLY in filename -- the case
     # Data-agents-demo's filename-sensitive hash gets wrong (DA-2).
-    shutil.copyfile(W1, OUT / "C1_identical.xlsx")
-    shutil.copyfile(W1, OUT / "C2_renamed_file.xlsx")
+    if wanted("C1_identical"):
+        shutil.copyfile(W1, OUT / "C1_identical.xlsx")
+    if wanted("C2_renamed_file"):
+        shutil.copyfile(W1, OUT / "C2_renamed_file.xlsx")
 
     # C3: next month's file -- two more products, so the total row moves.
     more = SALES_DATA + [["ART-005", 6, 8, 9, 23, None], ["ART-006", 4, 5, 3, 12, None]]
-    _build("Sales", SALES_HEADER, more,
-           ["YHTEENSÄ", 40, 52, 44, 136, None]).save(OUT / "C3_more_rows.xlsx")
+    if wanted("C3_more_rows"):
+        _build("Sales", SALES_HEADER, more,
+               ["YHTEENSÄ", 40, 52, 44, 136, None]).save(OUT / "C3_more_rows.xlsx")
 
     # C4: a header renamed -> the NAMED binding @Tuote cannot resolve.
-    _build("Sales", ["Tuotekoodi"] + SALES_HEADER[1:], SALES_DATA,
-           SALES_TOTAL).save(OUT / "C4_column_renamed.xlsx")
+    if wanted("C4_column_renamed"):
+        _build("Sales", ["Tuotekoodi"] + SALES_HEADER[1:], SALES_DATA,
+               SALES_TOTAL).save(OUT / "C4_column_renamed.xlsx")
 
     # C5: a column inserted -> the POSITIONAL binding B:D silently shifts.
     ins_header = ["Tuote", "Maa"] + SALES_HEADER[1:]
     ins_data = [[r[0], "FI"] + r[1:] for r in SALES_DATA]
     ins_total = [SALES_TOTAL[0], None] + SALES_TOTAL[1:]
-    _build("Sales", ins_header, ins_data, ins_total).save(OUT / "C5_column_inserted.xlsx")
+    if wanted("C5_column_inserted"):
+        _build("Sales", ins_header, ins_data, ins_total).save(OUT / "C5_column_inserted.xlsx")
 
     # C6: an extra sheet appears -- nothing breaks, but "which sheets matter?"
     # is a definition decision and there is now a new one.
-    _build("Sales", SALES_HEADER, SALES_DATA, SALES_TOTAL,
-           extra_sheet="Kampanjat").save(OUT / "C6_sheet_added.xlsx")
+    if wanted("C6_sheet_added"):
+        _build("Sales", SALES_HEADER, SALES_DATA, SALES_TOTAL,
+               extra_sheet="Kampanjat").save(OUT / "C6_sheet_added.xlsx")
 
     # C7: the bound data sheet is gone under that name -> nothing carries over.
-    _build("Myynnit", SALES_HEADER, SALES_DATA,
-           SALES_TOTAL).save(OUT / "C7_sheet_renamed.xlsx")
+    if wanted("C7_sheet_renamed"):
+        _build("Myynnit", SALES_HEADER, SALES_DATA,
+               SALES_TOTAL).save(OUT / "C7_sheet_renamed.xlsx")
 
     # C8: THE BLIND-SPOT CASE. Same dimensions, same headers, same sheets --
     # but a product row has become a VÄLISUMMA subtotal. Shape is unchanged, so
@@ -126,12 +148,24 @@ def main() -> None:
         ["VÄLISUMMA", 17, 21, 19, 57, None],
         ["ART-003", 5, 7, 6, 18, None],
     ]
-    _build("Sales", SALES_HEADER, quiet,
-           ["YHTEENSÄ", 22, 28, 25, 75, None]).save(OUT / "C8_silent_subtotal.xlsx")
+    if wanted("C8_silent_subtotal"):
+        _build("Sales", SALES_HEADER, quiet,
+               ["YHTEENSÄ", 22, 28, 25, 75, None]).save(OUT / "C8_silent_subtotal.xlsx")
 
-    for path in sorted(OUT.glob("C*.xlsx")):
-        print(f"wrote {path.name}")
+    # C13: a footnote row appended BELOW the grand total. Added for the C3-fix
+    # replay, to measure what relative anchoring costs: format v1 catches this
+    # as row_unclassified, but a `remainder` data region absorbs it silently.
+    if wanted("C13_footnote_row"):
+        wb = _build("Sales", SALES_HEADER, SALES_DATA, SALES_TOTAL)
+        wb["Sales"].append(["Huom: sisältää palautukset", None, None, None, None, None])
+        wb.save(OUT / "C13_footnote_row.xlsx")
+
+    for stem in written:
+        print(f"wrote {stem}.xlsx")
+    if only is None:
+        print("WARNING: rewrote every fixture; frozen hashes elsewhere are now void")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    main(sys.argv[1] if len(sys.argv) > 1 else None)

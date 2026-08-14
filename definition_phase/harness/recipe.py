@@ -24,6 +24,26 @@ FIELD_ROLES = ("id", "measure", "period_measure", "metadata", "derived")
 TRANSFORM_OPS = ("unpivot", "coerce", "derive")
 TYPES = ("string", "number", "date", "boolean")
 
+# v1.1 -- relative row anchoring (Experiment K's C3 finding).
+#
+# `data_region` may be the literal REMAINDER instead of a row referent: the data
+# is every row not claimed by the header or by an exclusion. The region then
+# grows with the file instead of being pinned to the row count of the day the
+# recipe was written.
+#
+# Exclusions may carry a RULE instead of a referent, for things anchored to the
+# bottom of a sheet (a grand-total row moves every month; a preamble does not).
+# The principle: anchor positionally from the stable end, by rule from the
+# unstable one.
+#
+# `label_in` takes a LITERAL value list -- no patterns, no regex. That is a
+# security choice, not a simplification: a rule is a predicate over untrusted
+# cell content, and a pattern language would be an expression language creeping
+# in through the back door. Literal lists stay inspectable by the human who
+# approves them.
+REMAINDER = "remainder"
+EXCLUDE_RULE_OPS = ("label_in", "row_blank")
+
 # Which referent kinds a field role may bind (spec sec.2).
 COLUMN_KINDS = ("col", "colrange", "namedcol")
 COLUMN_BOUND_ROLES = ("id", "measure", "period_measure")
@@ -50,8 +70,22 @@ class Field:
 
 
 @dataclass(frozen=True)
+class ExcludeRule:
+    op: str
+    column: Optional[str] = None            # referent string (a column)
+    values: tuple[str, ...] = ()
+
+    @staticmethod
+    def from_json(raw: Mapping[str, Any]) -> "ExcludeRule":
+        return ExcludeRule(op=str(raw.get("op", "")),
+                           column=raw.get("column"),
+                           values=tuple(str(v) for v in raw.get("values", ()) or ()))
+
+
+@dataclass(frozen=True)
 class Exclusion:
-    referent: str
+    referent: Optional[str] = None          # a row/column address...
+    rule: Optional[ExcludeRule] = None      # ...XOR a content rule (v1.1)
     reason: Optional[str] = None            # MANDATORY; absence is a problem
 
 
@@ -131,7 +165,12 @@ def recipe_from_json(raw: Mapping[str, Any]) -> Recipe:
             data_region=entry.get("data_region"),
             fields=_fields_from_json(entry.get("fields", ())),
             exclude=tuple(
-                Exclusion(referent=str(e.get("referent", "")), reason=e.get("reason"))
+                Exclusion(
+                    referent=e.get("referent"),
+                    rule=(ExcludeRule.from_json(e["rule"])
+                          if isinstance(e.get("rule"), Mapping) else None),
+                    reason=e.get("reason"),
+                )
                 for e in entry.get("exclude", ()) or ()
             ),
             ambiguities=tuple(
