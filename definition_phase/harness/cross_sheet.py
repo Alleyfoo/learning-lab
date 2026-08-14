@@ -161,11 +161,19 @@ def assert_same_origin(wb: WorkbookView, path_p: str, path_q: str,
 # the metamorphic corpus
 # ---------------------------------------------------------------------------
 
-def _fields(sheet_ref: str) -> list[dict]:
-    return [{"target": "tuote", "source": f"{sheet_ref}!@Tuote", "role": "id",
+def _fields(sheet_ref: str, suffix: str = "") -> list[dict]:
+    """Fields for one entry.
+
+    `suffix` exists because run 1 was non-evidential: two entries declaring the
+    same TARGET names were refused for `duplicate_target`, a name collision, so
+    the aliasing question was never adjudicated. Distinct targets make the
+    recipe a VALID representation of the question being asked — the same repair
+    the sheetset generator needed after multiplicity run 1.
+    """
+    return [{"target": f"tuote{suffix}", "source": f"{sheet_ref}!@Tuote", "role": "id",
              "type": "string"},
-            {"target": "myynti", "source": f"{sheet_ref}!@Myynti", "role": "measure",
-             "type": "number"}]
+            {"target": f"myynti{suffix}", "source": f"{sheet_ref}!@Myynti",
+             "role": "measure", "type": "number"}]
 
 
 def _entry(sheet_ref: str, fields: list[dict]) -> dict:
@@ -224,7 +232,7 @@ def case_sheet_name_case(tmp: Path) -> dict:
 
     baseline = _outcome(path, _recipe([_entry("sheet:Sales", _fields("sheet:Sales"))]))
     mutated = _outcome(path, _recipe([_entry("sheet:Sales", _fields("sheet:Sales")),
-                                      _entry("sheet:SALES", _fields("sheet:SALES"))]))
+                                      _entry("sheet:SALES", _fields("sheet:SALES", "_b"))]))
     return {"case": "sheet_name_case", "same_origin": same, "origin_detail": detail,
             "baseline": baseline, "mutated": mutated,
             "paths": ["sheet:Sales", "sheet:SALES"]}
@@ -260,7 +268,7 @@ def case_distinct_sheets_same_content(tmp: Path) -> dict:
 
     baseline = _outcome(path, _recipe([_entry("sheet:Jan", _fields("sheet:Jan"))]))
     both = _outcome(path, _recipe([_entry("sheet:Jan", _fields("sheet:Jan")),
-                                   _entry("sheet:Feb", _fields("sheet:Feb"))]))
+                                   _entry("sheet:Feb", _fields("sheet:Feb", "_b"))]))
     return {"case": "distinct_sheets_same_content", "same_origin": same,
             "origin_detail": detail, "baseline": baseline, "mutated": both,
             "paths": ["sheet:Jan", "sheet:Feb"], "control": True}
@@ -273,12 +281,19 @@ def _verdict(result: dict) -> tuple[str, str]:
     """refuse | aliases_recognised | DUPLICATED | (control) legitimate."""
     base, mut = result["baseline"], result["mutated"]
     if result.get("control"):
-        if not result["same_origin"] and not mut["refused"]:
-            return "legitimate", ("distinct origins both contributed, as they should; "
-                                  "the law did not fire on identical content")
         if result["same_origin"]:
             return "CONTROL FAILED", "distinct sheets were treated as one origin"
-        return "legitimate", f"refused: {mut.get('codes')}"
+        if mut["refused"]:
+            # A refusal here proves nothing about content-vs-origin identity:
+            # the control must SHOW both origins contributing.
+            return "NON-EVIDENTIAL", (f"the control refused ({mut['codes']}), so it never "
+                                      f"demonstrated two distinct origins contributing")
+        n_base, n_mut = len(base.get("rows", [])), len(mut.get("rows", []))
+        if n_mut <= n_base:
+            return "CONTROL FAILED", (f"a second distinct origin added nothing: "
+                                      f"{n_base} -> {n_mut} rows")
+        return "legitimate", (f"distinct origins both contributed ({n_base} -> {n_mut} "
+                              f"rows); the law did not fire on identical content")
 
     if not result["same_origin"]:
         return "UNREACHABLE", ("the two paths do not resolve to the same origin, so "
@@ -341,7 +356,7 @@ def _canary_duplicate(tmp: Path) -> tuple[bool, bool, str]:
         return False, False, f"CANARY UNREACHABLE: paths differ in origin — {detail}"
 
     raw = _recipe([_entry("sheet:Sales", _fields("sheet:Sales")),
-                   _entry("sheet:SALES", _fields("sheet:SALES"))])
+                   _entry("sheet:SALES", _fields("sheet:SALES", "_b"))])
     r = recipe_from_json(raw)
     contribs = contributions(r, view)
     if not aliased_atoms(contribs):
