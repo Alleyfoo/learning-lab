@@ -172,8 +172,8 @@ proven        there is at least one passing demonstration per supported construc
 NOT proven    the invariant holds across the construct's valid input domain
 ```
 
-Generated variation around each invariant is the obvious next step, and it is
-**not a level four**. Numbering it that way would imply a fourth architectural
+Generated variation around each invariant is now built
+(`harness/parity_properties.py`) — see below. It is **not a level four**. Numbering it that way would imply a fourth architectural
 boundary; there isn't one. Level three already asks the last structural question,
 and what is missing after it is **evidence depth** — confidence in a boundary
 that now exists, rather than another kind of check.
@@ -199,3 +199,101 @@ So the claim is not *"we found seven integration bugs."* It is:
 
 The prediction → mechanism → novel finding sequence is what gives it teeth, and
 it is why the dates and commit order are worth keeping legible.
+
+
+## Evidence depth — generated variation (`parity_properties.py`)
+
+Three things kept conceptually apart, because collapsing them makes the exercise
+circular:
+
+```text
+generator   declarations and input shapes across four buckets
+oracle      what must happen, from the contract, in plain set/filter logic
+system      validator -> dispatcher -> executor
+```
+
+**The system under test never generates its own oracle.** Where an exact expected
+output is cheap it is computed directly — which labels survive an exclusion, the
+cartesian product an unpivot must yield. Where it is not, the property is
+metamorphic, so no knowledge of the whole correct table is needed.
+
+Eight properties, four generation buckets (`ordinary_valid`, `boundary_valid`,
+`invalid`, `structurally_surprising`), plus one universal check:
+
+```text
+exact oracle   exclude:label_in         surviving ids = labels - excluded
+               period_measure           n x m rows AND each (entity, measure)
+                                        exactly once -- a duplicate plus an
+                                        omission cannot cancel out
+metamorphic    ignore_sheet             adding an ignored sheet: output identical
+               absent_exclusion         excluding a label not present: identical
+               one_more_measure         +1 measure: exactly +1 row per entity
+               column_permutation       permuting unrelated columns: semantics
+                                        unchanged as a set
+refusal        unsupported_sheet_role   refused before execution, every time
+               ambiguous_date           never silently converted
+universal      no_partial_honour        checked on EVERY generated case
+```
+
+### Refusal is part of the contract
+
+A correct refusal implements the contract, so the properties assert three states
+and treat only the third as a defect:
+
+```text
+accepted     -> the exact observable invariant holds
+unsupported  -> refused at the declared boundary
+NEVER        -> accepted and partially honoured
+```
+
+### No Partial Honour
+
+The generalisation of LIM-4, and the thing actually being hunted:
+
+> For every generated recipe: either every accepted declaration is honoured, or
+> the recipe is refused before authoritative execution. Never a subset silently
+> taking effect.
+
+Checked **by declaration, not by row count** — every declared target must appear
+in the output, so an omission cannot be masked by a duplicate elsewhere.
+
+### The canary — why the green result means anything
+
+An all-green property suite is evidence of nothing until it is shown to fail when
+it should. So the suite begins by removing the LIM-4 guard, feeding itself the
+two-unpivot shape that caused it, and **requiring** `no_partial_honour` to fire:
+
+```text
+ok  canary: guard removed   accepted and PARTIALLY HONOURED: declared
+                            ['a', 'b', 'id', 'ka', ...]
+```
+
+If that canary ever passes silently, the suite has stopped testing anything and
+the run is void.
+
+### Result
+
+```text
+720 generated cases across 5 seeds, 0 failures
+canary fires as required
+```
+
+**No eighth instance was found.** The chronology therefore does not extend on this
+run, and that is reported as-is: the method predicted a class and found a novel
+instance once (semantic parity → the sheetset defect); it did not do so twice.
+Generated variation raised confidence in boundaries that already exist rather
+than discovering a new one.
+
+### What is still not proven
+
+```text
+proven at level 3   at least one passing demonstration per supported construct
+proven here         the invariants survive 720 generated variations
+NOT proven          the invariants hold across the whole input domain
+```
+
+The generators are author-written, so they explore the shapes their author
+imagined. `structurally_surprising` exists precisely because the seventh defect
+was that kind of thing — a valid structure nobody had forced through the whole
+machine — but a bucket named after a past surprise is not a guarantee against the
+next one.
