@@ -96,6 +96,7 @@
   .g-n1     { background: var(--amber-soft); color: var(--amber); border: 1px solid var(--amber); }
   .g-anal   { background: var(--surface-2); color: var(--ink-3); border: 1px solid var(--rule-2); }
   .g-untest { background: transparent; color: var(--alert); border: 1px dashed var(--alert); }
+  .g-fixed  { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--rule-2); }
 
   .legend { display: grid; gap: .1rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
   .legend-row { display: grid; grid-template-columns: 10.5rem 1fr; gap: 1rem; padding: .7rem 1rem; align-items: baseline; border-bottom: 1px solid var(--rule); }
@@ -151,7 +152,8 @@
     Every claim this programme has made about putting agents behind a trust boundary,
     paired with the evidence that actually backs it — and graded by how strong that
     evidence is. <strong>Four of these claims are proven by construction. Most are
-    n=1.</strong> The difference is the point of this document.
+    n=1.</strong> The difference is the point of this document. The two entries that were
+    live defects have since been fixed — LIM-4 and PRO-2 carry their repair inline.
   </p>
 </header>
 
@@ -296,10 +298,11 @@
 </div>
 
 <div class="claim">
-  <div class="claim-head"><span class="cid">LIM-4</span><span class="grade g-det">Deterministic</span></div>
-  <h3>A validated, approved recipe can lose half the data with no signal anywhere.</h3>
+  <div class="claim-head"><span class="cid">LIM-4</span><span class="grade g-det">Deterministic</span><span class="grade g-fixed">Fixed</span></div>
+  <h3>A validated, approved recipe could lose half the data with no signal anywhere.</h3>
   <p><span class="lbl">Evidence</span>Experiment M shape S3: two measure fields each declaring an unpivot. The recipe validates, is approvable, and the executor honours only the last — 4 rows where 8 are required. No problem code, no unhonoured declaration, no refusal.</p>
-  <p class="caveat"><span class="lbl">Caveat</span><strong>This is a live defect, not a limitation.</strong> The format permits a combination the executor cannot honour and no layer checks that it can.</p>
+  <p><span class="lbl">Fixed</span>An executor contract now declares what can be honoured, and the validator refuses a recipe that exceeds it. The five defect cases all dispatch <code>BLOCKED</code>; the unmodified recipe still executes. See <code>fixes/LIM4-PRO2.md</code>.</p>
+  <p class="caveat"><span class="lbl">Caveat</span>The expressiveness gap remains — the format still cannot express two measure blocks. What changed is that it now <em>refuses</em> instead of producing half a table.</p>
 </div>
 
 <div class="claim">
@@ -354,10 +357,11 @@
 </div>
 
 <div class="claim">
-  <div class="claim-head"><span class="cid">PRO-2</span><span class="grade g-det">Deterministic</span></div>
+  <div class="claim-head"><span class="cid">PRO-2</span><span class="grade g-det">Deterministic</span><span class="grade g-fixed">Guarded</span></div>
   <h3>This codebase has one recurring defect shape: a capability declared in one layer and not consumed by another.</h3>
-  <p><span class="lbl">Evidence</span>Three instances. A new problem code added to the validator and not listed by the dispatcher, so a detection became a silent pass. A format permitting two unpivots the executor cannot honour, losing half the data. A grader voiding globally where the frozen spec said void per base, which would have buried a finding.</p>
-  <p class="caveat"><span class="lbl">Caveat</span>Each was caught by an assertion that every declared code is exercised — but nothing yet asserts that every declared code is <em>acted on</em>.</p>
+  <p><span class="lbl">Evidence</span>Six instances. Three found during experiments: a problem code added to the validator and not listed by the dispatcher; a format permitting two unpivots the executor cannot honour; a grader voiding globally where the spec said per base. Three more found by auditing every declared capability against its consumer: an unimplemented transform op silently dropped, a sheet role that contributed nothing, and <strong>fifteen of twenty-three problem codes unclassified by the dispatcher — so a recipe the validator reported invalid dispatched to <code>EXECUTE</code></strong>.</p>
+  <p><span class="lbl">Guarded</span>A single contract module now declares what the executor honours, and two assertions run at import: every format enum value must be classified, and every validator problem code must be classified by the dispatcher — in both directions.</p>
+  <p class="caveat"><span class="lbl">Caveat</span>The assertions compare <em>declarations</em>. A capability both layers claim but implement differently would pass. That is the next weakness in this line and it is untested.</p>
 </div>
 
 <h2>What I would defend hardest, and what I would not</h2>
