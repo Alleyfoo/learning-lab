@@ -38,7 +38,7 @@ ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 
 from executor_contract import (  # noqa: E402
-    MAX_UNPIVOTS_PER_SHEET, SUPPORTED_DERIVE_SOURCES, pairing_reason,
+    MAX_UNPIVOTS_PER_SHEET, SUPPORTED_DERIVE_SOURCES, normalize_for, pairing_reason,
     unsupported_reason,
 )
 from recipe import (  # noqa: E402
@@ -481,13 +481,13 @@ def _check_reconcile(entry: SheetEntry, wb: WorkbookView, sheet: str,
                 stated_cell = stated_values[col0] if col0 < len(stated_values) else ""
                 if not is_number(stated_cell):
                     continue
-                stated = float(stated_cell.strip().replace(",", "."))
+                stated = float(normalize_for("numeric_parse", stated_cell).replace(",", "."))
                 summed = 0.0
                 for row0 in data_rows:
                     values = wb.row_values(sheet, row0)
                     cell = values[col0] if col0 < len(values) else ""
                     if is_number(cell):
-                        summed += float(cell.strip().replace(",", "."))
+                        summed += float(normalize_for("numeric_parse", cell).replace(",", "."))
                 if abs(summed - stated) > RECONCILE_TOLERANCE:
                     problems.append(Problem(
                         "reconciliation_failure", entry.sheet,
@@ -521,7 +521,7 @@ def _check_row_shape(entry: SheetEntry, wb: WorkbookView, sheet: str,
         values = wb.row_values(sheet, row0)
         for constraint, ref_text, col0 in resolved:
             cell = values[col0] if col0 < len(values) else ""
-            if constraint == "require_non_blank" and cell.strip() == "":
+            if constraint == "require_non_blank" and normalize_for("blank_detection", cell) == "":
                 problems.append(Problem(
                     "row_shape_violation", entry.sheet,
                     f"row0 {row0} (A1 row {row0 + 1}): {ref_text} col0 {col0} is blank"))
@@ -529,7 +529,7 @@ def _check_row_shape(entry: SheetEntry, wb: WorkbookView, sheet: str,
                 problems.append(Problem(
                     "row_shape_violation", entry.sheet,
                     f"row0 {row0} (A1 row {row0 + 1}): {ref_text} col0 {col0} "
-                    f"is not numeric ({cell.strip()[:24]!r})"))
+                    f"is not numeric ({normalize_for('numeric_parse', cell)[:24]!r})"))
 
 
 def _rule_rows(exc: Exclusion, wb: WorkbookView, sheet: str, n_rows: int,
@@ -550,7 +550,8 @@ def _rule_rows(exc: Exclusion, wb: WorkbookView, sheet: str, n_rows: int,
 
     if rule.op == "row_blank":
         return {r for r in range(n_rows)
-                if all(v.strip() == "" for v in wb.row_values(sheet, r))}
+                if all(normalize_for("blank_detection", v) == ""
+                       for v in wb.row_values(sheet, r))}
 
     # label_in
     if not rule.column:
@@ -559,11 +560,12 @@ def _rule_rows(exc: Exclusion, wb: WorkbookView, sheet: str, n_rows: int,
     resolved = resolve(rule.column, wb, header_rows0=header_rows0)
     if not resolved.ok:
         return set()   # already reported as unresolvable_referent
-    wanted = {v.strip().casefold() for v in rule.values}
+    wanted = {normalize_for("label_in", v) for v in rule.values}
     hits: set[int] = set()
     for r in range(n_rows):
         values = wb.row_values(sheet, r)
-        if resolved.col0 < len(values) and values[resolved.col0].strip().casefold() in wanted:
+        if resolved.col0 < len(values) and \
+                normalize_for("label_in", values[resolved.col0]) in wanted:
             hits.add(r)
     return hits
 
@@ -581,11 +583,13 @@ def _check_sheetset_layout(recipe: Recipe, entry: SheetEntry, wb: WorkbookView,
     ref = parse(entry.header_row)
     if ref.kind != "row":
         return
-    expected = [v.casefold() for v in wb.row_values(prototype, ref.row0)]
+    expected = [normalize_for("sheetset_header_parity", v)
+                for v in wb.row_values(prototype, ref.row0)]
     for member in _member_sheets(recipe, entry, wb, problems):
         if member.casefold() == prototype.casefold():
             continue
-        actual = [v.casefold() for v in wb.row_values(member, ref.row0)]
+        actual = [normalize_for("sheetset_header_parity", v)
+                  for v in wb.row_values(member, ref.row0)]
         if actual != expected:
             problems.append(Problem("sheetset_member_layout_mismatch", member,
                                     f"header {actual} != prototype {expected}"))

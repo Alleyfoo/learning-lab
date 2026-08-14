@@ -161,8 +161,15 @@ def _self_test() -> int:
     for o in out["observations"]:
         sys.stdout.write(f"  note      {o['case']:20} {o.get('note','')[:70]}\n")
 
-    path = HERE.parent / "results" / "value_domains_run1.json"
-    path.parent.mkdir(parents=True, exist_ok=True)
+    # Never overwrite a previous run. Run 1 recorded PRO-2 instance 9 and is
+    # evidence; a re-run after the fix is a different measurement, not a
+    # replacement for it.
+    results = HERE.parent / "results"
+    results.mkdir(parents=True, exist_ok=True)
+    n = 1
+    while (results / f"value_domains_run{n}.json").exists():
+        n += 1
+    path = results / f"value_domains_run{n}.json"
     path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     sys.stdout.write(f"\n  written to {path.name}\n")
     # Findings are reported, not thrown: this is a measurement run.

@@ -117,6 +117,76 @@ MAX_UNPIVOTS_PER_SHEET = 1
 SUPPORTED_DERIVE_SOURCES = frozenset({"sheet_name"})
 
 
+# --- normalisation: a declared semantic operation ---------------------------
+# PRO-2 instance 9. Whitespace trimming used to live inside `row_values()`, a
+# helper sitting underneath every construct that reads a cell. Constructs that
+# genuinely want trimming (header matching, label comparison) inherited it, and
+# so did the one construct that must never have it: the literal value of a field.
+#
+# The fix is NOT to delete the trim. That would repair literal values and quietly
+# break header matching — the classic whack-a-mole. Instead normalisation becomes
+# something a construct DECLARES, and the default is to preserve.
+NORMALIZATIONS: dict[str, str] = {
+    "none":           "the admitted value is preserved exactly",
+    "trim_whitespace": "leading and trailing whitespace removed",
+    "trim_casefold":  "trimmed, then case-folded for comparison",
+}
+
+# Every construct that reads a source cell must appear here. `none` is not a
+# fallback for constructs nobody classified — an unlisted construct raises.
+CONSTRUCT_NORMALIZATION: dict[str, str] = {
+    # The value a field emits. The one construct that must preserve.
+    "field_value":            "none",
+    # Matching `@Name` against a header cell.
+    "header_label":           "trim_casefold",
+    # `label_in` exclusion rules comparing a cell against declared labels.
+    "label_in":               "trim_casefold",
+    # Sheetset member header parity.
+    "sheetset_header_parity": "trim_casefold",
+    # PREDICATES over the source, not emitted values. Deciding that a cell of
+    # spaces counts as blank is a legitimate declared choice; silently EMITTING
+    # "" for it is not. Instance 9 is the second thing, not the first.
+    "blank_detection":        "trim_whitespace",
+    # Numeric parsing for `reconcile` and `require_numeric`.
+    "numeric_parse":          "trim_whitespace",
+    # Parsing a declared `boolean`. Trimming and folding here is AUTHORISED by
+    # the declaration; the same trim applied to a declared `string` is not.
+    "boolean_parse":          "trim_casefold",
+    # An unpivot emits the HEADER LABEL as a value. Neither neighbour's rule is
+    # automatically right, so it gets its own: a header cell's surrounding
+    # whitespace is layout, and it is trimmed on the way in for matching, so
+    # emitting the untrimmed form would make the emitted label differ from the
+    # label the recipe matched against. Case is NOT folded — that would destroy
+    # information in something being emitted rather than compared.
+    "unpivot_var_label":      "trim_whitespace",
+}
+
+
+def normalize(value: str, normalization: str) -> str:
+    """Apply exactly the named normalisation. Unknown names raise."""
+    if normalization == "none":
+        return value
+    if normalization == "trim_whitespace":
+        return value.strip()
+    if normalization == "trim_casefold":
+        return value.strip().casefold()
+    raise KeyError(f"unknown normalization {normalization!r}; "
+                   f"declared: {sorted(NORMALIZATIONS)}")
+
+
+def normalize_for(construct: str, value: str) -> str:
+    """Normalise a cell for a named construct, per the declared contract."""
+    try:
+        rule = CONSTRUCT_NORMALIZATION[construct]
+    except KeyError:
+        raise KeyError(
+            f"construct {construct!r} reads source cells but declares no "
+            f"normalisation. Classify it in CONSTRUCT_NORMALIZATION — defaulting "
+            f"to 'none' would silently re-create PRO-2 instance 9 in reverse."
+        ) from None
+    return normalize(value, rule)
+
+
 def assert_contract_total() -> None:
     """Every value of every format enum must be classified as supported or not.
 
@@ -141,6 +211,10 @@ def assert_contract_total() -> None:
         for value, reason in unsupported.items():
             if not str(reason).strip():
                 problems.append(f"{name}: unsupported value {value!r} has no reason")
+    undeclared = {c: n for c, n in CONSTRUCT_NORMALIZATION.items() if n not in NORMALIZATIONS}
+    if undeclared:
+        problems.append(f"CONSTRUCT_NORMALIZATION: {undeclared} name normalisations "
+                        f"that do not exist; declared: {sorted(NORMALIZATIONS)}")
     if problems:
         raise RuntimeError("executor contract is not total:\n  " + "\n  ".join(problems))
 

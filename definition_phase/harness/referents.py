@@ -342,11 +342,17 @@ class WorkbookView:
         return int(ws.max_row or 0), int(ws.max_column or 0)
 
     def row_values(self, actual_sheet: str, row0: int) -> list[str]:
+        """Cell text, PRESERVED. Normalisation is the caller's declaration.
+
+        This used to `.strip()`, which meant every construct reading a cell
+        inherited a trim nobody asked for — PRO-2 instance 9. Constructs now
+        declare what they want via `executor_contract.normalize_for`.
+        """
         ws = self._wb[actual_sheet]
         one_based = row0 + 1
         values = next(ws.iter_rows(min_row=one_based, max_row=one_based,
                                    values_only=True), ())
-        return ["" if v is None else str(v).strip() for v in values]
+        return ["" if v is None else str(v) for v in values]
 
 
 def resolve(
@@ -403,9 +409,11 @@ def resolve(
             return Resolution(ok=False, referent=referent, sheet=actual,
                               reason="out_of_bounds",
                               detail=f"header row0 {header_row0} >= {n_rows} rows")
-        wanted = (referent.name or "").casefold()
+        from executor_contract import normalize_for  # no project deps upward
+
+        wanted = normalize_for("header_label", referent.name or "")
         hits = [i for i, v in enumerate(wb.row_values(actual, header_row0))
-                if v.casefold() == wanted]
+                if normalize_for("header_label", v) == wanted]
         if not hits:
             return Resolution(ok=False, referent=referent, sheet=actual,
                               reason="header_not_found", detail=referent.name)

@@ -30,6 +30,7 @@ LAB = ROOT.parent
 sys.path.insert(0, str(LAB / "definition_phase" / "harness"))
 sys.path.insert(0, str(LAB / "experimentJ" / "harness"))
 
+from executor_contract import normalize_for  # noqa: E402
 from macro_v2 import is_number  # noqa: E402
 from recipe import Recipe, SheetEntry, load_recipe  # noqa: E402
 from referents import WorkbookView, parse, resolve  # noqa: E402
@@ -54,22 +55,30 @@ class Execution:
 
 def _coerce(value: Any, declared: Optional[str], target: str,
             unhonoured: list[dict]) -> Any:
-    """Apply a declared type, or record that it could not be applied."""
+    """Apply a declared type, or record that it could not be applied.
+
+    Normalisation is DECLARED per construct (PRO-2 instance 9). A declared
+    `string` authorises representation as text and nothing else, so `text` is
+    preserved; `number` and `boolean` trim because their own declaration
+    authorises it.
+    """
     if value is None:
         return ""
-    text = str(value).strip()
+    text = normalize_for("field_value", str(value))
     if declared in (None, "string"):
         return text
     if declared == "number":
-        if is_number(text):
-            number = float(text.replace(",", "."))
+        numeric = normalize_for("numeric_parse", text)
+        if is_number(numeric):
+            number = float(numeric.replace(",", "."))
             return int(number) if number.is_integer() else number
         unhonoured.append({"target": target, "declared": declared,
                            "reason": f"value {text!r} does not parse as a number"})
         return text
     if declared == "boolean":
-        if text.lower() in ("true", "false"):
-            return text.lower() == "true"
+        flag = normalize_for("boolean_parse", text)
+        if flag in ("true", "false"):
+            return flag == "true"
         unhonoured.append({"target": target, "declared": declared,
                            "reason": f"value {text!r} is not a boolean literal"})
         return text
@@ -182,7 +191,9 @@ def execute(recipe: Recipe, wb: WorkbookView) -> Execution:
             if unpivot:
                 var_target, value_target, cols, dtype = unpivot
                 for col0 in cols:
-                    label = (header_values[col0] if col0 < len(header_values) else "")
+                    label = normalize_for(
+                        "unpivot_var_label",
+                        header_values[col0] if col0 < len(header_values) else "")
                     out.rows.append(base + [label,
                                             _coerce(cell(col0), dtype, value_target,
                                                     out.unhonoured_types)] + tail)

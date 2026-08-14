@@ -1,0 +1,119 @@
+{
+  "results": [
+    {
+      "construct": "blank_detection",
+      "declares": "trim_whitespace",
+      "expected": {
+        "whitespace": true,
+        "case": false
+      },
+      "observed": {
+        "whitespace": true,
+        "case": "n/a"
+      },
+      "verdict": "ok",
+      "detail": "' ' refused=True  '' refused=True  'x' refused=False"
+    },
+    {
+      "construct": "boolean_parse",
+      "declares": "trim_casefold",
+      "expected": {
+        "whitespace": true,
+        "case": true
+      },
+      "observed": {
+        "whitespace": true,
+        "case": true
+      },
+      "verdict": "ok",
+      "detail": "' true '->True 'TRUE'->True"
+    },
+    {
+      "construct": "field_value",
+      "declares": "none",
+      "expected": {
+        "whitespace": false,
+        "case": false
+      },
+      "observed": {
+        "whitespace": false,
+        "case": false
+      },
+      "verdict": "ok",
+      "detail": "' x '->' x '  'x'->'x'"
+    },
+    {
+      "construct": "header_label",
+      "declares": "trim_casefold",
+      "expected": {
+        "whitespace": true,
+        "case": true
+      },
+      "observed": {
+        "whitespace": true,
+        "case": true
+      },
+      "verdict": "ok",
+      "detail": "'Tuote'=True ' Tuote '=True 'TUOTE'=True"
+    },
+    {
+      "construct": "label_in",
+      "declares": "trim_casefold",
+      "expected": {
+        "whitespace": true,
+        "case": true
+      },
+      "observed": {
+        "whitespace": true,
+        "case": true
+      },
+      "verdict": "ok",
+      "detail": "' total ' excluded=True  'Total' excluded=True"
+    },
+    {
+      "construct": "numeric_parse",
+      "declares": "trim_whitespace",
+      "expected": {
+        "whitespace": true,
+        "case": false
+      },
+      "observed": {
+        "whitespace": true,
+        "case": "n/a"
+      },
+      "verdict": "ok",
+      "detail": "' 1,5 ' ok=True  '1,5' ok=True"
+    },
+    {
+      "construct": "sheetset_header_parity",
+      "declares": "trim_casefold",
+      "expected": {
+        "whitespace": true,
+        "case": true
+      },
+      "observed": {
+        "whitespace": "unreachable",
+        "case": "unreachable"
+      },
+      "verdict": "unreachable",
+      "detail": "sheetsets are outside the executable language"
+    },
+    {
+      "construct": "unpivot_var_label",
+      "declares": "trim_whitespace",
+      "expected": {
+        "whitespace": true,
+        "case": false
+      },
+      "observed": {
+        "whitespace": true,
+        "case": false
+      },
+      "verdict": "ok",
+      "detail": "' kk1 '->'kk1'  'KK1'->'KK1'"
+    }
+  ],
+  "ok": 7,
+  "unreachable": 1,
+  "mismatches": []
+}
