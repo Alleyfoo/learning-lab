@@ -34,7 +34,7 @@ sys.path.insert(0, str(LAB / "definition_phase" / "harness"))
 
 from recipe import Recipe, load_recipe  # noqa: E402
 from referents import WorkbookView, parse  # noqa: E402
-from validate_recipe import Problem, validate  # noqa: E402
+from validate_recipe import PROBLEM_CODES, Problem, validate  # noqa: E402
 
 OUTCOMES = ("EXECUTE", "REDEFINE_SCOPED", "DEFINE", "AMBIGUOUS", "BLOCKED")
 
@@ -53,6 +53,42 @@ COVERAGE_CODES = (
     # adding a code in one layer and not consuming it in this one.
     "reconciliation_failure",
 )
+
+# A recipe that does not VALIDATE must not be authorised, whatever else is
+# true of it. Before this list existed, 15 of 23 codes were unclassified here
+# and a recipe the validator reported as invalid dispatched to EXECUTE.
+STRUCTURAL_CODES = (
+    "unknown_recipe_version", "missing_key", "unknown_sheet_role",
+    "unknown_field_role", "unknown_transform_op", "unknown_type",
+    "duplicate_target", "malformed_referent", "wrong_referent_kind",
+    "missing_exclude_reason", "field_source_kind_mismatch",
+    "metadata_cell_in_data_region", "malformed_exclude",
+    "unknown_exclude_rule_op", "executor_cannot_honour",
+    "sheetset_member_layout_mismatch",
+)
+APPROVAL_CODES = ("blocking_ambiguity",)
+
+
+def assert_codes_classified() -> None:
+    """Every validator problem code must be classified by this dispatcher.
+
+    PRO-2, made impossible to repeat quietly: an unclassified code is a code
+    the front door reads and ignores, which is how a detection becomes a
+    silent pass. Runs at import, so a new code cannot reach a run unhandled.
+    """
+    classified = (set(BINDING_CODES) | set(COVERAGE_CODES)
+                  | set(STRUCTURAL_CODES) | set(APPROVAL_CODES))
+    missing = sorted(set(PROBLEM_CODES) - classified)
+    if missing:
+        raise RuntimeError(
+            "dispatch does not classify every validator problem code; these "
+            f"would be silently ignored: {missing}")
+    unknown = sorted(classified - set(PROBLEM_CODES))
+    if unknown:
+        raise RuntimeError(f"dispatch classifies codes the validator never emits: {unknown}")
+
+
+assert_codes_classified()
 
 
 @dataclass
@@ -126,8 +162,16 @@ def dispatch(wb: WorkbookView, store: Sequence[Recipe]) -> Dispatch:
 
     # [2] APPLICABILITY -- the step-2 validator, re-run against this file
     report = validate(recipe, wb)
+    structural = [p for p in report.problems if p.code in STRUCTURAL_CODES]
     binding = [p for p in report.problems if p.code in BINDING_CODES]
     coverage = [p for p in report.problems if p.code in COVERAGE_CODES]
+
+    # A broken recipe is not a drifted file. It must not be authorised, and
+    # asking a human to "scope a redefinition" would misdescribe the problem.
+    if structural:
+        return Dispatch("BLOCKED", recipe_id=recipe.recipe_id,
+                        reason="the recipe does not validate",
+                        delta=[f"{p.code}: {p.detail}" for p in structural])
 
     if binding:
         bound_sources = [f.source for e in recipe.data_sheets() for f in e.fields if f.source]

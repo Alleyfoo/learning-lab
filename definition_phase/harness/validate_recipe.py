@@ -37,6 +37,9 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 
+from executor_contract import (  # noqa: E402
+    MAX_UNPIVOTS_PER_SHEET, SUPPORTED_DERIVE_SOURCES, unsupported_reason,
+)
 from recipe import (  # noqa: E402
     COLUMN_BOUND_ROLES, COLUMN_KINDS, EXCLUDE_RULE_OPS, FIELD_ROLES, RECIPE_VERSIONS,
     RECONCILE_TOLERANCE, REMAINDER, ROW_SHAPE_CONSTRAINTS, SHEET_ROLES, TRANSFORM_OPS,
@@ -55,6 +58,8 @@ PROBLEM_CODES = (
     "duplicate_target", "malformed_referent", "wrong_referent_kind",
     "missing_exclude_reason", "field_source_kind_mismatch",
     "metadata_cell_in_data_region", "malformed_exclude", "unknown_exclude_rule_op",
+    # PRO-2: the format declared it, the executor cannot honour it
+    "executor_cannot_honour",
     # resolution
     "unresolvable_referent",
     # coverage
@@ -138,6 +143,21 @@ def validate(recipe: Recipe, wb: WorkbookView) -> Report:
         where = entry.sheet or "<no sheet>"
         if entry.role not in SHEET_ROLES:
             problems.append(Problem("unknown_sheet_role", where, entry.role))
+        else:
+            why = unsupported_reason("sheet_role", entry.role)
+            if why:
+                problems.append(Problem("executor_cannot_honour", where,
+                                        f"sheet role {entry.role!r}: {why}"))
+        # One unpivot per sheet: a second silently overwrote the first, which is
+        # how Experiment M's S3 lost half the data.
+        unpivots = [f for f in entry.fields
+                    if f.transform is not None and f.transform.op == "unpivot"]
+        if len(unpivots) > MAX_UNPIVOTS_PER_SHEET:
+            problems.append(Problem(
+                "executor_cannot_honour", where,
+                f"{len(unpivots)} unpivot transforms; the executor honours "
+                f"{MAX_UNPIVOTS_PER_SHEET} per sheet, so the rest would be dropped "
+                f"silently: {[f.target for f in unpivots]}"))
         if entry.role == "data":
             for key in ("header_row", "data_region"):
                 if not getattr(entry, key):
@@ -172,6 +192,23 @@ def validate(recipe: Recipe, wb: WorkbookView) -> Report:
                 problems.append(Problem("unknown_type", fwhere, str(fld.type)))
             if fld.transform and fld.transform.op not in TRANSFORM_OPS:
                 problems.append(Problem("unknown_transform_op", fwhere, fld.transform.op))
+            elif fld.transform:
+                why = unsupported_reason("transform_op", fld.transform.op)
+                if why:
+                    problems.append(Problem("executor_cannot_honour", fwhere,
+                                            f"transform {fld.transform.op!r}: {why}"))
+                if fld.transform.op == "derive":
+                    src = fld.transform.params.get("from")
+                    if src not in SUPPORTED_DERIVE_SOURCES:
+                        problems.append(Problem(
+                            "executor_cannot_honour", fwhere,
+                            f"derive from {src!r}; the executor supports "
+                            f"{sorted(SUPPORTED_DERIVE_SOURCES)}"))
+            if fld.role in FIELD_ROLES:
+                why = unsupported_reason("field_role", fld.role)
+                if why:
+                    problems.append(Problem("executor_cannot_honour", fwhere,
+                                            f"field role {fld.role!r}: {why}"))
             # role <-> referent-kind pairing
             if fld.role == "derived":
                 if fld.source:
@@ -674,6 +711,49 @@ def _self_test() -> int:
         load_recipe(ROOT / "recipes" / "W1_sales_v11.json"), wb_foot).codes(),
         "a recipe without data_row_shape must not gain the check")
 
+    # --- the executor contract (LIM-4 / PRO-2) -------------------------------
+    from executor_contract import assert_contract_total
+    from recipe import recipe_from_json as _rfj_contract
+    assert_contract_total()          # raises if a format enum value is unclassified
+
+    import copy as _copy
+    _base = json.loads((ROOT / "recipes" / "W1_sales_v13.json").read_text(encoding="utf-8"))
+
+    def _probe_contract(label, mutate):
+        d = _copy.deepcopy(_base)
+        d["recipe_id"] = label
+        mutate(d)
+        rep = validate(_rfj_contract(d), wb)
+        seen_codes.update(rep.codes())
+        return rep
+
+    def _second_unpivot(d):
+        f = _copy.deepcopy(d["sheets"][0]["fields"][2])
+        f["target"] = "toinen"
+        f["source"] = "sheet:Sales!B:C"
+        f["transform"] = {"op": "unpivot", "var_target": "kk2", "value_target": "toinen"}
+        d["sheets"][0]["fields"].append(f)
+
+    # LIM-4: a second unpivot silently overwrote the first and half the data
+    # vanished. The validator must refuse what the executor cannot honour.
+    rep_two = _probe_contract("two_unpivots", _second_unpivot)
+    check("executor_cannot_honour" in rep_two.codes(),
+          f"two unpivots must be refused, not silently half-executed: "
+          f"{sorted(rep_two.codes())}")
+    # PRO-2: a declared-but-unimplemented transform op.
+    rep_co = _probe_contract("coerce_op", lambda d: d["sheets"][0]["fields"][1]
+                             .__setitem__("transform", {"op": "coerce", "to": "string"}))
+    check("executor_cannot_honour" in rep_co.codes(),
+          f"an unimplemented transform op must be refused: {sorted(rep_co.codes())}")
+    # PRO-2: a declared-but-unhonoured sheet role.
+    rep_md = _probe_contract("metadata_sheet", lambda d: [
+        s.__setitem__("role", "metadata") for s in d["sheets"] if s["sheet"] == "sheet:Notes"])
+    check("executor_cannot_honour" in rep_md.codes(),
+          f"an unhonoured sheet role must be refused: {sorted(rep_md.codes())}")
+    # ...and the unmodified recipe must still be clean, or the rule is paranoid.
+    check(validate(_rfj_contract(_base), wb).codes() <= {"blocking_ambiguity"},
+          "the contract check must not fire on a recipe the executor CAN honour")
+
     # --- v1.3: reconciliation (Experiment K, the C8 attack) ------------------
     v13 = load_recipe(ROOT / "recipes" / "W1_sales_v13.json")
     kfix = ROOT.parent / "experimentK" / "fixtures"
@@ -897,8 +977,9 @@ def _self_test() -> int:
         "missing total row -> row_unclassified / double-bound column + undeclared sheet / "
         "legacy adapter round-trip / dry run pulls real values / v1.2 row shape catches "
         "the footnote / v1.3 reconciliation catches the C8 subtotal and provably does NOT "
-        "catch the C14 consistent double-count / all 24 problem codes "
-        "exercised)\n"
+        "catch C14 / executor contract refuses two unpivots, an unimplemented transform "
+        "and an unhonoured sheet role without firing on a clean recipe / all 25 problem "
+        "codes exercised)\n"
     )
     return 0
 

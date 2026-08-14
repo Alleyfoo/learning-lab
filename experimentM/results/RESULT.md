@@ -1,5 +1,13 @@
 # Experiment M — Result: RESULT_UNPREDICTED_SILENT_WRONG
 
+> **ERRATUM 2026-08-14 (post-run; the result below is unchanged).** S3's defect
+> was fixed afterwards — see `fixes/LIM4-PRO2.md`. **The numbers below measure the
+> PRE-FIX code and stand as recorded.** Re-running `grade_M.py` against the fixed
+> validator now reports S3 as `GAP, silent_wrong=False` ("recipe INVALID — the
+> system refuses rather than producing a wrong table"), which is the fix working,
+> not a correction to this measurement. Do not overwrite `results/M.json` with a
+> post-fix run.
+
 ```text
 shape                   predicted    actual       silent  behaviour
 S1_clean_wide           EXPRESSIBLE  EXPRESSIBLE  no      correct table
