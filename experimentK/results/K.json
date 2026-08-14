@@ -1,0 +1,206 @@
+{
+  "probe": "K",
+  "llm_invoked": false,
+  "n_cases": 12,
+  "per_case": {
+    "C1": {
+      "changed": "nothing",
+      "store": [
+        "approved"
+      ],
+      "ground_truth": "EXECUTE",
+      "predicted": "EXECUTE",
+      "actual": "EXECUTE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "approval intact",
+      "delta": [],
+      "recipe_id": "W1_sales_approved"
+    },
+    "C2": {
+      "changed": "the filename only (byte-identical to C1)",
+      "store": [
+        "approved"
+      ],
+      "ground_truth": "EXECUTE",
+      "predicted": "EXECUTE",
+      "actual": "EXECUTE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "approval intact",
+      "delta": [],
+      "recipe_id": "W1_sales_approved"
+    },
+    "C3": {
+      "changed": "two more products; the total row moves (A1:F11)",
+      "store": [
+        "approved"
+      ],
+      "ground_truth": "EXECUTE",
+      "predicted": "REDEFINE_SCOPED",
+      "actual": "REDEFINE_SCOPED",
+      "agree": false,
+      "fidelity": true,
+      "reason": "the recipe no longer fully accounts for this workbook",
+      "delta": [
+        "row_unclassified: row0 9 (A1 row 10) is claimed by nothing",
+        "row_unclassified: row0 10 (A1 row 11) is claimed by nothing"
+      ],
+      "recipe_id": "W1_sales_approved"
+    },
+    "C4": {
+      "changed": "Tuote -> Tuotekoodi",
+      "store": [
+        "approved"
+      ],
+      "ground_truth": "REDEFINE_SCOPED",
+      "predicted": "REDEFINE_SCOPED",
+      "actual": "REDEFINE_SCOPED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "the recipe no longer fully accounts for this workbook",
+      "delta": [
+        "unresolvable_referent: sheet:Sales!@Tuote -> header_not_found (Tuote)",
+        "column_unclassified: col0 0 is claimed by nothing"
+      ],
+      "recipe_id": "W1_sales_approved"
+    },
+    "C5": {
+      "changed": "a Maa column inserted at B (A1:G9)",
+      "store": [
+        "approved"
+      ],
+      "ground_truth": "REDEFINE_SCOPED",
+      "predicted": "REDEFINE_SCOPED",
+      "actual": "REDEFINE_SCOPED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "the recipe no longer fully accounts for this workbook",
+      "delta": [
+        "column_unclassified: col0 4 is claimed by nothing"
+      ],
+      "recipe_id": "W1_sales_approved"
+    },
+    "C6": {
+      "changed": "a new Kampanjat sheet",
+      "store": [
+        "approved"
+      ],
+      "ground_truth": "REDEFINE_SCOPED",
+      "predicted": "REDEFINE_SCOPED",
+      "actual": "REDEFINE_SCOPED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "the recipe no longer fully accounts for this workbook",
+      "delta": [
+        "sheet_unclassified: every sheet must be given a role"
+      ],
+      "recipe_id": "W1_sales_approved"
+    },
+    "C7": {
+      "changed": "Sales -> Myynnit",
+      "store": [
+        "approved"
+      ],
+      "ground_truth": "DEFINE",
+      "predicted": "DEFINE",
+      "actual": "DEFINE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "no recipe binds a data sheet present in this workbook",
+      "delta": [],
+      "recipe_id": null
+    },
+    "C8": {
+      "changed": "SAME dimensions (6 sheets, A1:F9, same headers); one product row is now a VÄLISUMMA subtotal",
+      "store": [
+        "approved"
+      ],
+      "ground_truth": "REDEFINE_SCOPED",
+      "predicted": "EXECUTE",
+      "actual": "EXECUTE",
+      "agree": false,
+      "fidelity": true,
+      "reason": "approval intact",
+      "delta": [],
+      "recipe_id": "W1_sales_approved"
+    },
+    "C9": {
+      "changed": "nothing; the recipe store is empty",
+      "store": [],
+      "ground_truth": "DEFINE",
+      "predicted": "DEFINE",
+      "actual": "DEFINE",
+      "agree": true,
+      "fidelity": true,
+      "reason": "no recipe binds a data sheet present in this workbook",
+      "delta": [],
+      "recipe_id": null
+    },
+    "C10": {
+      "changed": "nothing; two recipes claim the same data sheet",
+      "store": [
+        "approved",
+        "open_ambiguity"
+      ],
+      "ground_truth": "AMBIGUOUS",
+      "predicted": "AMBIGUOUS",
+      "actual": "AMBIGUOUS",
+      "agree": true,
+      "fidelity": true,
+      "reason": "2 recipes claim this workbook",
+      "delta": [],
+      "recipe_id": null
+    },
+    "C11": {
+      "changed": "nothing in the workbook; the RECIPE was edited after approval",
+      "store": [
+        "edited_after_approval"
+      ],
+      "ground_truth": "BLOCKED",
+      "predicted": "BLOCKED",
+      "actual": "BLOCKED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "recipe was edited after approval (faf4c3c94632… != 15bf894528ef…)",
+      "delta": [],
+      "recipe_id": "W1_sales_edited_after_approval"
+    },
+    "C12": {
+      "changed": "nothing in the workbook; the recipe has an open blocking ambiguity",
+      "store": [
+        "open_ambiguity"
+      ],
+      "ground_truth": "BLOCKED",
+      "predicted": "BLOCKED",
+      "actual": "BLOCKED",
+      "agree": true,
+      "fidelity": true,
+      "reason": "a blocking ambiguity is still open",
+      "delta": [],
+      "recipe_id": "W1_sales_open_ambiguity"
+    }
+  },
+  "agree": 10,
+  "predicted_agree": 10,
+  "false_execute": [
+    "C8"
+  ],
+  "over_escalation": [
+    "C3"
+  ],
+  "fidelity_all": true,
+  "fidelity_deviations": [],
+  "baseline_ok": true,
+  "predicted_totals": {
+    "n_cases": 12,
+    "agree": 10,
+    "false_execute": [
+      "C8"
+    ],
+    "over_escalation": [
+      "C3"
+    ]
+  },
+  "outcome": "PASS_AS_PREDICTED"
+}
