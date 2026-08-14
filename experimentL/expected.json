@@ -1,0 +1,268 @@
+{
+  "probe": "L",
+  "purpose": "Does working only with the schema actually work? Execute an approved recipe and compare to a frozen expected table. Plan v1 sec.10 step 6, deferred four times.",
+  "framed_question": "Another question to answer is if only working with schema really works -- that's what we are relying on in the end.",
+  "frozen_before_implementation": true,
+  "llm_invoked": false,
+  "claims": {
+    "A": "Can an AGENT define the frame from structure alone? UNTESTED; separate freeze; depends on B.",
+    "B": "Is a RECIPE sufficient to do the job? NEVER TESTED -- this experiment."
+  },
+  "recipe": {
+    "path": "../experimentK/recipes/W1_sales_v13_approved.json",
+    "sha256": "4c372076cfdc46d09c78eb616c021d823b6b5c92ec8451357db46fe7a29523c6"
+  },
+  "output_columns": [
+    "paivitetty",
+    "tuote",
+    "kuukausi",
+    "myynti"
+  ],
+  "cases": {
+    "L1": {
+      "workbook": "../definition_phase/fixtures/W1_multisheet.xlsx",
+      "description": "the workbook the recipe was written for",
+      "expected_rows": [
+        [
+          "3.2.2026",
+          "ART-001",
+          "Tammi",
+          10
+        ],
+        [
+          "3.2.2026",
+          "ART-001",
+          "Helmi",
+          12
+        ],
+        [
+          "3.2.2026",
+          "ART-001",
+          "Maalis",
+          8
+        ],
+        [
+          "3.2.2026",
+          "ART-002",
+          "Tammi",
+          7
+        ],
+        [
+          "3.2.2026",
+          "ART-002",
+          "Helmi",
+          9
+        ],
+        [
+          "3.2.2026",
+          "ART-002",
+          "Maalis",
+          11
+        ],
+        [
+          "3.2.2026",
+          "ART-003",
+          "Tammi",
+          5
+        ],
+        [
+          "3.2.2026",
+          "ART-003",
+          "Helmi",
+          7
+        ],
+        [
+          "3.2.2026",
+          "ART-003",
+          "Maalis",
+          6
+        ],
+        [
+          "3.2.2026",
+          "ART-004",
+          "Tammi",
+          8
+        ],
+        [
+          "3.2.2026",
+          "ART-004",
+          "Helmi",
+          11
+        ],
+        [
+          "3.2.2026",
+          "ART-004",
+          "Maalis",
+          7
+        ]
+      ],
+      "must_be_absent": [
+        "the YHTEENSA grand-total row",
+        "the Yhteensa derived total column",
+        "the Kommentti free-text column",
+        "the three preamble rows"
+      ]
+    },
+    "L2": {
+      "workbook": "../experimentK/fixtures/C3_more_rows.xlsx",
+      "description": "next month's file: six products, the total row moved. THE PAYOFF CLAIM -- define once, run on next month's file, no model in the loop.",
+      "expected_rows": [
+        [
+          "3.2.2026",
+          "ART-001",
+          "Tammi",
+          10
+        ],
+        [
+          "3.2.2026",
+          "ART-001",
+          "Helmi",
+          12
+        ],
+        [
+          "3.2.2026",
+          "ART-001",
+          "Maalis",
+          8
+        ],
+        [
+          "3.2.2026",
+          "ART-002",
+          "Tammi",
+          7
+        ],
+        [
+          "3.2.2026",
+          "ART-002",
+          "Helmi",
+          9
+        ],
+        [
+          "3.2.2026",
+          "ART-002",
+          "Maalis",
+          11
+        ],
+        [
+          "3.2.2026",
+          "ART-003",
+          "Tammi",
+          5
+        ],
+        [
+          "3.2.2026",
+          "ART-003",
+          "Helmi",
+          7
+        ],
+        [
+          "3.2.2026",
+          "ART-003",
+          "Maalis",
+          6
+        ],
+        [
+          "3.2.2026",
+          "ART-004",
+          "Tammi",
+          8
+        ],
+        [
+          "3.2.2026",
+          "ART-004",
+          "Helmi",
+          11
+        ],
+        [
+          "3.2.2026",
+          "ART-004",
+          "Maalis",
+          7
+        ],
+        [
+          "3.2.2026",
+          "ART-005",
+          "Tammi",
+          6
+        ],
+        [
+          "3.2.2026",
+          "ART-005",
+          "Helmi",
+          8
+        ],
+        [
+          "3.2.2026",
+          "ART-005",
+          "Maalis",
+          9
+        ],
+        [
+          "3.2.2026",
+          "ART-006",
+          "Tammi",
+          4
+        ],
+        [
+          "3.2.2026",
+          "ART-006",
+          "Helmi",
+          5
+        ],
+        [
+          "3.2.2026",
+          "ART-006",
+          "Maalis",
+          3
+        ]
+      ],
+      "must_be_absent": [
+        "the YHTEENSA row, wherever it moved to"
+      ]
+    }
+  },
+  "predicted_gaps": {
+    "G1": {
+      "field": "paivitetty",
+      "declared_type": "date",
+      "gap": "The format has no way to say HOW a date is written -- no format string, no locale. The executor cannot honour the declaration without guessing dd.mm.yyyy, and guessing is what this programme does not do.",
+      "expected": "the value stays the raw string '3.2.2026' AND declared_types_honoured is False for this field",
+      "why_it_matters": "G1 is the first concrete answer to the question. Working only with the schema DOES work -- up to the point where the schema cannot say something the job needs. Counting those points is the measurement."
+    }
+  },
+  "grading": {
+    "L1_pass": "executor output == frozen expected_rows exactly, order included",
+    "L2_pass": "same, on C3, 18 rows",
+    "gaps": "declared_types_honoured recorded per field; G1 predicted False"
+  },
+  "decision_table": [
+    {
+      "condition": "L1 and L2 both match and gaps == ['G1']",
+      "outcome": "PASS_AS_PREDICTED -- a recipe does the job, and one named thing the schema cannot say"
+    },
+    {
+      "condition": "L1 or L2 mismatches",
+      "outcome": "FAIL -- record the diff; do NOT adjust the expected table"
+    },
+    {
+      "condition": "a gap appears beyond G1",
+      "outcome": "RESULT_MORE_GAPS -- record each; this is the measurement, not a failure"
+    },
+    {
+      "condition": "the executor needs information the recipe does not carry",
+      "outcome": "FAIL_INSUFFICIENT -- the honest negative answer, and the most important possible result"
+    }
+  ],
+  "hard_stop": [
+    "Execution only. No LLM, including for parsing a date.",
+    "No changes to the frozen grammar, to recipe format v1.1/v1.2/v1.3, to any recorded K result, or to any frozen fixture.",
+    "If the executor needs something the format lacks, that is a GAP -- never patched into the format mid-run. Patching would convert the measurement into a tautology."
+  ],
+  "stated_limitations": [
+    "One recipe, two workbooks. This establishes that a recipe CAN execute correctly, not that the format covers the space of real provider files.",
+    "The expected tables were written by hand from the fixtures, so they test the executor, not the fixtures.",
+    "Expressiveness across many shapes is a separate measurement (an L2-style breadth arm), not attempted here.",
+    "Deterministic and fully repeatable: no LLM, no seeds, no sampling."
+  ],
+  "hidden": true
+}
