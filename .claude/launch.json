@@ -1,0 +1,21 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "workbook-browser",
+      "runtimeExecutable": "C:\\Users\\pertt\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\\python.exe",
+      "runtimeArgs": [
+        "-m",
+        "streamlit",
+        "run",
+        "definition_phase/app/browser.py",
+        "--server.port",
+        "8555",
+        "--server.headless",
+        "true"
+      ],
+      "port": 8555,
+      "_note": "Pinned to the 3.11 interpreter: the bare `python` on PATH resolves to 3.14, which has streamlit but not openpyxl/pandas, so the app starts and then fails on the first workbook load."
+    }
+  ]
+}

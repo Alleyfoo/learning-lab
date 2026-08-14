@@ -6,6 +6,11 @@
       "note": "adopted 2026-08-14"
     },
     {
+      "path": "definition_phase/fixtures/W2_hidden_content.xlsx",
+      "sha256": "cdc6f468377f80df50503f152b68240cd2f7fb940b578a5741719d68a216032d",
+      "note": "adopted 2026-08-14"
+    },
+    {
       "path": "definition_phase/recipes/W1_months.json",
       "sha256": "ef732cce490e5519de1355fc337cca6bc5182a334914e20264f224b6d4761f16",
       "note": "adopted 2026-08-14"
