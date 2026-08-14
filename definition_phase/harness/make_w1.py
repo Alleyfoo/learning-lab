@@ -14,6 +14,7 @@ place (see design/referent_grammar_v1.md sec.8).
 """
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 from openpyxl import Workbook
@@ -83,11 +84,25 @@ def build() -> Workbook:
     return wb
 
 
-def main() -> None:
+def main(force: bool = False) -> None:
+    """Write the fixture.
+
+    `.xlsx` output is NOT byte-reproducible -- openpyxl embeds zip timestamps --
+    and this workbook's hash is frozen (`frozen_manifest.json`; Experiment K's
+    C1/C2 are copies of it). Regenerating it therefore VOIDS those freezes, so
+    overwriting requires --force and is a deliberate re-freeze.
+    """
     OUT.parent.mkdir(parents=True, exist_ok=True)
+    if OUT.exists() and not force:
+        raise SystemExit(
+            f"REFUSING to overwrite {OUT.name}: it is a frozen artifact and .xlsx\n"
+            f"output is not byte-reproducible, so rewriting it voids every hash\n"
+            f"that references it. Re-run with --force only as a deliberate\n"
+            f"re-freeze, then update frozen_manifest.json in the same commit and\n"
+            f"run: python scripts/verify_frozen.py")
     build().save(OUT)
     print(f"wrote {OUT}")
 
 
 if __name__ == "__main__":
-    main()
+    main(force="--force" in sys.argv[1:])

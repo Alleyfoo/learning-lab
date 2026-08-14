@@ -1,0 +1,35 @@
+{
+  "artifacts": [
+    {
+      "path": "definition_phase/fixtures/W1_multisheet.xlsx",
+      "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
+      "note": "adopted 2026-08-14"
+    },
+    {
+      "path": "definition_phase/recipes/W1_months.json",
+      "sha256": "ef732cce490e5519de1355fc337cca6bc5182a334914e20264f224b6d4761f16",
+      "note": "adopted 2026-08-14"
+    },
+    {
+      "path": "definition_phase/recipes/W1_sales.json",
+      "sha256": "281efa405cc92dd4b9489f66b7758575c1e3634785da7ed9a99ea6ecc36c5ff9",
+      "note": "adopted 2026-08-14"
+    },
+    {
+      "path": "definition_phase/recipes/W1_sales_v11.json",
+      "sha256": "87ae2f7ea2d9068bcb23719ba25a800c1533c5b87f133061d5f2e0b6ef8e8c90",
+      "note": "adopted 2026-08-14"
+    },
+    {
+      "path": "definition_phase/recipes/broken/W1_sales_double_bound.json",
+      "sha256": "a366736535cfce2a405f1775048d2c4a986651b2dfa13d7164295c4c6344decd",
+      "note": "adopted 2026-08-14"
+    },
+    {
+      "path": "definition_phase/recipes/broken/W1_sales_missing_total_row.json",
+      "sha256": "a17af499584d4f0b786c16d26e6895040fef1a059c75ae91f54f2c6d625d32e8",
+      "note": "adopted 2026-08-14"
+    }
+  ],
+  "_note": "Frozen artifacts NOT covered by any experiment's expected.json. Per-experiment expected.json files remain authoritative for what they cover; this file never duplicates them. Do not edit a hash to make a check pass -- if an artifact legitimately changed, that is a re-freeze and belongs in a commit that says so."
+}
