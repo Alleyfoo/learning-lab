@@ -1,0 +1,7 @@
+{
+  "_note": "zoe before alice ON PURPOSE, so left-then-right ordering and sorted ordering genuinely differ. Identical orderings would make the output_order permutation a no-op.",
+  "users": [
+    {"user_id": "zoe",   "email": "zoe@x"},
+    {"user_id": "alice", "email": "alice@x"}
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "_note": "The second row carries no user_id at all. It cannot be classified by a key it does not have, and treating it as the empty key would silently pool every keyless row together.",
+  "users": [
+    {"user_id": "alice", "email": "alice@x"},
+    {"email": "nokey@x"}
+  ]
+}

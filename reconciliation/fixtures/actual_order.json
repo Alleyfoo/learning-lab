@@ -1,0 +1,7 @@
+{
+  "_note": "Pairs with expected_order.json. left_then_right gives [zoe, alice, bob]; sorted gives [alice, bob, zoe].",
+  "users": [
+    {"user_id": "alice", "email": "alice@x"},
+    {"user_id": "bob",   "email": "bob@x"}
+  ]
+}

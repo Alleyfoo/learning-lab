@@ -1,0 +1,19 @@
+{
+  "model_version": 1,
+  "model_id": "reconciliation_v1",
+  "task": "reconciliation",
+  "sources": {
+    "expected": {"path": "fixtures/expected_users.json", "collection": "users"},
+    "actual":   {"path": "fixtures/actual_users.json",   "collection": "users"}
+  },
+  "left": "expected",
+  "right": "actual",
+  "match_on": {"left_field": "user_id", "right_field": "user_id"},
+  "classify": {
+    "both": "BOTH",
+    "only_left": "ONLY_EXPECTED",
+    "only_right": "ONLY_ACTUAL"
+  },
+  "output_order": "left_then_right",
+  "on_duplicate_key": "refuse_run"
+}

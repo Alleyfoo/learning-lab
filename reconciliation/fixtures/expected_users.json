@@ -1,0 +1,8 @@
+{
+  "_note": "Expected users. Emails are chosen so that matching by email gives a DIFFERENT partition than matching by user_id -- otherwise the match-key permutation would be a no-op and prove nothing.",
+  "users": [
+    {"user_id": "alice", "email": "alice@x"},
+    {"user_id": "bob",   "email": "bob@x"},
+    {"user_id": "carol", "email": "carol@x"}
+  ]
+}
