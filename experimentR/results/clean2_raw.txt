@@ -1,0 +1,19 @@
+```json
+{
+  "model_version": 1,
+  "model_id": "reservation",
+  "task": "reservation",
+  "purpose": "Validate an incoming reservation request date and append it to the reservations list, refusing invalid dates, holidays, and already-booked dates.",
+  "rules": [
+    {"name": "date_well_formed", "refusal": "INVALID_DATE"},
+    {"name": "not_holiday", "refusal": "HOLIDAY"},
+    {"name": "not_reserved", "refusal": "ALREADY_RESERVED"}
+  ],
+  "on_accept": ["append_to_reservations"],
+  "sources": [
+    {"path": "fixtures/holidays.json", "collection": "holidays"},
+    {"path": "fixtures/reservations.json", "collection": "reservations"}
+  ],
+  "note": "rules are evaluated in the order declared, and the FIRST rule that fails decides the refusal"
+}
+```

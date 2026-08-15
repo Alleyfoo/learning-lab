@@ -1,0 +1,33 @@
+{
+  "model_version": 1,
+  "model_id": "reservation_node",
+  "task": "reservation",
+  "purpose": "Add a requested date to reservations unless it is invalid, a holiday, or already reserved.",
+  "sources": [
+    {
+      "path": "fixtures/holidays.json",
+      "collection": "holidays"
+    },
+    {
+      "path": "fixtures/reservations.json",
+      "collection": "reservations"
+    }
+  ],
+  "rules": [
+    {
+      "name": "date_well_formed",
+      "refusal": "INVALID_DATE"
+    },
+    {
+      "name": "not_holiday",
+      "refusal": "HOLIDAY"
+    },
+    {
+      "name": "not_reserved",
+      "refusal": "ALREADY_RESERVED"
+    }
+  ],
+  "on_accept": [
+    "append_to_reservations"
+  ]
+}

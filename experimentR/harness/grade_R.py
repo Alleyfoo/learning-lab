@@ -54,10 +54,23 @@ def _workspace(tmp: Path, tag: str, definition: dict) -> Path:
 
 
 def g1_valid(definition: dict) -> dict:
-    """The task's own validator. Nothing is added here."""
-    with tempfile.TemporaryDirectory() as td:
-        ws = _workspace(Path(td), "g1", definition)
-        report = task_model.validate(task_model.parse(definition), ws)
+    """The task's own validator. Nothing is added here.
+
+    A proposal from outside this repo can be malformed in ways no hand-written
+    model ever was -- `sources` as a LIST rather than a map makes
+    `task_model.parse` raise before any validator sees it. That is a real gap in
+    the floor, recorded as a finding rather than patched mid-run; here it is
+    caught so grading completes and reports WHAT happened instead of dying.
+    """
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            ws = _workspace(Path(td), "g1", definition)
+            report = task_model.validate(task_model.parse(definition), ws)
+    except Exception as exc:                     # noqa: BLE001 - reported, not hidden
+        return {"valid": False, "codes": ["unparseable_by_floor"],
+                "problems": [f"{type(exc).__name__}: {exc}"],
+                "note": ("task_model.parse raised before validation. The floor "
+                         "assumes `sources` is a map; a list crashes it.")}
     return {"valid": report.valid,
             "codes": sorted(report.codes()),
             "problems": [str(p) for p in report.problems]}
@@ -101,11 +114,20 @@ def g3_structural(definition: dict) -> dict:
     """Reported, never a pass criterion. Order is compared, because order is
     semantics: the first failing rule decides the refusal."""
     def shape(d: dict) -> dict:
+        sources = d.get("sources") or {}
+        # A proposal may hand back a LIST of source specs instead of a map.
+        # Reported as the shape it actually is rather than normalised away --
+        # the difference is the finding.
+        if isinstance(sources, list):
+            sources_shape = ["<list>"] + [s.get("collection") for s in sources
+                                          if isinstance(s, dict)]
+        else:
+            sources_shape = {k: v.get("collection") if isinstance(v, dict) else v
+                             for k, v in sources.items()}
         return {"rules": [(r.get("rule"), r.get("refusal"))
-                          for r in d.get("rules", [])],
+                          for r in d.get("rules", []) if isinstance(r, dict)],
                 "on_accept": d.get("on_accept"),
-                "sources": {k: v.get("collection")
-                            for k, v in (d.get("sources") or {}).items()}}
+                "sources": sources_shape}
 
     want, got = shape(ESTABLISHED), shape(definition)
     return {"matches": want == got, "established": want, "proposed": got,

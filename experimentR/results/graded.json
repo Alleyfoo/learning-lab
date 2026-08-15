@@ -1,0 +1,205 @@
+{
+  "probe1": {
+    "G1_valid": {
+      "valid": false,
+      "codes": [
+        "unparseable_by_floor"
+      ],
+      "problems": [
+        "AttributeError: 'list' object has no attribute 'items'"
+      ],
+      "note": "task_model.parse raised before validation. The floor assumes `sources` is a map; a list crashes it."
+    },
+    "G2_equivalent": {
+      "equivalent": false,
+      "skipped": "not run: an invalid definition is never executed"
+    },
+    "G3_structural": {
+      "matches": false,
+      "established": {
+        "rules": [
+          [
+            "date_well_formed",
+            "INVALID_DATE"
+          ],
+          [
+            "not_holiday",
+            "HOLIDAY"
+          ],
+          [
+            "not_reserved",
+            "ALREADY_RESERVED"
+          ]
+        ],
+        "on_accept": "append_to_reservations",
+        "sources": {
+          "holidays": "holidays",
+          "reservations": "reservations"
+        }
+      },
+      "proposed": {
+        "rules": [
+          [
+            null,
+            "INVALID_DATE"
+          ],
+          [
+            null,
+            "HOLIDAY"
+          ],
+          [
+            null,
+            "ALREADY_RESERVED"
+          ]
+        ],
+        "on_accept": [
+          "append_to_reservations"
+        ],
+        "sources": [
+          "<list>",
+          "holidays",
+          "reservations"
+        ]
+      },
+      "rule_order_matches": false,
+      "differs_only_in_prose": false
+    },
+    "passed": false
+  },
+  "probe2": {
+    "G1_valid": {
+      "valid": false,
+      "codes": [
+        "unparseable_by_floor"
+      ],
+      "problems": [
+        "AttributeError: 'list' object has no attribute 'items'"
+      ],
+      "note": "task_model.parse raised before validation. The floor assumes `sources` is a map; a list crashes it."
+    },
+    "G2_equivalent": {
+      "equivalent": false,
+      "skipped": "not run: an invalid definition is never executed"
+    },
+    "G3_structural": {
+      "matches": false,
+      "established": {
+        "rules": [
+          [
+            "date_well_formed",
+            "INVALID_DATE"
+          ],
+          [
+            "not_holiday",
+            "HOLIDAY"
+          ],
+          [
+            "not_reserved",
+            "ALREADY_RESERVED"
+          ]
+        ],
+        "on_accept": "append_to_reservations",
+        "sources": {
+          "holidays": "holidays",
+          "reservations": "reservations"
+        }
+      },
+      "proposed": {
+        "rules": [
+          [
+            null,
+            "INVALID_DATE"
+          ],
+          [
+            null,
+            "HOLIDAY"
+          ],
+          [
+            null,
+            "ALREADY_RESERVED"
+          ]
+        ],
+        "on_accept": [
+          "append_to_reservations"
+        ],
+        "sources": [
+          "<list>",
+          "holidays",
+          "reservations"
+        ]
+      },
+      "rule_order_matches": false,
+      "differs_only_in_prose": false
+    },
+    "passed": false
+  },
+  "probe3": {
+    "G1_valid": {
+      "valid": false,
+      "codes": [
+        "unknown_on_accept",
+        "unknown_rule"
+      ],
+      "problems": [
+        "unknown_rule@reservation_node:rules[0]",
+        "unknown_rule@reservation_node:rules[1]",
+        "unknown_rule@reservation_node:rules[2]",
+        "unknown_on_accept@reservation_node: ['append_to_reservations']"
+      ]
+    },
+    "G2_equivalent": {
+      "equivalent": false,
+      "skipped": "not run: an invalid definition is never executed"
+    },
+    "G3_structural": {
+      "matches": false,
+      "established": {
+        "rules": [
+          [
+            "date_well_formed",
+            "INVALID_DATE"
+          ],
+          [
+            "not_holiday",
+            "HOLIDAY"
+          ],
+          [
+            "not_reserved",
+            "ALREADY_RESERVED"
+          ]
+        ],
+        "on_accept": "append_to_reservations",
+        "sources": {
+          "holidays": "holidays",
+          "reservations": "reservations"
+        }
+      },
+      "proposed": {
+        "rules": [
+          [
+            null,
+            "INVALID_DATE"
+          ],
+          [
+            null,
+            "HOLIDAY"
+          ],
+          [
+            null,
+            "ALREADY_RESERVED"
+          ]
+        ],
+        "on_accept": [
+          "append_to_reservations"
+        ],
+        "sources": {
+          "holidays": "holidays",
+          "reservations": "reservations"
+        }
+      },
+      "rule_order_matches": false,
+      "differs_only_in_prose": false
+    },
+    "passed": false
+  }
+}

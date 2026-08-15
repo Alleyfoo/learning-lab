@@ -1,0 +1,119 @@
+Thinking...
+We need produce JSON node definition. Need follow vocabulary. Need include [K
+envelope_keys? The output JSON should have model_version, model_id, task, s[1D[K
+sources, purpose maybe, rules etc. Need infer format.
+
+We are defining a small deterministic node. The job. Incoming requests cont[4D[K
+contain date. Holiday list and reservation list. Add request unless date in[2D[K
+invalid, holiday, already booked.
+
+Need use only rule names: date_well_formed, not_holiday, not_reserved. Refu[4D[K
+Refusals INVALID_DATE, HOLIDAY, ALREADY_RESERVED. on_accept append_to_reser[15D[K
+append_to_reservations. source_spec path/collection. sources must name each[4D[K
+each file and collection inside. Rules evaluated in order declared; first f[1D[K
+failing decides refusal.
+
+Need produce node definition JSON. Include purpose string. Need maybe "rule[5D[K
+"rules": array of objects with "rule": name, "refusal": reason. And "on_acc[7D[K
+"on_accept": [ "append_to_reservations" ]. "sources": list or object with h[1D[K
+holidays and reservations source_spec. "model_id" maybe choose "reservation[12D[K
+"reservation". "task": "reservation". model_version 1.
+
+Need output only JSON object no explanation no fence. Ensure valid JSON. Ma[2D[K
+Maybe:
+
+{
+  "model_version": 1,
+  "model_id": "reservation",
+  "task": "reservation",
+  "purpose": "Add a requested date to reservations unless it is malformed, [K
+a holiday, or already booked.",
+  "sources": [
+    {"path": "fixtures/holidays.json", "collection": "holidays"},
+    {"path": "fixtures/reservations.json", "collection": "reservations"}
+  ],
+  "rules": [
+    {"rule": "date_well_formed", "refusal": "INVALID_DATE"},
+    {"rule": "not_holiday", "refusal": "HOLIDAY"},
+    {"rule": "not_reserved", "refusal": "ALREADY_RESERVED"}
+  ],
+  "on_accept": ["append_to_reservations"]
+}
+
+Need maybe source_spec keys? The only vocabulary includes source_spec with [K
+path and collection, not necessarily object? It says sources must name each[4D[K
+each file and collection inside it. Could use source_spec objects? The "sou[4D[K
+"source_spec" in vocabulary likely indicates each source. But envelope_keys[13D[K
+envelope_keys includes "sources". Need maybe:
+
+"sources": {
+  "holidays": {"path": "fixtures/holidays.json", "collection": "holidays"},[12D[K
+"holidays"},
+  "reservations": {"path": "fixtures/reservations.json", "colle[6D[K
+"collection": "reservations"}
+}
+
+This names each. But "source_spec" in vocab has path/collection. Either. To[2D[K
+To be safe, use object keyed by collection? But "sources" must name each fi[2D[K
+file and collection. Could be array of source_specs. The vocabulary only li[2D[K
+lists source_spec shape, not explicitly sources shape. I think array of sou[3D[K
+source_spec objects is fine.
+
+Need include "input"? Not requested. "request_date" maybe? The node receive[7D[K
+receives once per run. Maybe include "input": {"request_date": "string"}? N[1D[K
+Not in envelope_keys. Envelope keys allowed only: model_version, model_id, [K
+task, sources. But also purpose? Hmm envelope_keys lists only four, but req[3D[K
+requirements ask include purpose. That conflicts? "The only vocabulary you [K
+may use: envelope_keys ..."; Does that mean top-level keys should only be t[1D[K
+those? But requirements say include purpose. We need include purpose even t[1D[K
+though not in envelope_keys? Maybe "purpose" allowed by requirement. But "u[2D[K
+"use only rule names..." etc. The envelope_keys maybe list required keys, n[1D[K
+not exhaustive? They say "envelope_keys" are [model_version, model_id, task[4D[K
+task, sources]. Need include short purpose. Could include purpose as extra [K
+key. Is that allowed? The requirement explicitly asks. We should include pu[2D[K
+purpose. It might violate vocabulary but requirement wins. Maybe use "purpo[6D[K
+"purpose" in task? Hmm.
+
+Need maybe include "rules" and "on_accept" though not in envelope_keys. Tho[3D[K
+Those are part of node definition. So envelope_keys are not exhaustive. Out[3D[K
+Output should have them.
+
+Need maybe model_id choose unique: "reservation_guard" or "reservation". Co[2D[K
+Could be "reservation".
+...done thinking.
+
+{
+  "model_version": 1,
+  "model_id": "reservation",
+  "task": "reservation",
+  "purpose": "Add a requested date to reservations unless the date is malfo[5D[K
+malformed, a holiday, or already reserved.",
+  "sources": [
+    {
+      "path": "fixtures/holidays.json",
+      "collection": "holidays"
+    },
+    {
+      "path": "fixtures/reservations.json",
+      "collection": "reservations"
+    }
+  ],
+  "rules": [
+    {
+      "rule": "date_well_formed",
+      "refusal": "INVALID_DATE"
+    },
+    {
+      "rule": "not_holiday",
+      "refusal": "HOLIDAY"
+    },
+    {
+      "rule": "not_reserved",
+      "refusal": "ALREADY_RESERVED"
+    }
+  ],
+  "on_accept": [
+    "append_to_reservations"
+  ]
+}
+

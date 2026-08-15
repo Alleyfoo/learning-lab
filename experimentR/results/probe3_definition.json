@@ -1,0 +1,4 @@
+{
+  "rule": "not_reserved",
+  "refusal": "ALREADY_RESERVED"
+}
