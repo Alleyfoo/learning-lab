@@ -47,10 +47,17 @@ class Execution:
     rows: list[list[Any]] = dc_field(default_factory=list)
     unhonoured_types: list[dict] = dc_field(default_factory=list)
     notes: list[str] = dc_field(default_factory=list)
+    # How many data rows each declared source sheet contributed. Cross-sheet law
+    # 2: a member with a header and no data rows contributes zero, which is
+    # legitimate -- and without this record it is indistinguishable from a member
+    # that was never declared. A zero cannot be recovered by counting output
+    # rows, because it leaves no row to count.
+    member_contribution: dict[str, int] = dc_field(default_factory=dict)
 
     def as_dict(self) -> dict:
         return {"columns": self.columns, "rows": self.rows,
-                "unhonoured_types": self.unhonoured_types, "notes": self.notes}
+                "unhonoured_types": self.unhonoured_types, "notes": self.notes,
+                "member_contribution": self.member_contribution}
 
 
 def _coerce(value: Any, declared: Optional[str], target: str,
@@ -162,6 +169,10 @@ def execute(recipe: Recipe, wb: WorkbookView) -> Execution:
         for member, cov in members.items():
             header_values = wb.row_values(member, header_ref.row0)
             data_rows = _data_row0s(cov, f"{entry.sheet}@{member}")
+            # Recorded BEFORE the rows are emitted, so a member contributing zero
+            # still appears. Deriving this afterwards from the output is exactly
+            # what a consumer cannot do.
+            out.member_contribution[member] = len(data_rows)
 
             scalars: dict[str, Any] = {}
             id_fields: list[tuple[str, int, Optional[str]]] = []

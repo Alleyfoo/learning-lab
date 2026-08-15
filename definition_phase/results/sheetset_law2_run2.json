@@ -1,0 +1,119 @@
+{
+  "law": "No Partial Honour at COLLECTION scope",
+  "statement": "either every declared member contributes its rows AND the contribution is observable, or the recipe is refused before authoritative execution",
+  "canary": {
+    "fired": true,
+    "reached": true,
+    "detail": "expected {'A': 1, 'B': 1, 'C': 3}, got {'A': 1, 'B': 1, 'C': 1}"
+  },
+  "cases": [
+    {
+      "case": "baseline",
+      "required": "full_union",
+      "rationale": "control: three members, one row each, all present",
+      "reachability": "3/3 declared members present in workbook",
+      "reachability_ok": true,
+      "result": {
+        "refused": false,
+        "n_rows": 3,
+        "rows_by_member": {
+          "A": 1,
+          "B": 1,
+          "C": 1
+        },
+        "declared_contribution": {
+          "A": 1,
+          "B": 1,
+          "C": 1
+        }
+      },
+      "status": "HELD",
+      "detail": "every member contributed in full: {'A': 1, 'B': 1, 'C': 1}"
+    },
+    {
+      "case": "member_missing_from_workbook",
+      "required": "refused",
+      "rationale": "B is declared and absent. The literal 'A + C contribute, B disappears'. Must refuse rather than union what is present.",
+      "reachability": "2/3 declared members present in workbook",
+      "reachability_ok": true,
+      "result": {
+        "refused": true,
+        "codes": [
+          "unresolvable_referent"
+        ]
+      },
+      "status": "HELD",
+      "detail": "refused before execution: ['unresolvable_referent']"
+    },
+    {
+      "case": "member_longer_than_prototype",
+      "required": "full_union",
+      "rationale": "the hazard per-member coverage exists to prevent: C has three rows where the prototype has one. A prototype-shaped map drops C's tail with nothing reporting it.",
+      "reachability": "3/3 declared members present in workbook",
+      "reachability_ok": true,
+      "result": {
+        "refused": false,
+        "n_rows": 5,
+        "rows_by_member": {
+          "A": 1,
+          "B": 1,
+          "C": 3
+        },
+        "declared_contribution": {
+          "A": 1,
+          "B": 1,
+          "C": 3
+        }
+      },
+      "status": "HELD",
+      "detail": "every member contributed in full: {'A': 1, 'B': 1, 'C': 3}"
+    },
+    {
+      "case": "member_shorter_than_prototype",
+      "required": "full_union",
+      "rationale": "the other direction: B must contribute its OWN row count, not the prototype's. Phantom rows are the same defect mirrored.",
+      "reachability": "3/3 declared members present in workbook",
+      "reachability_ok": true,
+      "result": {
+        "refused": false,
+        "n_rows": 5,
+        "rows_by_member": {
+          "A": 3,
+          "B": 1,
+          "C": 1
+        },
+        "declared_contribution": {
+          "A": 3,
+          "B": 1,
+          "C": 1
+        }
+      },
+      "status": "HELD",
+      "detail": "every member contributed in full: {'A': 3, 'B': 1, 'C': 1}"
+    },
+    {
+      "case": "member_empty",
+      "required": "observable",
+      "rationale": "B has a header and no data rows. Contributing zero is LEGITIMATE -- a month with no sales is a real file -- so the law does not demand refusal. It demands that the zero be readable, because otherwise 'B contributed nothing' is indistinguishable from 'B was never declared'.",
+      "reachability": "3/3 declared members present in workbook",
+      "reachability_ok": true,
+      "result": {
+        "refused": false,
+        "n_rows": 2,
+        "rows_by_member": {
+          "A": 1,
+          "C": 1
+        },
+        "declared_contribution": {
+          "A": 1,
+          "B": 0,
+          "C": 1
+        }
+      },
+      "status": "HELD",
+      "detail": "zero contribution recorded: {'A': 1, 'B': 0, 'C': 1}"
+    }
+  ],
+  "outcome": "LAW_2_HELD",
+  "stated_limitation": "the corpus was written after an exploratory probe of the same five shapes; it explores shapes its author had already seen behave"
+}
