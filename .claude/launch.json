@@ -16,6 +16,22 @@
       ],
       "port": 8555,
       "_note": "Pinned to the 3.11 interpreter: the bare `python` on PATH resolves to 3.14, which has streamlit but not openpyxl/pandas, so the app starts and then fails on the first workbook load."
+    },
+    {
+      "name": "model-builder",
+      "runtimeExecutable": "C:\\Users\\pertt\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\\python.exe",
+      "runtimeArgs": [
+        "-m",
+        "streamlit",
+        "run",
+        "modeller/app.py",
+        "--server.port",
+        "8556",
+        "--server.headless",
+        "true"
+      ],
+      "port": 8556,
+      "_note": "Same pinned 3.11 interpreter as the workbook browser. The modeller itself needs only json/decimal, but it imports the task harnesses, which sit on the same path assumptions."
     }
   ]
 }

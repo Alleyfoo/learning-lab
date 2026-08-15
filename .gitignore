@@ -1,2 +1,6 @@
 __pycache__/
 *.pyc
+
+# Modeller approvals are per-user artifacts, written by whoever runs the app.
+# The mechanism is evidenced by builder.py --self-test, not by committed records.
+modeller/approvals/
