@@ -33,7 +33,9 @@ LAB = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(LAB / "taskmodel"))
 
 import reservation_model  # noqa: E402  (registers the task type)
-from reservation_model import load_dates, on_accept, rules_of, validate  # noqa: E402
+from reservation_model import (  # noqa: E402
+    load_dates, on_accept, rules_of, source_field, validate,
+)
 from task_model import TaskModel as Model, assert_refusal, load_model  # noqa: E402
 
 
@@ -123,7 +125,10 @@ def execute(model: Model, base: Path, request: str) -> Decision:
                 reason=assert_refusal("reservation", rule["refusal"]),
                 evaluated=evaluated, reservations=reservations)
 
-    # on_accept: append, returning a NEW list.
+    # on_accept: append, returning a NEW list. The DATE list is what the
+    # decision is about; how that date is stored back is the runtime's problem
+    # (see calendar_job/unattended.py), and the shape it must write is decided
+    # by whether the source declares a field.
     return Decision(accepted=True, request=request, reason=None,
                     evaluated=evaluated, reservations=tuple(reservations) + (request,))
 

@@ -41,6 +41,7 @@ sys.path.insert(0, str(LAB / "taskmodel"))
 sys.path.insert(0, str(LAB / "reservation" / "harness"))
 
 import reservation_model  # noqa: E402,F401  (registers the task type)
+from reservation_model import source_field  # noqa: E402
 import task_model  # noqa: E402
 from execute_reservation import execute  # noqa: E402
 
@@ -83,8 +84,15 @@ def run(requests: list[str], base: Path = JOB,
     for request in requests:
         decision = execute(model, base, request)
         if decision.accepted:
-            # The append is the RUNTIME's act, on acceptance only.
-            state["reservations"] = list(decision.reservations)
+            # The append is the RUNTIME's act, on acceptance only -- and it
+            # writes back in the shape the source actually holds. A source whose
+            # items are objects gets an object, not a bare string.
+            field = source_field(model, "reservations")
+            collection = model.sources["reservations"].collection
+            if field is None:
+                state[collection] = list(decision.reservations)
+            else:
+                state[collection] = list(state[collection]) + [{field: request}]
             reservations_path.write_text(
                 json.dumps(state, indent=2, ensure_ascii=False) + "\n",
                 encoding="utf-8")

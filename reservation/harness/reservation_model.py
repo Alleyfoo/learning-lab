@@ -38,6 +38,8 @@ MUST_BE_FIRST = "date_well_formed"
 # missing_key, missing_data_file, malformed_data_file) live on the floor now and
 # are not repeated here.
 BODY_PROBLEM_CODES = (
+    "field_not_in_items",
+    "field_required_for_object_items",
     "unknown_rule",
     "unknown_refusal",
     "unknown_on_accept",
@@ -66,6 +68,21 @@ def refusal_for(model: TaskModel, rule: str) -> Optional[str]:
 
 def on_accept(model: TaskModel) -> str:
     return str(model.body.get("on_accept", ""))
+
+
+def source_field(model: TaskModel, source: str) -> Optional[str]:
+    """Which item field carries the date, when items are OBJECTS.
+
+    Absent means the collection holds plain strings, which is what every model
+    written before 2026-08-15 assumes and what `calendar_job` still uses.
+
+    Added because Experiment S described real sources whose items are objects
+    with TWO date fields. A node over such data cannot avoid saying which field
+    it means -- and that binding is exactly where an unsupported upstream
+    inference would land, which is what Experiment T measures.
+    """
+    spec = (model.body.get("source_fields") or {}).get(source)
+    return str(spec) if spec else None
 
 
 def validate_body(model: TaskModel, base: Path) -> list[Problem]:
@@ -108,8 +125,10 @@ def validate_body(model: TaskModel, base: Path) -> list[Problem]:
     if on_accept(model) not in ON_ACCEPT:
         problems.append(Problem("unknown_on_accept", where, on_accept(model)))
 
-    # Element shape. The envelope proved a LIST arrived; that these are date
-    # STRINGS is this task's knowledge and nobody else's.
+    # Element shape. The envelope proved a LIST arrived; what the elements ARE
+    # is this task's knowledge and nobody else's. Two shapes are accepted:
+    # plain date strings, or objects plus a declared field naming which value
+    # to read.
     for name in ("holidays", "reservations"):
         if name not in model.sources:
             problems.append(Problem("missing_key", where, f"sources.{name}"))
@@ -118,9 +137,28 @@ def validate_body(model: TaskModel, base: Path) -> list[Problem]:
             values = load_collection(model, base, name)
         except (OSError, ValueError):
             continue                      # already reported by the envelope
-        if not all(isinstance(v, str) for v in values):
-            problems.append(Problem("malformed_data_file", f"{where}:{name}",
-                                    "expected a list of date strings"))
+        field = source_field(model, name)
+        if all(isinstance(v, str) for v in values):
+            if field:
+                problems.append(Problem(
+                    "field_not_in_items", f"{where}:{name}",
+                    f"source_fields declares {field!r} but the items are plain "
+                    f"strings, so there is no field to read"))
+            continue
+        if all(isinstance(v, dict) for v in values):
+            if not field:
+                problems.append(Problem(
+                    "field_required_for_object_items", f"{where}:{name}",
+                    "items are objects, so the model must declare WHICH field "
+                    "carries the date; guessing one would make an unstated "
+                    "choice on the job's behalf"))
+            elif not all(field in v for v in values):
+                problems.append(Problem("field_not_in_items", f"{where}:{name}",
+                                        f"{field!r} is missing from some items"))
+            continue
+        problems.append(Problem("malformed_data_file", f"{where}:{name}",
+                                "expected a list of date strings, or a list of "
+                                "objects with a declared source field"))
 
     return problems
 
@@ -136,7 +174,16 @@ def validate(model: TaskModel, base: Path) -> Report:
 
 
 def load_dates(model: TaskModel, base: Path, source: str) -> tuple[str, ...]:
-    return tuple(load_collection(model, base, source))
+    """The dates in a source, whether its items are strings or objects.
+
+    Projection happens HERE, once, so the executor never has to know which shape
+    it was handed -- and so the declared field is read rather than assumed.
+    """
+    values = load_collection(model, base, source)
+    field = source_field(model, source)
+    if field is None:
+        return tuple(str(v) for v in values)
+    return tuple(str(v[field]) for v in values if isinstance(v, dict) and field in v)
 
 
 def _self_test() -> int:
@@ -193,6 +240,59 @@ def _self_test() -> int:
     check("unknown_on_accept" in r.codes(), f"on_accept: {sorted(r.codes())}")
     r = probe(lambda d: d["rules"].__setitem__(1, {"rule": "not_holiday"}))
     check("missing_key" in r.codes(), f"rule without refusal: {sorted(r.codes())}")
+
+    # --- object items and the declared source field --------------------------
+    with tempfile.TemporaryDirectory() as td:
+        objects = Path(td) / "objects.json"
+        objects.write_text(json.dumps({"reservations": [
+            {"date": "2026-03-10", "created": "2026-01-15"},
+            {"date": "2026-03-11", "created": "2026-01-15"}]}), encoding="utf-8")
+        holidays = Path(td) / "hol.json"
+        holidays.write_text(json.dumps({"holidays": ["2026-01-01"]}), encoding="utf-8")
+
+        def with_objects(extra=None) -> dict:
+            d = copy.deepcopy(raw)
+            d["sources"] = {
+                "holidays": {"path": holidays.name, "collection": "holidays"},
+                "reservations": {"path": objects.name, "collection": "reservations"}}
+            if extra:
+                d.update(extra)
+            return d
+
+        # Object items with NO declared field: the model must not be allowed to
+        # let the executor guess which date matters.
+        r = validate(task_model.parse(with_objects()), Path(td))
+        seen |= r.codes()
+        check("field_required_for_object_items" in r.codes(),
+              f"object items with no declared field must be refused: {sorted(r.codes())}")
+
+        # A declared field that is not in the items.
+        r = validate(task_model.parse(
+            with_objects({"source_fields": {"reservations": "booking_date"}})), Path(td))
+        seen |= r.codes()
+        check("field_not_in_items" in r.codes(),
+              f"a field absent from the items must be refused: {sorted(r.codes())}")
+
+        # A field declared over items that are plain STRINGS.
+        r = validate(task_model.parse(
+            {**copy.deepcopy(raw), "source_fields": {"holidays": "date"}}), base)
+        seen |= r.codes()
+        check("field_not_in_items" in r.codes(),
+              f"a field declared over string items must be refused: {sorted(r.codes())}")
+
+        # The working case, and the projection it produces.
+        good = task_model.parse(
+            with_objects({"source_fields": {"reservations": "date"}}))
+        r = validate(good, Path(td))
+        check(r.valid, f"objects + a declared field must validate: "
+                       f"{[str(x) for x in r.problems]}")
+        check(load_dates(good, Path(td), "reservations") == ("2026-03-10", "2026-03-11"),
+              "…and the DECLARED field is what gets read")
+        other = task_model.parse(
+            with_objects({"source_fields": {"reservations": "created"}}))
+        check(load_dates(other, Path(td), "reservations") == ("2026-01-15", "2026-01-15"),
+              "…and declaring the OTHER field reads the other field -- the binding "
+              "is the model's, not the executor's")
 
     with tempfile.TemporaryDirectory() as td:
         bad = Path(td) / "bad.json"
