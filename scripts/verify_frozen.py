@@ -35,6 +35,7 @@ Usage
 """
 from __future__ import annotations
 
+import datetime
 import hashlib
 import json
 import sys
@@ -162,8 +163,18 @@ def adopt() -> int:
                           "experimentH/reference/*.json",
                           "experimentI/fixtures/*.csv",
                           "experimentJ/fixtures/*.csv",
-                          "experiment2b/fixtures/*.csv")
+                          "experiment2b/fixtures/*.csv",
+                          # Agent definitions are inputs to the 3A-3E runs in the
+                          # same sense a fixture is: editing one moves the
+                          # boundary two runs are compared across. See
+                          # scripts/agent_binding.py.
+                          ".claude/agents/*.md")
         for p in LAB.glob(pattern))
+
+    # Stamped with the day the hash was actually taken. It was hardcoded, which
+    # would have back-dated every later adoption to the day this script was
+    # written -- a false provenance claim in the one file whose job is provenance.
+    stamp = datetime.date.today().isoformat()
 
     added = 0
     for path in candidates:
@@ -171,7 +182,7 @@ def adopt() -> int:
         if path.resolve() in covered or rel in known:
             continue
         data["artifacts"].append({"path": rel, "sha256": sha256(path),
-                                  "note": "adopted 2026-08-14"})
+                                  "note": f"adopted {stamp}"})
         added += 1
     data["artifacts"].sort(key=lambda e: e["path"])
     data.setdefault("_note",

@@ -29,6 +29,9 @@ JUDGE = ROOT / "judgements"
 RESULTS = ROOT / "results"
 EXPECTED = ROOT / "expected.json"
 
+sys.path.insert(0, str(ROOT.parent / "scripts"))
+import agent_binding  # noqa: E402
+
 VALID_CLASS = {"month", "not_month", "unknown"}
 VALID_WARRANT = {"supported", "insufficient_evidence"}
 
@@ -166,6 +169,14 @@ def main(argv) -> int:
         judgements["fixture_sha256"] == expected_all["fixtures"][test]["sha256"]
     )
 
+    # The fixture hash binds the INPUT side of the run. This binds the other
+    # side: which agent definitions, and which model, produced the judgements.
+    # Without it, two runs can be compared across a moved boundary with nothing
+    # in the record to say so. See scripts/agent_binding.py.
+    binding = agent_binding.binding_from_judgements(judgements)
+    result["agent_binding"] = binding
+    result["agent_binding_check"] = agent_binding.verify_binding(binding)
+
     (RESULTS / f"{test}.json").write_text(
         json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
@@ -179,6 +190,11 @@ def main(argv) -> int:
               f"{result['orchestrator_disposition']['ask_human']=} "
               f"{result['orchestrator_disposition']['month_columns']} ; "
               f"gate overrode -> ask_human={g['ask_human']}")
+    if not result["agent_binding_check"]["verified"]:
+        # Not a grading failure -- the verdict stands. It means the RECORD of
+        # what produced the verdict is incomplete, which only matters later,
+        # when this run is compared with another.
+        print(f"  BINDING: {result['agent_binding_check']['reason']}")
     return 0 if v["passed"] else 1
 
 

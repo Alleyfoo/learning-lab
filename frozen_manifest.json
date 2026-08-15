@@ -1,6 +1,21 @@
 {
   "artifacts": [
     {
+      "path": ".claude/agents/header-cell-classifier.md",
+      "sha256": "cba33f4b9ac9e93a8968eef305b916787da60782af8014760f54a49d00abad52",
+      "note": "adopted 2026-08-15"
+    },
+    {
+      "path": ".claude/agents/header-locator.md",
+      "sha256": "d3c692ec14b08c736b545f713b9fc24ae676b93c600b50d94cc6f4a7da1202f4",
+      "note": "adopted 2026-08-15"
+    },
+    {
+      "path": ".claude/agents/warrant-reviewer.md",
+      "sha256": "1130b147650cfc9533055b53d3d49677524820f3ca098e6b648328951a046297",
+      "note": "adopted 2026-08-15"
+    },
+    {
       "path": "definition_phase/fixtures/W1_multisheet.xlsx",
       "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
       "note": "adopted 2026-08-14"
