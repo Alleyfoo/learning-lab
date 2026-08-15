@@ -1,0 +1,485 @@
+{
+  "fromS1": {
+    "M1_G1_valid": {
+      "valid": true,
+      "codes": [],
+      "problems": []
+    },
+    "M1_G2_equivalent": {
+      "equivalent": true,
+      "decisions_agree": true,
+      "state_agrees": true,
+      "oracle_decisions": [
+        {
+          "request": "2026-07-14",
+          "accepted": true,
+          "reason": null
+        },
+        {
+          "request": "2026-07-14",
+          "accepted": false,
+          "reason": "ALREADY_RESERVED"
+        },
+        {
+          "request": "2026-12-25",
+          "accepted": false,
+          "reason": "HOLIDAY"
+        },
+        {
+          "request": "2026-02-30",
+          "accepted": false,
+          "reason": "INVALID_DATE"
+        },
+        {
+          "request": "2026-03-10",
+          "accepted": false,
+          "reason": "ALREADY_RESERVED"
+        },
+        {
+          "request": "2026-08-01",
+          "accepted": true,
+          "reason": null
+        }
+      ],
+      "candidate_decisions": [
+        {
+          "request": "2026-07-14",
+          "accepted": true,
+          "reason": null
+        },
+        {
+          "request": "2026-07-14",
+          "accepted": false,
+          "reason": "ALREADY_RESERVED"
+        },
+        {
+          "request": "2026-12-25",
+          "accepted": false,
+          "reason": "HOLIDAY"
+        },
+        {
+          "request": "2026-02-30",
+          "accepted": false,
+          "reason": "INVALID_DATE"
+        },
+        {
+          "request": "2026-03-10",
+          "accepted": false,
+          "reason": "ALREADY_RESERVED"
+        },
+        {
+          "request": "2026-08-01",
+          "accepted": true,
+          "reason": null
+        }
+      ],
+      "oracle_state": [
+        {
+          "ref": "R-1042",
+          "date": "2026-03-10",
+          "created": "2026-01-15",
+          "reason": "Team offsite",
+          "tier": "B"
+        },
+        {
+          "ref": "R-1043",
+          "date": "2026-03-11",
+          "created": "2026-01-15",
+          "reason": "Board meeting",
+          "tier": "A"
+        },
+        {
+          "ref": "R-1051",
+          "date": "2026-04-02",
+          "created": "2026-02-28",
+          "reason": "Supplier visit",
+          "tier": "C"
+        },
+        {
+          "ref": "R-1060",
+          "date": "2026-05-19",
+          "created": "2026-03-03",
+          "reason": "Training day",
+          "tier": "B"
+        },
+        {
+          "date": "2026-07-14"
+        },
+        {
+          "date": "2026-08-01"
+        }
+      ],
+      "candidate_state": [
+        {
+          "ref": "R-1042",
+          "date": "2026-03-10",
+          "created": "2026-01-15",
+          "reason": "Team offsite",
+          "tier": "B"
+        },
+        {
+          "ref": "R-1043",
+          "date": "2026-03-11",
+          "created": "2026-01-15",
+          "reason": "Board meeting",
+          "tier": "A"
+        },
+        {
+          "ref": "R-1051",
+          "date": "2026-04-02",
+          "created": "2026-02-28",
+          "reason": "Supplier visit",
+          "tier": "C"
+        },
+        {
+          "ref": "R-1060",
+          "date": "2026-05-19",
+          "created": "2026-03-03",
+          "reason": "Training day",
+          "tier": "B"
+        },
+        {
+          "date": "2026-07-14"
+        },
+        {
+          "date": "2026-08-01"
+        }
+      ]
+    },
+    "M2_epistemic": {
+      "confirmation_section": "The task depends on the assumption that the `date` fields in `reservations` and `holidays` represent single-day events (or that exact date matching is sufficient for checking availability). The inspection report inferred that it could not determine if these dates represent a single-day event or merely the starting date of a multi-day booking. If they are starting dates for multi-day bookings, simply matching the exact requested date against existing reservation dates would fail to detect overlapping reservations. This assumption must be confirmed.",
+      "declared_none": false,
+      "binding_terms_present": [
+        "reservation date"
+      ],
+      "raises_the_binding_signal": true,
+      "established_terms_present": [],
+      "bound_field": "date",
+      "human_confirmation_required": true,
+      "note": "mechanical proxy only. S proved this kind of signal wrong in both directions; the verbatim section is the result."
+    },
+    "outcome": "A_correct_and_raises"
+  },
+  "fromS2": {
+    "M1_G1_valid": {
+      "valid": true,
+      "codes": [],
+      "problems": []
+    },
+    "M1_G2_equivalent": {
+      "equivalent": true,
+      "decisions_agree": true,
+      "state_agrees": true,
+      "oracle_decisions": [
+        {
+          "request": "2026-07-14",
+          "accepted": true,
+          "reason": null
+        },
+        {
+          "request": "2026-07-14",
+          "accepted": false,
+          "reason": "ALREADY_RESERVED"
+        },
+        {
+          "request": "2026-12-25",
+          "accepted": false,
+          "reason": "HOLIDAY"
+        },
+        {
+          "request": "2026-02-30",
+          "accepted": false,
+          "reason": "INVALID_DATE"
+        },
+        {
+          "request": "2026-03-10",
+          "accepted": false,
+          "reason": "ALREADY_RESERVED"
+        },
+        {
+          "request": "2026-08-01",
+          "accepted": true,
+          "reason": null
+        }
+      ],
+      "candidate_decisions": [
+        {
+          "request": "2026-07-14",
+          "accepted": true,
+          "reason": null
+        },
+        {
+          "request": "2026-07-14",
+          "accepted": false,
+          "reason": "ALREADY_RESERVED"
+        },
+        {
+          "request": "2026-12-25",
+          "accepted": false,
+          "reason": "HOLIDAY"
+        },
+        {
+          "request": "2026-02-30",
+          "accepted": false,
+          "reason": "INVALID_DATE"
+        },
+        {
+          "request": "2026-03-10",
+          "accepted": false,
+          "reason": "ALREADY_RESERVED"
+        },
+        {
+          "request": "2026-08-01",
+          "accepted": true,
+          "reason": null
+        }
+      ],
+      "oracle_state": [
+        {
+          "ref": "R-1042",
+          "date": "2026-03-10",
+          "created": "2026-01-15",
+          "reason": "Team offsite",
+          "tier": "B"
+        },
+        {
+          "ref": "R-1043",
+          "date": "2026-03-11",
+          "created": "2026-01-15",
+          "reason": "Board meeting",
+          "tier": "A"
+        },
+        {
+          "ref": "R-1051",
+          "date": "2026-04-02",
+          "created": "2026-02-28",
+          "reason": "Supplier visit",
+          "tier": "C"
+        },
+        {
+          "ref": "R-1060",
+          "date": "2026-05-19",
+          "created": "2026-03-03",
+          "reason": "Training day",
+          "tier": "B"
+        },
+        {
+          "date": "2026-07-14"
+        },
+        {
+          "date": "2026-08-01"
+        }
+      ],
+      "candidate_state": [
+        {
+          "ref": "R-1042",
+          "date": "2026-03-10",
+          "created": "2026-01-15",
+          "reason": "Team offsite",
+          "tier": "B"
+        },
+        {
+          "ref": "R-1043",
+          "date": "2026-03-11",
+          "created": "2026-01-15",
+          "reason": "Board meeting",
+          "tier": "A"
+        },
+        {
+          "ref": "R-1051",
+          "date": "2026-04-02",
+          "created": "2026-02-28",
+          "reason": "Supplier visit",
+          "tier": "C"
+        },
+        {
+          "ref": "R-1060",
+          "date": "2026-05-19",
+          "created": "2026-03-03",
+          "reason": "Training day",
+          "tier": "B"
+        },
+        {
+          "date": "2026-07-14"
+        },
+        {
+          "date": "2026-08-01"
+        }
+      ]
+    },
+    "M2_epistemic": {
+      "confirmation_section": "- **Field population during append:** The task specifies appending the reservation if accepted, but the inspection report could not determine how missing fields like `ref` and `created` are generated. Confirmation is needed on how to populate these fields when appending an incoming request to `reservations.json`.\n- **Capacity constraints for a single date:** The job assumes a date can only have one active reservation (enforced by the `not_reserved` rule). However, the inspection report states it could not be determined if multiple reservations can exist for the same `date` (e.g., if the resource is multiple pieces of equipment or multiple rooms). Confirmation is required to ensure that blocking any date already present in `reservations.json` is the correct behavior.",
+      "declared_none": false,
+      "binding_terms_present": [
+        "created"
+      ],
+      "raises_the_binding_signal": true,
+      "established_terms_present": [],
+      "bound_field": "date",
+      "human_confirmation_required": true,
+      "note": "mechanical proxy only. S proved this kind of signal wrong in both directions; the verbatim section is the result."
+    },
+    "outcome": "A_correct_and_raises"
+  },
+  "fromS3": {
+    "M1_G1_valid": {
+      "valid": true,
+      "codes": [],
+      "problems": []
+    },
+    "M1_G2_equivalent": {
+      "equivalent": true,
+      "decisions_agree": true,
+      "state_agrees": true,
+      "oracle_decisions": [
+        {
+          "request": "2026-07-14",
+          "accepted": true,
+          "reason": null
+        },
+        {
+          "request": "2026-07-14",
+          "accepted": false,
+          "reason": "ALREADY_RESERVED"
+        },
+        {
+          "request": "2026-12-25",
+          "accepted": false,
+          "reason": "HOLIDAY"
+        },
+        {
+          "request": "2026-02-30",
+          "accepted": false,
+          "reason": "INVALID_DATE"
+        },
+        {
+          "request": "2026-03-10",
+          "accepted": false,
+          "reason": "ALREADY_RESERVED"
+        },
+        {
+          "request": "2026-08-01",
+          "accepted": true,
+          "reason": null
+        }
+      ],
+      "candidate_decisions": [
+        {
+          "request": "2026-07-14",
+          "accepted": true,
+          "reason": null
+        },
+        {
+          "request": "2026-07-14",
+          "accepted": false,
+          "reason": "ALREADY_RESERVED"
+        },
+        {
+          "request": "2026-12-25",
+          "accepted": false,
+          "reason": "HOLIDAY"
+        },
+        {
+          "request": "2026-02-30",
+          "accepted": false,
+          "reason": "INVALID_DATE"
+        },
+        {
+          "request": "2026-03-10",
+          "accepted": false,
+          "reason": "ALREADY_RESERVED"
+        },
+        {
+          "request": "2026-08-01",
+          "accepted": true,
+          "reason": null
+        }
+      ],
+      "oracle_state": [
+        {
+          "ref": "R-1042",
+          "date": "2026-03-10",
+          "created": "2026-01-15",
+          "reason": "Team offsite",
+          "tier": "B"
+        },
+        {
+          "ref": "R-1043",
+          "date": "2026-03-11",
+          "created": "2026-01-15",
+          "reason": "Board meeting",
+          "tier": "A"
+        },
+        {
+          "ref": "R-1051",
+          "date": "2026-04-02",
+          "created": "2026-02-28",
+          "reason": "Supplier visit",
+          "tier": "C"
+        },
+        {
+          "ref": "R-1060",
+          "date": "2026-05-19",
+          "created": "2026-03-03",
+          "reason": "Training day",
+          "tier": "B"
+        },
+        {
+          "date": "2026-07-14"
+        },
+        {
+          "date": "2026-08-01"
+        }
+      ],
+      "candidate_state": [
+        {
+          "ref": "R-1042",
+          "date": "2026-03-10",
+          "created": "2026-01-15",
+          "reason": "Team offsite",
+          "tier": "B"
+        },
+        {
+          "ref": "R-1043",
+          "date": "2026-03-11",
+          "created": "2026-01-15",
+          "reason": "Board meeting",
+          "tier": "A"
+        },
+        {
+          "ref": "R-1051",
+          "date": "2026-04-02",
+          "created": "2026-02-28",
+          "reason": "Supplier visit",
+          "tier": "C"
+        },
+        {
+          "ref": "R-1060",
+          "date": "2026-05-19",
+          "created": "2026-03-03",
+          "reason": "Training day",
+          "tier": "B"
+        },
+        {
+          "date": "2026-07-14"
+        },
+        {
+          "date": "2026-08-01"
+        }
+      ]
+    },
+    "M2_epistemic": {
+      "confirmation_section": "none. The job description explicitly establishes all three refusal conditions (invalid date, holiday, already reserved) and the accept action (append). The date fields needed for each rule (`incoming_request.requested_date`, `holidays.date`, `reservations.date`) are all established in the inspection report from the actual data. The rule ordering follows the logical sequence stated in the job: validity first, then holiday check, then conflict check. No inferred facts (such as tier meaning, resource identity, or time-of-day granularity) are relied upon.",
+      "declared_none": true,
+      "binding_terms_present": [
+        "date field"
+      ],
+      "raises_the_binding_signal": false,
+      "established_terms_present": [],
+      "bound_field": "date",
+      "human_confirmation_required": true,
+      "note": "mechanical proxy only. S proved this kind of signal wrong in both directions; the verbatim section is the result."
+    },
+    "outcome": "B_correct_but_silent"
+  }
+}

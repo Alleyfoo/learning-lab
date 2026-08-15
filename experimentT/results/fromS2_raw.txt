@@ -1,0 +1,41 @@
+```json
+{
+  "model_id": "reservation_node",
+  "model_version": 1,
+  "task": "reservation",
+  "purpose": "Accept a requested date unless it is invalid, a holiday, or already reserved; otherwise append the reservation.",
+  "sources": {
+    "holidays": {
+      "path": "fixtures/holidays.json",
+      "collection": "holidays"
+    },
+    "reservations": {
+      "path": "fixtures/reservations.json",
+      "collection": "reservations"
+    }
+  },
+  "source_fields": {
+    "holidays": "date",
+    "reservations": "date"
+  },
+  "rules": [
+    {
+      "rule": "date_well_formed",
+      "refusal": "INVALID_DATE"
+    },
+    {
+      "rule": "not_holiday",
+      "refusal": "HOLIDAY"
+    },
+    {
+      "rule": "not_reserved",
+      "refusal": "ALREADY_RESERVED"
+    }
+  ],
+  "on_accept": "append_to_reservations"
+}
+```
+
+CONFIRMATION REQUIRED
+- **Field population during append:** The task specifies appending the reservation if accepted, but the inspection report could not determine how missing fields like `ref` and `created` are generated. Confirmation is needed on how to populate these fields when appending an incoming request to `reservations.json`.
+- **Capacity constraints for a single date:** The job assumes a date can only have one active reservation (enforced by the `not_reserved` rule). However, the inspection report states it could not be determined if multiple reservations can exist for the same `date` (e.g., if the resource is multiple pieces of equipment or multiple rooms). Confirmation is required to ensure that blocking any date already present in `reservations.json` is the correct behavior.
