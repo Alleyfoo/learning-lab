@@ -1,0 +1,14 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": [
+        "orders",
+        "products"
+      ],
+      "field": "item",
+      "binding": "Which field in products (code or sku) orders.item maps to for the lookup join",
+      "claim_status": "UNKNOWN",
+      "question": "Whether orders.item maps to products.code or products.sku, as both fields share identical values, left_coverage, and right_unique properties."
+    }
+  ]
+}

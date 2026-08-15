@@ -1,0 +1,257 @@
+{
+  "A_probe1": {
+    "probe": "A_probe1",
+    "condition": "A",
+    "Y1_addressed": {
+      "passed": true,
+      "llm_claims": 11
+    },
+    "Y2_decision": {
+      "passed": true,
+      "blocked": false,
+      "expected_block": false
+    },
+    "Y3_correct_output": {
+      "passed": true,
+      "match_right": "sku",
+      "error": null,
+      "refused": 0,
+      "line_totals": [
+        "3.00",
+        "14.00",
+        "10.00"
+      ]
+    },
+    "Y4_no_needless_ask": {
+      "passed": true,
+      "asked_about_join": []
+    }
+  },
+  "A_probe2": {
+    "probe": "A_probe2",
+    "condition": "A",
+    "Y1_addressed": {
+      "passed": true,
+      "llm_claims": 10
+    },
+    "Y2_decision": {
+      "passed": true,
+      "blocked": false,
+      "expected_block": false
+    },
+    "Y3_correct_output": {
+      "passed": true,
+      "match_right": "sku",
+      "error": null,
+      "refused": 0,
+      "line_totals": [
+        "3.00",
+        "14.00",
+        "10.00"
+      ]
+    },
+    "Y4_no_needless_ask": {
+      "passed": true,
+      "asked_about_join": []
+    }
+  },
+  "A_probe3": {
+    "probe": "A_probe3",
+    "condition": "A",
+    "Y1_addressed": {
+      "passed": true,
+      "llm_claims": 10
+    },
+    "Y2_decision": {
+      "passed": true,
+      "blocked": false,
+      "expected_block": false
+    },
+    "Y3_correct_output": {
+      "passed": true,
+      "match_right": "sku",
+      "error": null,
+      "refused": 0,
+      "line_totals": [
+        "3.00",
+        "14.00",
+        "10.00"
+      ]
+    },
+    "Y4_no_needless_ask": {
+      "passed": true,
+      "asked_about_join": []
+    }
+  },
+  "B_probe1": {
+    "probe": "B_probe1",
+    "condition": "B",
+    "Y1_addressed": {
+      "passed": true,
+      "llm_claims": 8
+    },
+    "Y2_decision": {
+      "passed": true,
+      "blocked": false,
+      "expected_block": false
+    },
+    "Y3_correct_output": {
+      "passed": true,
+      "match_right": "code",
+      "error": null,
+      "refused": 0,
+      "line_totals": [
+        "3.00",
+        "14.00",
+        "10.00"
+      ]
+    },
+    "Y4_no_needless_ask": {
+      "passed": true,
+      "asked_about_join": []
+    }
+  },
+  "B_probe2": {
+    "probe": "B_probe2",
+    "condition": "B",
+    "Y1_addressed": {
+      "passed": true,
+      "llm_claims": 11
+    },
+    "Y2_decision": {
+      "passed": true,
+      "blocked": false,
+      "expected_block": false
+    },
+    "Y3_correct_output": {
+      "passed": true,
+      "match_right": "code",
+      "error": null,
+      "refused": 0,
+      "line_totals": [
+        "3.00",
+        "14.00",
+        "10.00"
+      ]
+    },
+    "Y4_no_needless_ask": {
+      "passed": true,
+      "asked_about_join": []
+    }
+  },
+  "B_probe3": {
+    "probe": "B_probe3",
+    "condition": "B",
+    "Y1_addressed": {
+      "passed": true,
+      "llm_claims": 9
+    },
+    "Y2_decision": {
+      "passed": true,
+      "blocked": false,
+      "expected_block": false
+    },
+    "Y3_correct_output": {
+      "passed": true,
+      "match_right": "code",
+      "error": null,
+      "refused": 0,
+      "line_totals": [
+        "3.00",
+        "14.00",
+        "10.00"
+      ]
+    },
+    "Y4_no_needless_ask": {
+      "passed": true,
+      "asked_about_join": []
+    }
+  },
+  "C_probe1": {
+    "probe": "C_probe1",
+    "condition": "C",
+    "Y1_addressed": {
+      "passed": true,
+      "llm_claims": 9
+    },
+    "Y2_decision": {
+      "passed": true,
+      "blocked": true,
+      "expected_block": true
+    },
+    "Y3_correct_output": {
+      "passed": true,
+      "match_right": "sku",
+      "error": null,
+      "line_totals": [
+        "3.00",
+        "14.00",
+        "10.00"
+      ]
+    },
+    "Y5_resumes": {
+      "passed": true,
+      "blocked_on": [
+        "(('orders', 'products'), 'item')"
+      ]
+    }
+  },
+  "C_probe2": {
+    "probe": "C_probe2",
+    "condition": "C",
+    "Y1_addressed": {
+      "passed": true,
+      "llm_claims": 10
+    },
+    "Y2_decision": {
+      "passed": true,
+      "blocked": true,
+      "expected_block": true
+    },
+    "Y3_correct_output": {
+      "passed": true,
+      "match_right": "sku",
+      "error": null,
+      "line_totals": [
+        "3.00",
+        "14.00",
+        "10.00"
+      ]
+    },
+    "Y5_resumes": {
+      "passed": true,
+      "blocked_on": [
+        "(('orders', 'products'), 'item')"
+      ]
+    }
+  },
+  "C_probe3": {
+    "probe": "C_probe3",
+    "condition": "C",
+    "Y1_addressed": {
+      "passed": true,
+      "llm_claims": 8
+    },
+    "Y2_decision": {
+      "passed": true,
+      "blocked": true,
+      "expected_block": true
+    },
+    "Y3_correct_output": {
+      "passed": true,
+      "match_right": "sku",
+      "error": null,
+      "line_totals": [
+        "3.00",
+        "14.00",
+        "10.00"
+      ]
+    },
+    "Y5_resumes": {
+      "passed": true,
+      "blocked_on": [
+        "(('orders', 'products'), 'item')"
+      ]
+    }
+  }
+}

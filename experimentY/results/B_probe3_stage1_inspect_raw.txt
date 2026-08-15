@@ -1,0 +1,110 @@
+[
+  {
+    "claim": {
+      "source": "orders",
+      "field": null,
+      "meaning": "A collection of orders or order line items."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "meaning": "A foreign key referencing the product code, likely products.code."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "meaning": "The numeric quantity of the item ordered."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": null,
+      "meaning": "A collection of products."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "meaning": "The primary product identifier or primary key."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "meaning": "A text description of the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "meaning": "The numeric price of the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "meaning": "A Stock Keeping Unit identifier for the product, which partially overlaps with orders.item."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": [
+        "orders",
+        "products"
+      ],
+      "field": "sku",
+      "question": "Whether products.sku is intended as an alternate foreign key target for orders.item, given the partial coverage."
+    },
+    "status": "UNKNOWN",
+    "note": "products.sku only contains 2 of the 3 values in orders.item, while products.code contains all 3. The partial match may be coincidental, indicate a subset relationship, or suggest a different mapping that cannot be definitively settled from the data alone."
+  }
+]

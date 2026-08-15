@@ -1,0 +1,101 @@
+[
+  {
+    "claim": {
+      "source": ["orders", "products"],
+      "field": ["item", "code"],
+      "meaning": "orders.item identifies the ordered product and corresponds one-to-one to products.code."
+    },
+    "status": "INFERRED",
+    "basis": ["cross_source_similarity", "value_examples"]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "meaning": "Identifier of the product being ordered; likely references products.code."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_examples", "cross_source_similarity"]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "meaning": "Product code or primary product identifier."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_examples", "cross_source_similarity"]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "meaning": "Quantity of the item ordered."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_examples"]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "meaning": "Textual description or name of the product."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_examples"]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "meaning": "Unit price of the product."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_examples"]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "meaning": "Stock-keeping unit or alternate product code."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_examples"]
+  },
+  {
+    "claim": {
+      "source": ["orders", "products"],
+      "field": ["sku", "item"],
+      "question": "Whether products.sku is intended to match orders.item or to serve as an alternate key for products.code."
+    },
+    "status": "UNKNOWN",
+    "note": "Only 2/3 values overlap between products.sku and orders.item, and one sku value is absent from orders.item, so the intended relationship cannot be settled."
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": ["code", "sku"],
+      "question": "Whether code and sku identify the same products or are independent coding schemes."
+    },
+    "status": "UNKNOWN",
+    "note": "Their values overlap partially but differ: sku includes Z-900 and lacks B-200 relative to code, so the mapping cannot be settled."
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": null,
+      "question": "What the row granularity of orders is, and whether rows represent line items, whole orders, or something else."
+    },
+    "status": "UNKNOWN",
+    "note": "orders has only item and quantity fields; no order id or line id is observed, so row meaning cannot be settled."
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "question": "What currency or pricing units apply to price."
+    },
+    "status": "UNKNOWN",
+    "note": "price is observed only as numeric strings with no currency symbol or unit label."
+  }
+]

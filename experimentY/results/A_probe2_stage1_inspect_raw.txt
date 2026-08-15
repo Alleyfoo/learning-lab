@@ -1,0 +1,118 @@
+[
+  {
+    "claim": {
+      "source": "orders",
+      "field": null,
+      "meaning": "A collection of order records."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": null,
+      "meaning": "A collection of product records."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "meaning": "A foreign key referencing the product ordered, linking directly to products.sku."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "meaning": "The numeric amount of the product ordered."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "meaning": "The primary identifier or Stock Keeping Unit for the product, serving as the foreign key target for orders.item."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "meaning": "A textual name or description of the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "meaning": "The numeric cost or price of the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "meaning": "An alternative textual identifier for the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "question": "What is the specific role of products.code compared to products.sku, given they only partially overlap in values?"
+    },
+    "status": "UNKNOWN",
+    "note": "The value containment shows products.code and products.sku only match on 2/3 values, making it unclear if code is a legacy identifier, a supplier code, or refers to a different set of products."
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": null,
+      "question": "Does the orders collection imply a calculated total price based on orders.quantity and the referenced products.price?"
+    },
+    "status": "UNKNOWN",
+    "note": "There is no total or calculated value field in orders, and the relationship between quantity and price is not explicitly modeled as a calculated field in the observed schema."
+  }
+]

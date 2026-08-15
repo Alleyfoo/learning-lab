@@ -1,0 +1,302 @@
+[
+  {
+    "claim": {
+      "source": "orders",
+      "fields": [
+        "item",
+        "quantity"
+      ],
+      "row_count": 3
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "type": "str",
+      "distinct_values": 3,
+      "value_kind": "text",
+      "examples": [
+        "A-100",
+        "B-200",
+        "C-300"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "type": "str",
+      "distinct_values": 3,
+      "value_kind": "numeric_string",
+      "examples": [
+        "3",
+        "7",
+        "2"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "fields": [
+        "code",
+        "description",
+        "price",
+        "sku"
+      ],
+      "row_count": 3
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "type": "str",
+      "distinct_values": 3,
+      "value_kind": "text",
+      "examples": [
+        "Z-900",
+        "A-100",
+        "C-300"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "type": "str",
+      "distinct_values": 3,
+      "value_kind": "text",
+      "examples": [
+        "Alpha",
+        "Beta",
+        "Gamma"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "type": "str",
+      "distinct_values": 3,
+      "value_kind": "numeric_string",
+      "examples": [
+        "1.00",
+        "2.00",
+        "5.00"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "type": "str",
+      "distinct_values": 3,
+      "value_kind": "text",
+      "examples": [
+        "A-100",
+        "B-200",
+        "C-300"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "candidate_relationship": {
+        "left": "orders.item",
+        "right": "products.code",
+        "left_coverage": "2/3",
+        "right_unique": true
+      }
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "candidate_relationship": {
+        "left": "orders.item",
+        "right": "products.sku",
+        "left_coverage": "3/3",
+        "right_unique": true
+      }
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "candidate_relationship": {
+        "left": "products.code",
+        "right": "orders.item",
+        "left_coverage": "2/3",
+        "right_unique": true
+      }
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "candidate_relationship": {
+        "left": "products.sku",
+        "right": "orders.item",
+        "left_coverage": "3/3",
+        "right_unique": true
+      }
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": null,
+      "meaning": "A collection of order entries or line items containing products and their ordered quantities."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "meaning": "An identifier for the product being ordered. It serves as a foreign key that corresponds directly to the `products.sku` field."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "meaning": "The numeric amount of the item ordered."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": null,
+      "meaning": "A product catalog or master list of available products."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "meaning": "A unique internal identifier or code for a product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "meaning": "A human-readable text describing or naming the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "meaning": "The monetary cost of the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "meaning": "A Stock Keeping Unit identifier for the product, which acts as the primary join key to `orders.item`."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": [
+        "orders",
+        "products"
+      ],
+      "field": null,
+      "meaning": "Orders are linked to products by matching the `orders.item` field to the `products.sku` field."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": null,
+      "question": "Whether each row represents a full standalone order or a line item belonging to a larger order entity."
+    },
+    "status": "UNKNOWN",
+    "note": "The data only provides item and quantity, without an order ID, customer ID, or grouping identifier to contextualize the rows."
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "question": "The exact business meaning of `products.code` and how it differs from `products.sku`."
+    },
+    "status": "UNKNOWN",
+    "note": "Both fields appear to be unique product identifiers, but `code` is not referenced by orders and includes a disjoint value (Z-900) not found in `orders.item`."
+  }
+]

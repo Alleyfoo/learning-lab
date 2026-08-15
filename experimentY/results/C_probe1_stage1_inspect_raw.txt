@@ -1,0 +1,111 @@
+[
+  {
+    "claim": {
+      "source": "orders",
+      "field": null,
+      "meaning": "A collection of order records."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "meaning": "A product identifier acting as a foreign key to the products collection."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "meaning": "The quantity of the item ordered."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": null,
+      "meaning": "A collection of product records."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "meaning": "An identifier code for the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "meaning": "A textual description of the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "meaning": "The price of the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "meaning": "A stock keeping unit (SKU) acting as a product identifier."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_examples",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": [
+        "orders",
+        "products"
+      ],
+      "field": "item",
+      "question": "Which field in 'products' is the intended target of the 'orders.item' foreign key?"
+    },
+    "status": "UNKNOWN",
+    "note": "Both 'products.code' and 'products.sku' have identical values to 'orders.item' with 3/3 coverage and right-unique, so the specific join target cannot be determined from value containment alone."
+  }
+]

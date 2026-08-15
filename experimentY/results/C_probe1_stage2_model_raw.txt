@@ -1,0 +1,11 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": ["orders", "products"],
+      "field": "item",
+      "binding": "which field in products (code or sku) the orders.item foreign key joins to",
+      "claim_status": "UNKNOWN",
+      "question": "Which field in 'products' is the intended target of the 'orders.item' foreign key?"
+    }
+  ]
+}

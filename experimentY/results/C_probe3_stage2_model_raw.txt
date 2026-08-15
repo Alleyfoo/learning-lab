@@ -1,0 +1,14 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": [
+        "orders",
+        "products"
+      ],
+      "field": "item",
+      "binding": "The lookup join key from orders.item to the intended product identifier field in products",
+      "claim_status": "UNKNOWN",
+      "question": "Which field in the products collection is the intended target of orders.item: products.code or products.sku?"
+    }
+  ]
+}
