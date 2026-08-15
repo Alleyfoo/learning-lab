@@ -55,11 +55,14 @@ class Execution:
     rows: list[list[Any]] = dc_field(default_factory=list)
     unhonoured_types: list[dict] = dc_field(default_factory=list)
     notes: list[str] = dc_field(default_factory=list)
-    # How many data rows each declared source sheet contributed. Cross-sheet law
-    # 2: a member with a header and no data rows contributes zero, which is
-    # legitimate -- and without this record it is indistinguishable from a member
-    # that was never declared. A zero cannot be recovered by counting output
-    # rows, because it leaves no row to count.
+    # How many data rows each declared source sheet contributed. A zero cannot be
+    # recovered by counting output rows, because it leaves no row to count.
+    #
+    # DIAGNOSTIC, not law-mandated. Cross-sheet law 2 originally required this --
+    # a member contributing zero was otherwise indistinguishable from one never
+    # declared -- but the designer ruled on 2026-08-15 that a silent zero is
+    # acceptable. Kept because it costs nothing and three modules read it;
+    # nothing fails if a future Execution omits it.
     member_contribution: dict[str, int] = dc_field(default_factory=dict)
 
     def as_dict(self) -> dict:

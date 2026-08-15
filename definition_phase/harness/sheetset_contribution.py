@@ -8,16 +8,27 @@ honour` governs declarations within a sheet; this governs members within a
 collection:
 
 > Either every declared member of a sheetset contributes its data rows to
-> authoritative output AND that contribution is observable, or the recipe is
-> refused before authoritative execution. Never a subset silently taking effect.
+> authoritative output, or the recipe is refused before authoritative execution.
+> Never a subset silently taking effect.
 
     A + C must not quietly contribute while B disappears.
 
-**Observability is part of the law, not a nicety.** A member contributing zero
-rows is legitimate — a month with no sales yet is a real file. What is not
-legitimate is that outcome being *indistinguishable from the member never having
-been declared*. Experiment M's S3 is the precedent: it lost half the data and
-said nothing, and the finding was the silence rather than the loss.
+## Observability was proposed and RULED OUT (designer, 2026-08-15)
+
+Run 1 of this law asserted a stronger version: that a member contributing zero
+rows must also be *observable* as having been declared and contributed nothing,
+on the reasoning that otherwise it cannot be told apart from a member that was
+never declared. `member_empty` VIOLATED under that reading and was fixed by
+adding `Execution.member_contribution`.
+
+**The designer ruled that a silent zero is acceptable**, so the law is the
+weaker, row-arithmetic form above and `member_empty` HOLDS on row correctness
+alone. Recorded rather than quietly rewritten, because the run-1 violation and
+its fix are in the history and would otherwise read as unexplained.
+
+`Execution.member_contribution` is KEPT as a diagnostic — it costs nothing, three
+modules already read it, and removing it would churn working code — but it is no
+longer law-mandated, and nothing here fails if it is absent.
 
 ## The metamorphic shape
 
@@ -25,8 +36,8 @@ said nothing, and the finding was the silence rather than the loss.
 baseline:   sheetset over members {A, B, C}      -> rows(A) + rows(B) + rows(C)
 mutation:   something that could cause B to drop
 required:   refused before execution
-        or  B's rows still present, and B's contribution readable from the result
-never:      A + C alone, with nothing recording that B contributed nothing
+        or  B's rows still present, all of them
+never:      A + C alone, with B's rows silently missing
 ```
 
 No rich oracle: the required output is the union of per-member row sets, which is
@@ -138,8 +149,9 @@ def _run(members: list[str], sheets: dict, tmp: Path, tag: str) -> dict:
         contributed[row[kausi]] = contributed.get(row[kausi], 0) + 1
     return {"refused": False, "n_rows": len(ex.rows),
             "rows_by_member": contributed,
-            # Whatever the executor itself says about member contribution. The
-            # law asks for this to exist; it is read here rather than assumed.
+            # Whatever the executor says about member contribution. Reported for
+            # information only since the observability ruling -- it decides no
+            # verdict, and a None here is not a failure.
             "declared_contribution": _declared_contribution(ex)}
 
 
@@ -148,8 +160,10 @@ def _declared_contribution(ex) -> Optional[dict]:
 
     Read from the result rather than reconstructed from the rows, because
     reconstructing it is exactly what a consumer cannot do: a member with zero
-    rows leaves no row to count. If this is None, a zero-contribution member is
-    indistinguishable from an undeclared one.
+    rows leaves no row to count.
+
+    A None here used to be a law violation. Since the designer ruled that a
+    silent zero is acceptable it is merely an absence, reported and not judged.
     """
     for attr in ("member_contribution", "members", "contribution"):
         value = getattr(ex, attr, None)
@@ -225,12 +239,13 @@ CASES: list[dict[str, Any]] = [
         "case": "member_empty",
         "why": "B has a header and no data rows. Contributing zero is "
                "LEGITIMATE -- a month with no sales is a real file -- so the law "
-               "does not demand refusal. It demands that the zero be readable, "
-               "because otherwise 'B contributed nothing' is indistinguishable "
-               "from 'B was never declared'.",
+               "demands neither refusal nor a record of the zero. The designer "
+               "ruled on 2026-08-15 that a silent zero is acceptable; the "
+               "requirement is only that the members which DO have rows "
+               "contribute all of them.",
         "sheets": {"A": [HEADER, ["a1"]], "B": [HEADER], "C": [HEADER, ["c1"]]},
         "members": ["A", "B", "C"],
-        "required": "observable",
+        "required": "zero_allowed",
         "expect_rows": {"A": 1, "C": 1},
     },
 ]
@@ -259,21 +274,19 @@ def _verdict(case: dict, result: dict) -> tuple[str, str]:
             return "HELD", f"every member contributed in full: {got}"
         return "VIOLATED", f"expected {expected}, got {got}"
 
-    if required == "observable":
+    if required == "zero_allowed":
+        # Row arithmetic only. Observability was proposed in run 1 and ruled out
+        # by the designer, so a zero-contribution member is NOT required to be
+        # readable from the result -- only the members with rows must contribute
+        # all of them. What the execution happens to record is reported for
+        # information and decides nothing.
         if got != expected:
             return "VIOLATED", f"present members wrong: expected {expected}, got {got}"
         declared = result["declared_contribution"]
-        if declared is None:
-            return "VIOLATED", (
-                "the empty member contributed zero rows and the execution "
-                "records no per-member contribution, so a declared member that "
-                "contributed nothing cannot be told apart from one that was "
-                "never declared")
-        missing = [m for m in case["members"] if m not in declared]
-        if missing:
-            return "VIOLATED", (f"execution reports contribution for "
-                                f"{sorted(declared)} but not {missing}")
-        return "HELD", f"zero contribution recorded: {declared}"
+        note = (f"; execution also records {declared}" if declared else
+                "; execution records no per-member contribution, which the "
+                "designer ruled acceptable")
+        return "HELD", f"members with rows contributed in full: {got}{note}"
 
     return "VIOLATED", f"unknown requirement {required!r}"
 
