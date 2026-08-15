@@ -1,0 +1,128 @@
+[
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "meaning": "The calendar date of a holiday."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_pattern", "collection_name"]
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "meaning": "The human-readable name/title of a holiday."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name"]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "meaning": "A stated justification for the request; likely a single candidate value for one request."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name"]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "meaning": "The date the requester is asking to book/reserve."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_pattern", "collection_name"]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "meaning": "A service/priority tier associated with the request."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "cross_source_similarity"]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "meaning": "The date a reservation record was created."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_pattern", "collection_name"]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "meaning": "The reservation date itself (the booked date)."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_pattern", "collection_name"]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "meaning": "The justification/purpose recorded for an existing reservation."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "cross_source_similarity"]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "meaning": "An identifier/reference code for a reservation."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name"]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "meaning": "A service/priority tier recorded for a reservation."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "cross_source_similarity"]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "meaning": "A single candidate booking request to be evaluated, distinct from existing reservations."
+    },
+    "status": "INFERRED",
+    "basis": ["collection_name", "cross_source_similarity"]
+  },
+  {
+    "claim": {
+      "question": "Does incoming_request represent a proposed reservation to be validated against holidays and existing reservations?"
+    },
+    "status": "UNKNOWN",
+    "note": "Field similarity suggests a relationship, but observed facts contain no joins, foreign keys, or business rules, so the intended workflow cannot be confirmed."
+  },
+  {
+    "claim": {
+      "question": "What are the actual values of reason and tier, and do the incoming_request values match a reservations enum?"
+    },
+    "status": "UNKNOWN",
+    "note": "Only distinct counts and types were observed, not the distinct values themselves, so enumerations/vocabularies cannot be settled."
+  },
+  {
+    "claim": {
+      "question": "Is reservations.ref a unique key or a foreign reference to another system?"
+    },
+    "status": "UNKNOWN",
+    "note": "The name suggests a reference/identifier, but uniqueness and key relationships were not measured."
+  },
+  {
+    "claim": {
+      "question": "Are reservations.date and holidays.date meant to be compared to prevent booking on holidays?"
+    },
+    "status": "UNKNOWN",
+    "note": "Both are YYYY-MM-DD strings, but no semantic linkage or validation rule was observed."
+  }
+]

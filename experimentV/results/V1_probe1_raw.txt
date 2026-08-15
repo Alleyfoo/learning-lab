@@ -1,0 +1,174 @@
+[
+  {
+    "claim": {
+      "source": "holidays",
+      "meaning": "A collection of public or organizational holidays"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name",
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "meaning": "The calendar date of a holiday"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "meaning": "The name or title of the holiday"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "meaning": "A single request payload for a new reservation"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name",
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "meaning": "The reason provided for the reservation request"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "meaning": "The target date requested for the reservation"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "meaning": "The desired tier or level for the request"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "meaning": "A log or table of existing reservations"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name",
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "meaning": "The date the reservation record was created"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "meaning": "The date of the reservation itself"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "meaning": "The reason for the reservation"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "meaning": "A reference or identifier for the reservation"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "meaning": "The tier or level of the reservation"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "question": "What does 'tier' actually represent in this domain?"
+    },
+    "status": "UNKNOWN",
+    "note": "Field names and types do not reveal whether this is a hotel room class, a customer support priority level, or another type of category."
+  },
+  {
+    "claim": {
+      "question": "Are reservations restricted from being made on dates listed in the holidays collection?"
+    },
+    "status": "UNKNOWN",
+    "note": "There is no explicit observed link, schema constraint, or business rule connecting the holidays and reservations/incoming_request collections."
+  },
+  {
+    "claim": {
+      "question": "Is the incoming_request meant to be transformed directly into a new record in the reservations collection?"
+    },
+    "status": "UNKNOWN",
+    "note": "While the matching fields (reason, date/requested_date, tier) strongly suggest a relationship, the observed facts do not provide workflow or application logic to confirm this."
+  }
+]

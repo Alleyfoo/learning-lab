@@ -1,0 +1,134 @@
+[
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "meaning": "The calendar date of a public/observed holiday, in YYYY-MM-DD format."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_pattern", "collection_name"],
+    "confidence": "certain",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "meaning": "The human-readable name/title of the holiday occurring on the corresponding date."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name"],
+    "confidence": "certain",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "meaning": "The stated reason/purpose for an incoming reservation request; likely a single pending request value."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name"]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "meaning": "The calendar date being requested in the incoming reservation request, in YYYY-MM-DD format."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_pattern"],
+    "confidence": "certain",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "meaning": "The service/ticket tier requested in the incoming request; one distinct value suggests a single pending request."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name"]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "meaning": "The date the reservation record was created, in YYYY-MM-DD format (not necessarily the date reserved for)."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_pattern"]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "meaning": "The reservation date for which the reservation is made, in YYYY-MM-DD format."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_pattern", "collection_name"],
+    "confidence": "certain",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "meaning": "The reason/purpose associated with a reservation."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "cross_source_similarity"],
+    "confidence": "certain",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "meaning": "A reference identifier for a reservation (e.g. booking/reference number)."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name"],
+    "confidence": "certain",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "meaning": "The service/ticket tier assigned to the reservation."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "cross_source_similarity"],
+    "confidence": "certain",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "question": "Does incoming_request represent a single pending reservation to be checked against existing reservations and holidays, or a table of many requests?"
+    },
+    "status": "UNKNOWN",
+    "note": "All incoming_request fields have only 1 distinct value, but distinct-value count alone cannot distinguish a one-row request object from a many-row table where every row happens to repeat the same values."
+  },
+  {
+    "claim": {
+      "question": "What the specific 'tier' categories are and whether reservations.tier uses the same vocabulary/allowed values as incoming_request.tier."
+    },
+    "status": "UNKNOWN",
+    "note": "Field names suggest shared tier semantics, but no value examples or enumerated allowed-values were provided."
+  },
+  {
+    "claim": {
+      "question": "Whether reservations.date and incoming_request.requested_date should be compared against holidays.date to detect holiday bookings or holiday conflicts."
+    },
+    "status": "UNKNOWN",
+    "note": "The presence of a holidays source and date fields across sources suggests such a relationship, but the observed facts do not state any join/relationship semantics."
+  },
+  {
+    "claim": {
+      "question": "Whether reservations.ref is unique across rows and serves as a primary key."
+    },
+    "status": "UNKNOWN",
+    "note": "It has 4 distinct values for 4 distinct reservations implied by other fields, but distinct-value counts cannot confirm uniqueness or key status without row counts."
+  }
+]

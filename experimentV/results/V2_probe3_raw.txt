@@ -1,0 +1,122 @@
+```json
+[
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "meaning": "The calendar date on which a holiday falls."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name", "value_pattern"]
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "meaning": "The human-readable name of the holiday."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name"]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "meaning": "The stated reason for the incoming reservation request."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name", "cross_source_similarity"]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "meaning": "The date the requester is asking to reserve."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name", "value_pattern"]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "meaning": "The service or priority tier requested."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name", "cross_source_similarity"]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "meaning": "The date on which the reservation record was created."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name", "value_pattern"]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "meaning": "The date of the reserved event or booking (not the creation date)."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name", "value_pattern"]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "meaning": "The reason recorded for the reservation."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name"]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "meaning": "A reference identifier associated with the reservation, likely unique per record (4 distinct values across 4 distinct reasons)."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name"]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "meaning": "The service or priority tier assigned to the reservation."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name", "cross_source_similarity"]
+  },
+  {
+    "claim": {
+      "question": "Does incoming_request represent a single pending request to be validated against holidays and existing reservations, or a batch of identical requests?"
+    },
+    "status": "UNKNOWN",
+    "note": "All incoming_request fields have exactly 1 distinct value, which could mean one record or multiple records with identical values. The observed facts do not include row counts."
+  },
+  {
+    "claim": {
+      "question": "What are the valid domain values for 'reason' and 'tier' across incoming_request and reservations?"
+    },
+    "status": "UNKNOWN",
+    "note": "The observed facts report distinct-value counts and types but not the actual values, so the categorical domains cannot be determined."
+  },
+  {
+    "claim": {
+      "question": "Is reservations.ref a unique primary key for the reservation, or a foreign key referencing an external system?"
+    },
+    "status": "UNKNOWN",
+    "note": "The field name 'ref' is ambiguous; 4 distinct values suggest it may be unique per record, but there is no explicit uniqueness constraint or row count to confirm this."
+  },
+  {
+    "claim": {
+      "question": "Should requested_date or reservation dates that fall on a holiday be rejected, and does the system enforce this relationship between holidays and reservations?"
+    },
+    "status": "UNKNOWN",
+    "note": "The three collections share date-shaped fields and overlapping semantic domains (reason, tier), implying a relationship, but the observed facts do not describe any integrity rules or validation logic."
+  }
+]
+```

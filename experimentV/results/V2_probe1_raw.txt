@@ -1,0 +1,172 @@
+```json
+[
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "meaning": "The calendar date of a holiday, in ISO date format."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_pattern", "collection_name"],
+    "confidence": "certain",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "meaning": "The human-readable name of a holiday."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "collection_name"],
+    "confidence": "certain",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "meaning": "A lookup table of holidays, used to identify dates on which reservations are not allowed or are treated specially."
+    },
+    "status": "INFERRED",
+    "basis": ["collection_name", "cross_source_similarity"],
+    "confidence": "high",
+    "requires_confirmation": true
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "meaning": "The stated reason for the reservation request being submitted."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "cross_source_similarity"],
+    "confidence": "high",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "meaning": "The date the requester wants a reservation for, in ISO date format."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_pattern"],
+    "confidence": "certain",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "meaning": "The service or priority tier requested for this reservation."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "cross_source_similarity"],
+    "confidence": "high",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "meaning": "A single reservation request submitted for validation, containing the desired date, reason, and tier. The fact that every field has exactly 1 distinct value suggests this represents one request being checked against existing holidays and reservations."
+    },
+    "status": "INFERRED",
+    "basis": ["collection_name", "field_order", "cross_source_similarity"],
+    "confidence": "high",
+    "requires_confirmation": true
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "meaning": "The date a reservation record was created, in ISO date format."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_pattern"],
+    "confidence": "certain",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "meaning": "The date for which the reservation is made, in ISO date format. This likely corresponds to requested_date in the incoming_request."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "value_pattern", "cross_source_similarity"],
+    "confidence": "certain",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "meaning": "The reason recorded for the reservation. Same concept as reason in incoming_request."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "cross_source_similarity"],
+    "confidence": "high",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "meaning": "A unique reference identifier for the reservation."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name"],
+    "confidence": "high",
+    "requires_confirmation": true
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "meaning": "The service or priority tier of the reservation. Same concept as tier in incoming_request."
+    },
+    "status": "INFERRED",
+    "basis": ["field_name", "cross_source_similarity"],
+    "confidence": "high",
+    "requires_confirmation": false
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "meaning": "A table of existing reservations, each with a creation date, reservation date, reason, reference, and tier. The incoming_request is likely validated against these records (e.g., checking for conflicts on the same date or holiday)."
+    },
+    "status": "INFERRED",
+    "basis": ["collection_name", "field_order", "cross_source_similarity"],
+    "confidence": "high",
+    "requires_confirmation": true
+  },
+  {
+    "claim": {
+      "question": "Whether the system rejects reservation requests falling on holidays, or merely flags them."
+    },
+    "status": "UNKNOWN",
+    "note": "The holidays collection and the incoming_request/reservations structure suggest a relationship, but the specific business rule for how holidays affect reservations cannot be determined from field names and value patterns alone."
+  },
+  {
+    "claim": {
+      "question": "What the valid set of tier values is and whether tiers affect availability or scheduling rules."
+    },
+    "status": "UNKNOWN",
+    "note": "Tier is present in both incoming_request and reservations, but the actual tier values and their business meaning are not provided—only that they are strings with 1 or 3 distinct values."
+  },
+  {
+    "claim": {
+      "question": "Whether the incoming_request represents a new reservation to be added to reservations, or a query/check against existing ones."
+    },
+    "status": "UNKNOWN",
+    "note": "The single-distinct-value pattern of incoming_request suggests one request, but whether the workflow is insert-then-validate or validate-only cannot be settled from schema facts alone."
+  },
+  {
+    "claim": {
+      "question": "What the 'reason' values actually are and whether they come from a constrained enum or free text."
+    },
+    "status": "UNKNOWN",
+    "note": "Reason is a str field with 1 or 4 distinct values, but the actual values were not captured in the observed facts, so whether they are categorical or freeform cannot be determined."
+  }
+]
+```
