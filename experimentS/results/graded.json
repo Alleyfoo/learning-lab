@@ -1,0 +1,124 @@
+{
+  "probe1": {
+    "S1_identifies": {
+      "passed": true,
+      "collections": {
+        "holidays": true,
+        "reservations": true,
+        "incoming_request": true
+      },
+      "fields": {
+        "date": true,
+        "name": true,
+        "ref": true,
+        "created": true,
+        "reason": true,
+        "tier": true,
+        "requested_date": true
+      }
+    },
+    "S2_interprets": {
+      "passed": false,
+      "holidays_read_as_blocking": false,
+      "reservations_read_as_bookings": true
+    },
+    "S3_flags_planted_ambiguity": {
+      "signal": {
+        "tier": true,
+        "date_vs_created": false
+      },
+      "both_flagged": false,
+      "human_confirmation_required": true,
+      "note": "mechanical proxy: does the planted term appear inside the model's own CANNOT DETERMINE section. It cannot judge whether the stated open question is the RIGHT one."
+    },
+    "S4_does_not_over_hedge": {
+      "signal_clean": true,
+      "determinable_fields_called_uncertain": [],
+      "human_confirmation_required": true
+    },
+    "uncertainty_section_found": true,
+    "uncertainty_section": "*   **`tier` (in both incoming_request and reservations):** We cannot determine what the tier classifications (A, B, C) actually represent. They could indicate VIP priority, physical room sizes, different pricing brackets, or varying levels of included services. \n*   **`date` / `requested_date` (in reservations and incoming_request):** We cannot determine if these dates represent a single-day event or merely the starting date of a multi-day booking. Because there is no \"end date\" or \"duration\" field, the length of the reservations is unknown.\n*   **`reason` (in both incoming_request and reservations):** We cannot determine if the reason field accepts free-text input or if users must select from a predefined dropdown list of valid reasons. \n*   **`holidays.json` scope:** We cannot determine the geographic or organizational scope of these holidays. It is unclear whether they represent national public holidays, regional observances, or specific company-wide office closures.\n*   **Relationship between incoming_request and reservations:** We cannot determine the system's workflow for converting requests into confirmed bookings. It is unknown whether an incoming request is automatically converted into a reservation if the date is free, or if it goes through a manual human approval process.\n*   **Relationship between holidays.json and reservations/incoming_request:** We cannot determine how holidays interact with the booking system. It is unknown if holidays are used to automatically block or reject incoming requests, or if they are simply stored for informational/display purposes."
+  },
+  "probe2": {
+    "S1_identifies": {
+      "passed": true,
+      "collections": {
+        "holidays": true,
+        "reservations": true,
+        "incoming_request": true
+      },
+      "fields": {
+        "date": true,
+        "name": true,
+        "ref": true,
+        "created": true,
+        "reason": true,
+        "tier": true,
+        "requested_date": true
+      }
+    },
+    "S2_interprets": {
+      "passed": true,
+      "holidays_read_as_blocking": true,
+      "reservations_read_as_bookings": true
+    },
+    "S3_flags_planted_ambiguity": {
+      "signal": {
+        "tier": true,
+        "date_vs_created": true
+      },
+      "both_flagged": true,
+      "human_confirmation_required": true,
+      "note": "mechanical proxy: does the planted term appear inside the model's own CANNOT DETERMINE section. It cannot judge whether the stated open question is the RIGHT one."
+    },
+    "S4_does_not_over_hedge": {
+      "signal_clean": false,
+      "determinable_fields_called_uncertain": [
+        "ref"
+      ],
+      "human_confirmation_required": true
+    },
+    "uncertainty_section_found": true,
+    "uncertainty_section": "- **The \"tier\" field (in incoming_request.json and reservations.json):** It uses values like \"A\", \"B\", and \"C\", but it cannot be determined what these tiers actually represent. The open question is whether tier indicates the priority or importance of the event, the seniority of the person making the booking, or the grade of the facility/resource being reserved.\n\n- **The scope of the holidays (in holidays.json):** While the collection lists dates and names of holidays, the open question is whether these are national public holidays, company-specific non-working days, or simply dates when a specific venue is closed.\n\n- **The relationship between incoming_request and reservations (across incoming_request.json and reservations.json):** Both collections share the fields \"reason\" and \"tier\", which suggests an incoming request might eventually become a reservation. However, we cannot determine the exact workflow or rules. The open question is whether an incoming request automatically generates a reservation item upon approval, and how the missing fields (like \"ref\" and \"created\") are populated during that process.\n\n- **The nature of the resource being reserved (across incoming_request.json and reservations.json):** Neither collection specifies what physical or virtual object is actually being booked. The open question is whether these reservations are for a single meeting room, multiple pieces of equipment, or a whole venue, and whether multiple reservations can exist for the same \"date\".\n\n- **The relationship between \"created\" and \"date\" (in reservations.json):** While \"created\" appears to be the date the booking was made and \"date\" is the date the booking occurs, we cannot determine if there are system constraints governing this pair. The open question is whether there is a minimum or maximum lead time required between when a reservation is created and when the requested date can occur."
+  },
+  "probe3": {
+    "S1_identifies": {
+      "passed": true,
+      "collections": {
+        "holidays": true,
+        "reservations": true,
+        "incoming_request": true
+      },
+      "fields": {
+        "date": true,
+        "name": true,
+        "ref": true,
+        "created": true,
+        "reason": true,
+        "tier": true,
+        "requested_date": true
+      }
+    },
+    "S2_interprets": {
+      "passed": true,
+      "holidays_read_as_blocking": true,
+      "reservations_read_as_bookings": true
+    },
+    "S3_flags_planted_ambiguity": {
+      "signal": {
+        "tier": true,
+        "date_vs_created": true
+      },
+      "both_flagged": true,
+      "human_confirmation_required": true,
+      "note": "mechanical proxy: does the planted term appear inside the model's own CANNOT DETERMINE section. It cannot judge whether the stated open question is the RIGHT one."
+    },
+    "S4_does_not_over_hedge": {
+      "signal_clean": true,
+      "determinable_fields_called_uncertain": [],
+      "human_confirmation_required": true
+    },
+    "uncertainty_section_found": true,
+    "uncertainty_section": "*   **The physical or logical resource being reserved:** Looking at the `reason` fields across `incoming_request` and `reservations`, it is clear this is a booking system for events like \"Team offsite\" or \"Workshop\". However, we cannot determine what is actually being booked. It could be a specific meeting room, an entire venue, a piece of equipment, or even personal time off.\n*   **The meaning of the `tier` field:** We see the values \"A\", \"B\", and \"C\" in both `incoming_request.tier` and `reservations.tier`, but we cannot determine what these tiers actually mean. We do not know if \"A\" represents a higher priority than \"C\", what criteria dictate a tier assignment, or how tiers interact with each other during the booking process.\n*   **The system's conflict rules:** We cannot determine how the `date` in `reservations` or `incoming_request` interacts with the `date` in `holidays`. We do not know if a reservation can be made on a holiday, or if multiple reservations are allowed on the exact same date. \n*   **Time granularity:** Because all date fields (`reservations.date`, `reservations.created`, `incoming_request.requested_date`, and `holidays.date`) only contain year, month, and day values, we cannot determine if these are full-day events or if the system is simply lacking time-of-day tracking. If time-of-day tracking is absent, it raises the open question of whether the system allows two half-day reservations to share the same date."
+  }
+}

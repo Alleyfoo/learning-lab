@@ -1,0 +1,35 @@
+Here is a breakdown of what these three data sources appear to contain:
+
+**1. holidays.json**
+*   **Collection name:** holidays
+*   **Fields:**
+    *   **date:** A specific calendar day formatted as YYYY-MM-DD.
+    *   **name:** The common name or title of the holiday occurring on that date.
+*   **Item representation:** Each item represents a single public or organizational holiday on a specific date when normal operations might be closed or restricted.
+
+**2. incoming_request.json**
+*   **Collection name:** incoming_request
+*   **Fields:**
+    *   **requested_date:** The specific calendar date that a user is asking to book or reserve.
+    *   **reason:** A short text description explaining the purpose of the booking.
+    *   **tier:** A categorical label (e.g., "A", "B", "C") that likely classifies the priority, importance, or type of request.
+*   **Item representation:** This collection currently holds a single item, which represents a new, unprocessed request to reserve a resource or date for a specific purpose.
+
+**3. reservations.json**
+*   **Collection name:** reservations
+*   **Fields:**
+    *   **ref:** A unique alphanumeric identifier or reference number assigned to a confirmed booking.
+    *   **date:** The calendar date that the booking is actually for.
+    *   **created:** The calendar date when the booking was originally submitted or confirmed in the system.
+    *   **reason:** A short text description explaining the purpose of the booking.
+    *   **tier:** A categorical label that classifies the priority or type of reservation.
+*   **Item representation:** Each item represents a single, existing, and confirmed booking within the system's history. 
+
+***
+
+CANNOT DETERMINE
+
+*   **The physical or logical resource being reserved:** Looking at the `reason` fields across `incoming_request` and `reservations`, it is clear this is a booking system for events like "Team offsite" or "Workshop". However, we cannot determine what is actually being booked. It could be a specific meeting room, an entire venue, a piece of equipment, or even personal time off.
+*   **The meaning of the `tier` field:** We see the values "A", "B", and "C" in both `incoming_request.tier` and `reservations.tier`, but we cannot determine what these tiers actually mean. We do not know if "A" represents a higher priority than "C", what criteria dictate a tier assignment, or how tiers interact with each other during the booking process.
+*   **The system's conflict rules:** We cannot determine how the `date` in `reservations` or `incoming_request` interacts with the `date` in `holidays`. We do not know if a reservation can be made on a holiday, or if multiple reservations are allowed on the exact same date. 
+*   **Time granularity:** Because all date fields (`reservations.date`, `reservations.created`, `incoming_request.requested_date`, and `holidays.date`) only contain year, month, and day values, we cannot determine if these are full-day events or if the system is simply lacking time-of-day tracking. If time-of-day tracking is absent, it raises the open question of whether the system allows two half-day reservations to share the same date.
