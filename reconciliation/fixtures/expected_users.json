@@ -1,8 +1,8 @@
 {
-  "_note": "Expected users. Emails are chosen so that matching by email gives a DIFFERENT partition than matching by user_id -- otherwise the match-key permutation would be a no-op and prove nothing.",
+  "_note": "Expected users. Emails are chosen so that matching by email gives a DIFFERENT partition than matching by user_id. Names and statuses exist for ATTRIBUTE comparison: alice's name differs from actual's only by CASE, which is what makes the exact-vs-casefold discriminator possible.",
   "users": [
-    {"user_id": "alice", "email": "alice@x"},
-    {"user_id": "bob",   "email": "bob@x"},
-    {"user_id": "carol", "email": "carol@x"}
+    {"user_id": "alice", "email": "alice@x", "name": "Alice", "status": "active"},
+    {"user_id": "bob",   "email": "bob@x",   "name": "Bob",   "status": "active"},
+    {"user_id": "carol", "email": "carol@x", "name": "Carol", "status": "active"}
   ]
 }

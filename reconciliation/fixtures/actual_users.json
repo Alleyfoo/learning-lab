@@ -1,8 +1,8 @@
 {
-  "_note": "Actual users. carol matches by user_id but NOT by email; dave matches bob by EMAIL but not by user_id. So the two declared match keys partition the union differently.",
+  "_note": "Actual users. carol's EMAIL differs; alice's NAME differs only by case; alice carries NO status at all, so a compared attribute can be present on one side and absent on the other.",
   "users": [
-    {"user_id": "alice", "email": "alice@x"},
-    {"user_id": "carol", "email": "changed@x"},
-    {"user_id": "dave",  "email": "bob@x"}
+    {"user_id": "alice", "email": "alice@x",   "name": "ALICE"},
+    {"user_id": "carol", "email": "changed@x", "name": "Carol", "status": "active"},
+    {"user_id": "dave",  "email": "bob@x",     "name": "Dave",  "status": "active"}
   ]
 }

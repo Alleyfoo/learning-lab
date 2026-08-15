@@ -33,12 +33,52 @@ sys.path.insert(0, str(LAB / "taskmodel"))
 
 import reconciliation_model  # noqa: E402  (registers the task type)
 from reconciliation_model import (  # noqa: E402
-    classify, left, match_on, on_duplicate_key, output_order, right, validate,
+    classify, compare_of, compares_attributes, left, match_on, on_duplicate_key,
+    output_order, right, validate,
 )
 from task_model import TaskModel as Model, assert_refusal, load_collection, load_model  # noqa: E402
 
 SUPPORTED_OUTPUT_ORDERS = ("left_then_right", "sorted_by_key")
 SUPPORTED_DUPLICATE_POLICIES = ("refuse_run", "refuse_key")
+SUPPORTED_COMPARISONS = ("exact", "trim", "casefold", "trim_casefold")
+
+# Absent is not a value. A compared attribute present on one side and missing on
+# the other is a DIFFERENCE, reported with None for the side that lacks it --
+# never silently treated as equal to "" and never quietly skipped.
+ABSENT = None
+
+
+def _normalised(value, how: str):
+    """The form used for COMPARING. Never the form reported.
+
+    PRO-2 instance 9: a predicate may normalise, an emitted value may not. The
+    difference report below carries the ORIGINAL text, so a reviewer sees what
+    the sources actually say rather than what the comparison made of them.
+    """
+    if value is ABSENT:
+        return ABSENT
+    text = str(value)
+    if how == "exact":
+        return text
+    if how == "trim":
+        return text.strip()
+    if how == "casefold":
+        return text.casefold()
+    if how == "trim_casefold":
+        return text.strip().casefold()
+    raise UnhonourableModel(f"comparison {how!r} is declared but not implemented")
+
+
+def _differences(left_row: dict, right_row: dict,
+                 compares: tuple[tuple[str, str], ...]) -> list[dict]:
+    """Which declared attributes differ, with the values as WRITTEN."""
+    out: list[dict] = []
+    for field, how in compares:
+        lv = left_row.get(field, ABSENT)
+        rv = right_row.get(field, ABSENT)
+        if _normalised(lv, how) != _normalised(rv, how):
+            out.append({"field": field, "comparison": how, "left": lv, "right": rv})
+    return out
 
 
 class UnhonourableModel(Exception):
@@ -100,6 +140,11 @@ def execute(model: Model, base: Path) -> Reconciliation:
     if dup_policy not in SUPPORTED_DUPLICATE_POLICIES:
         raise UnhonourableModel(f"on_duplicate_key {dup_policy!r} declared, not implemented")
 
+    compares = compare_of(model)
+    for _field, how in compares:
+        if how not in SUPPORTED_COMPARISONS:
+            raise UnhonourableModel(f"comparison {how!r} declared, not implemented")
+
     lname, rname = left(model), right(model)
     lfield, rfield = match_on(model)
     labels = classify(model)
@@ -110,7 +155,8 @@ def execute(model: Model, base: Path) -> Reconciliation:
     left_index, left_order, left_keyless = _index(left_rows, lfield)
     right_index, right_order, right_keyless = _index(right_rows, rfield)
 
-    out = Reconciliation(columns=[lfield, "relation"])
+    out = Reconciliation(columns=[lfield, "relation"]
+                         + (["differences"] if compares else []))
 
     # A row that cannot be classified by a key it does not carry stops the run.
     # There is deliberately no policy for this: classifying it would require
@@ -146,9 +192,22 @@ def execute(model: Model, base: Path) -> Reconciliation:
         if key in refused_keys:
             continue
         in_left, in_right = key in left_index, key in right_index
-        relation = "both" if (in_left and in_right) else ("only_left" if in_left
-                                                          else "only_right")
-        out.rows.append([key, labels[relation]])
+
+        if not (in_left and in_right):
+            relation = "only_left" if in_left else "only_right"
+            out.rows.append([key, labels[relation]] + ([[]] if compares else []))
+            continue
+
+        if not compares:
+            out.rows.append([key, labels["both"]])
+            continue
+
+        # Matched on the key. Whether the PAIR agrees is a separate question, and
+        # one the model has to have asked -- an unasked comparison is why v1
+        # reported carol as BOTH while her email had changed.
+        diffs = _differences(left_index[key][0], right_index[key][0], compares)
+        relation = "both_different" if diffs else "both_same"
+        out.rows.append([key, labels[relation], diffs])
 
     return out
 

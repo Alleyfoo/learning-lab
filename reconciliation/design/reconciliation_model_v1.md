@@ -100,14 +100,70 @@ Refused, with no policy offered. It cannot be classified by a key it does not
 carry, and filing it under the empty string would pool every keyless row into one
 phantom key and classify it as though it were real.
 
-## What this model cannot say
+## v2 — declared attribute comparison (2026-08-15)
 
-Recorded because it is the most likely thing to be mistaken for a bug:
-**`carol`'s email differs between the two sources and this model has no way to
-express that.** It classifies by key presence only, so carol is `BOTH`.
-Comparing non-key ATTRIBUTES is a different question and would need its own
-declaration.
+v1 reported `carol` as `BOTH` while her email had changed. That is *correct* for
+a model classifying by key presence, and useless for the job. The fix is a
+**declaration**, not a cleverer executor:
 
-Also absent: composite match keys, fuzzy or normalised matching, three-way
-reconciliation. Three users a side, string keys only. This says the shape works,
-not that the model is complete.
+```json
+"compare": [
+  {"field": "email", "comparison": "exact"},
+  {"field": "name",  "comparison": "casefold"}
+]
+```
+
+```text
+alice  SAME        (name Alice vs ALICE -- identical under the declared casefold)
+bob    ONLY_EXPECTED
+carol  DIFFERENT   email: carol@x -> changed@x
+dave   ONLY_ACTUAL
+```
+
+`reconciliation_v1.json` is kept and still runs. Both models are exercised, which
+is what tests both branches of the pairing rule below.
+
+### Which attributes, and HOW, both belong to the model
+
+`exact` / `trim` / `casefold` / `trim_casefold`. Whether `Alice` and `ALICE` are
+the same person's name is a property of the JOB, and the executor must not decide
+it. The discriminator: alice is `DIFFERENT` under `exact` and `SAME` under
+`casefold`, on identical data.
+
+### The comparison normalises; the REPORT does not
+
+PRO-2 instance 9, one task over. A predicate may normalise, an emitted value may
+not — so the difference report carries the values **as written**:
+
+```text
+{"field": "name", "comparison": "exact", "left": "Alice", "right": "ALICE"}
+```
+
+A casefold comparison must never make the report say `alice` twice.
+
+### `classify` must match whether attributes are compared
+
+Enforced in **both** directions, and this is the load-bearing rule:
+
+```text
+compare declared      classify needs both_same / both_different, NOT `both`
+compare absent        classify needs `both`, NOT the split
+```
+
+A model that compares attributes and still reports a flat `both` would hide
+every difference it just went looking for. A model that compares nothing cannot
+meaningfully report SAME versus DIFFERENT. Both are refused as
+`classify_split_mismatch` rather than quietly patched up.
+
+### An absent attribute is a difference
+
+`actual`'s alice carries no `status` at all. Absent is not equal to the empty
+string and is not silently skipped — it is reported as a difference with `null`
+on the side that lacks it.
+
+## What this model still cannot say
+
+Composite match keys, fuzzy or normalised MATCHING (as opposed to comparison),
+three-way reconciliation, and any comparison of a numeric attribute by tolerance
+rather than string equality. Three users a side, string keys only. This says the
+shape works, not that the model is complete.

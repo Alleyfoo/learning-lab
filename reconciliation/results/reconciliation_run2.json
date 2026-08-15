@@ -1,0 +1,137 @@
+{
+  "question": "can a relationship between two PEER sources be declared by the model and faithfully executed, with neither side subordinate?",
+  "model_valid": true,
+  "model_problems": [],
+  "vocabulary_parity": {
+    "agree": true,
+    "output_orders": {
+      "declared_not_implemented": [],
+      "implemented_not_declared": []
+    },
+    "duplicate_policies": {
+      "declared_not_implemented": [],
+      "implemented_not_declared": []
+    }
+  },
+  "foils": {
+    "left_join": [
+      [
+        "alice",
+        "BOTH"
+      ],
+      [
+        "bob",
+        "ONLY_EXPECTED"
+      ],
+      [
+        "carol",
+        "BOTH"
+      ]
+    ],
+    "intersection": [
+      [
+        "alice",
+        "BOTH"
+      ],
+      [
+        "carol",
+        "BOTH"
+      ]
+    ]
+  },
+  "checks": [
+    {
+      "check": "baseline_union",
+      "status": "PASS",
+      "detail": "[['alice', 'BOTH'], ['bob', 'ONLY_EXPECTED'], ['carol', 'BOTH'], ['dave', 'ONLY_ACTUAL']]",
+      "rationale": "the union of two peer sources, each key classified by which side(s) it appears on"
+    },
+    {
+      "check": "right_only_survives",
+      "status": "PASS",
+      "detail": "left-join foil would give [['alice', 'BOTH'], ['bob', 'ONLY_EXPECTED'], ['carol', 'BOTH']]",
+      "rationale": "an implementation that walked the LEFT side and looked up the right would drop dave entirely, and the remaining three rows would look perfectly reasonable. Neither source is subordinate here, so a right-only key must survive"
+    },
+    {
+      "check": "non_matching_keys_survive",
+      "status": "PASS",
+      "detail": "intersection foil would give [['alice', 'BOTH'], ['carol', 'BOTH']]",
+      "rationale": "keeping only matching keys loses bob AND dave -- the two rows a reconciliation exists to surface"
+    },
+    {
+      "check": "match_follows_declaration",
+      "status": "PASS",
+      "detail": "[['alice@x', 'BOTH'], ['bob@x', 'BOTH'], ['carol@x', 'ONLY_EXPECTED'], ['changed@x', 'ONLY_ACTUAL']]",
+      "rationale": "matching by email partitions the union differently: carol matches by id but not email, dave matches bob by email but not id. If the output did not move, the relationship is hardcoded"
+    },
+    {
+      "check": "output_order_follows_declaration",
+      "status": "PASS",
+      "detail": "{'left_then_right': ['zoe', 'alice', 'bob'], 'sorted_by_key': ['alice', 'bob', 'zoe']}",
+      "rationale": "the union of two sources has no natural order, so it must be DECLARED. The fixture puts zoe before alice on purpose so the two orderings genuinely differ"
+    },
+    {
+      "check": "labels_follow_declaration",
+      "status": "PASS",
+      "detail": "only_right relabelled -> ['dave', 'MISSING_FROM_EXPECTED']",
+      "rationale": "the output labels are the model's words, not the executor's"
+    },
+    {
+      "check": "duplicate_policy_follows_declaration",
+      "status": "PASS",
+      "detail": "{'refuse_run': {'n_rows': 0, 'run_refused': True, 'refused_keys': []}, 'refuse_key': {'n_rows': 3, 'run_refused': False, 'refused_keys': ['alice']}}",
+      "rationale": "a key appearing twice on one side has no single right answer, so the model declares it. `deduplicate` and `separate_records` are deliberately ABSENT -- both silently change what the data says"
+    },
+    {
+      "check": "missing_match_key_refuses_run",
+      "status": "PASS",
+      "detail": "run_refused=\"MISSING_MATCH_KEY: 0 row(s) in 'expected' and 1 in 'actual' carry no match key\"",
+      "rationale": "a row cannot be classified by a key it does not carry. Filing it under the empty string would pool every keyless row into one phantom key and classify it as though it were real"
+    },
+    {
+      "check": "refuses_unhonourable_model",
+      "status": "PASS",
+      "detail": "True",
+      "rationale": "an output order the executor does not implement stops the run"
+    },
+    {
+      "check": "v2_attribute_comparison",
+      "status": "PASS",
+      "detail": "[['alice', 'SAME', []], ['bob', 'ONLY_EXPECTED', []], ['carol', 'DIFFERENT', [{'field': 'email', 'comparison': 'exact', 'left': 'carol@x', 'right': 'changed@x'}]], ['dave', 'ONLY_ACTUAL', []]]",
+      "rationale": "v1 reported carol as BOTH while her email had changed -- correct for a model that classifies by key presence, and useless for the job. The difference is now named, with the values as WRITTEN"
+    },
+    {
+      "check": "comparison_mode_follows_declaration",
+      "status": "PASS",
+      "detail": "{'exact': {'alice': 'DIFFERENT', 'carol': 'SAME'}, 'casefold': {'alice': 'SAME', 'carol': 'SAME'}}",
+      "rationale": "alice's names are `Alice` and `ALICE`: identical under casefold, different under exact. Whether those are the same person's name is a property of the JOB, and the executor must not decide it"
+    },
+    {
+      "check": "report_carries_original_values",
+      "status": "PASS",
+      "detail": "[{'field': 'name', 'comparison': 'exact', 'left': 'Alice', 'right': 'ALICE'}]",
+      "rationale": "a casefold comparison must not make the REPORT say `alice` twice. PRO-2 instance 9: a predicate may normalise, an emitted value may not"
+    },
+    {
+      "check": "absent_attribute_is_a_difference",
+      "status": "PASS",
+      "detail": "[{'field': 'status', 'comparison': 'exact', 'left': 'active', 'right': None}]",
+      "rationale": "actual's alice carries no status at all. Absent is not equal to the empty string and must not be silently skipped"
+    },
+    {
+      "check": "classify_matches_whether_attributes_are_compared",
+      "status": "PASS",
+      "detail": "flat-on-v2=['classify_split_mismatch', 'missing_classification'], split-on-v1=['classify_split_mismatch', 'missing_classification']",
+      "rationale": "a model that compares attributes and still reports a flat `both` would hide every difference it went looking for; a model that compares nothing cannot report SAME vs DIFFERENT. Refused BOTH ways rather than patched up"
+    },
+    {
+      "check": "no_non_numeric_policy",
+      "status": "PASS",
+      "detail": "True",
+      "rationale": "this shape has no numeric semantics at all. Its ABSENCE of an on_non_numeric policy is the independent evidence the fourth task exists to provide"
+    }
+  ],
+  "outcome": "RECONCILIATION_FAITHFUL",
+  "floor_evidence": "CORRECTED TALLY. Only enrichment and aggregation declare an on_non_numeric policy -- 2 of 4, not 3. Reservation has none either: it handles a malformed value as a RULE in its ordered list (date_well_formed -> INVALID_DATE), not as a policy field. So the policy appears exactly where NUMERIC COERCION happens and nowhere else, which is stronger evidence than a 3-of-4 split would have been: it tracks a property of the task's data, not of task-hood. It does not belong in the shared envelope.",
+  "stated_limitation": "three users a side, one match field at a time, string keys only. No composite match keys, no fuzzy or normalised matching, no three-way reconciliation, and no comparison of non-key ATTRIBUTES (carol's email differs between the sources and this model has no way to say so -- it classifies by key presence only). Says the SHAPE works, not that the model is complete."
+}

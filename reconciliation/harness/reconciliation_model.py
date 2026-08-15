@@ -39,7 +39,19 @@ from task_model import (  # noqa: E402
     validate as validate_envelope,
 )
 
-RELATIONS = ("both", "only_left", "only_right")
+# Two relation sets, and WHICH ONE applies is decided by whether the model
+# declares attribute comparison. A model that compares attributes but still
+# reports a flat `both` would hide every difference it just went looking for --
+# so the pairing is enforced rather than left to the author's care.
+RELATIONS_KEY_ONLY = ("both", "only_left", "only_right")
+RELATIONS_COMPARED = ("both_same", "both_different", "only_left", "only_right")
+
+# How a compared attribute is compared. DECLARED, never assumed: whether
+# `alice@X` equals `alice@x` is a property of the job, not of the executor.
+# PRO-2 instance 9 is the precedent -- normalisation is something a construct
+# declares, and the default is to preserve.
+COMPARISONS = ("exact", "trim", "casefold", "trim_casefold")
+
 OUTPUT_ORDERS = ("left_then_right", "sorted_by_key")
 
 # What may happen when one side carries a key more than once. `deduplicate` and
@@ -52,6 +64,9 @@ REFUSALS = ("DUPLICATE_KEY", "MISSING_MATCH_KEY")
 
 BODY_PROBLEM_CODES = (
     "missing_key",
+    "unknown_comparison",
+    "duplicate_compare_field",
+    "classify_split_mismatch",
     "unknown_source",
     "same_source_both_sides",
     "unknown_output_order",
@@ -78,6 +93,20 @@ def match_on(model: TaskModel) -> tuple[str, str]:
 
 def classify(model: TaskModel) -> dict:
     return dict(model.body.get("classify") or {})
+
+
+def compare_of(model: TaskModel) -> tuple[tuple[str, str], ...]:
+    """Declared attribute comparisons as (field, comparison) pairs, in order."""
+    return tuple((str(c.get("field", "")), str(c.get("comparison", "")))
+                 for c in (model.body.get("compare") or ()))
+
+
+def compares_attributes(model: TaskModel) -> bool:
+    return bool(model.body.get("compare"))
+
+
+def relations_for(model: TaskModel) -> tuple[str, ...]:
+    return RELATIONS_COMPARED if compares_attributes(model) else RELATIONS_KEY_ONLY
 
 
 def output_order(model: TaskModel) -> str:
@@ -129,19 +158,49 @@ def validate_body(model: TaskModel, base: Path) -> list[Problem]:
             problems.append(Problem("field_not_in_source", f"{where}:match_on.right_field",
                                     f"{rname}.{rfield}"))
 
+    # --- declared attribute comparison ---------------------------------------
+    compares = compare_of(model)
+    seen_fields: set[str] = set()
+    for i, (field, how) in enumerate(compares):
+        cwhere = f"{where}:compare[{i}]"
+        if not field:
+            problems.append(Problem("missing_key", cwhere, "field"))
+        elif field in seen_fields:
+            problems.append(Problem("duplicate_compare_field", cwhere, field))
+        else:
+            seen_fields.add(field)
+        if how not in COMPARISONS:
+            problems.append(Problem("unknown_comparison", cwhere, how))
+        # A compared attribute must exist on BOTH sides. Comparing a field only
+        # one source has would report every matched pair as different for a
+        # reason that is about the schema, not the data.
+        for label, name in (("left", lname), ("right", rname)):
+            if field and name in columns and field not in columns[name]:
+                problems.append(Problem("field_not_in_source", cwhere,
+                                        f"{name}.{field} ({label})"))
+
     # Every relation must be given a label, and no two may share one -- a shared
     # label makes the output unreadable, which is worse than an absent one.
+    # WHICH relations are required depends on whether attributes are compared.
+    relations = relations_for(model)
     labels = classify(model)
-    for relation in RELATIONS:
+    for relation in relations:
         if not labels.get(relation):
             problems.append(Problem("missing_classification", f"{where}:classify",
                                     relation))
+    stray = sorted(set(labels) - set(relations))
+    if stray:
+        problems.append(Problem(
+            "classify_split_mismatch", f"{where}:classify",
+            f"declares {stray} but {'compares attributes' if compares else 'does not compare attributes'}, "
+            f"so the relations are {list(relations)}. A model that compares "
+            f"attributes and still reports a flat `both` would hide every "
+            f"difference it went looking for"))
+
     seen: dict[str, str] = {}
     for relation, label in labels.items():
-        if relation not in RELATIONS:
-            problems.append(Problem("missing_classification", f"{where}:classify",
-                                    f"unknown relation {relation!r}"))
-            continue
+        if relation not in relations:
+            continue                       # already reported as classify_split_mismatch
         if label in seen:
             problems.append(Problem("duplicate_classification", f"{where}:classify",
                                     f"{relation!r} and {seen[label]!r} both use "
@@ -212,6 +271,38 @@ def _self_test() -> int:
     check("unknown_policy" in r.codes(),
           f"an absent policy must be REFUSED, not quietly accepted: {sorted(r.codes())}")
 
+    # --- v2: declared attribute comparison -----------------------------------
+    v2raw = json.loads((base / "models" / "reconciliation_v2.json").read_text(encoding="utf-8"))
+    rep2 = validate(task_model.parse(v2raw), base)
+    seen |= rep2.codes()
+    check(rep2.valid, f"the v2 model must validate: {[str(x) for x in rep2.problems]}")
+
+    def probe2(mutate) -> Report:
+        bad = copy.deepcopy(v2raw)
+        mutate(bad)
+        r = validate(task_model.parse(bad), base)
+        seen.update(r.codes())
+        return r
+
+    r = probe2(lambda d: d["compare"][0].update(comparison="approximately"))
+    check("unknown_comparison" in r.codes(), f"comparison: {sorted(r.codes())}")
+    r = probe2(lambda d: d["compare"].append(dict(d["compare"][0])))
+    check("duplicate_compare_field" in r.codes(), f"duplicate field: {sorted(r.codes())}")
+    r = probe2(lambda d: d["compare"][0].update(field="colour"))
+    check("field_not_in_source" in r.codes(), f"compared field absent: {sorted(r.codes())}")
+
+    # The PAIRING, both directions. This is the load-bearing rule of v2.
+    r = probe2(lambda d: d.update(classify={"both": "BOTH", "only_left": "L",
+                                            "only_right": "R"}))
+    check("classify_split_mismatch" in r.codes(),
+          f"comparing attributes while reporting a flat `both` would hide every "
+          f"difference: {sorted(r.codes())}")
+    r = probe(lambda d: d.update(classify={"both_same": "S", "both_different": "D",
+                                           "only_left": "L", "only_right": "R"}))
+    check("classify_split_mismatch" in r.codes(),
+          f"reporting SAME vs DIFFERENT while comparing nothing is meaningless: "
+          f"{sorted(r.codes())}")
+
     with tempfile.TemporaryDirectory() as td:
         bad = Path(td) / "bad.json"
         bad.write_text('{"users": ["not an object"]}', encoding="utf-8")
@@ -233,9 +324,10 @@ def _self_test() -> int:
     if failures:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
         return 1
-    print(f"SELF-TEST PASSED (shipped model valid / all {len(BODY_PROBLEM_CODES)} body "
-          f"codes exercised / self-reconciliation refused / a shared classification "
-          f"label refused / NO on_non_numeric policy anywhere)")
+    print(f"SELF-TEST PASSED (v1 and v2 models valid / all {len(BODY_PROBLEM_CODES)} "
+          f"body codes exercised / self-reconciliation refused / a shared "
+          f"classification label refused / classify-vs-compare pairing enforced in "
+          f"BOTH directions / NO on_non_numeric policy anywhere)")
     return 0
 
 

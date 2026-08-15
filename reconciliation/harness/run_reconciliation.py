@@ -46,6 +46,32 @@ from task_model import vocabulary_parity  # noqa: E402
 
 RESULTS = BASE / "results"
 MODEL_PATH = BASE / "models" / "reconciliation_v1.json"
+V2_PATH = BASE / "models" / "reconciliation_v2.json"
+
+# --- v2: DECLARED ATTRIBUTE COMPARISON ---------------------------------------
+# v1 reported carol as BOTH while her email had changed. That was correct under
+# a model that classifies by key presence -- and useless for the job. The fix is
+# a DECLARATION, not a cleverer executor: which attributes are compared, and how.
+V2_ROWS = [
+    ["alice", "SAME", []],
+    ["bob", "ONLY_EXPECTED", []],
+    ["carol", "DIFFERENT",
+     [{"field": "email", "comparison": "exact",
+       "left": "carol@x", "right": "changed@x"}]],
+    ["dave", "ONLY_ACTUAL", []],
+]
+
+# Same data, same key, different declared COMPARISON. alice's names are `Alice`
+# and `ALICE`: identical under casefold, different under exact. This is the
+# discriminator for "the executor must not invent normalisation".
+COMPARISON_MODE_EXPECTED = {
+    "exact": {"alice": "DIFFERENT", "carol": "SAME"},
+    "casefold": {"alice": "SAME", "carol": "SAME"},
+}
+
+# A compared attribute present on one side and absent on the other.
+MISSING_ATTR_DIFF = {"field": "status", "comparison": "exact",
+                     "left": "active", "right": None}
 
 # --- baseline, written before the run ---------------------------------------
 BASELINE_COLUMNS = ["user_id", "relation"]
@@ -86,6 +112,13 @@ DUP_EXPECTED = {
     "refuse_run": {"n_rows": 0, "run_refused": True, "refused_keys": []},
     "refuse_key": {"n_rows": 3, "run_refused": False, "refused_keys": ["alice"]},
 }
+
+
+def _model2(mutate=None):
+    raw = json.loads(V2_PATH.read_text(encoding="utf-8"))
+    if mutate:
+        mutate(raw)
+    return task_model.parse(raw)
 
 
 def _model(mutate=None):
@@ -208,6 +241,67 @@ def run_all() -> dict:
             refused_bad = True
         record("refuses_unhonourable_model", refused_bad, f"{refused_bad}",
                "an output order the executor does not implement stops the run")
+
+        # --- v2: declared attribute comparison ---------------------------
+        v2 = execute(_model2(), BASE)
+        record("v2_attribute_comparison", v2.rows == V2_ROWS,
+               f"{v2.rows}",
+               "v1 reported carol as BOTH while her email had changed -- correct "
+               "for a model that classifies by key presence, and useless for the "
+               "job. The difference is now named, with the values as WRITTEN")
+
+        # Which fields are compared, and HOW, both come from the model.
+        mode_detail, mode_ok = {}, True
+        for how, want in COMPARISON_MODE_EXPECTED.items():
+            def set_mode(d: dict, h=how) -> None:
+                d["compare"] = [{"field": "name", "comparison": h}]
+            r = execute(_model2(set_mode), BASE)
+            got = {row[0]: row[1] for row in r.rows if row[1] in ("SAME", "DIFFERENT")}
+            mode_detail[how] = got
+            mode_ok = mode_ok and got == want
+        record("comparison_mode_follows_declaration", mode_ok, f"{mode_detail}",
+               "alice's names are `Alice` and `ALICE`: identical under casefold, "
+               "different under exact. Whether those are the same person's name "
+               "is a property of the JOB, and the executor must not decide it")
+
+        # The report must carry the values as written, not as compared.
+        exact_name = execute(_model2(
+            lambda d: d.update(compare=[{"field": "name", "comparison": "exact"}])), BASE)
+        alice_diff = next(r[2] for r in exact_name.rows if r[0] == "alice")
+        record("report_carries_original_values",
+               alice_diff == [{"field": "name", "comparison": "exact",
+                               "left": "Alice", "right": "ALICE"}],
+               f"{alice_diff}",
+               "a casefold comparison must not make the REPORT say `alice` twice. "
+               "PRO-2 instance 9: a predicate may normalise, an emitted value "
+               "may not")
+
+        # A compared attribute absent on one side is a difference, not equality.
+        status_run = execute(_model2(
+            lambda d: d.update(compare=[{"field": "status", "comparison": "exact"}])), BASE)
+        alice_status = next(r[2] for r in status_run.rows if r[0] == "alice")
+        record("absent_attribute_is_a_difference",
+               alice_status == [MISSING_ATTR_DIFF],
+               f"{alice_status}",
+               "actual's alice carries no status at all. Absent is not equal to "
+               "the empty string and must not be silently skipped")
+
+        # --- the classify/compare PAIRING, both directions -------------------
+        split_ok = True
+        flat_on_v2 = validate(_model2(lambda d: d.update(
+            classify={"both": "BOTH", "only_left": "L", "only_right": "R"})), BASE)
+        split_on_v1 = validate(_model(lambda d: d.update(
+            classify={"both_same": "S", "both_different": "D",
+                      "only_left": "L", "only_right": "R"})), BASE)
+        split_ok = ("classify_split_mismatch" in flat_on_v2.codes()
+                    and "classify_split_mismatch" in split_on_v1.codes())
+        record("classify_matches_whether_attributes_are_compared", split_ok,
+               f"flat-on-v2={sorted(flat_on_v2.codes())}, "
+               f"split-on-v1={sorted(split_on_v1.codes())}",
+               "a model that compares attributes and still reports a flat `both` "
+               "would hide every difference it went looking for; a model that "
+               "compares nothing cannot report SAME vs DIFFERENT. Refused BOTH "
+               "ways rather than patched up")
 
     # --- the point of this task, asserted --------------------------------------
     raw = json.loads(MODEL_PATH.read_text(encoding="utf-8"))
