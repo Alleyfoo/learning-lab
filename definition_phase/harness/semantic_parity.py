@@ -58,8 +58,8 @@ sys.path.insert(0, str(LAB / "experimentK" / "harness"))
 sys.path.insert(0, str(LAB / "experimentL" / "harness"))
 
 from executor_contract import (  # noqa: E402
-    SUPPORTED_DERIVE_SOURCES, SUPPORTED_FIELD_ROLES, SUPPORTED_SHEET_ROLES,
-    SUPPORTED_TRANSFORM_OPS,
+    SUPPORTED_DERIVE_SOURCES, SUPPORTED_FIELD_ROLES, SUPPORTED_SHEET_REFS,
+    SUPPORTED_SHEET_ROLES, SUPPORTED_TRANSFORM_OPS,
 )
 from execute_recipe import InsufficientRecipe, execute  # noqa: E402
 from recipe import recipe_from_json  # noqa: E402
@@ -471,14 +471,78 @@ def _p_type_date(tmp):
         f"value {value!r}, unhonoured={[g.get('gap') for g in gaps]}"
 
 
+@parity("sheet_ref:sheet",
+        "an ordinary `sheet:` data entry contributes exactly its own data rows, "
+        "and nothing from any other sheet in the workbook")
+def _p_sheet_ref_sheet(tmp):
+    path = _wb(tmp, "one_sheet", {"S": SIMPLE, "Other": [["Tuote"], ["X-9"]]})
+    r = _recipe([_data("sheet:S", "sheet:S!1", "remainder",
+                       [{"target": "tuote", "source": "sheet:S!@Tuote",
+                         "role": "id", "type": "string"}],
+                       exclude=[{"referent": "sheet:S!@Tammi", "reason": "c"},
+                                {"referent": "sheet:S!@Helmi", "reason": "c"}]),
+                 {"sheet": "sheet:Other", "role": "ignore", "fields": [],
+                  "exclude": [], "ambiguities": []}])
+    _, ex = _run(r, path)
+    if ex is None:
+        return False, "recipe did not validate"
+    got = [row[0] for row in ex.rows]
+    return got == ["A-1", "A-2"], f"rows {got}"
+
+
+@parity("sheet_ref:sheetset",
+        "a sheetset UNIONS its members: every member contributes ALL of its own "
+        "data rows, and a field derived from sheet_name carries THAT member's "
+        "name. Members of differing length are the case that matters -- taking "
+        "the prototype's row set would drop a longer member's tail unseen.")
+def _p_sheet_ref_sheetset(tmp):
+    """The observable meaning of a sheetset, and the axis-2 hazard in one case.
+
+    Member lengths are deliberately 2 / 1 / 3. Equal-length members would pass
+    just as well against a prototype-shaped coverage map, so they would
+    demonstrate nothing about partial honour at collection scope.
+    """
+    path = _wb(tmp, "months", {
+        "2026-01": [["Tuote", "Myynti"], ["A-1", 1], ["A-2", 2]],
+        "2026-02": [["Tuote", "Myynti"], ["B-1", 3]],
+        "2026-03": [["Tuote", "Myynti"], ["C-1", 4], ["C-2", 5], ["C-3", 6]],
+    })
+    entry = _data("sheetset:Months", "sheet:2026-01!1", "remainder",
+                  [{"target": "tuote", "source": "sheet:2026-01!@Tuote",
+                    "role": "id", "type": "string"},
+                   {"target": "myynti", "source": "sheet:2026-01!@Myynti",
+                    "role": "measure", "type": "number"},
+                   {"target": "kausi", "role": "derived", "type": "string",
+                    "transform": {"op": "derive", "from": "sheet_name"}}],
+                  layout_from="sheet:2026-01")
+    r = _recipe([entry], sheetsets={"Months": ["2026-01", "2026-02", "2026-03"]})
+    _, ex = _run(r, path)
+    if ex is None:
+        return False, "recipe did not validate"
+
+    kausi, tuote = ex.columns.index("kausi"), ex.columns.index("tuote")
+    pairs = sorted((row[kausi], row[tuote]) for row in ex.rows)
+    expected = sorted([("2026-01", "A-1"), ("2026-01", "A-2"),
+                       ("2026-02", "B-1"),
+                       ("2026-03", "C-1"), ("2026-03", "C-2"), ("2026-03", "C-3")])
+    return pairs == expected, f"{len(ex.rows)} rows, (kausi, tuote) = {pairs}"
+
+
 # ---------------------------------------------------------------------------
 # coverage + run
 # ---------------------------------------------------------------------------
 
 def required_constructs() -> set[str]:
+    # `sheet_ref` was MISSING from this enumeration until 2026-08-15, which is
+    # why PRO-2 instance 7 (a sheetset validating cleanly and failing at
+    # execution) had to be found by behaviour rather than by the completeness
+    # check that exists to find exactly that. A sheet reference kind is a
+    # construct with observable meaning like any other; leaving the dimension out
+    # meant nothing demanded a demonstration of what a sheetset MEANS.
     return ({f"transform_op:{op}" for op in SUPPORTED_TRANSFORM_OPS}
             | {f"field_role:{r}" for r in SUPPORTED_FIELD_ROLES}
             | {f"sheet_role:{r}" for r in SUPPORTED_SHEET_ROLES}
+            | {f"sheet_ref:{k}" for k in SUPPORTED_SHEET_REFS}
             | set(EXTRA_CONSTRUCTS))
 
 

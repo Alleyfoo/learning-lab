@@ -293,9 +293,25 @@ def validate(recipe: Recipe, wb: WorkbookView) -> Report:
             problems.append(Problem("sheet_unclassified", name,
                                     "every sheet must be given a role"))
 
+    # Coverage is built PER MEMBER, not once for the prototype. A sheetset's
+    # members legitimately differ in row count -- a month with more products has
+    # more data rows -- and a prototype-shaped map would leave the longer
+    # member's extra rows unclassified AND unread: unioned A and C while B's tail
+    # silently vanished. That is No Partial Honour at collection scope. Ordinary
+    # `sheet:` entries take the same path with a single member, so there is one
+    # code path rather than a sheetset special case.
     for entry in recipe.data_sheets():
-        coverage[entry.sheet] = _coverage_for_data_sheet(
-            recipe, entry, wb, header_rows0, problems)
+        proto = _prototype_sheet(recipe, entry, wb, problems)
+        members = _member_sheets(recipe, entry, wb, problems) or ([proto] if proto else [])
+        per_member: dict[str, dict] = {}
+        for member in members:
+            per_member[member] = _coverage_for_data_sheet(
+                recipe, entry, wb, header_rows0, problems, sheet=member,
+                where=entry.sheet if member == proto else f"{entry.sheet}@{member}")
+        base = per_member.get(proto) or (next(iter(per_member.values()), {}))
+        # The prototype's map stays at the top level so existing readers keep
+        # working; `members` is what the executor consumes.
+        coverage[entry.sheet] = {**base, "members": per_member}
 
     # ---- 4. sheetset member layouts ----------------------------------------
     for entry in recipe.sheets:
@@ -353,10 +369,21 @@ def _prototype_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView,
 
 
 def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView,
-                             header_rows0: dict, problems: list[Problem]) -> dict:
-    sheet = _prototype_sheet(recipe, entry, wb, problems)
+                             header_rows0: dict, problems: list[Problem],
+                             sheet: Optional[str] = None,
+                             where: Optional[str] = None) -> dict:
+    """Coverage for ONE actual sheet.
+
+    `sheet` names which member this map is for; `where` is how a problem on it is
+    reported. A member's problem must name the member -- "row0 4 is claimed by
+    nothing" against `sheetset:Months` would leave the reader hunting six sheets
+    for it.
+    """
+    if sheet is None:
+        sheet = _prototype_sheet(recipe, entry, wb, problems)
     if sheet is None:
         return {}
+    where = where or entry.sheet
     n_rows, n_cols = wb.dims(sheet)
 
     row_claims: dict[int, list[str]] = {}
@@ -382,7 +409,7 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
             claim_rows(_rule_rows(exc, wb, sheet, n_rows, header_rows0, problems),
                        "exclude")
             continue
-        ref = _parse_ref(exc.referent or "", entry.sheet, problems)
+        ref = _parse_ref(exc.referent or "", where, problems)
         if ref is None:
             continue
         if ref.kind in ("row", "rowrange"):
@@ -391,7 +418,7 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
             r = resolve(ref, wb, header_rows0=header_rows0)
             claim_cols(_expand_cols(ref, r.col0 if r.ok else None), "exclude")
         else:
-            problems.append(Problem("wrong_referent_kind", entry.sheet,
+            problems.append(Problem("wrong_referent_kind", where,
                                     f"exclude must be rows or columns, got {ref.kind}"))
 
     if entry.data_region == REMAINDER:
@@ -399,10 +426,10 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
         # count of the day the recipe was written (Experiment K, C3).
         claim_rows({r for r in range(n_rows) if r not in row_claims}, "data_region")
     elif entry.data_region:
-        ref = _parse_ref(entry.data_region, entry.sheet, problems)
+        ref = _parse_ref(entry.data_region, where, problems)
         if ref is not None:
             if ref.kind not in ("row", "rowrange"):
-                problems.append(Problem("wrong_referent_kind", entry.sheet,
+                problems.append(Problem("wrong_referent_kind", where,
                                         f"data_region must be rows, got {ref.kind}"))
             else:
                 claim_rows(_expand_rows(ref, n_rows), "data_region")
@@ -412,7 +439,7 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
     for fld in entry.fields:
         if not fld.source:
             continue
-        ref = _parse_ref(fld.source, entry.sheet, problems)
+        ref = _parse_ref(fld.source, where, problems)
         if ref is None:
             continue
         if ref.kind in COLUMN_KINDS:
@@ -423,7 +450,7 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
             # column coverage, but it must not sit inside the data region.
             if ref.row0 in data_rows:
                 problems.append(Problem("metadata_cell_in_data_region",
-                                        f"{entry.sheet}:{fld.target}", fld.source))
+                                        f"{where}:{fld.target}", fld.source))
 
     if entry.data_row_shape:
         _check_row_shape(entry, wb, sheet, sorted(data_rows), header_rows0, problems)
@@ -434,18 +461,18 @@ def _coverage_for_data_sheet(recipe: Recipe, entry: SheetEntry, wb: WorkbookView
     for r in range(n_rows):
         labels = row_claims.get(r, [])
         if not labels:
-            problems.append(Problem("row_unclassified", entry.sheet,
+            problems.append(Problem("row_unclassified", where,
                                     f"row0 {r} (A1 row {r + 1}) is claimed by nothing"))
         elif len(labels) > 1:
-            problems.append(Problem("row_double_classified", entry.sheet,
+            problems.append(Problem("row_double_classified", where,
                                     f"row0 {r} claimed by {labels}"))
     for c in range(n_cols):
         labels = col_claims.get(c, [])
         if not labels:
-            problems.append(Problem("column_unclassified", entry.sheet,
+            problems.append(Problem("column_unclassified", where,
                                     f"col0 {c} is claimed by nothing"))
         elif len(labels) > 1:
-            problems.append(Problem("column_double_bound", entry.sheet,
+            problems.append(Problem("column_double_bound", where,
                                     f"col0 {c} claimed by {labels}"))
 
     return {
@@ -596,12 +623,24 @@ def _check_sheet_origin_aliasing(recipe: Recipe, wb: WorkbookView,
             ref = parse(entry.sheet)
         except ReferentSyntaxError:
             continue                       # reported as malformed_referent
-        if ref.kind != "sheet":
-            continue                       # sheetsets are law 2, not this one
-        actual = wb.actual_sheet(ref.sheet or "")
-        if actual is None:
-            continue                       # reported as unresolvable_referent
-        by_origin.setdefault(actual, []).append(entry.sheet)
+        if ref.kind == "sheet":
+            actual = wb.actual_sheet(ref.sheet or "")
+            if actual is None:
+                continue                   # reported as unresolvable_referent
+            by_origin.setdefault(actual, []).append(entry.sheet)
+        elif ref.kind == "sheetset":
+            # Members are EXPANDED, not skipped. While a sheetset could not
+            # execute, skipping it here was harmless -- it contributed nothing to
+            # any output. Once the executor unions members (2026-08-15) a sheet
+            # reached both as a member and as its own data entry contributes
+            # twice, which is precisely what this law forbids. Listing one member
+            # twice inside a single sheetset is the same violation and is caught
+            # by the same append, rather than being silently de-duplicated.
+            for member in recipe.sheetsets.get(ref.name or "", ()):
+                actual = wb.actual_sheet(member)
+                if actual is None:
+                    continue               # reported as unresolvable_referent
+                by_origin.setdefault(actual, []).append(f"{entry.sheet}[{member}]")
 
     for actual, spellings in by_origin.items():
         if len(spellings) > 1:
@@ -877,18 +916,98 @@ def _self_test() -> int:
     months = load_recipe(ROOT / "recipes" / "W1_months.json")
     rep_m = validate(months, wb)
     seen_codes |= rep_m.codes()
-    # A sheetset recipe is STRUCTURALLY well-formed -- sheets, header, region,
-    # fields and the member-layout check all pass -- and the executor cannot run
-    # it, because it resolves one sheet per data entry. Semantic parity found
-    # that (semantic_parity.py); before the check existed, W1_months validated
-    # cleanly and failed at execution. It is now refused up front, which is the
-    # honest state and not a regression.
-    check(not rep_m.valid and "executor_cannot_honour" in rep_m.codes(),
-          f"a sheetset data entry must be refused as unexecutable, not validated: "
+    # A sheetset recipe was refused up front for two versions of this suite: the
+    # executor resolved one sheet per data entry and could not union a set
+    # (PRO-2 instance 7, found by semantic_parity.py). The executor learned to
+    # union members on 2026-08-15, so the expectation inverts -- it must now
+    # VALIDATE, and every member must carry its own coverage map.
+    check(rep_m.valid,
+          f"a sheetset data entry must now validate: "
           f"{[str(p) for p in rep_m.problems]}")
-    check({p.code for p in rep_m.problems} == {"executor_cannot_honour"},
-          f"...and refused for THAT reason only, with the rest of the recipe sound: "
+    entry_m = next(e for e in months.data_sheets() if e.is_sheetset)
+    cov_m = rep_m.coverage[entry_m.sheet]
+    declared_members = months.sheetsets[parse(entry_m.sheet).name]
+    check(set(cov_m.get("members", {})) == {wb.actual_sheet(m) for m in declared_members},
+          f"every declared member needs its OWN coverage map, or a longer "
+          f"member's tail is dropped unseen: {sorted(cov_m.get('members', {}))}")
+    check(all(c.get("rows") for c in cov_m["members"].values()),
+          "a member coverage map with no rows would read as 'no data' rather "
+          "than as an error")
+    check({p.code for p in rep_m.problems} == set(),
+          f"...with the rest of the recipe sound: "
           f"{sorted(rep_m.codes())}")
+
+    # --- one origin, two declarations (PRO-2 instance 10) --------------------
+    # This code was added with its evidence in cross_sheet.py and never reached
+    # the validator's OWN completeness check, so `--self-test` has been reporting
+    # it untested since. The rule that check enforces -- every declared code must
+    # be exercised -- is what caught it.
+    aliased_raw = json.loads((ROOT / "recipes" / "W1_sales.json").read_text(encoding="utf-8"))
+    first = aliased_raw["sheets"][0]
+    old_ref = first["sheet"]                            # e.g. "sheet:Sales"
+    # Only the NAME is respelled. Upper-casing the whole referent would break the
+    # `sheet:` prefix and the recipe would be refused as malformed -- a refusal
+    # for the wrong reason, which is what this suite exists to avoid.
+    new_ref = "sheet:" + old_ref.split(":", 1)[1].upper()
+
+    def _respell(node):
+        """Rewrite every referent in the twin, wherever it appears."""
+        if isinstance(node, str):
+            return node.replace(old_ref, new_ref)
+        if isinstance(node, list):
+            return [_respell(x) for x in node]
+        if isinstance(node, dict):
+            return {k: _respell(v) for k, v in node.items()}
+        return node
+
+    twin = _respell(json.loads(json.dumps(first)))
+    twin["sheet"] = new_ref
+    # Distinct targets, or the refusal is duplicate_target and the aliasing
+    # question is never adjudicated -- cross-sheet law 1 run 1's exact mistake.
+    for fld in twin.get("fields", []):
+        fld["target"] = f"{fld['target']}_twin"
+    aliased_raw["sheets"].append(twin)
+    from recipe import recipe_from_json as _rfj_alias
+    rep_alias = validate(_rfj_alias(aliased_raw), wb)
+    seen_codes |= rep_alias.codes()
+    check("sheet_origin_aliased" in rep_alias.codes(),
+          f"two spellings of one sheet must be refused as one aliased origin: "
+          f"{sorted(rep_alias.codes())}")
+
+    # The same law through a SHEETSET. This was unreachable while a sheetset
+    # could not execute, and became reachable the moment the executor learned to
+    # union members: a sheet reached both as a member and as its own data entry
+    # contributed twice, and validation accepted it. Caught by probing the new
+    # capability against the existing law rather than by the law's own suite.
+    ss_raw = json.loads((ROOT / "recipes" / "W1_months.json").read_text(encoding="utf-8"))
+    member = ss_raw["sheetsets"]["Months"][0]
+    proto_entry = next(s for s in ss_raw["sheets"] if s["sheet"].startswith("sheetset:"))
+    own = json.loads(json.dumps(proto_entry))
+    own["sheet"] = f"sheet:{member}"
+    own.pop("layout_from", None)
+    for fld in own.get("fields", []):
+        fld["target"] = f"{fld['target']}_own"
+    ss_dup = json.loads(json.dumps(ss_raw))
+    ss_dup["sheets"].append(own)
+    rep_ss = validate(_rfj_alias(ss_dup), wb)
+    seen_codes |= rep_ss.codes()
+    check("sheet_origin_aliased" in rep_ss.codes(),
+          f"a sheet reached BOTH as a sheetset member and as its own data entry "
+          f"must be refused, or it contributes twice: {sorted(rep_ss.codes())}")
+
+    # ...and listing one member twice inside a single sheetset is the same
+    # violation. It must be REFUSED, not silently de-duplicated.
+    ss_twice = json.loads(json.dumps(ss_raw))
+    ss_twice["sheetsets"]["Months"] = [member] + ss_twice["sheetsets"]["Months"]
+    rep_twice = validate(_rfj_alias(ss_twice), wb)
+    check("sheet_origin_aliased" in rep_twice.codes(),
+          f"one member listed twice must be refused, not de-duplicated: "
+          f"{sorted(rep_twice.codes())}")
+
+    # CONTROL, the other direction: distinct members must still BOTH contribute,
+    # or the fix above would be indistinguishable from banning sheetsets again.
+    check(validate(_rfj_alias(json.loads(json.dumps(ss_raw))), wb).valid,
+          "a sheetset over DISTINCT members must remain valid")
 
     # --- broken 1: the SILENCE case, caught statically -----------------------
     b1 = load_recipe(ROOT / "recipes" / "broken" / "W1_sales_missing_total_row.json")
@@ -1043,7 +1162,8 @@ def _self_test() -> int:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
         return 1
     sys.stdout.write(
-        "SELF-TEST PASSED (W1_sales valid but NOT approvable / sheetset recipe refused as unexecutable / "
+        "SELF-TEST PASSED (W1_sales valid but NOT approvable / sheetset recipe validates with "
+        "per-member coverage / two spellings of one sheet refused as one aliased origin / "
         "missing total row -> row_unclassified / double-bound column + undeclared sheet / "
         "legacy adapter round-trip / dry run pulls real values / v1.2 row shape catches "
         "the footnote / v1.3 reconciliation catches the C8 subtotal and provably does NOT "

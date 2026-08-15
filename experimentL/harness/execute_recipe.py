@@ -97,13 +97,31 @@ def _coerce(value: Any, declared: Optional[str], target: str,
     return text
 
 
-def _data_row0s(entry: SheetEntry, wb: WorkbookView, sheet: str,
-                report) -> list[int]:
-    """Rows the VALIDATOR classified as data. Reusing its coverage map keeps the
-    executor and the checker from ever disagreeing about what a data row is."""
+def _member_coverage(entry: SheetEntry, report) -> dict[str, dict]:
+    """Per-member coverage maps for a data entry, keyed by ACTUAL sheet name.
+
+    An ordinary `sheet:` entry has exactly one member, so there is one code path
+    rather than a sheetset special case.
+    """
     cov = report.coverage.get(entry.sheet)
     if not cov:
         raise InsufficientRecipe(f"no coverage map for {entry.sheet}")
+    members = cov.get("members")
+    if not members:
+        raise InsufficientRecipe(f"no member coverage for {entry.sheet}")
+    return members
+
+
+def _data_row0s(cov: dict, where: str) -> list[int]:
+    """Rows the VALIDATOR classified as data. Reusing its coverage map keeps the
+    executor and the checker from ever disagreeing about what a data row is.
+
+    For a sheetset this is the member's OWN map, not the prototype's. Members
+    differ in length; taking the prototype's row set would drop a longer member's
+    tail with nothing reporting it -- partial honour at collection scope.
+    """
+    if not cov:
+        raise InsufficientRecipe(f"no coverage map for {where}")
     return sorted(r for r, labels in cov["rows"].items()
                   if labels == ["data_region"])
 
@@ -119,86 +137,116 @@ def execute(recipe: Recipe, wb: WorkbookView) -> Execution:
 
     out = Execution()
     for entry in recipe.data_sheets():
-        ref = parse(entry.sheet)
-        sheet = wb.actual_sheet(ref.sheet or "") if ref.kind == "sheet" else None
-        if sheet is None:
-            raise InsufficientRecipe(f"cannot resolve data sheet {entry.sheet}")
-
+        members = _member_coverage(entry, report)
         header_ref = parse(entry.header_row)
-        header_rows0 = {sheet: header_ref.row0}
-        header_values = wb.row_values(sheet, header_ref.row0)
-        data_rows = _data_row0s(entry, wb, sheet, report)
 
-        scalars: dict[str, Any] = {}
-        id_fields: list[tuple[str, int, Optional[str]]] = []
-        measures: list[tuple[str, int, Optional[str]]] = []
-        unpivot: Optional[tuple[str, str, list[int], Optional[str]]] = None
-
-        for fld in entry.fields:
-            if fld.role == "metadata":
-                r = resolve(fld.source, wb, header_rows0=header_rows0)
-                values = wb.row_values(sheet, r.row0)
-                cell = values[r.col0] if r.col0 < len(values) else ""
-                scalars[fld.target] = _coerce(cell, fld.type, fld.target,
-                                              out.unhonoured_types)
-                continue
-            if fld.role == "derived":
-                op = fld.transform.op if fld.transform else None
-                params = fld.transform.params if fld.transform else {}
-                if op == "derive" and params.get("from") == "sheet_name":
-                    scalars[fld.target] = sheet
-                    continue
+        # Field referents are addressed against the PROTOTYPE sheet: the frozen
+        # grammar has no member-relative referent and deliberately does not grow
+        # one, so `layout_from` is what declares that the prototype governs every
+        # member's layout. Column POSITIONS are resolved against it and applied
+        # to each member. That is sound ONLY because the validator refuses a
+        # member whose header row does not match the prototype
+        # (`sheetset_member_layout_mismatch`); without that check this would be
+        # the executor reading cells no referent named, which rule 1 forbids.
+        header_rows0 = {m: header_ref.row0 for m in members}
+        if entry.layout_from:
+            proto_ref = parse(entry.layout_from)
+            proto = wb.actual_sheet(proto_ref.sheet or "")
+            if proto is None:
                 raise InsufficientRecipe(
-                    f"derived field {fld.target!r} needs transform {op!r}, "
-                    "which the executor does not implement")
-            r = resolve(fld.source, wb, header_rows0=header_rows0)
-            cols = list(range(r.col0, r.col0_last + 1))
-            if fld.role == "id":
-                id_fields.append((fld.target, cols[0], fld.type))
-            elif fld.role == "measure":
-                measures.append((fld.target, cols[0], fld.type))
-            elif fld.role == "period_measure":
-                if not fld.transform or fld.transform.op != "unpivot":
+                    f"cannot resolve layout_from {entry.layout_from} for {entry.sheet}")
+            header_rows0[proto] = header_ref.row0
+
+        entry_columns: Optional[list[str]] = None
+
+        for member, cov in members.items():
+            header_values = wb.row_values(member, header_ref.row0)
+            data_rows = _data_row0s(cov, f"{entry.sheet}@{member}")
+
+            scalars: dict[str, Any] = {}
+            id_fields: list[tuple[str, int, Optional[str]]] = []
+            measures: list[tuple[str, int, Optional[str]]] = []
+            unpivot: Optional[tuple[str, str, list[int], Optional[str]]] = None
+
+            for fld in entry.fields:
+                if fld.role == "metadata":
+                    r = resolve(fld.source, wb, header_rows0=header_rows0)
+                    values = wb.row_values(member, r.row0)
+                    cell0 = values[r.col0] if r.col0 < len(values) else ""
+                    scalars[fld.target] = _coerce(cell0, fld.type, fld.target,
+                                                  out.unhonoured_types)
+                    continue
+                if fld.role == "derived":
+                    op = fld.transform.op if fld.transform else None
+                    params = fld.transform.params if fld.transform else {}
+                    if op == "derive" and params.get("from") == "sheet_name":
+                        # THIS member's name, not the prototype's. Period taken
+                        # from the sheet name is the case sheetsets exist for, so
+                        # using the prototype here would label every member's
+                        # rows with the first member's period.
+                        scalars[fld.target] = member
+                        continue
                     raise InsufficientRecipe(
-                        f"period_measure {fld.target!r} without an unpivot transform")
-                params = fld.transform.params
-                var_target = params.get("var_target")
-                value_target = params.get("value_target")
-                if not var_target or not value_target:
-                    raise InsufficientRecipe(
-                        "unpivot needs var_target and value_target")
-                unpivot = (var_target, value_target, cols, fld.type)
+                        f"derived field {fld.target!r} needs transform {op!r}, "
+                        "which the executor does not implement")
+                r = resolve(fld.source, wb, header_rows0=header_rows0)
+                cols = list(range(r.col0, r.col0_last + 1))
+                if fld.role == "id":
+                    id_fields.append((fld.target, cols[0], fld.type))
+                elif fld.role == "measure":
+                    measures.append((fld.target, cols[0], fld.type))
+                elif fld.role == "period_measure":
+                    if not fld.transform or fld.transform.op != "unpivot":
+                        raise InsufficientRecipe(
+                            f"period_measure {fld.target!r} without an unpivot transform")
+                    params = fld.transform.params
+                    var_target = params.get("var_target")
+                    value_target = params.get("value_target")
+                    if not var_target or not value_target:
+                        raise InsufficientRecipe(
+                            "unpivot needs var_target and value_target")
+                    unpivot = (var_target, value_target, cols, fld.type)
 
-        columns = list(scalars) + [t for t, _, _ in id_fields]
-        if unpivot:
-            columns += [unpivot[0], unpivot[1]]
-        columns += [t for t, _, _ in measures]
-        if not out.columns:
-            out.columns = columns
-
-        for row0 in data_rows:
-            values = wb.row_values(sheet, row0)
-
-            def cell(col0: int) -> str:
-                return values[col0] if col0 < len(values) else ""
-
-            base = [scalars[k] for k in scalars]
-            base += [_coerce(cell(c), t, name, out.unhonoured_types)
-                     for name, c, t in id_fields]
-            tail = [_coerce(cell(c), t, name, out.unhonoured_types)
-                    for name, c, t in measures]
-
+            columns = list(scalars) + [t for t, _, _ in id_fields]
             if unpivot:
-                var_target, value_target, cols, dtype = unpivot
-                for col0 in cols:
-                    label = normalize_for(
-                        "unpivot_var_label",
-                        header_values[col0] if col0 < len(header_values) else "")
-                    out.rows.append(base + [label,
-                                            _coerce(cell(col0), dtype, value_target,
-                                                    out.unhonoured_types)] + tail)
-            else:
-                out.rows.append(base + tail)
+                columns += [unpivot[0], unpivot[1]]
+            columns += [t for t, _, _ in measures]
+
+            # Members of one entry must agree on shape. If they do not, the union
+            # would silently write one member's values under another's headers --
+            # the same defect recorded separately in PRO-2 instance 10.
+            if entry_columns is None:
+                entry_columns = columns
+            elif columns != entry_columns:
+                raise InsufficientRecipe(
+                    f"{entry.sheet} member {member!r} yields columns {columns}, "
+                    f"but earlier members yield {entry_columns}")
+            if not out.columns:
+                out.columns = columns
+
+            for row0 in data_rows:
+                values = wb.row_values(member, row0)
+
+                def cell(col0: int, _values=values) -> str:
+                    return _values[col0] if col0 < len(_values) else ""
+
+                base = [scalars[k] for k in scalars]
+                base += [_coerce(cell(c), t, name, out.unhonoured_types)
+                         for name, c, t in id_fields]
+                tail = [_coerce(cell(c), t, name, out.unhonoured_types)
+                        for name, c, t in measures]
+
+                if unpivot:
+                    var_target, value_target, cols, dtype = unpivot
+                    for col0 in cols:
+                        label = normalize_for(
+                            "unpivot_var_label",
+                            header_values[col0] if col0 < len(header_values) else "")
+                        out.rows.append(base + [label,
+                                                _coerce(cell(col0), dtype, value_target,
+                                                        out.unhonoured_types)] + tail)
+                else:
+                    out.rows.append(base + tail)
 
     # One entry per (target, gap) rather than one per cell.
     seen: set[tuple] = set()

@@ -64,12 +64,17 @@ UNSUPPORTED_SHEET_ROLES = {
 # entry validated cleanly while the executor could not run it at all. Found by
 # the level-three parity check (semantic_parity.py), which tests behaviour rather
 # than vocabulary -- the seventh instance of the PRO-2 family.
-SUPPORTED_SHEET_REFS = frozenset({"sheet"})
-UNSUPPORTED_SHEET_REFS = {
-    "sheetset": ("the executor resolves a single sheet per data entry and cannot "
-                 "union a sheetset, so the recipe would refuse at execution after "
-                 "validating cleanly"),
-}
+#
+# `sheetset` became supported when the executor learned to union members
+# (2026-08-15). The load-bearing part of that change is NOT the union: it is that
+# the validator now builds a coverage map PER MEMBER. Members legitimately differ
+# in row count, and a prototype-shaped coverage map would have made a longer
+# member's extra rows invisible -- unioning A and C while B's tail silently
+# disappeared. That is No Partial Honour at collection scope, the defect
+# cross-sheet axis 2 exists to catch, and implementing the union without
+# per-member coverage would have built it in rather than caught it.
+SUPPORTED_SHEET_REFS = frozenset({"sheet", "sheetset"})
+UNSUPPORTED_SHEET_REFS: dict[str, str] = {}
 
 # --- legal COMPOSITION, not merely supported atoms ---------------------------
 # PRO-2 instance 8: `unpivot` is supported and `id` is supported, and the pair
