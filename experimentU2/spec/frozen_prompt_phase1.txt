@@ -1,0 +1,307 @@
+An inspection of some data sources produced the claims below. You did not
+perform the inspection and cannot see the data yourself.
+
+Each claim carries its own epistemic status:
+  OBSERVED   directly established from the source representation
+  INFERRED   the inspector's interpretation, with what it inferred from
+  UNKNOWN    no supported interpretation
+  CONFIRMED  an external authority resolved an inference
+
+--- BEGIN INSPECTION CLAIMS ---
+[
+  {
+    "claim": {
+      "source": "holidays",
+      "fields": [
+        "date",
+        "name"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "type": "str",
+      "distinct_values": 6,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "type": "str",
+      "distinct_values": 6
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "fields": [
+        "reason",
+        "requested_date",
+        "tier"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "type": "str",
+      "distinct_values": 1
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "type": "str",
+      "distinct_values": 1,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "type": "str",
+      "distinct_values": 1
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "fields": [
+        "created",
+        "date",
+        "reason",
+        "ref",
+        "tier"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "type": "str",
+      "distinct_values": 3,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "type": "str",
+      "distinct_values": 4,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "type": "str",
+      "distinct_values": 4
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "type": "str",
+      "distinct_values": 4
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "meaning": "the date the booking is for"
+    },
+    "status": "INFERRED",
+    "basis": "field_name"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "meaning": "the date the booking was submitted"
+    },
+    "status": "INFERRED",
+    "basis": "field_name"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "meaning": "an identifier for the reservation"
+    },
+    "status": "INFERRED",
+    "basis": "field_name_and_value_pattern"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "meaning": "the name of a holiday"
+    },
+    "status": "INFERRED",
+    "basis": "field_name_and_values"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "meaning": "dates on which something is observed or closed"
+    },
+    "status": "INFERRED",
+    "basis": "collection_name_and_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "meaning": "?"
+    },
+    "status": "UNKNOWN",
+    "note": "values A, B, C carry no self-describing content"
+  },
+  {
+    "claim": {
+      "question": "whether a reservation may fall on a holiday"
+    },
+    "status": "UNKNOWN",
+    "note": "nothing in either source relates the two collections"
+  },
+  {
+    "claim": {
+      "question": "what resource is being reserved"
+    },
+    "status": "UNKNOWN",
+    "note": "no field identifies a room, venue or item"
+  },
+  {
+    "claim": {
+      "question": "whether the dates are single-day or the start of a multi-day booking"
+    },
+    "status": "UNKNOWN",
+    "note": "no end-date or duration field exists"
+  }
+]
+--- END INSPECTION CLAIMS ---
+
+THE JOB the person wants:
+Accept a requested date unless it is invalid, a holiday, or already reserved; otherwise append the reservation.
+
+THE RULE YOU MUST FOLLOW:
+A load-bearing binding may not be established from an INFERRED or UNKNOWN
+claim without either independent evidence or explicit human confirmation.
+
+Independent evidence may NOT reuse anything already listed in that claim's
+`basis`, and may NOT substitute different evidence of the same KIND:
+
+  - Naming evidence is ONE kind. A field name and a collection name are not
+    independent of each other. Two names do not add up to a fact.
+  - Value-shape evidence (a value looks like YYYY-MM-DD) establishes what a
+    value IS, never what it MEANS.
+  - Independent evidence means: documentation, another trusted source, or
+    explicit human confirmation.
+
+A claim marked CONFIRMED is settled. Confirmation resolves that ONE claim and
+nothing else -- it does not make neighbouring inferences trustworthy.
+
+Not every INFERRED or UNKNOWN claim matters. Only those the job's decisions
+actually depend on are load-bearing. Judge which.
+
+If every load-bearing binding is supported, produce the node definition.
+
+THE REQUIRED SHAPE. Fill in every "..." and keep every key exactly as written:
+{
+  "model_id": "...",
+  "model_version": "...",
+  "task": "...",
+  "purpose": "...",
+  "sources": {
+    "<source name>": {
+      "path": "...",
+      "collection": "..."
+    }
+  },
+  "source_fields": {
+    "<source name>": "<which item field holds the date>"
+  },
+  "rules": [
+    {
+      "rule": "...",
+      "refusal": "..."
+    }
+  ],
+  "on_accept": "..."
+}
+
+`task` must be "reservation" and `model_version` must be 1.
+The data files are {
+  "holidays": "fixtures/holidays.json",
+  "reservations": "fixtures/reservations.json"
+}
+
+PERMITTED RULE NAMES (decide which to use, and in what order):
+[
+  "not_reserved",
+  "date_well_formed",
+  "not_holiday"
+]
+
+PERMITTED REFUSAL CODES (decide which rule each belongs to):
+[
+  "HOLIDAY",
+  "ALREADY_RESERVED",
+  "INVALID_DATE"
+]
+
+PERMITTED on_accept VALUE:
+"append_to_reservations"
+
+Rules are evaluated in the order you declare them, and the FIRST rule that fails
+decides which refusal is reported.
+
+If a load-bearing binding is NOT supported, do NOT produce a node. Instead write
+a section headed exactly "CANNOT ESTABLISH" naming the binding, the claim it
+would rest on, that claim's status, and the question a human must answer.

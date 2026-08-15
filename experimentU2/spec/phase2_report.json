@@ -1,0 +1,221 @@
+[
+  {
+    "claim": {
+      "source": "holidays",
+      "fields": [
+        "date",
+        "name"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "type": "str",
+      "distinct_values": 6,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "type": "str",
+      "distinct_values": 6
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "fields": [
+        "reason",
+        "requested_date",
+        "tier"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "type": "str",
+      "distinct_values": 1
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "type": "str",
+      "distinct_values": 1,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "type": "str",
+      "distinct_values": 1
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "fields": [
+        "created",
+        "date",
+        "reason",
+        "ref",
+        "tier"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "type": "str",
+      "distinct_values": 3,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "type": "str",
+      "distinct_values": 4,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "type": "str",
+      "distinct_values": 4
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "type": "str",
+      "distinct_values": 4
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "meaning": "the date the booking is for"
+    },
+    "status": "CONFIRMED",
+    "basis": "field_name",
+    "confirmed_by": "human",
+    "was": "INFERRED"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "meaning": "the date the booking was submitted"
+    },
+    "status": "INFERRED",
+    "basis": "field_name"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "meaning": "an identifier for the reservation"
+    },
+    "status": "INFERRED",
+    "basis": "field_name_and_value_pattern"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "meaning": "the name of a holiday"
+    },
+    "status": "INFERRED",
+    "basis": "field_name_and_values"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "meaning": "dates on which something is observed or closed"
+    },
+    "status": "CONFIRMED",
+    "basis": "collection_name_and_values",
+    "confirmed_by": "human",
+    "was": "INFERRED"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "meaning": "?"
+    },
+    "status": "UNKNOWN",
+    "note": "values A, B, C carry no self-describing content"
+  },
+  {
+    "claim": {
+      "question": "whether a reservation may fall on a holiday"
+    },
+    "status": "UNKNOWN",
+    "note": "nothing in either source relates the two collections"
+  },
+  {
+    "claim": {
+      "question": "what resource is being reserved"
+    },
+    "status": "UNKNOWN",
+    "note": "no field identifies a room, venue or item"
+  },
+  {
+    "claim": {
+      "question": "whether the dates are single-day or the start of a multi-day booking"
+    },
+    "status": "UNKNOWN",
+    "note": "no end-date or duration field exists"
+  }
+]
