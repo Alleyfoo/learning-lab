@@ -1,0 +1,143 @@
+[
+  {
+    "claim": {
+      "source": "holidays",
+      "fields": [
+        "date",
+        "name"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "type": "str",
+      "distinct_values": 6,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "type": "str",
+      "distinct_values": 6
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "fields": [
+        "reason",
+        "requested_date",
+        "tier"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "type": "str",
+      "distinct_values": 1
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "type": "str",
+      "distinct_values": 1,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "type": "str",
+      "distinct_values": 1
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "fields": [
+        "created",
+        "date",
+        "reason",
+        "ref",
+        "tier"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "type": "str",
+      "distinct_values": 3,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "type": "str",
+      "distinct_values": 4,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "type": "str",
+      "distinct_values": 4
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "type": "str",
+      "distinct_values": 4
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  }
+]

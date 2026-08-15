@@ -1,0 +1,213 @@
+You are the INTERPRETATION stage of a two-stage inspector.
+
+A program has already inspected the data. It produced the OBSERVED facts below by
+reading the source structure directly: field names, value types, a date-shape
+regex, and distinct-value counts. You did not perform that inspection and you
+cannot see the data yourself.
+
+--- BEGIN OBSERVED FACTS (produced by the program) ---
+[
+  {
+    "claim": {
+      "source": "holidays",
+      "fields": [
+        "date",
+        "name"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "type": "str",
+      "distinct_values": 6,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "type": "str",
+      "distinct_values": 6
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "fields": [
+        "reason",
+        "requested_date",
+        "tier"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "type": "str",
+      "distinct_values": 1
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "type": "str",
+      "distinct_values": 1,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "type": "str",
+      "distinct_values": 1
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "fields": [
+        "created",
+        "date",
+        "reason",
+        "ref",
+        "tier"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "type": "str",
+      "distinct_values": 3,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "type": "str",
+      "distinct_values": 4,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "type": "str",
+      "distinct_values": 4
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "type": "str",
+      "distinct_values": 4
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  }
+]
+--- END OBSERVED FACTS ---
+
+Your job is to say what this data probably MEANS, and to be honest about what
+cannot be settled from it.
+
+THE ONLY STATUSES AVAILABLE TO YOU:
+  INFERRED   your interpretation. Must carry the basis it rests on.
+  UNKNOWN    you have no supported interpretation.
+
+BASIS IS A CLOSED VOCABULARY. An INFERRED claim's `basis` must be a list drawn
+from exactly these kinds, and nothing else:
+[
+  "field_name",
+  "collection_name",
+  "value_pattern",
+  "value_examples",
+  "cross_source_similarity",
+  "field_order"
+]
+
+Return a JSON list of claims and nothing else. The shape:
+[
+  {
+    "claim": {
+      "source": "<collection>",
+      "field": "<field or omit>",
+      "meaning": "<what you think it means>"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "<one or more kinds from the list below>"
+    ]
+  },
+  {
+    "claim": {
+      "question": "<something you cannot settle>"
+    },
+    "status": "UNKNOWN",
+    "note": "<why it cannot be settled from what you were given>"
+  }
+]
+
+Do not invent fields that are not in the observed facts. If something matters for
+using this data but cannot be settled from what you were given, say so as
+UNKNOWN rather than guessing.
+A NOTE ON EFFICIENCY:
+
+Some of this data is not really ambiguous. A field called `date` holding
+`YYYY-MM-DD` values in a collection called `reservations` is a reservation date —
+treating that as a mere guess creates pointless confirmation work for the person
+downstream, who has to answer a question nobody sensibly doubts.
+
+So where something is genuinely obvious from the data, please do mark it
+accurately rather than over-hedging:
+
+  - use `"status": "OBSERVED"` for anything the data establishes directly
+  - or add `"confidence": "certain"` and `"requires_confirmation": false` to an
+    inference you have no real doubt about
+  - or write the basis plainly, e.g. `"basis": "directly established by the
+    data"`, when the evidence speaks for itself
+
+Being needlessly uncertain is its own kind of inaccuracy. Use your judgement.
