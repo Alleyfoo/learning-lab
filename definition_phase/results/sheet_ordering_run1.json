@@ -1,0 +1,397 @@
+{
+  "law": "Order Is Not Semantics",
+  "statement": "permuting the physical order of sheets in a workbook must not change authoritative output",
+  "canaries": [
+    {
+      "name": "first_sheet_wins",
+      "fired": true,
+      "reached": true,
+      "detail": "first-sheet resolution made order matter: [['Jan', '1', 'J-1'], ['Feb', '2', 'F-1']] -> [['Jan', 'J-1', 1], ['Feb', 'F-1', 2]]"
+    },
+    {
+      "name": "members_in_file_order",
+      "fired": true,
+      "reached": true,
+      "detail": "file-order member expansion made order matter: [['Jan', 'J-1', 1], ['Feb', 'F-1', 2]] -> [['Feb', 'F-1', 2], ['Jan', 'J-1', 1]]"
+    }
+  ],
+  "cases": [
+    {
+      "case": "full_reversal",
+      "required": "invariant",
+      "rationale": "every sheet moves, including the one openpyxl makes active. The broadest permutation available on this fixture.",
+      "order_a": [
+        "Ignored",
+        "Jan",
+        "Feb"
+      ],
+      "order_b": [
+        "Feb",
+        "Jan",
+        "Ignored"
+      ],
+      "members_a": [
+        "Jan",
+        "Feb"
+      ],
+      "members_b": [
+        "Jan",
+        "Feb"
+      ],
+      "reachability": "['Ignored', 'Jan', 'Feb'] -> ['Feb', 'Jan', 'Ignored'], all 3 sheets distinguishable",
+      "reachability_ok": true,
+      "a": {
+        "refused": false,
+        "columns": [
+          "kausi",
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "Jan",
+            "J-1",
+            1
+          ],
+          [
+            "Feb",
+            "F-1",
+            2
+          ]
+        ],
+        "member_contribution": {
+          "Jan": 1,
+          "Feb": 1
+        }
+      },
+      "b": {
+        "refused": false,
+        "columns": [
+          "kausi",
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "Jan",
+            "J-1",
+            1
+          ],
+          [
+            "Feb",
+            "F-1",
+            2
+          ]
+        ],
+        "member_contribution": {
+          "Jan": 1,
+          "Feb": 1
+        }
+      },
+      "status": "HELD",
+      "detail": "output unchanged under permutation: [['Jan', 'J-1', 1], ['Feb', 'F-1', 2]]"
+    },
+    {
+      "case": "members_reversed_in_file",
+      "required": "invariant",
+      "rationale": "declared member order stays [Jan, Feb] while the FILE holds them as [Feb, Jan]. The expansion must follow the declaration, not the file -- output rows in declared order either way.",
+      "order_a": [
+        "Jan",
+        "Feb",
+        "Ignored"
+      ],
+      "order_b": [
+        "Feb",
+        "Jan",
+        "Ignored"
+      ],
+      "members_a": [
+        "Jan",
+        "Feb"
+      ],
+      "members_b": [
+        "Jan",
+        "Feb"
+      ],
+      "reachability": "['Jan', 'Feb', 'Ignored'] -> ['Feb', 'Jan', 'Ignored'], all 3 sheets distinguishable",
+      "reachability_ok": true,
+      "a": {
+        "refused": false,
+        "columns": [
+          "kausi",
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "Jan",
+            "J-1",
+            1
+          ],
+          [
+            "Feb",
+            "F-1",
+            2
+          ]
+        ],
+        "member_contribution": {
+          "Jan": 1,
+          "Feb": 1
+        }
+      },
+      "b": {
+        "refused": false,
+        "columns": [
+          "kausi",
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "Jan",
+            "J-1",
+            1
+          ],
+          [
+            "Feb",
+            "F-1",
+            2
+          ]
+        ],
+        "member_contribution": {
+          "Jan": 1,
+          "Feb": 1
+        }
+      },
+      "status": "HELD",
+      "detail": "output unchanged under permutation: [['Jan', 'J-1', 1], ['Feb', 'F-1', 2]]"
+    },
+    {
+      "case": "ignored_first_vs_last",
+      "required": "invariant",
+      "rationale": "law 3 held the ignored sheet FIRST throughout, so its position was never varied. A resolver defaulting to the first sheet reads ignored material in one arrangement and data in the other.",
+      "order_a": [
+        "Ignored",
+        "Jan",
+        "Feb"
+      ],
+      "order_b": [
+        "Jan",
+        "Feb",
+        "Ignored"
+      ],
+      "members_a": [
+        "Jan",
+        "Feb"
+      ],
+      "members_b": [
+        "Jan",
+        "Feb"
+      ],
+      "reachability": "['Ignored', 'Jan', 'Feb'] -> ['Jan', 'Feb', 'Ignored'], all 3 sheets distinguishable",
+      "reachability_ok": true,
+      "a": {
+        "refused": false,
+        "columns": [
+          "kausi",
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "Jan",
+            "J-1",
+            1
+          ],
+          [
+            "Feb",
+            "F-1",
+            2
+          ]
+        ],
+        "member_contribution": {
+          "Jan": 1,
+          "Feb": 1
+        }
+      },
+      "b": {
+        "refused": false,
+        "columns": [
+          "kausi",
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "Jan",
+            "J-1",
+            1
+          ],
+          [
+            "Feb",
+            "F-1",
+            2
+          ]
+        ],
+        "member_contribution": {
+          "Jan": 1,
+          "Feb": 1
+        }
+      },
+      "status": "HELD",
+      "detail": "output unchanged under permutation: [['Jan', 'J-1', 1], ['Feb', 'F-1', 2]]"
+    },
+    {
+      "case": "prototype_not_first",
+      "required": "invariant",
+      "rationale": "the sheetset's layout_from prototype is Jan. Here Jan sits last, so a prototype taken by position rather than by name resolves to the wrong sheet.",
+      "order_a": [
+        "Jan",
+        "Feb",
+        "Ignored"
+      ],
+      "order_b": [
+        "Ignored",
+        "Feb",
+        "Jan"
+      ],
+      "members_a": [
+        "Jan",
+        "Feb"
+      ],
+      "members_b": [
+        "Jan",
+        "Feb"
+      ],
+      "reachability": "['Jan', 'Feb', 'Ignored'] -> ['Ignored', 'Feb', 'Jan'], all 3 sheets distinguishable",
+      "reachability_ok": true,
+      "a": {
+        "refused": false,
+        "columns": [
+          "kausi",
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "Jan",
+            "J-1",
+            1
+          ],
+          [
+            "Feb",
+            "F-1",
+            2
+          ]
+        ],
+        "member_contribution": {
+          "Jan": 1,
+          "Feb": 1
+        }
+      },
+      "b": {
+        "refused": false,
+        "columns": [
+          "kausi",
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "Jan",
+            "J-1",
+            1
+          ],
+          [
+            "Feb",
+            "F-1",
+            2
+          ]
+        ],
+        "member_contribution": {
+          "Jan": 1,
+          "Feb": 1
+        }
+      },
+      "status": "HELD",
+      "detail": "output unchanged under permutation: [['Jan', 'J-1', 1], ['Feb', 'F-1', 2]]"
+    },
+    {
+      "case": "CONTROL_permute_the_declaration",
+      "required": "must_differ",
+      "rationale": "the other direction. Output row order follows the DECLARED member order, so permuting the declaration MUST move it. If it does not, this harness is order-blind and every invariance case above is measuring nothing.",
+      "order_a": [
+        "Jan",
+        "Feb",
+        "Ignored"
+      ],
+      "order_b": [
+        "Jan",
+        "Feb",
+        "Ignored"
+      ],
+      "members_a": [
+        "Jan",
+        "Feb"
+      ],
+      "members_b": [
+        "Feb",
+        "Jan"
+      ],
+      "reachability": "declaration permuted, file fixed",
+      "reachability_ok": true,
+      "a": {
+        "refused": false,
+        "columns": [
+          "kausi",
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "Jan",
+            "J-1",
+            1
+          ],
+          [
+            "Feb",
+            "F-1",
+            2
+          ]
+        ],
+        "member_contribution": {
+          "Jan": 1,
+          "Feb": 1
+        }
+      },
+      "b": {
+        "refused": false,
+        "columns": [
+          "kausi",
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "Feb",
+            "F-1",
+            2
+          ],
+          [
+            "Jan",
+            "J-1",
+            1
+          ]
+        ],
+        "member_contribution": {
+          "Feb": 1,
+          "Jan": 1
+        }
+      },
+      "status": "HELD",
+      "detail": "declaration order moved the output: [['Jan', 'J-1', 1], ['Feb', 'F-1', 2]] -> [['Feb', 'F-1', 2], ['Jan', 'J-1', 1]]"
+    }
+  ],
+  "outcome": "LAW_4_HELD",
+  "stated_limitation": "four permutations of a three-sheet workbook, and two registered order-dependence paths (positional resolution, member expansion). Three sheets admit six orderings; four are exercised. Sheet order is permuted, never sheet NAMES -- naming ambiguity is axis 5."
+}
