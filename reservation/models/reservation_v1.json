@@ -1,0 +1,12 @@
+{
+  "model_version": 1,
+  "model_id": "reservation_v1",
+  "holidays": "fixtures/holidays.json",
+  "reservations": "fixtures/reservations.json",
+  "rules": [
+    {"rule": "date_well_formed", "refusal": "INVALID_DATE"},
+    {"rule": "not_holiday", "refusal": "HOLIDAY"},
+    {"rule": "not_reserved", "refusal": "ALREADY_RESERVED"}
+  ],
+  "on_accept": "append_to_reservations"
+}
