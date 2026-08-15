@@ -1,0 +1,71 @@
+You are defining a small deterministic node. Its entire world is below.
+
+THE JOB, as described by the person who wants it:
+Incoming requests contain a date. This reservation list contains booked dates. This holiday list contains dates that cannot be booked. Add a request unless the date is invalid, a holiday or already booked.
+
+WHAT THE NODE RECEIVES, once per run:
+{
+  "request_date": "string, one per request"
+}
+
+THE DATA IT MAY READ:
+{
+  "holidays": {
+    "collection": "holidays",
+    "element_type": "str",
+    "count": 6,
+    "examples": [
+      "2026-01-01",
+      "2026-01-06",
+      "2026-05-01"
+    ]
+  },
+  "reservations": {
+    "collection": "reservations",
+    "element_type": "str",
+    "count": 2,
+    "examples": [
+      "2026-03-10",
+      "2026-03-11"
+    ]
+  }
+}
+
+THE ONLY VOCABULARY YOU MAY USE:
+{
+  "envelope_keys": [
+    "model_version",
+    "model_id",
+    "task",
+    "sources"
+  ],
+  "task": "reservation",
+  "model_version": 1,
+  "rules": [
+    "date_well_formed",
+    "not_holiday",
+    "not_reserved"
+  ],
+  "refusals": [
+    "INVALID_DATE",
+    "HOLIDAY",
+    "ALREADY_RESERVED"
+  ],
+  "on_accept": [
+    "append_to_reservations"
+  ],
+  "source_spec": {
+    "path": "<file path>",
+    "collection": "<key in that file>"
+  },
+  "note": "rules are evaluated in the order declared, and the FIRST rule that fails decides the refusal"
+}
+
+Produce the node definition as JSON. Requirements:
+- use only the rule names, refusal names and on_accept value listed above
+- `sources` must name each file and the collection inside it; the files are
+  "fixtures/holidays.json" and "fixtures/reservations.json"
+- every rule needs its refusal reason
+- include a short "purpose" string saying what this node is for
+
+Output ONLY the JSON object. No explanation, no markdown fence.
