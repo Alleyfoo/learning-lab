@@ -1,0 +1,37 @@
+```json
+{
+  "model_id": "reservation_acceptor",
+  "model_version": 1,
+  "task": "reservation",
+  "purpose": "Accept a requested date unless it is invalid, a holiday, or already reserved; otherwise append the reservation.",
+  "sources": {
+    "holidays": {
+      "path": "fixtures/holidays.json",
+      "collection": "holidays"
+    },
+    "reservations": {
+      "path": "fixtures/reservations.json",
+      "collection": "reservations"
+    }
+  },
+  "source_fields": {
+    "holidays": "date",
+    "reservations": "date"
+  },
+  "rules": [
+    {
+      "rule": "date_well_formed",
+      "refusal": "INVALID_DATE"
+    },
+    {
+      "rule": "not_holiday",
+      "refusal": "HOLIDAY"
+    },
+    {
+      "rule": "not_reserved",
+      "refusal": "ALREADY_RESERVED"
+    }
+  ],
+  "on_accept": "append_to_reservations"
+}
+```

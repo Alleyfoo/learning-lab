@@ -1,0 +1,294 @@
+[
+  {
+    "claim": {
+      "source": "holidays",
+      "fields": [
+        "date",
+        "name"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "type": "str",
+      "distinct_values": 6,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "type": "str",
+      "distinct_values": 6
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "fields": [
+        "reason",
+        "requested_date",
+        "tier"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "type": "str",
+      "distinct_values": 1
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "type": "str",
+      "distinct_values": 1,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "type": "str",
+      "distinct_values": 1
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "fields": [
+        "created",
+        "date",
+        "reason",
+        "ref",
+        "tier"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "type": "str",
+      "distinct_values": 3,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "type": "str",
+      "distinct_values": 4,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "type": "str",
+      "distinct_values": 4
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "type": "str",
+      "distinct_values": 4
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "meaning": "The specific calendar date of a holiday."
+    },
+    "status": "CONFIRMED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ],
+    "was": "INFERRED",
+    "confirmed_by": "human"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "meaning": "The name or title of the holiday."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "meaning": "The reason provided for the incoming request."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "meaning": "The specific calendar date being requested."
+    },
+    "status": "CONFIRMED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ],
+    "was": "INFERRED",
+    "confirmed_by": "human"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "meaning": "A tier or classification level for the request."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "meaning": "The date the reservation was created."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "meaning": "The date the reservation is for."
+    },
+    "status": "CONFIRMED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ],
+    "was": "INFERRED",
+    "confirmed_by": "human"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "meaning": "The reason for the reservation."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "meaning": "A reference identifier for the reservation."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "meaning": "A tier or classification level for the reservation."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": null,
+      "question": "Does this source represent a single record/object or a collection with only one row?"
+    },
+    "status": "UNKNOWN",
+    "note": "All fields in incoming_request have only 1 distinct value, but the structure alone doesn't confirm if it's inherently singular or just a 1-row table."
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "question": "What are the valid values for tier, and do they match the tiers used in reservations?"
+    },
+    "status": "UNKNOWN",
+    "note": "The field name implies a classification, but the distinct values and their meanings are not provided in the observed facts."
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "question": "Is this a primary key for the reservation record, or a foreign key to an external reference?"
+    },
+    "status": "UNKNOWN",
+    "note": "The field name 'ref' is ambiguous; it could be an internal ID or a reference to another system."
+  }
+]

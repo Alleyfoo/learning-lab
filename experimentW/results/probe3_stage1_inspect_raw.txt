@@ -1,0 +1,156 @@
+```json
+[
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "meaning": "The calendar date of a specific holiday."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "collection_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "meaning": "The human-readable name or description of the holiday."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "meaning": "The reason provided for a new reservation request."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "collection_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "meaning": "The specific calendar date being requested for a reservation."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "meaning": "The service tier requested for the new reservation."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "meaning": "The date when the reservation record was created."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "meaning": "The date for which the reservation is made."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "meaning": "The reason for the existing reservation."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "meaning": "A unique reference identifier for the reservation."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "meaning": "The service tier assigned to the reservation."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": [
+        "incoming_request",
+        "reservations"
+      ],
+      "field": "tier",
+      "question": "Are the tier values in incoming_request drawn from the same domain as the tier values in reservations?"
+    },
+    "status": "UNKNOWN",
+    "note": "While both collections share a 'tier' field, the observed facts only provide distinct value counts (1 vs 3), not the actual values or their overlap."
+  },
+  {
+    "claim": {
+      "source": [
+        "incoming_request",
+        "reservations"
+      ],
+      "field": "reason",
+      "question": "Are the reasons for incoming requests drawn from the same vocabulary as existing reservation reasons?"
+    },
+    "status": "UNKNOWN",
+    "note": "Field names suggest similarity, but value examples were not provided to confirm overlapping domains."
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": null,
+      "question": "Does the holidays collection constrain the dates that can be requested in incoming_request or reserved in reservations?"
+    },
+    "status": "UNKNOWN",
+    "note": "The holidays collection contains dates, but there is no observed cross-source link or schema constraint tying them to reservations or incoming_request."
+  }
+]
+```

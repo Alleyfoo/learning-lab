@@ -1,0 +1,27 @@
+```json
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "binding": "The field holds the specific calendar date being requested",
+      "claim_status": "INFERRED",
+      "question": "Does the 'requested_date' field in 'incoming_request' represent the specific calendar date being requested?"
+    },
+    {
+      "source": "holidays",
+      "field": "date",
+      "binding": "The field holds the specific calendar date of a holiday",
+      "claim_status": "INFERRED",
+      "question": "Does the 'date' field in 'holidays' represent the specific calendar date of a holiday?"
+    },
+    {
+      "source": "reservations",
+      "field": "date",
+      "binding": "The field holds the date the reservation is for",
+      "claim_status": "INFERRED",
+      "question": "Does the 'date' field in 'reservations' represent the date the reservation is for?"
+    }
+  ]
+}
+```

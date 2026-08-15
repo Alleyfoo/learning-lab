@@ -1,0 +1,25 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "binding": "requested_date holds the date being requested for the reservation",
+      "claim_status": "INFERRED",
+      "question": "Does incoming_request.requested_date contain the date that the user is requesting for a reservation?"
+    },
+    {
+      "source": "holidays",
+      "field": "date",
+      "binding": "date holds the holiday date that should block reservation requests",
+      "claim_status": "INFERRED",
+      "question": "Does holidays.date contain the date of the holiday that should be used to reject reservation requests?"
+    },
+    {
+      "source": "reservations",
+      "field": "date",
+      "binding": "date holds the date for which a reservation is made and thus indicates a date is already reserved",
+      "claim_status": "INFERRED",
+      "question": "Does reservations.date contain the reserved date that should be used to detect already-reserved dates?"
+    }
+  ]
+}

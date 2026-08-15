@@ -1,0 +1,27 @@
+```json
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "holidays",
+      "field": null,
+      "binding": "The holidays collection constrains the dates that can be requested in incoming_request.",
+      "claim_status": "UNKNOWN",
+      "question": "Does the holidays collection constrain the dates that can be requested in incoming_request or reserved in reservations?"
+    },
+    {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "binding": "The meaning of requested_date as the specific calendar date being requested for a reservation, to be matched against holidays and existing reservations.",
+      "claim_status": "INFERRED",
+      "question": "Does incoming_request.requested_date represent the calendar date to be validated against holidays and reservations?"
+    },
+    {
+      "source": "reservations",
+      "field": "date",
+      "binding": "The meaning of reservations.date as the date for which the reservation is made, to be matched against incoming_request.requested_date to prevent double-booking.",
+      "claim_status": "INFERRED",
+      "question": "Does reservations.date represent the reserved dates to be matched against incoming_request.requested_date?"
+    }
+  ]
+}
+```

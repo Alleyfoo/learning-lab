@@ -1,0 +1,288 @@
+[
+  {
+    "claim": {
+      "source": "holidays",
+      "fields": [
+        "date",
+        "name"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "type": "str",
+      "distinct_values": 6,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "type": "str",
+      "distinct_values": 6
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "fields": [
+        "reason",
+        "requested_date",
+        "tier"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "type": "str",
+      "distinct_values": 1
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "type": "str",
+      "distinct_values": 1,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "type": "str",
+      "distinct_values": 1
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "fields": [
+        "created",
+        "date",
+        "reason",
+        "ref",
+        "tier"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "type": "str",
+      "distinct_values": 3,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "type": "str",
+      "distinct_values": 4,
+      "value_shape": "YYYY-MM-DD"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "type": "str",
+      "distinct_values": 4
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "type": "str",
+      "distinct_values": 4
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "date",
+      "meaning": "The date on which a holiday occurs."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "collection_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "holidays",
+      "field": "name",
+      "meaning": "The name of the holiday."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "requested_date",
+      "meaning": "The date being requested, likely for a reservation."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "reason",
+      "meaning": "The reason provided for a reservation request."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "incoming_request",
+      "field": "tier",
+      "meaning": "The service or pricing tier being requested."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "created",
+      "meaning": "The date the reservation was created."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "date",
+      "meaning": "The date for which the reservation is made."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "reason",
+      "meaning": "The reason for the reservation."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "ref",
+      "meaning": "A reference or identifier for the reservation."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "reservations",
+      "field": "tier",
+      "meaning": "The service or pricing tier of the reservation."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": [
+        "incoming_request",
+        "reservations"
+      ],
+      "field": null,
+      "question": "Does an incoming_request directly correspond to or create a reservation?"
+    },
+    "status": "UNKNOWN",
+    "note": "The shared fields (reason, tier) suggest a relationship, but there is no explicit linking key or identifier to confirm a direct workflow between the two collections."
+  },
+  {
+    "claim": {
+      "source": [
+        "holidays",
+        "reservations"
+      ],
+      "field": "date",
+      "question": "Are reservations restricted from being made on dates that appear in holidays?"
+    },
+    "status": "UNKNOWN",
+    "note": "Both collections contain a 'date' field with the same YYYY-MM-DD shape, but no constraint or cross-reference was observed to confirm whether holidays block reservations."
+  }
+]

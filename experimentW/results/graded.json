@@ -1,0 +1,147 @@
+{
+  "probe1": {
+    "probe": "probe1",
+    "W1_addressed": {
+      "passed": true,
+      "llm_claims": 13,
+      "unknowns": 3,
+      "unaddressed": 0
+    },
+    "W2_blocked": {
+      "passed": true,
+      "produced_a_node_instead": false
+    },
+    "W3_load_bearing": {
+      "passed": true,
+      "blocked_on": [
+        "('holidays', 'date')",
+        "('incoming_request', 'requested_date')",
+        "('reservations', 'date')"
+      ]
+    },
+    "W4_no_over_block": {
+      "passed": true,
+      "over_blocked_on": []
+    },
+    "W5_confirmation_exact": {
+      "passed": true,
+      "promoted": 3,
+      "changed": 3,
+      "was": [
+        "INFERRED"
+      ],
+      "observations_intact": true
+    },
+    "W6_resumes": {
+      "passed": true,
+      "node_produced": true,
+      "G1_valid": true,
+      "G1_codes": [],
+      "G2_equivalent": true,
+      "bound_field": "date",
+      "rules": [
+        "date_well_formed",
+        "not_holiday",
+        "not_reserved"
+      ]
+    },
+    "chain_completed": true
+  },
+  "probe2": {
+    "probe": "probe2",
+    "W1_addressed": {
+      "passed": true,
+      "llm_claims": 12,
+      "unknowns": 2,
+      "unaddressed": 0
+    },
+    "W2_blocked": {
+      "passed": true,
+      "produced_a_node_instead": false
+    },
+    "W3_load_bearing": {
+      "passed": true,
+      "blocked_on": [
+        "('holidays', 'date')",
+        "('incoming_request', 'requested_date')",
+        "('reservations', 'date')"
+      ]
+    },
+    "W4_no_over_block": {
+      "passed": true,
+      "over_blocked_on": []
+    },
+    "W5_confirmation_exact": {
+      "passed": true,
+      "promoted": 3,
+      "changed": 3,
+      "was": [
+        "INFERRED"
+      ],
+      "observations_intact": true
+    },
+    "W6_resumes": {
+      "passed": true,
+      "node_produced": true,
+      "G1_valid": true,
+      "G1_codes": [],
+      "G2_equivalent": true,
+      "bound_field": "date",
+      "rules": [
+        "date_well_formed",
+        "not_holiday",
+        "not_reserved"
+      ]
+    },
+    "chain_completed": true
+  },
+  "probe3": {
+    "probe": "probe3",
+    "W1_addressed": {
+      "passed": true,
+      "llm_claims": 13,
+      "unknowns": 3,
+      "unaddressed": 0
+    },
+    "W2_blocked": {
+      "passed": true,
+      "produced_a_node_instead": false
+    },
+    "W3_load_bearing": {
+      "passed": true,
+      "blocked_on": [
+        "('holidays', None)",
+        "('incoming_request', 'requested_date')",
+        "('reservations', 'date')"
+      ]
+    },
+    "W4_no_over_block": {
+      "passed": true,
+      "over_blocked_on": []
+    },
+    "W5_confirmation_exact": {
+      "passed": true,
+      "promoted": 3,
+      "changed": 3,
+      "was": [
+        "INFERRED",
+        "UNKNOWN"
+      ],
+      "observations_intact": true
+    },
+    "W6_resumes": {
+      "passed": true,
+      "node_produced": true,
+      "G1_valid": true,
+      "G1_codes": [],
+      "G2_equivalent": true,
+      "bound_field": "date",
+      "rules": [
+        "date_well_formed",
+        "not_holiday",
+        "not_reserved"
+      ]
+    },
+    "chain_completed": true
+  }
+}
