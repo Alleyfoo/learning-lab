@@ -65,6 +65,12 @@ ENVELOPE_PROBLEM_CODES = (
     "missing_data_file",
     "malformed_data_file",
     "unknown_task",
+    # Added 2026-08-15. Malformed proposals from OUTSIDE this repo are now an
+    # expected input class -- Experiment R had an LLM return `sources` as a list
+    # and `parse()` raised AttributeError before any validator ran. A crash is
+    # not a refusal: it says nothing about what was wrong and cannot be reported
+    # to whoever produced it.
+    "malformed_sources",
 )
 
 
@@ -93,6 +99,9 @@ class TaskModel:
     task: str
     sources: dict[str, Source]
     body: dict                      # task-specific; opaque here, by design
+    # What was wrong with `sources` structurally, if anything. Carried rather
+    # than raised so validate() can report it as a Problem like everything else.
+    malformed_sources: Optional[str] = None
 
     def source_names(self) -> tuple[str, ...]:
         return tuple(self.sources)
@@ -162,8 +171,19 @@ def assert_refusal(task_name: str, reason: str) -> str:
 
 def parse(raw: dict) -> TaskModel:
     """Structural parse only. Judgement belongs to validate()."""
+    raw_sources = raw.get("sources")
+    malformed: Optional[str] = None
+    if raw_sources is None:
+        raw_sources = {}
+    elif not isinstance(raw_sources, dict):
+        # A list of specs is the shape an outside producer most often reaches
+        # for. It is refused by name, not by traceback.
+        malformed = (f"expected an object keyed by source name, got "
+                     f"{type(raw_sources).__name__}")
+        raw_sources = {}
+
     sources: dict[str, Source] = {}
-    for name, spec in (raw.get("sources") or {}).items():
+    for name, spec in raw_sources.items():
         spec = spec if isinstance(spec, dict) else {}
         sources[name] = Source(name=name,
                                path=str(spec.get("path", "")),
@@ -175,6 +195,7 @@ def parse(raw: dict) -> TaskModel:
         task=str(raw.get("task", "")),
         sources=sources,
         body={k: v for k, v in raw.items() if k not in known and not k.startswith("_")},
+        malformed_sources=malformed,
     )
 
 
@@ -199,7 +220,9 @@ def validate(model: TaskModel, base: Path) -> Report:
         problems.append(Problem("unknown_task", where,
                                 f"{model.task!r}; registered: {sorted(_REGISTRY)}"))
 
-    if not model.sources:
+    if model.malformed_sources:
+        problems.append(Problem("malformed_sources", where, model.malformed_sources))
+    elif not model.sources:
         problems.append(Problem("missing_key", where, "sources"))
 
     for name, src in model.sources.items():
@@ -288,6 +311,17 @@ def _self_test() -> int:
         check("missing_key" in r.codes(), f"model_id: {sorted(r.codes())}")
         r = probe({**good, "task": "nope"}, base)
         check("unknown_task" in r.codes(), f"task: {sorted(r.codes())}")
+
+        # A malformed `sources` must be REFUSED, not raise. Experiment R had an
+        # external producer hand back a list here and the floor crashed.
+        r = probe({**good, "sources": [{"path": "data.json", "collection": "items"}]}, base)
+        check("malformed_sources" in r.codes(),
+              f"a list of source specs must be refused by name: {sorted(r.codes())}")
+        check(not r.valid, "…and must not validate")
+        for bad_shape in ("a string", 42, True):
+            r = probe({**good, "sources": bad_shape}, base)
+            check("malformed_sources" in r.codes(),
+                  f"sources={bad_shape!r} must be refused, not crash: {sorted(r.codes())}")
         r = probe({**good, "sources": {"s": {"path": "gone.json", "collection": "items"}}}, base)
         check("missing_data_file" in r.codes(), f"missing file: {sorted(r.codes())}")
         r = probe({**good, "sources": {"s": {"path": "bad.json", "collection": "items"}}}, base)

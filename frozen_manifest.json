@@ -84,6 +84,11 @@
       "path": "scripts/check_surfaced.py",
       "sha256": "eb1db8c30f52b70b4097a1430084df21ce2f9bca0f69631f42c1cafbf377ea25",
       "note": "adopted 2026-08-15"
+    },
+    {
+      "path": "taskmodel/task_model.py",
+      "sha256": "41ecdb1043c11d1bd43b5080f3ca639fbb862972c2c3bdbfc1e3c08bfa05cc98",
+      "note": "adopted 2026-08-15"
     }
   ],
   "_note": "Frozen artifacts NOT covered by any experiment's expected.json. Per-experiment expected.json files remain authoritative for what they cover; this file never duplicates them. Do not edit a hash to make a check pass -- if an artifact legitimately changed, that is a re-freeze and belongs in a commit that says so."

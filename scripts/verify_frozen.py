@@ -184,7 +184,12 @@ def adopt() -> int:
                           # commits with nothing noticing.
                           "experimentL/harness/execute_recipe.py",
                           "definition_phase/harness/approval.py",
-                          "scripts/check_surfaced.py")
+                          "scripts/check_surfaced.py",
+                          # The task-model floor, pinned 2026-08-15 before
+                          # Experiment R2 so that experiment's instrument is
+                          # fixed. Malformed external proposals are refused by
+                          # name here rather than crashing; R2 depends on that.
+                          "taskmodel/task_model.py")
         for p in LAB.glob(pattern))
 
     # Stamped with the day the hash was actually taken. It was hardcoded, which
