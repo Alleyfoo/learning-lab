@@ -1,0 +1,79 @@
+You are defining a small deterministic node. Its entire world is below.
+
+THE JOB, as described by the person who wants it:
+Incoming requests contain a date. This reservation list contains booked dates. This holiday list contains dates that cannot be booked. Add a request unless the date is invalid, a holiday or already booked.
+
+WHAT THE NODE RECEIVES, once per run:
+{
+  "request_date": "string, one per request"
+}
+
+THE DATA IT MAY READ:
+{
+  "holidays": {
+    "collection": "holidays",
+    "element_type": "str",
+    "count": 6,
+    "examples": [
+      "2026-01-01",
+      "2026-01-06",
+      "2026-05-01"
+    ]
+  },
+  "reservations": {
+    "collection": "reservations",
+    "element_type": "str",
+    "count": 2,
+    "examples": [
+      "2026-03-10",
+      "2026-03-11"
+    ]
+  }
+}
+
+The two files are "fixtures/holidays.json" and "fixtures/reservations.json".
+
+THE REQUIRED SHAPE. Fill in every "..." and keep every key exactly as written:
+{
+  "model_id": "...",
+  "model_version": "...",
+  "task": "...",
+  "purpose": "...",
+  "sources": {
+    "<source name>": {
+      "path": "...",
+      "collection": "..."
+    }
+  },
+  "rules": [
+    {
+      "rule": "...",
+      "refusal": "..."
+    }
+  ],
+  "on_accept": "..."
+}
+
+`task` must be "reservation" and `model_version` must be 1.
+
+PERMITTED RULE NAMES (you must decide which to use, and in what order):
+[
+  "date_well_formed",
+  "not_holiday",
+  "not_reserved"
+]
+
+PERMITTED REFUSAL CODES (you must decide which rule each belongs to):
+[
+  "INVALID_DATE",
+  "HOLIDAY",
+  "ALREADY_RESERVED"
+]
+
+PERMITTED on_accept VALUE:
+"append_to_reservations"
+
+Rules are evaluated in the order you declare them, and the FIRST rule that fails
+decides which refusal is reported.
+
+Output ONLY the JSON object. No explanation, no markdown fence.
