@@ -28,6 +28,7 @@ See `reconciliation/design/reconciliation_model_v1.md`.
 from __future__ import annotations
 
 import sys
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Optional
 
@@ -50,7 +51,20 @@ RELATIONS_COMPARED = ("both_same", "both_different", "only_left", "only_right")
 # `alice@X` equals `alice@x` is a property of the job, not of the executor.
 # PRO-2 instance 9 is the precedent -- normalisation is something a construct
 # declares, and the default is to preserve.
-COMPARISONS = ("exact", "trim", "casefold", "trim_casefold")
+COMPARISONS = ("exact", "trim", "casefold", "trim_casefold", "within")
+
+# `within` is the only comparison with numeric semantics, and it is what gives
+# this task a reason to want a non-numeric policy at all. That reason arrived
+# because the JOB needed it -- a reconciliation of balances cannot be done by
+# string equality -- not because the other numeric tasks have one.
+NUMERIC_COMPARISONS = ("within",)
+
+# What may happen when a numerically-compared operand is not a number. The unit
+# here is a KEY, not a row: this task's output is one row per key in the union,
+# so "refuse_row" would name a thing that does not exist. Same idea as
+# enrichment's and aggregation's policy, different unit -- which is itself
+# evidence about how reusable the idea is.
+NON_NUMERIC_POLICIES = ("refuse_run", "refuse_key")
 
 OUTPUT_ORDERS = ("left_then_right", "sorted_by_key")
 
@@ -60,13 +74,16 @@ OUTPUT_ORDERS = ("left_then_right", "sorted_by_key")
 # multiplies rows must be a NAMED policy with its own evidence before it exists.
 DUPLICATE_POLICIES = ("refuse_run", "refuse_key")
 
-REFUSALS = ("DUPLICATE_KEY", "MISSING_MATCH_KEY")
+REFUSALS = ("DUPLICATE_KEY", "MISSING_MATCH_KEY", "NON_NUMERIC_OPERAND")
 
 BODY_PROBLEM_CODES = (
     "missing_key",
     "unknown_comparison",
     "duplicate_compare_field",
     "classify_split_mismatch",
+    "comparison_tolerance_mismatch",
+    "malformed_tolerance",
+    "policy_comparison_mismatch",
     "unknown_source",
     "same_source_both_sides",
     "unknown_output_order",
@@ -95,10 +112,17 @@ def classify(model: TaskModel) -> dict:
     return dict(model.body.get("classify") or {})
 
 
-def compare_of(model: TaskModel) -> tuple[tuple[str, str], ...]:
-    """Declared attribute comparisons as (field, comparison) pairs, in order."""
-    return tuple((str(c.get("field", "")), str(c.get("comparison", "")))
-                 for c in (model.body.get("compare") or ()))
+def compare_of(model: TaskModel) -> tuple[dict, ...]:
+    """Declared attribute comparisons, in order, as raw dicts."""
+    return tuple(dict(c) for c in (model.body.get("compare") or ()))
+
+
+def compares_numerically(model: TaskModel) -> bool:
+    return any(c.get("comparison") in NUMERIC_COMPARISONS for c in compare_of(model))
+
+
+def on_non_numeric(model: TaskModel) -> str:
+    return str(model.body.get("on_non_numeric", ""))
 
 
 def compares_attributes(model: TaskModel) -> bool:
@@ -161,8 +185,31 @@ def validate_body(model: TaskModel, base: Path) -> list[Problem]:
     # --- declared attribute comparison ---------------------------------------
     compares = compare_of(model)
     seen_fields: set[str] = set()
-    for i, (field, how) in enumerate(compares):
+    for i, spec in enumerate(compares):
+        field, how = str(spec.get("field", "")), str(spec.get("comparison", ""))
         cwhere = f"{where}:compare[{i}]"
+
+        # PAIRING, both directions: `within` needs a tolerance and nothing else
+        # may carry one. A tolerance on a casefold comparison implies a
+        # numeric reading that is never applied.
+        tolerance = spec.get("tolerance")
+        if how in NUMERIC_COMPARISONS and tolerance is None:
+            problems.append(Problem("comparison_tolerance_mismatch", cwhere,
+                                    f"{how!r} needs a declared tolerance"))
+        if how not in NUMERIC_COMPARISONS and tolerance is not None:
+            problems.append(Problem(
+                "comparison_tolerance_mismatch", cwhere,
+                f"{how!r} takes no tolerance, but {tolerance!r} was given -- it "
+                f"implies a numeric reading that is never applied"))
+        if tolerance is not None:
+            try:
+                value = Decimal(str(tolerance))
+            except (InvalidOperation, ValueError, ArithmeticError):
+                problems.append(Problem("malformed_tolerance", cwhere, repr(tolerance)))
+            else:
+                if value < 0:
+                    problems.append(Problem("malformed_tolerance", cwhere,
+                                            f"{tolerance!r} is negative"))
         if not field:
             problems.append(Problem("missing_key", cwhere, "field"))
         elif field in seen_fields:
@@ -213,6 +260,25 @@ def validate_body(model: TaskModel, base: Path) -> list[Problem]:
     if on_duplicate_key(model) not in DUPLICATE_POLICIES:
         problems.append(Problem("unknown_policy", f"{where}:on_duplicate_key",
                                 on_duplicate_key(model)))
+
+    # PAIRING: the non-numeric policy exists if and only if something is compared
+    # numerically. Required so the policy's PRESENCE stays attributable -- it is
+    # here because this job compares balances, not because two other tasks have
+    # one.
+    policy = on_non_numeric(model)
+    numeric = compares_numerically(model)
+    if numeric and not policy:
+        problems.append(Problem(
+            "policy_comparison_mismatch", where,
+            "a numeric comparison is declared, so on_non_numeric must say what "
+            "happens when an operand is not a number"))
+    if policy and not numeric:
+        problems.append(Problem(
+            "policy_comparison_mismatch", where,
+            f"on_non_numeric={policy!r} is declared but nothing is compared "
+            f"numerically, so the policy could never apply"))
+    if policy and policy not in NON_NUMERIC_POLICIES:
+        problems.append(Problem("unknown_policy", f"{where}:on_non_numeric", policy))
 
     return problems
 
@@ -303,6 +369,48 @@ def _self_test() -> int:
           f"reporting SAME vs DIFFERENT while comparing nothing is meaningless: "
           f"{sorted(r.codes())}")
 
+    # --- v3: tolerance-based numeric comparison ------------------------------
+    v3raw = json.loads((base / "models" / "reconciliation_v3.json").read_text(encoding="utf-8"))
+    rep3 = validate(task_model.parse(v3raw), base)
+    seen |= rep3.codes()
+    check(rep3.valid, f"the v3 model must validate: {[str(x) for x in rep3.problems]}")
+
+    def probe3(mutate) -> Report:
+        bad = copy.deepcopy(v3raw)
+        mutate(bad)
+        r = validate(task_model.parse(bad), base)
+        seen.update(r.codes())
+        return r
+
+    # PAIRING 1: `within` <-> tolerance, both directions.
+    r = probe3(lambda d: d["compare"][1].pop("tolerance"))
+    check("comparison_tolerance_mismatch" in r.codes(),
+          f"`within` without a tolerance: {sorted(r.codes())}")
+    r = probe3(lambda d: d["compare"][0].update(tolerance="0.01"))
+    check("comparison_tolerance_mismatch" in r.codes(),
+          f"a tolerance on an `exact` comparison implies a numeric reading that "
+          f"is never applied: {sorted(r.codes())}")
+
+    r = probe3(lambda d: d["compare"][1].update(tolerance="a bit"))
+    check("malformed_tolerance" in r.codes(), f"unparseable tolerance: {sorted(r.codes())}")
+    r = probe3(lambda d: d["compare"][1].update(tolerance="-0.01"))
+    check("malformed_tolerance" in r.codes(), f"negative tolerance: {sorted(r.codes())}")
+
+    # PAIRING 2: numeric comparison <-> non-numeric policy, both directions.
+    # This is what keeps the policy's PRESENCE attributable.
+    r = probe3(lambda d: d.pop("on_non_numeric"))
+    check("policy_comparison_mismatch" in r.codes(),
+          f"a numeric comparison with no policy for non-numeric operands: "
+          f"{sorted(r.codes())}")
+    r = probe2(lambda d: d.update(on_non_numeric="refuse_key"))
+    check("policy_comparison_mismatch" in r.codes(),
+          f"a policy that could never apply, because nothing is compared "
+          f"numerically: {sorted(r.codes())}")
+    r = probe3(lambda d: d.update(on_non_numeric="refuse_row"))
+    check("unknown_policy" in r.codes(),
+          f"this task's unit is a KEY, not a row -- `refuse_row` names something "
+          f"that does not exist here: {sorted(r.codes())}")
+
     with tempfile.TemporaryDirectory() as td:
         bad = Path(td) / "bad.json"
         bad.write_text('{"users": ["not an object"]}', encoding="utf-8")
@@ -324,10 +432,11 @@ def _self_test() -> int:
     if failures:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
         return 1
-    print(f"SELF-TEST PASSED (v1 and v2 models valid / all {len(BODY_PROBLEM_CODES)} "
+    print(f"SELF-TEST PASSED (v1, v2 and v3 models valid / all {len(BODY_PROBLEM_CODES)} "
           f"body codes exercised / self-reconciliation refused / a shared "
           f"classification label refused / classify-vs-compare pairing enforced in "
-          f"BOTH directions / NO on_non_numeric policy anywhere)")
+          f"BOTH directions / tolerance and policy pairings enforced both ways / "
+          f"`refuse_row` refused because this task's unit is a KEY)")
     return 0
 
 

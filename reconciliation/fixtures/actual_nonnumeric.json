@@ -1,5 +1,5 @@
 {
-  "_note": "Actual users. carol's EMAIL differs; alice's NAME differs only by case; alice carries NO status at all, so a compared attribute can be present on one side and absent on the other. Balances added for TOLERANCE comparison: alice differs by 0.004 (inside a 0.01 tolerance, outside exact equality) and carol by 0.50 (outside both).",
+  "_note": "Pairs with expected_users.json for the NON-NUMERIC operand case: carol's balance is the string 'unknown', which no tolerance can compare.",
   "users": [
     {
       "user_id": "alice",
@@ -12,7 +12,7 @@
       "email": "changed@x",
       "name": "Carol",
       "status": "active",
-      "balance": "50.50"
+      "balance": "unknown"
     },
     {
       "user_id": "dave",

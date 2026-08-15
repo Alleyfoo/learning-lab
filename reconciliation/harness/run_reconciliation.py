@@ -47,6 +47,35 @@ from task_model import vocabulary_parity  # noqa: E402
 RESULTS = BASE / "results"
 MODEL_PATH = BASE / "models" / "reconciliation_v1.json"
 V2_PATH = BASE / "models" / "reconciliation_v2.json"
+V3_PATH = BASE / "models" / "reconciliation_v3.json"
+
+# --- v3: TOLERANCE-BASED NUMERIC COMPARISON ----------------------------------
+# Added because the JOB needed it: reconciling balances cannot be done by string
+# equality. alice differs by 0.004 (inside a 0.01 tolerance), carol by 0.50.
+V3_ROWS = [
+    ["alice", "SAME", []],
+    ["bob", "ONLY_EXPECTED", []],
+    ["carol", "DIFFERENT",
+     [{"field": "email", "comparison": "exact",
+       "left": "carol@x", "right": "changed@x"},
+      {"field": "balance", "comparison": "within",
+       "left": "50.00", "right": "50.50",
+       "tolerance": "0.01", "delta": "0.50"}]],
+    ["dave", "ONLY_ACTUAL", []],
+]
+
+# Same data, same field, different declared comparison. alice's balances are
+# 100.00 and 100.004: equal under a 0.01 tolerance, unequal as strings.
+TOLERANCE_MODE_EXPECTED = {
+    "exact": {"alice": "DIFFERENT", "carol": "DIFFERENT"},
+    "within": {"alice": "SAME", "carol": "DIFFERENT"},
+}
+
+# carol's balance is the string "unknown" in this fixture.
+NON_NUMERIC_EXPECTED = {
+    "refuse_key": {"n_rows": 3, "run_refused": False, "refused": ["carol"]},
+    "refuse_run": {"n_rows": 0, "run_refused": True, "refused": []},
+}
 
 # --- v2: DECLARED ATTRIBUTE COMPARISON ---------------------------------------
 # v1 reported carol as BOTH while her email had changed. That was correct under
@@ -116,6 +145,13 @@ DUP_EXPECTED = {
 
 def _model2(mutate=None):
     raw = json.loads(V2_PATH.read_text(encoding="utf-8"))
+    if mutate:
+        mutate(raw)
+    return task_model.parse(raw)
+
+
+def _model3(mutate=None):
+    raw = json.loads(V3_PATH.read_text(encoding="utf-8"))
     if mutate:
         mutate(raw)
     return task_model.parse(raw)
@@ -303,13 +339,82 @@ def run_all() -> dict:
                "compares nothing cannot report SAME vs DIFFERENT. Refused BOTH "
                "ways rather than patched up")
 
+        # --- v3: tolerance-based numeric comparison ------------------------
+        v3 = execute(_model3(), BASE)
+        record("v3_tolerance_comparison", v3.rows == V3_ROWS,
+               f"{v3.rows}",
+               "reconciling balances cannot be done by string equality. carol's "
+               "difference reports the ORIGINAL values plus the declared "
+               "tolerance and the computed delta")
+
+        tol_detail, tol_ok = {}, True
+        for how, want in TOLERANCE_MODE_EXPECTED.items():
+            def set_cmp(d: dict, h=how) -> None:
+                spec = {"field": "balance", "comparison": h}
+                if h == "within":
+                    spec["tolerance"] = "0.01"
+                d["compare"] = [spec]
+                if h != "within":
+                    d.pop("on_non_numeric", None)
+            r = execute(_model3(set_cmp), BASE)
+            got = {row[0]: row[1] for row in r.rows if row[1] in ("SAME", "DIFFERENT")}
+            tol_detail[how] = got
+            tol_ok = tol_ok and got == want
+        record("tolerance_follows_declaration", tol_ok, f"{tol_detail}",
+               "alice's balances are 100.00 and 100.004: equal within 0.01, "
+               "unequal as strings. Whether that gap matters is the JOB's "
+               "question, and the tolerance is where it is answered")
+
+        # --- the non-numeric policy, which this task now has a REASON to have -
+        nn_detail, nn_ok = {}, True
+        for policy, want in NON_NUMERIC_EXPECTED.items():
+            def set_nn(d: dict, p=policy) -> None:
+                d["sources"]["actual"]["path"] = "fixtures/actual_nonnumeric.json"
+                d["on_non_numeric"] = p
+            r = execute(_model3(set_nn), BASE)
+            got = {"n_rows": len(r.rows), "run_refused": r.run_refused is not None,
+                   "refused": sorted({x["key"] for x in r.refused})}
+            nn_detail[policy] = got
+            nn_ok = nn_ok and got == want
+        record("non_numeric_policy_follows_declaration", nn_ok, f"{nn_detail}",
+               "carol's balance is the string `unknown`, which no tolerance can "
+               "compare. The unit refused is a KEY, not a row -- this task emits "
+               "one row per key in the union, so `refuse_row` would name "
+               "something that does not exist here")
+
+        # The numeric operands are reported AS WRITTEN, like the string ones.
+        nn_run = execute(_model3(lambda d: (
+            d["sources"]["actual"].update(path="fixtures/actual_nonnumeric.json"),
+            d.update(on_non_numeric="refuse_key"))), BASE)
+        carol_refusal = next(x for x in nn_run.refused if x["key"] == "carol")
+        record("non_numeric_refusal_names_the_operands",
+               carol_refusal["field"] == "balance"
+               and carol_refusal["left"] == "50.00"
+               and carol_refusal["right"] == "unknown",
+               f"{carol_refusal}",
+               "a refusal that did not name WHICH field and WHAT values would "
+               "leave the reader to guess which of two compared attributes "
+               "failed")
+
     # --- the point of this task, asserted --------------------------------------
-    raw = json.loads(MODEL_PATH.read_text(encoding="utf-8"))
-    no_numeric_policy = "on_non_numeric" not in json.dumps(raw)
-    record("no_non_numeric_policy", no_numeric_policy, f"{no_numeric_policy}",
-           "this shape has no numeric semantics at all. Its ABSENCE of an "
-           "on_non_numeric policy is the independent evidence the fourth task "
-           "exists to provide")
+    v1raw = json.loads(MODEL_PATH.read_text(encoding="utf-8"))
+    v2raw = json.loads(V2_PATH.read_text(encoding="utf-8"))
+    v3raw = json.loads(V3_PATH.read_text(encoding="utf-8"))
+    policy_presence = {
+        "v1 (key presence only)": "on_non_numeric" in v1raw,
+        "v2 (string comparison)": "on_non_numeric" in v2raw,
+        "v3 (tolerance)": "on_non_numeric" in v3raw,
+    }
+    record("policy_appears_only_with_numeric_comparison",
+           policy_presence == {"v1 (key presence only)": False,
+                               "v2 (string comparison)": False,
+                               "v3 (tolerance)": True},
+           f"{policy_presence}",
+           "WITHIN ONE TASK: the non-numeric policy is absent until a numeric "
+           "comparison is declared, and required once it is. That is the "
+           "cleanest available evidence that the policy tracks numeric "
+           "semantics rather than task-hood -- and it is enforced by the model "
+           "validator, not merely observed")
 
     failed = [c for c in checks if c["status"] == "FAIL"]
     if not report.valid:

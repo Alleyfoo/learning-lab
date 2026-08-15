@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 import sys
 from dataclasses import dataclass, field as dc_field
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Optional
 
@@ -34,13 +35,30 @@ sys.path.insert(0, str(LAB / "taskmodel"))
 import reconciliation_model  # noqa: E402  (registers the task type)
 from reconciliation_model import (  # noqa: E402
     classify, compare_of, compares_attributes, left, match_on, on_duplicate_key,
-    output_order, right, validate,
+    on_non_numeric, output_order, right, validate,
 )
 from task_model import TaskModel as Model, assert_refusal, load_collection, load_model  # noqa: E402
 
 SUPPORTED_OUTPUT_ORDERS = ("left_then_right", "sorted_by_key")
 SUPPORTED_DUPLICATE_POLICIES = ("refuse_run", "refuse_key")
-SUPPORTED_COMPARISONS = ("exact", "trim", "casefold", "trim_casefold")
+SUPPORTED_COMPARISONS = ("exact", "trim", "casefold", "trim_casefold", "within")
+SUPPORTED_NON_NUMERIC_POLICIES = ("refuse_run", "refuse_key")
+
+
+def _to_number(value):
+    """Decimal, or None if this is not a number.
+
+    Deliberately strict, as in the two numeric executors: no currency symbols,
+    no thousands separators, no locale guessing. An operand the model asks to
+    compare numerically and that is not a number is handled by the DECLARED
+    policy, never coerced into one.
+    """
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        return Decimal(str(value).strip())
+    except (InvalidOperation, ValueError, ArithmeticError):
+        return None
 
 # Absent is not a value. A compared attribute present on one side and missing on
 # the other is a DIFFERENCE, reported with None for the side that lacks it --
@@ -69,13 +87,42 @@ def _normalised(value, how: str):
     raise UnhonourableModel(f"comparison {how!r} is declared but not implemented")
 
 
+class NonNumericOperand(Exception):
+    """A numerically-compared operand is not a number. Handled by the policy."""
+
+    def __init__(self, field: str, left, right):
+        super().__init__(field)
+        self.field, self.left, self.right = field, left, right
+
+
 def _differences(left_row: dict, right_row: dict,
-                 compares: tuple[tuple[str, str], ...]) -> list[dict]:
-    """Which declared attributes differ, with the values as WRITTEN."""
+                 compares: tuple[dict, ...]) -> list[dict]:
+    """Which declared attributes differ, with the values as WRITTEN.
+
+    Every reported value is the ORIGINAL text on both branches: the string
+    comparisons normalise only to decide, and the numeric one reports the
+    operands as written alongside the computed delta. PRO-2 instance 9 does not
+    stop applying because the comparison became arithmetic.
+    """
     out: list[dict] = []
-    for field, how in compares:
+    for spec in compares:
+        field = str(spec.get("field", ""))
+        how = str(spec.get("comparison", ""))
         lv = left_row.get(field, ABSENT)
         rv = right_row.get(field, ABSENT)
+
+        if how == "within":
+            ln, rn = _to_number(lv), _to_number(rv)
+            if ln is None or rn is None:
+                raise NonNumericOperand(field, lv, rv)
+            tolerance = Decimal(str(spec.get("tolerance")))
+            delta = abs(ln - rn)
+            if delta > tolerance:
+                out.append({"field": field, "comparison": how,
+                            "left": lv, "right": rv,
+                            "tolerance": str(tolerance), "delta": str(delta)})
+            continue
+
         if _normalised(lv, how) != _normalised(rv, how):
             out.append({"field": field, "comparison": how, "left": lv, "right": rv})
     return out
@@ -141,9 +188,13 @@ def execute(model: Model, base: Path) -> Reconciliation:
         raise UnhonourableModel(f"on_duplicate_key {dup_policy!r} declared, not implemented")
 
     compares = compare_of(model)
-    for _field, how in compares:
+    for spec in compares:
+        how = str(spec.get("comparison", ""))
         if how not in SUPPORTED_COMPARISONS:
             raise UnhonourableModel(f"comparison {how!r} declared, not implemented")
+    nn_policy = on_non_numeric(model)
+    if nn_policy and nn_policy not in SUPPORTED_NON_NUMERIC_POLICIES:
+        raise UnhonourableModel(f"on_non_numeric {nn_policy!r} declared, not implemented")
 
     lname, rname = left(model), right(model)
     lfield, rfield = match_on(model)
@@ -205,7 +256,15 @@ def execute(model: Model, base: Path) -> Reconciliation:
         # Matched on the key. Whether the PAIR agrees is a separate question, and
         # one the model has to have asked -- an unasked comparison is why v1
         # reported carol as BOTH while her email had changed.
-        diffs = _differences(left_index[key][0], right_index[key][0], compares)
+        try:
+            diffs = _differences(left_index[key][0], right_index[key][0], compares)
+        except NonNumericOperand as bad:
+            reason = assert_refusal("reconciliation", "NON_NUMERIC_OPERAND")
+            if nn_policy == "refuse_run":
+                return _refuse_run(out, f"{reason}: {bad.field!r} on key {key!r}")
+            out.refused.append({"key": key, "reason": reason, "field": bad.field,
+                                "left": bad.left, "right": bad.right})
+            continue
         relation = "both_different" if diffs else "both_same"
         out.rows.append([key, labels[relation], diffs])
 
