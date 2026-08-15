@@ -92,17 +92,44 @@
       "predicted": "GAP",
       "predicted_missing_capability": "multiple_unpivots",
       "predicted_silent_wrong": false,
-      "valid": false,
-      "problem_codes": [
-        "executor_cannot_honour"
-      ],
+      "valid": true,
+      "problem_codes": [],
       "implied_rows": 8,
-      "executed": false,
+      "executed": true,
+      "columns": [
+        "tuote",
+        "kuukausi_eur",
+        "eur"
+      ],
+      "n_rows": 4,
+      "unhonoured_types": [],
       "classification": "GAP",
-      "silent_wrong": false,
-      "behaviour": "recipe INVALID -- the system refuses rather than producing a wrong table",
+      "silent_wrong": true,
+      "behaviour": "validated and executed, but produced 4/8 rows",
+      "sample": [
+        [
+          "ART-001",
+          "Tammi eur",
+          100
+        ],
+        [
+          "ART-001",
+          "Helmi eur",
+          120
+        ],
+        [
+          "ART-002",
+          "Tammi eur",
+          70
+        ],
+        [
+          "ART-002",
+          "Helmi eur",
+          90
+        ]
+      ],
       "as_predicted": true,
-      "silent_wrong_as_predicted": true
+      "silent_wrong_as_predicted": false
     },
     "S4_already_long": {
       "predicted": "EXPRESSIBLE",
@@ -221,6 +248,7 @@
     "S6_interleaved_note"
   ],
   "silent_wrong": [
+    "S3_two_measure_blocks",
     "S5_formatted_numbers"
   ],
   "more_capable_than_predicted": [
@@ -228,6 +256,7 @@
   ],
   "less_capable_than_predicted": [],
   "unpredicted_silent_wrong": [
+    "S3_two_measure_blocks",
     "S5_formatted_numbers"
   ],
   "predicted_totals": {
