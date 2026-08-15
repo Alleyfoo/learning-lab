@@ -1,0 +1,133 @@
+{
+  "question": "does the modelled task do the same job as the hand-written one, including the state it leaves behind?",
+  "requests": [
+    "2026-07-14",
+    "2026-07-14",
+    "2026-12-25",
+    "2026-02-30",
+    "2026-03-10",
+    "2026-08-01"
+  ],
+  "control": {
+    "decisions_agree": true,
+    "state_agrees": true,
+    "equivalent": true,
+    "reference_decisions": [
+      {
+        "request": "2026-07-14",
+        "accepted": true,
+        "reason": null
+      },
+      {
+        "request": "2026-07-14",
+        "accepted": false,
+        "reason": "ALREADY_RESERVED"
+      },
+      {
+        "request": "2026-12-25",
+        "accepted": false,
+        "reason": "HOLIDAY"
+      },
+      {
+        "request": "2026-02-30",
+        "accepted": false,
+        "reason": "INVALID_DATE"
+      },
+      {
+        "request": "2026-03-10",
+        "accepted": false,
+        "reason": "ALREADY_RESERVED"
+      },
+      {
+        "request": "2026-08-01",
+        "accepted": true,
+        "reason": null
+      }
+    ],
+    "modelled_decisions": [
+      {
+        "request": "2026-07-14",
+        "accepted": true,
+        "reason": null
+      },
+      {
+        "request": "2026-07-14",
+        "accepted": false,
+        "reason": "ALREADY_RESERVED"
+      },
+      {
+        "request": "2026-12-25",
+        "accepted": false,
+        "reason": "HOLIDAY"
+      },
+      {
+        "request": "2026-02-30",
+        "accepted": false,
+        "reason": "INVALID_DATE"
+      },
+      {
+        "request": "2026-03-10",
+        "accepted": false,
+        "reason": "ALREADY_RESERVED"
+      },
+      {
+        "request": "2026-08-01",
+        "accepted": true,
+        "reason": null
+      }
+    ],
+    "reference_state": [
+      "2026-03-10",
+      "2026-03-11",
+      "2026-07-14",
+      "2026-08-01"
+    ],
+    "modelled_state": [
+      "2026-03-10",
+      "2026-03-11",
+      "2026-07-14",
+      "2026-08-01"
+    ]
+  },
+  "canaries": [
+    {
+      "name": "skip_holiday",
+      "detected": true,
+      "decisions_agree": false,
+      "state_agrees": false,
+      "reference_state": [
+        "2026-03-10",
+        "2026-03-11",
+        "2026-07-14",
+        "2026-12-25",
+        "2026-08-01"
+      ]
+    },
+    {
+      "name": "never_append",
+      "detected": true,
+      "decisions_agree": false,
+      "state_agrees": false,
+      "reference_state": [
+        "2026-03-10",
+        "2026-03-11"
+      ]
+    },
+    {
+      "name": "append_twice",
+      "detected": true,
+      "decisions_agree": true,
+      "state_agrees": false,
+      "reference_state": [
+        "2026-03-10",
+        "2026-03-11",
+        "2026-07-14",
+        "2026-07-14",
+        "2026-08-01",
+        "2026-08-01"
+      ]
+    }
+  ],
+  "outcome": "EQUIVALENT",
+  "stated_limitation": "one request sequence of six, one holiday list, one starting state. Says the two implementations agree HERE; it is not a proof of equivalence over all inputs. No LLM is involved in either path at runtime."
+}

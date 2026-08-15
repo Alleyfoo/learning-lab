@@ -1,0 +1,7 @@
+{
+  "_note": "The reservation source, as it stands before the job runs. This file is APPENDED TO by an accepted request -- it is state, not a fixture in the read-only sense.",
+  "reservations": [
+    "2026-03-10",
+    "2026-03-11"
+  ]
+}

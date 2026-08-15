@@ -1,0 +1,16 @@
+{
+  "model_version": 1,
+  "model_id": "calendar_job",
+  "task": "reservation",
+  "purpose": "Unattended booking of a shared resource. A requested date is accepted unless it is not a real calendar date, falls on a company holiday, or is already booked. An accepted date is appended to the reservation list. There is no human in the run.",
+  "sources": {
+    "holidays":     {"path": "fixtures/holidays.json",     "collection": "holidays"},
+    "reservations": {"path": "fixtures/reservations.json", "collection": "reservations"}
+  },
+  "rules": [
+    {"rule": "date_well_formed", "refusal": "INVALID_DATE"},
+    {"rule": "not_holiday", "refusal": "HOLIDAY"},
+    {"rule": "not_reserved", "refusal": "ALREADY_RESERVED"}
+  ],
+  "on_accept": "append_to_reservations"
+}
