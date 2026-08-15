@@ -65,8 +65,36 @@ class Execution:
     # nothing fails if a future Execution omits it.
     member_contribution: dict[str, int] = dc_field(default_factory=dict)
 
+    @property
+    def degraded(self) -> bool:
+        """Does this result fail to deliver what the recipe DECLARED?
+
+        Derived, never assigned. Observable Error v1: a result cannot be
+        constructed that is degraded and does not say so.
+
+        A field declared `number` that delivered strings is degraded -- the table
+        looks complete while a column is not what it claims. A sheetset member
+        with no data rows is NOT: every value is right and nothing is
+        misrepresented, which is why the designer's "a silent zero is
+        acceptable" ruling and M's `silent_wrong` grading of S5 are consistent
+        rather than opposed.
+        """
+        return bool(self.unhonoured_types)
+
+    @property
+    def degradation(self) -> list[dict]:
+        """Which declarations were not honoured, in the authoritative artifact."""
+        return list(self.unhonoured_types)
+
     def as_dict(self) -> dict:
+        # `degraded` sits alongside `columns` and `rows` deliberately. The table
+        # and the fact that it is degraded are ONE artifact: a consumer that
+        # serialises the result cannot obtain the table without the flag.
+        # `unhonoured_types` already existed and was not enough -- Experiment M
+        # graded S5 as silently wrong precisely because the table was separable
+        # from it.
         return {"columns": self.columns, "rows": self.rows,
+                "degraded": self.degraded, "degradation": self.degradation,
                 "unhonoured_types": self.unhonoured_types, "notes": self.notes,
                 "member_contribution": self.member_contribution}
 
