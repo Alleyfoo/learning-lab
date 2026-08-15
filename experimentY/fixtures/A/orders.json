@@ -1,0 +1,17 @@
+{
+  "_note": "Identical in all three conditions. Only the products side varies.",
+  "orders": [
+    {
+      "item": "A-100",
+      "quantity": "3"
+    },
+    {
+      "item": "B-200",
+      "quantity": "7"
+    },
+    {
+      "item": "C-300",
+      "quantity": "2"
+    }
+  ]
+}

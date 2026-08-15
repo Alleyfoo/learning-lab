@@ -1,0 +1,62 @@
+{
+  "model_version": 1,
+  "task": "enrichment",
+  "driving_source": "orders",
+  "outputs": [
+    {
+      "target": "item",
+      "from": "orders",
+      "field": "item"
+    },
+    {
+      "target": "description",
+      "from": "products",
+      "field": "description"
+    },
+    {
+      "target": "quantity",
+      "from": "orders",
+      "field": "quantity",
+      "type": "number"
+    },
+    {
+      "target": "price",
+      "from": "products",
+      "field": "price",
+      "type": "number"
+    },
+    {
+      "target": "line_total",
+      "compute": {
+        "op": "multiply",
+        "left": {
+          "from": "orders",
+          "field": "quantity"
+        },
+        "right": {
+          "from": "products",
+          "field": "price"
+        }
+      }
+    }
+  ],
+  "on_non_numeric": "refuse_row",
+  "model_id": "enrichment_y_C_oracle",
+  "sources": {
+    "orders": {
+      "path": "fixtures/C/orders.json",
+      "collection": "orders"
+    },
+    "products": {
+      "path": "fixtures/C/products.json",
+      "collection": "products"
+    }
+  },
+  "lookup": {
+    "into": "products",
+    "match_left": "item",
+    "match_right": "sku",
+    "on_missing": "refuse_row",
+    "on_ambiguous": "refuse_run"
+  }
+}

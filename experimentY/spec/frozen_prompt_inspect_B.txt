@@ -1,0 +1,235 @@
+You are the INTERPRETATION stage of a two-stage inspector.
+
+A program has already inspected the data. It produced the OBSERVED facts below by
+reading the source structure directly: field names, value kinds, example values,
+distinct counts, and — for every pair of fields across two sources — a
+`candidate_relationship` reporting how much of the left field's values are
+present on the right (`left_coverage`) and whether the right field identifies at
+most one row per value (`right_unique`). Those are measurements. The program does
+not say which pairing is intended.
+
+--- BEGIN OBSERVED FACTS (produced by the program) ---
+[
+  {
+    "claim": {
+      "source": "orders",
+      "fields": [
+        "item",
+        "quantity"
+      ],
+      "row_count": 3
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "type": "str",
+      "distinct_values": 3,
+      "value_kind": "text",
+      "examples": [
+        "A-100",
+        "B-200",
+        "C-300"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "type": "str",
+      "distinct_values": 3,
+      "value_kind": "numeric_string",
+      "examples": [
+        "3",
+        "7",
+        "2"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "fields": [
+        "code",
+        "description",
+        "price",
+        "sku"
+      ],
+      "row_count": 3
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "type": "str",
+      "distinct_values": 3,
+      "value_kind": "text",
+      "examples": [
+        "A-100",
+        "B-200",
+        "C-300"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "type": "str",
+      "distinct_values": 3,
+      "value_kind": "text",
+      "examples": [
+        "Alpha",
+        "Beta",
+        "Gamma"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "type": "str",
+      "distinct_values": 3,
+      "value_kind": "numeric_string",
+      "examples": [
+        "1.00",
+        "2.00",
+        "5.00"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "type": "str",
+      "distinct_values": 3,
+      "value_kind": "text",
+      "examples": [
+        "Z-900",
+        "A-100",
+        "C-300"
+      ]
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "candidate_relationship": {
+        "left": "orders.item",
+        "right": "products.code",
+        "left_coverage": "3/3",
+        "right_unique": true
+      }
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "candidate_relationship": {
+        "left": "orders.item",
+        "right": "products.sku",
+        "left_coverage": "2/3",
+        "right_unique": true
+      }
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "candidate_relationship": {
+        "left": "products.code",
+        "right": "orders.item",
+        "left_coverage": "3/3",
+        "right_unique": true
+      }
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "candidate_relationship": {
+        "left": "products.sku",
+        "right": "orders.item",
+        "left_coverage": "2/3",
+        "right_unique": true
+      }
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  }
+]
+--- END OBSERVED FACTS ---
+
+Your job is to say what this data probably MEANS, and to be honest about what
+cannot be settled from it.
+
+THE ONLY STATUSES AVAILABLE TO YOU:
+  INFERRED   your interpretation. Must carry the basis it rests on.
+  UNKNOWN    you have no supported interpretation.
+
+BASIS IS A CLOSED VOCABULARY. An INFERRED claim's `basis` must be a list drawn
+from exactly these kinds, and nothing else:
+[
+  "field_name",
+  "collection_name",
+  "value_pattern",
+  "value_examples",
+  "cross_source_similarity",
+  "field_order"
+]
+
+EVERY CLAIM MUST NAME ITS SUBJECT. This applies to UNKNOWN exactly as much as to
+INFERRED: `source` is required, and `field` is required but may be `null` when
+the question is about a whole collection. Where a claim concerns a relationship
+between two collections, `source` may be a list of both.
+
+Return a JSON list of claims and nothing else. The shape:
+[
+  {
+    "claim": {
+      "source": "<collection>",
+      "field": "<field name, or null>",
+      "meaning": "<what you think it means>"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "<kinds from the list below>"
+    ]
+  },
+  {
+    "claim": {
+      "source": "<collection, or a list of collections>",
+      "field": "<field name, or null for a whole-collection question>",
+      "question": "<what you cannot settle about that subject>"
+    },
+    "status": "UNKNOWN",
+    "note": "<why it cannot be settled>"
+  }
+]
+
+Do not invent fields that are not in the observed facts. Offering a candidate
+meaning AND recording what remains unsettled about the same subject is correct
+and expected.

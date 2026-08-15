@@ -1,0 +1,23 @@
+{
+  "_note": "code has complete coverage and sku does not. Mirror of A -- the field NAME cannot be the answer.",
+  "products": [
+    {
+      "sku": "Z-900",
+      "code": "A-100",
+      "description": "Alpha",
+      "price": "1.00"
+    },
+    {
+      "sku": "A-100",
+      "code": "B-200",
+      "description": "Beta",
+      "price": "2.00"
+    },
+    {
+      "sku": "C-300",
+      "code": "C-300",
+      "description": "Gamma",
+      "price": "5.00"
+    }
+  ]
+}

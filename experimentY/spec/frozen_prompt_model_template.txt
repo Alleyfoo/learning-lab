@@ -1,0 +1,146 @@
+An inspection of some data sources produced the claims below. You did not
+perform the inspection and cannot see the data yourself.
+
+Each claim carries its own epistemic status:
+  OBSERVED   directly established from the source representation
+  INFERRED   the inspector's interpretation, with what it inferred from
+  UNKNOWN    no supported interpretation, naming the subject it is about
+  CONFIRMED  an external authority resolved an inference or an unknown
+
+--- BEGIN INSPECTION CLAIMS ---
+[
+  {
+    "claim": {
+      "source": "<stage 1>"
+    },
+    "status": "<stage 1>"
+  }
+]
+--- END INSPECTION CLAIMS ---
+
+THE JOB the person wants:
+Enrich each order line with the description and price of the product it refers to, and compute the line total as quantity multiplied by price.
+
+THE RULE YOU MUST FOLLOW:
+A load-bearing binding may not be established from an INFERRED or UNKNOWN
+claim without either independent evidence or explicit human confirmation.
+
+Independent evidence may NOT reuse anything already listed in that claim's
+`basis`, and may NOT substitute different evidence of the same KIND:
+
+  - Naming evidence is ONE kind. A field name and a collection name are not
+    independent of each other. Two names do not add up to a fact.
+  - Value-kind and example evidence establish what values ARE, never what a
+    field MEANS.
+  - Independent evidence means: documentation, another trusted source, explicit
+    human confirmation, or the mechanical sufficiency defined below.
+
+The key a lookup joins on IS a load-bearing binding: it decides which reference
+row supplies the output.
+
+MECHANICAL SUFFICIENCY FOR A RELATIONSHIP BINDING:
+
+A candidate relationship is MECHANICALLY SUFFICIENT when it is the SOLE candidate
+for that left field having BOTH complete left coverage (every left value present
+on the right) AND unique right-side keys.
+
+A mechanically sufficient candidate IS established, by OBSERVED evidence. Use it,
+and do NOT ask a human to confirm it.
+
+If two or more candidates for the same left field are mechanically sufficient, or
+none is, the binding is NOT established: block and ask which is intended.
+
+A claim marked CONFIRMED is settled. Confirmation resolves that ONE claim and
+nothing else -- it does not make neighbouring inferences trustworthy.
+
+Not every INFERRED or UNKNOWN claim matters. Only those the job's decisions
+actually depend on are load-bearing. Judge which.
+
+If every load-bearing binding is supported, produce the model definition.
+
+THE REQUIRED SHAPE. Fill in every "..." and keep every key exactly as written.
+The `sources` and `outputs` blocks are already decided and must be copied
+unchanged:
+{
+  "model_version": 1,
+  "model_id": "...",
+  "task": "enrichment",
+  "sources": {
+    "orders": {
+      "path": "fixtures/A/orders.json",
+      "collection": "orders"
+    },
+    "products": {
+      "path": "fixtures/A/products.json",
+      "collection": "products"
+    }
+  },
+  "driving_source": "...",
+  "lookup": {
+    "into": "...",
+    "match_left": "...",
+    "match_right": "...",
+    "on_missing": "...",
+    "on_ambiguous": "..."
+  },
+  "outputs": [
+    {
+      "target": "item",
+      "from": "orders",
+      "field": "item"
+    },
+    {
+      "target": "description",
+      "from": "products",
+      "field": "description"
+    },
+    {
+      "target": "quantity",
+      "from": "orders",
+      "field": "quantity",
+      "type": "number"
+    },
+    {
+      "target": "price",
+      "from": "products",
+      "field": "price",
+      "type": "number"
+    },
+    {
+      "target": "line_total",
+      "compute": {
+        "op": "multiply",
+        "left": {
+          "from": "orders",
+          "field": "quantity"
+        },
+        "right": {
+          "from": "products",
+          "field": "price"
+        }
+      }
+    }
+  ],
+  "on_non_numeric": "..."
+}
+
+PERMITTED VALUES:
+  driving_source, lookup.into      one of "orders", "products"
+  lookup.match_left                a field of the driving source
+  lookup.match_right               a field of the looked-up source
+  on_missing, on_ambiguous         "refuse_row" or "refuse_run"
+  on_non_numeric                   "refuse_row" or "refuse_run"
+
+If a load-bearing binding is NOT supported, do NOT produce a model. Instead
+return ONLY this JSON object:
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "<collection, or a list of collections>",
+      "field": "<field name, or null>",
+      "binding": "<what you cannot establish>",
+      "claim_status": "<status of the claim it would rest on>",
+      "question": "<the question a human must answer>"
+    }
+  ]
+}

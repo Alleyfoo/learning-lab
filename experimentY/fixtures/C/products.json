@@ -1,0 +1,23 @@
+{
+  "_note": "both have complete coverage. Nothing mechanical distinguishes them.",
+  "products": [
+    {
+      "sku": "A-100",
+      "code": "B-200",
+      "description": "Alpha",
+      "price": "1.00"
+    },
+    {
+      "sku": "B-200",
+      "code": "A-100",
+      "description": "Beta",
+      "price": "2.00"
+    },
+    {
+      "sku": "C-300",
+      "code": "C-300",
+      "description": "Gamma",
+      "price": "5.00"
+    }
+  ]
+}
