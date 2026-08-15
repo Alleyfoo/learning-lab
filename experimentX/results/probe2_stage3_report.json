@@ -1,0 +1,258 @@
+[
+  {
+    "claim": {
+      "source": "orders",
+      "fields": [
+        "item",
+        "quantity"
+      ],
+      "row_count": 3
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "fields": [
+        "code",
+        "description",
+        "price",
+        "sku"
+      ],
+      "row_count": 3
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "type": "str",
+      "distinct_values": 3,
+      "value_shape": "decimal written as a string"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "left": "orders.item",
+      "right": "products.code",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "left": "orders.item",
+      "right": "products.sku",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "left": "products.code",
+      "right": "orders.item",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "left": "products.sku",
+      "right": "orders.item",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": null,
+      "meaning": "A collection of order records"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": null,
+      "meaning": "A collection of product records"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "meaning": "The item being ordered, which acts as a product identifier"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "meaning": "The quantity of the item being ordered"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "meaning": "orders.item matches products.sku"
+    },
+    "status": "CONFIRMED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ],
+    "was": "INFERRED",
+    "confirmed_by": "human",
+    "superseded_meaning": "A unique product code identifier"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "meaning": "A textual description of the product"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "meaning": "The cost or price of the product"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "meaning": "A Stock Keeping Unit identifier for the product"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": [
+        "orders",
+        "products"
+      ],
+      "field": "item",
+      "meaning": "orders.item acts as a foreign key linking orders to products via both products.code and products.sku"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "cross_source_similarity",
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "meaning": "orders.item matches products.sku"
+    },
+    "status": "CONFIRMED",
+    "note": "Both fields perfectly match each other's values via orders.item, but the observed facts do not reveal if they are semantically identical or just overlapping.",
+    "was": "UNKNOWN",
+    "confirmed_by": "human"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "question": "Whether quantity contains numeric values represented as strings or some other non-numeric shapes"
+    },
+    "status": "UNKNOWN",
+    "note": "The field type is string and no value_shape or value_examples were provided for it in the observed facts."
+  }
+]

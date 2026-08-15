@@ -1,0 +1,124 @@
+```json
+[
+  {
+    "claim": {
+      "source": "orders",
+      "field": null,
+      "meaning": "A collection of order records or order line items."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "meaning": "The identifier of the product being ordered, referencing a product in the 'products' collection."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "meaning": "The amount or count of the item being ordered."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": null,
+      "meaning": "A catalog or inventory of products."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name",
+      "field_order"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "meaning": "A unique identifier for a product that maps to ordered items."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "meaning": "The textual description or name of the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "meaning": "The cost of the product, stored as a decimal string."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "meaning": "A unique stock keeping unit identifier for the product, mapping to ordered items."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "question": "Whether 'code' and 'sku' represent semantically different concepts (like an internal code vs a supplier code) or if they are redundant columns."
+    },
+    "status": "UNKNOWN",
+    "note": "Both fields contain the exact same 3 unique values and both map perfectly to orders.item. The sample size and value patterns do not allow distinguishing their specific roles."
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "question": "Whether the values are purely numeric quantities stored as strings or if they contain non-numeric characters."
+    },
+    "status": "UNKNOWN",
+    "note": "The field name implies a numeric quantity, but the measured type is 'str'. Without value examples or a specific numeric shape, the nature of the string values cannot be settled."
+  },
+  {
+    "claim": {
+      "source": ["orders", "products"],
+      "field": null,
+      "question": "Whether the relationship between orders and products is strictly one-to-one or if it could be one-to-many in a larger dataset."
+    },
+    "status": "UNKNOWN",
+    "note": "With only 3 rows, every item is unique and matches exactly one product. This could be an artifact of the small sample size rather than a true structural constraint."
+  }
+]
+```

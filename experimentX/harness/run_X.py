@@ -2,6 +2,7 @@
 """Run the X chain. Same three stages as W, relational missing truth."""
 from __future__ import annotations
 
+import importlib.util
 import json
 import sys
 import urllib.request
@@ -11,15 +12,18 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 LAB = ROOT.parent
 RESULTS = ROOT / "results"
+# X's harness ONLY. W's modules share these names and are loaded by
+# explicit path below -- putting W's directory on sys.path made
+# `import build_prompts` resolve to W's calendar prompts and voided a run.
 sys.path.insert(0, str(HERE))
-sys.path.insert(0, str(LAB / "experimentW" / "harness"))
 
+import observe  # noqa: E402
 import build_prompts as x  # noqa: E402
 
 boundary = x.boundary
-_w_run = x.importlib.util.spec_from_file_location(
+_w_run = importlib.util.spec_from_file_location(
     "_w_run", LAB / "experimentW" / "harness" / "run_W.py")
-w_run = x.importlib.util.module_from_spec(_w_run)
+w_run = importlib.util.module_from_spec(_w_run)
 sys.modules["_w_run"] = w_run
 _w_run.loader.exec_module(w_run)
 
@@ -80,7 +84,7 @@ def node_of(text: str):
 
 def main(argv: list[str]) -> int:
     RESULTS.mkdir(exist_ok=True)
-    observed = x.observe.observed_claims()
+    observed = observe.observed_claims()
     inspect = x.inspect_prompt(observed)
 
     for probe in (1, 2, 3):

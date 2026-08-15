@@ -1,0 +1,152 @@
+{
+  "probe1": {
+    "probe": "probe1",
+    "X1_addressed": {
+      "passed": true,
+      "llm_claims": 10,
+      "unaddressed": 0
+    },
+    "X2_blocked": {
+      "passed": true,
+      "produced_a_model_instead": false,
+      "match_right_if_so": null
+    },
+    "X3_join_binding": {
+      "passed": true,
+      "blocked_on": [
+        "('orders', 'quantity')",
+        "(('orders', 'products'), 'item')"
+      ]
+    },
+    "X4_no_over_block": {
+      "passed": true,
+      "over_blocked_on": [],
+      "note": "weak check -- only `description` qualifies"
+    },
+    "X4B_observer_gap": {
+      "blocked_on_fields_the_program_did_not_characterise": [
+        "quantity"
+      ],
+      "note": "attributable to observe.py, not to the modeller"
+    },
+    "X5_answer_applied": {
+      "passed": true,
+      "promoted": 3,
+      "carries_the_answer": true,
+      "superseded": [
+        "The ordered amount for each order line, stored as a string rather than a native number."
+      ],
+      "observations_intact": true
+    },
+    "X6_resumes": {
+      "passed": true,
+      "model_produced": true,
+      "match_right": "sku",
+      "error": null,
+      "rows_equal_oracle": true,
+      "refused": [],
+      "run_refused": null
+    },
+    "chain_completed": true
+  },
+  "probe2": {
+    "probe": "probe2",
+    "X1_addressed": {
+      "passed": true,
+      "llm_claims": 11,
+      "unaddressed": 0
+    },
+    "X2_blocked": {
+      "passed": true,
+      "produced_a_model_instead": false,
+      "match_right_if_so": null
+    },
+    "X3_join_binding": {
+      "passed": true,
+      "blocked_on": [
+        "('products', 'code')"
+      ]
+    },
+    "X4_no_over_block": {
+      "passed": true,
+      "over_blocked_on": [],
+      "note": "weak check -- only `description` qualifies"
+    },
+    "X4B_observer_gap": {
+      "blocked_on_fields_the_program_did_not_characterise": [
+        "code"
+      ],
+      "note": "attributable to observe.py, not to the modeller"
+    },
+    "X5_answer_applied": {
+      "passed": true,
+      "promoted": 2,
+      "carries_the_answer": true,
+      "superseded": [
+        "A unique product code identifier"
+      ],
+      "observations_intact": true
+    },
+    "X6_resumes": {
+      "passed": false,
+      "model_produced": false,
+      "blocked_again_on": [
+        [
+          "orders",
+          "quantity"
+        ]
+      ]
+    },
+    "chain_completed": true
+  },
+  "probe3": {
+    "probe": "probe3",
+    "X1_addressed": {
+      "passed": true,
+      "llm_claims": 10,
+      "unaddressed": 0
+    },
+    "X2_blocked": {
+      "passed": true,
+      "produced_a_model_instead": false,
+      "match_right_if_so": null
+    },
+    "X3_join_binding": {
+      "passed": true,
+      "blocked_on": [
+        "('orders', 'quantity')",
+        "(('orders', 'products'), 'item')"
+      ]
+    },
+    "X4_no_over_block": {
+      "passed": true,
+      "over_blocked_on": [],
+      "note": "weak check -- only `description` qualifies"
+    },
+    "X4B_observer_gap": {
+      "blocked_on_fields_the_program_did_not_characterise": [
+        "quantity"
+      ],
+      "note": "attributable to observe.py, not to the modeller"
+    },
+    "X5_answer_applied": {
+      "passed": true,
+      "promoted": 3,
+      "carries_the_answer": true,
+      "superseded": [
+        "The amount of the item ordered."
+      ],
+      "observations_intact": true
+    },
+    "X6_resumes": {
+      "passed": true,
+      "model_produced": true,
+      "match_right": "sku",
+      "error": null,
+      "rows_equal_oracle": true,
+      "refused": [],
+      "run_refused": null
+    },
+    "chain_completed": true
+  }
+}

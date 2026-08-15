@@ -1,0 +1,121 @@
+```json
+[
+  {
+    "claim": {
+      "source": "orders",
+      "field": null,
+      "meaning": "A collection of order line items."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "meaning": "An identifier for the product being ordered."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "meaning": "The amount or count of the item being ordered."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": null,
+      "meaning": "A catalog or master list of products."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "meaning": "A code identifying the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "meaning": "A textual description of the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "meaning": "The monetary price of the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "meaning": "A Stock Keeping Unit identifier for the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "question": "Whether `orders.item` is intended to reference `products.code` or `products.sku` as its primary foreign key."
+    },
+    "status": "UNKNOWN",
+    "note": "Both `products.code` and `products.sku` contain exactly the same 3 values as `orders.item` and are both unique, making either a valid join key."
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "question": "Whether `products.code` and `products.sku` represent distinct concepts or are simply aliases for the same identifier."
+    },
+    "status": "UNKNOWN",
+    "note": "They have identical values and identical containment relationships with `orders.item` in the observed data, so no semantic distinction can be made."
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "question": "The exact data format and whether it includes units of measure."
+    },
+    "status": "UNKNOWN",
+    "note": "The field is typed as a string, but no value examples were provided to determine if it strictly contains numeric strings or if it includes textual units."
+  }
+]
+```

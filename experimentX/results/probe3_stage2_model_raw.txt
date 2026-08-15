@@ -1,0 +1,23 @@
+```json
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": [
+        "orders",
+        "products"
+      ],
+      "field": "item",
+      "binding": "orders.item maps to products.code or products.sku as the lookup join key",
+      "claim_status": "UNKNOWN",
+      "question": "Does orders.item map to products.code or products.sku?"
+    },
+    {
+      "source": "orders",
+      "field": "quantity",
+      "binding": "quantity values are numeric (castable to number for multiplication)",
+      "claim_status": "UNKNOWN",
+      "question": "What is the value pattern of quantity?"
+    }
+  ]
+}
+```

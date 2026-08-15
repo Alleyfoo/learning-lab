@@ -1,0 +1,11 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "products",
+      "field": "code",
+      "binding": "The lookup match_right key for orders.item: products.code versus products.sku",
+      "claim_status": "UNKNOWN",
+      "question": "Whether products.code and products.sku represent the same concept or are distinct identifiers that happen to share the same values, and which one should be used as the join key for orders.item."
+    }
+  ]
+}

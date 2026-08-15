@@ -1,0 +1,21 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": [
+        "orders",
+        "products"
+      ],
+      "field": "item",
+      "binding": "the products-side field (code or sku) to use as the foreign-key target for orders.item",
+      "claim_status": "UNKNOWN",
+      "question": "Which products-side field (code or sku) is the intended foreign-key target for orders.item?"
+    },
+    {
+      "source": "orders",
+      "field": "quantity",
+      "binding": "whether the string values of quantity are numeric quantities that can be multiplied",
+      "claim_status": "UNKNOWN",
+      "question": "Are the string values of quantity numeric quantities, or categorical codes that happen to be stored as text?"
+    }
+  ]
+}

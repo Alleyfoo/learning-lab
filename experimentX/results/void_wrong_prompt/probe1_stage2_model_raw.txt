@@ -1,0 +1,18 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "holidays",
+      "field": null,
+      "binding": "the field that holds a holiday date so a requested date can be checked for holidays",
+      "claim_status": "UNKNOWN",
+      "question": "Which field in holidays.json contains the holiday date?"
+    },
+    {
+      "source": "reservations",
+      "field": null,
+      "binding": "the field that holds a reserved date so a requested date can be checked for existing reservations",
+      "claim_status": "UNKNOWN",
+      "question": "Which field in reservations.json contains the reserved date?"
+    }
+  ]
+}

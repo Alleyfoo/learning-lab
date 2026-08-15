@@ -1,0 +1,126 @@
+[
+  {
+    "claim": {
+      "source": "orders",
+      "field": null,
+      "meaning": "A collection of order records"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": null,
+      "meaning": "A collection of product records"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "collection_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "meaning": "The item being ordered, which acts as a product identifier"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "meaning": "The quantity of the item being ordered"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "meaning": "A unique product code identifier"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "meaning": "A textual description of the product"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "meaning": "The cost or price of the product"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "meaning": "A Stock Keeping Unit identifier for the product"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": [
+        "orders",
+        "products"
+      ],
+      "field": "item",
+      "meaning": "orders.item acts as a foreign key linking orders to products via both products.code and products.sku"
+    },
+    "status": "INFERRED",
+    "basis": [
+      "cross_source_similarity",
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "question": "Whether products.code and products.sku represent the same concept or are distinct identifiers that happen to share the same values"
+    },
+    "status": "UNKNOWN",
+    "note": "Both fields perfectly match each other's values via orders.item, but the observed facts do not reveal if they are semantically identical or just overlapping."
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "question": "Whether quantity contains numeric values represented as strings or some other non-numeric shapes"
+    },
+    "status": "UNKNOWN",
+    "note": "The field type is string and no value_shape or value_examples were provided for it in the observed facts."
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "holidays",
+      "field": null,
+      "binding": "which field holds the holiday date used to evaluate not_holiday",
+      "claim_status": "UNKNOWN",
+      "question": "Which field in fixtures/holidays.json contains the holiday date?"
+    },
+    {
+      "source": "reservations",
+      "field": null,
+      "binding": "which field holds the reservation date used to evaluate not_reserved",
+      "claim_status": "UNKNOWN",
+      "question": "Which field in fixtures/reservations.json contains the reserved date?"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "holidays",
+      "field": null,
+      "binding": "which field holds the holiday date used for the not_holiday check",
+      "claim_status": "UNKNOWN",
+      "question": "Which field in the holidays collection holds the holiday date that the requested date must be compared against?"
+    },
+    {
+      "source": "reservations",
+      "field": null,
+      "binding": "which field holds the reserved date used for the not_reserved check and for appending new reservations",
+      "claim_status": "UNKNOWN",
+      "question": "Which field in the reservations collection holds the reserved date that the requested date must be compared against, and that must be set when appending a new reservation?"
+    }
+  ]
+}

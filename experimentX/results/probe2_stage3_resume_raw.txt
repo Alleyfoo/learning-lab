@@ -1,0 +1,11 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "orders",
+      "field": "quantity",
+      "binding": "quantity can be treated as a number (or converted to a number) so it can be multiplied by price to compute line_total",
+      "claim_status": "UNKNOWN",
+      "question": "Whether quantity contains numeric values represented as strings or some other non-numeric shapes"
+    }
+  ]
+}

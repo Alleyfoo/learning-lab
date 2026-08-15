@@ -1,0 +1,245 @@
+[
+  {
+    "claim": {
+      "source": "orders",
+      "fields": [
+        "item",
+        "quantity"
+      ],
+      "row_count": 3
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "fields": [
+        "code",
+        "description",
+        "price",
+        "sku"
+      ],
+      "row_count": 3
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "type": "str",
+      "distinct_values": 3,
+      "value_shape": "decimal written as a string"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "left": "orders.item",
+      "right": "products.code",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "left": "orders.item",
+      "right": "products.sku",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "left": "products.code",
+      "right": "orders.item",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "left": "products.sku",
+      "right": "orders.item",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "meaning": "A product identifier on each order line; its values exactly match the values of products.code (and products.sku)."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "meaning": "orders.item matches products.sku"
+    },
+    "status": "CONFIRMED",
+    "basis": [
+      "field_name"
+    ],
+    "was": "INFERRED",
+    "confirmed_by": "human",
+    "superseded_meaning": "The ordered amount for each order line, stored as a string rather than a native number."
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "meaning": "A product code that identifies each product; it is uniquely populated and is a candidate join key for orders.item."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "meaning": "A stock-keeping unit identifier for each product; uniquely populated and also a candidate join key for orders.item."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "meaning": "A human-readable description of each product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "meaning": "The product price, given as a decimal number encoded as a string."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": [
+        "orders",
+        "products"
+      ],
+      "field": "item",
+      "meaning": "orders.item matches products.sku"
+    },
+    "status": "CONFIRMED",
+    "note": "orders.item fully overlaps and is fully contained by both products.code and products.sku, so either could be the join key; the data alone does not distinguish them.",
+    "was": "UNKNOWN",
+    "confirmed_by": "human"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": null,
+      "question": "Are products.code and products.sku the same identifier, or two distinct identifiers that merely share the same three values?"
+    },
+    "status": "UNKNOWN",
+    "note": "Both fields have 3 unique str values that mutually contain orders.item's 3 unique values, implying the same value set, but row-level pairing between code and sku was not measured, so identity versus coincidence cannot be settled."
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "meaning": "orders.item matches products.sku"
+    },
+    "status": "CONFIRMED",
+    "note": "The field name suggests a quantity, but no value pattern or examples were provided for orders.quantity, so its numeric nature cannot be confirmed.",
+    "was": "UNKNOWN",
+    "confirmed_by": "human"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "question": "What currency or unit does the decimal price represent?"
+    },
+    "status": "UNKNOWN",
+    "note": "Only the decimal-as-string shape was observed; no currency marker or examples were given."
+  }
+]

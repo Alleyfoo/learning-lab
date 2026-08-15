@@ -1,0 +1,226 @@
+[
+  {
+    "claim": {
+      "source": "orders",
+      "fields": [
+        "item",
+        "quantity"
+      ],
+      "row_count": 3
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "fields": [
+        "code",
+        "description",
+        "price",
+        "sku"
+      ],
+      "row_count": 3
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "type": "str",
+      "distinct_values": 3,
+      "value_shape": "decimal written as a string"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "left": "orders.item",
+      "right": "products.code",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "left": "orders.item",
+      "right": "products.sku",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "left": "products.code",
+      "right": "orders.item",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "left": "products.sku",
+      "right": "orders.item",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "meaning": "Identifier for the product being ordered, which corresponds to identifiers in the products collection."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "meaning": "The quantity of the item being ordered."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "meaning": "A unique product code or identifier, which acts as a key linked to orders."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "meaning": "A textual description of the product."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "meaning": "The price of the product, stored as a decimal number formatted as a string."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "value_pattern"
+    ]
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "meaning": "A unique stock keeping unit (SKU) or product identifier, which acts as a key linked to orders."
+    },
+    "status": "INFERRED",
+    "basis": [
+      "field_name",
+      "cross_source_similarity"
+    ]
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "question": "Which field in products is the intended foreign key target for orders.item: products.code or products.sku?"
+    },
+    "status": "UNKNOWN",
+    "note": "orders.item perfectly matches both products.code and products.sku in both directions, making the intended primary relationship ambiguous."
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "question": "What distinguishes products.code from products.sku semantically?"
+    },
+    "status": "UNKNOWN",
+    "note": "Both fields contain the exact same set of distinct values and have identical matching relationships to orders.item."
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "question": "Does the quantity field actually represent numeric values despite being stored as strings?"
+    },
+    "status": "UNKNOWN",
+    "note": "The observed type is string, but no value examples or numeric patterns were provided to confirm the contents are strictly numeric."
+  }
+]

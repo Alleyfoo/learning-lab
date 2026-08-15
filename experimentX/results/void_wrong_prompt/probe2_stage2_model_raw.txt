@@ -1,0 +1,20 @@
+```json
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "holidays",
+      "field": null,
+      "binding": "which item field holds the date",
+      "claim_status": "UNKNOWN",
+      "question": "Which field in the holidays collection holds the date?"
+    },
+    {
+      "source": "reservations",
+      "field": null,
+      "binding": "which item field holds the date",
+      "claim_status": "UNKNOWN",
+      "question": "Which field in the reservations collection holds the date?"
+    }
+  ]
+}
+```
