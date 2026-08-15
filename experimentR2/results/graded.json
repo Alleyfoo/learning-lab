@@ -1,0 +1,74 @@
+{
+  "A": {
+    "vocabulary_order": [
+      "not_reserved",
+      "date_well_formed",
+      "not_holiday"
+    ],
+    "emitted_order": [
+      "date_well_formed",
+      "not_holiday",
+      "not_reserved"
+    ],
+    "matches_required_order": true,
+    "matches_vocabulary_order": false,
+    "pairing_correct": true,
+    "pairing": {
+      "date_well_formed": "INVALID_DATE",
+      "not_holiday": "HOLIDAY",
+      "not_reserved": "ALREADY_RESERVED"
+    },
+    "G1_valid": true,
+    "G1_codes": [],
+    "G2_equivalent": true,
+    "passed": true
+  },
+  "B": {
+    "vocabulary_order": [
+      "not_holiday",
+      "not_reserved",
+      "date_well_formed"
+    ],
+    "emitted_order": [
+      "date_well_formed",
+      "not_holiday",
+      "not_reserved"
+    ],
+    "matches_required_order": true,
+    "matches_vocabulary_order": false,
+    "pairing_correct": true,
+    "pairing": {
+      "date_well_formed": "INVALID_DATE",
+      "not_holiday": "HOLIDAY",
+      "not_reserved": "ALREADY_RESERVED"
+    },
+    "G1_valid": true,
+    "G1_codes": [],
+    "G2_equivalent": true,
+    "passed": true
+  },
+  "C": {
+    "vocabulary_order": [
+      "date_well_formed",
+      "not_holiday",
+      "not_reserved"
+    ],
+    "emitted_order": [
+      "date_well_formed",
+      "not_holiday",
+      "not_reserved"
+    ],
+    "matches_required_order": true,
+    "matches_vocabulary_order": true,
+    "pairing_correct": true,
+    "pairing": {
+      "date_well_formed": "INVALID_DATE",
+      "not_holiday": "HOLIDAY",
+      "not_reserved": "ALREADY_RESERVED"
+    },
+    "G1_valid": true,
+    "G1_codes": [],
+    "G2_equivalent": true,
+    "passed": true
+  }
+}
