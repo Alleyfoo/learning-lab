@@ -92,7 +92,27 @@ Registered with the floor, so an executor emitting anything else raises.
 Five sale lines, one source. Row order is deliberate (South first). The East row
 carries a non-numeric quantity on purpose.
 
-Absent on purpose: multi-key grouping is **expressible and untested** — the format
-takes a list and the corpus only ever passes one key; also no having/filter, no
-ordering of rows within a group, and no `min`/`max`/`avg`. This says the shape
-works, not that the model is complete.
+## Multi-key grouping — tested (2026-08-15)
+
+The format has always taken a *list* of keys while the corpus passed one, which
+is the "declared wider than demonstrated" state PRO-2 instance 7 sat in before
+semantic parity found it. `fixtures/sales_multikey.json` closes it, and is built
+so that **grouping by the first key alone gives a plausible but wrong answer**:
+
+```text
+group_by [region, product]   South|A 1.50   South|B 2.00   North|A 3.00
+group_by [region] alone      South   3.50                  North   3.00
+```
+
+The second table is what an executor silently using `keys[0]` would emit —
+nothing about it looks malformed, South's A and B are simply conflated. Both are
+run, and the check requires the multi-key result to match the first table AND to
+differ from the second. That is what makes the pass evidence rather than a
+coincidence.
+
+## What remains absent on purpose
+
+Three or more grouping keys (still expressible, still untested — though the
+two-key case carried the discriminator), having/filter, ordering of rows within a
+group, and `min`/`max`/`avg`. This says the shape works, not that the model is
+complete.

@@ -1,0 +1,9 @@
+{
+  "_note": "For the multi-key grouping claim. Built so that grouping by the FIRST key alone gives a plausible but WRONG result: South's A and B rows would be conflated into one 3.50 total instead of 1.50 and 2.00. Row order puts a repeat of (South, A) last so first-appearance ordering is also exercised.",
+  "sales": [
+    {"region": "South", "product": "A", "quantity": "1", "amount": "1.00"},
+    {"region": "South", "product": "B", "quantity": "1", "amount": "2.00"},
+    {"region": "South", "product": "A", "quantity": "1", "amount": "0.50"},
+    {"region": "North", "product": "A", "quantity": "1", "amount": "3.00"}
+  ]
+}

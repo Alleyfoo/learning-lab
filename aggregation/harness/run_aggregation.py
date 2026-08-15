@@ -84,6 +84,30 @@ POLICY_EXPECTED = {
     "refuse_run": {"n_rows": 0, "run_refused": True},
 }
 
+# --- MULTI-KEY GROUPING: expressible, and until now untested ----------------
+# The format takes a LIST of grouping keys and the corpus only ever passed one.
+# "Declared wider than demonstrated" is the state PRO-2 instance 7 was in before
+# semantic parity found it, so the claim is made to earn its keep here.
+#
+# The fixture is built so that grouping by the FIRST key alone gives a plausible
+# but WRONG answer -- South's A and B rows conflated into 3.50 instead of 1.50
+# and 2.00. That is the discriminator: an executor silently using keys[0] would
+# produce a table that looks entirely reasonable.
+MULTIKEY_FIXTURE = "fixtures/sales_multikey.json"
+MULTIKEY_GROUP_BY = ["region", "product"]
+MULTIKEY_COLUMNS = ["region", "product", "n_rows", "total_quantity", "total_amount"]
+MULTIKEY_ROWS = [
+    ["South", "A", 2, "2", "1.50"],
+    ["South", "B", 1, "1", "2.00"],
+    ["North", "A", 1, "1", "3.00"],
+]
+# What a first-key-only executor would emit on the SAME fixture. Not an
+# expectation -- a foil, used to prove the check above can actually fail.
+FIRST_KEY_ONLY_ROWS = [
+    ["South", 3, "3", "3.50"],
+    ["North", 1, "1", "3.00"],
+]
+
 
 def _model(mutate=None):
     raw = json.loads(MODEL_PATH.read_text(encoding="utf-8"))
@@ -164,6 +188,35 @@ def run_all() -> dict:
                "refuse_run must deliver NO groups rather than the groups formed "
                "before the bad row was reached")
 
+        # --- MULTI-KEY GROUPING, the claim that was expressible and untested --
+        def multikey(d: dict) -> None:
+            d["sources"]["sales"]["path"] = MULTIKEY_FIXTURE
+            d["group_by"] = MULTIKEY_GROUP_BY
+
+        mk = execute(_model(multikey), BASE)
+        record("multi_key_grouping",
+               mk.rows == MULTIKEY_ROWS and mk.columns == MULTIKEY_COLUMNS,
+               f"{mk.columns} {mk.rows}",
+               "the format has always taken a LIST of keys and the corpus only "
+               "ever passed one; both keys must participate in the partition")
+
+        # The discriminator, and the reason the check above is evidence: on this
+        # fixture a first-key-only executor emits a table that looks entirely
+        # reasonable. Running the SAME data under group_by [region] produces it,
+        # so if the multi-key result ever equalled this, the second key is being
+        # ignored.
+        def first_key_only(d: dict) -> None:
+            d["sources"]["sales"]["path"] = MULTIKEY_FIXTURE
+            d["group_by"] = MULTIKEY_GROUP_BY[:1]
+
+        fk = execute(_model(first_key_only), BASE)
+        record("multi_key_is_not_first_key_only",
+               fk.rows == FIRST_KEY_ONLY_ROWS and mk.rows != fk.rows,
+               f"first-key-only would give {fk.rows}",
+               "a plausible but WRONG answer -- South's A and B conflated into "
+               "3.50. If the executor ignored the second key it would emit this "
+               "and nothing would look malformed")
+
         # --- the executor must refuse a model it cannot honour ---------------
         refused_bad = False
         try:
@@ -223,12 +276,14 @@ def run_all() -> dict:
         "checks": checks,
         "outcome": outcome,
         "stated_limitation": (
-            "five sale lines, one source, one grouping key at a time, two ops. No "
-            "multi-key grouping exercised (the format allows it and the corpus "
-            "does not test it), no having/filter, no ordering of ROWS within a "
-            "group, no min/max/avg. Says the SHAPE works -- declared grouping and "
-            "declared aggregation are both followed, and the accumulator does not "
-            "leak -- not that the model is complete."),
+            "two fixtures, one source, two ops. Grouping is exercised at ONE and "
+            "TWO keys; three or more is still expressible and untested, though "
+            "the two-key case is what carried the discriminator. No "
+            "having/filter, no ordering of ROWS within a group, no min/max/avg. "
+            "Says the SHAPE works -- declared grouping and declared aggregation "
+            "are both followed, the accumulator does not leak, and every declared "
+            "key participates in the partition -- not that the model is "
+            "complete."),
     }
 
 
