@@ -1,0 +1,47 @@
+All load-bearing bindings are supported:
+
+1. **`incoming_request.requested_date` holds the date to validate** — established by an OBSERVED claim (field exists, type str, value_shape YYYY-MM-DD).
+
+2. **`holidays.date` holds holiday dates** — rests on an INFERRED claim (meaning: "dates on which something is observed or closed"), but this is independently supported by OBSERVED evidence: the collection is named "holidays" and the field is named "date" (both from `source_structure`).
+
+3. **`reservations.date` holds the reservation date** — rests on an INFERRED claim (meaning: "the date the booking is for"), but independently supported by OBSERVED evidence: the collection is named "reservations" and the field is named "date" (both from `source_structure`).
+
+The UNKNOWN claims (whether reservations may fall on holidays, what resource is reserved, single-day vs multi-day, tier meaning) are not load-bearing: the job checks holiday status and reservation status independently, does not identify a resource, and treats each date as a single value.
+
+```json
+{
+  "model_id": "reservation",
+  "model_version": 1,
+  "task": "reservation",
+  "purpose": "Accept a requested date unless it is invalid, a holiday, or already reserved; otherwise append the reservation.",
+  "sources": {
+    "holidays": {
+      "path": "fixtures/holidays.json",
+      "collection": "holidays"
+    },
+    "reservations": {
+      "path": "fixtures/reservations.json",
+      "collection": "reservations"
+    }
+  },
+  "source_fields": {
+    "holidays": "date",
+    "reservations": "date"
+  },
+  "rules": [
+    {
+      "rule": "date_well_formed",
+      "refusal": "INVALID_DATE"
+    },
+    {
+      "rule": "not_holiday",
+      "refusal": "HOLIDAY"
+    },
+    {
+      "rule": "not_reserved",
+      "refusal": "ALREADY_RESERVED"
+    }
+  ],
+  "on_accept": "append_to_reservations"
+}
+```

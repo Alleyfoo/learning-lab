@@ -1,0 +1,11 @@
+CANNOT ESTABLISH
+
+**Binding:** `reservations.date` is the field that holds the date a reservation is booked for (the value to check against the incoming requested date).
+
+**Claim it would rest on:** The claim with `source: "reservations"`, `field: "date"`, `meaning: "the date the booking is for"`, `basis: "field_name"`.
+
+**Status:** INFERRED
+
+**Why it is load-bearing:** The `not_reserved` rule must compare the incoming `requested_date` against the correct date field in `reservations`. The `reservations` source contains two date-shaped string fields observed in `YYYY-MM-DD` format — `date` and `created` — and without the inferred meaning there is no OBSERVED evidence distinguishing which one represents the booked date versus the submission date. Picking the wrong field would silently break the "already reserved" check.
+
+**Question a human must answer:** In the `reservations` source, does the field named `date` hold the date the booking is for (as opposed to the `created` field, which holds the submission date)? Please confirm which field should be matched against an incoming requested date to determine whether the date is already reserved.

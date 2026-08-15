@@ -1,0 +1,20 @@
+## CANNOT ESTABLISH
+
+**Binding:** The `holidays` collection contains dates that represent holidays on which reservations should be blocked.
+
+**Claim it would rest on:** The claim that the `holidays` source means "dates on which something is observed or closed."
+
+**Claim's status:** `INFERRED` (basis: `collection_name_and_values`).
+
+**Question a human must answer:** Does the `holidays` collection contain the set of dates that should be treated as holidays (i.e., dates on which no reservation may be made)? If so, confirm that querying `holidays.date` for the requested date is the correct way to determine whether the requested date is a holiday.
+
+---
+
+**Why this is load-bearing:** The job requires rejecting any requested date that "is a holiday." The only candidate source for holiday dates is the `holidays` collection. While the structure of `holidays` is `OBSERVED` (it has a `date` field of type `str` with shape `YYYY-MM-DD`), the semantic binding that these dates are holidays that should block reservations rests solely on an `INFERRED` claim about the collection's meaning. No human has confirmed this inference, and no independent evidence establishes it.
+
+All other load-bearing bindings are supported:
+- `reservations.date` meaning ("the date the booking is for") is `CONFIRMED` by a human.
+- `incoming_request.requested_date` structure is `OBSERVED` (field name is self-describing; no INFERRED or UNKNOWN meaning claim is load-bearing).
+- `holidays.date` field identity and type are `OBSERVED`.
+- The question "what resource is being reserved" (UNKNOWN) is not load-bearing: the job checks only whether a date is already reserved, not whether a specific resource is available.
+- The question "whether a reservation may fall on a holiday" (UNKNOWN) is answered by the job definition itself, which explicitly instructs rejection of holidays.

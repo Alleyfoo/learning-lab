@@ -1,0 +1,52 @@
+Looking at the job: "Accept a requested date unless it is invalid, a holiday, or already reserved; otherwise append the reservation."
+
+**Load-bearing bindings I need to check:**
+
+1. **`incoming_request.requested_date` is the date to validate** — The field name "requested_date" is OBSERVED; the job's own specification ("Accept a requested date") independently corroborates this. ✓ Supported by independent evidence.
+
+2. **`holidays.date` holds dates that should be blocked** — The source name "holidays" and field name "date" are both OBSERVED. The job says "a holiday" — independent evidence from the external specification. The INFERRED meaning ("dates on which something is observed or closed") is corroborated by these OBSERVED facts + the job spec. ✓ Supported.
+
+3. **`reservations.date` holds the date of each existing reservation** — The source name "reservations" and field name "date" are both OBSERVED. The job says "already reserved" — independent evidence. The INFERRED meaning ("the date the booking is for") is corroborated. ✓ Supported.
+
+4. **`reservations` is the collection to append to on accept** — Source name "reservations" is OBSERVED; the job says "append the reservation." ✓ Supported.
+
+All load-bearing bindings rest on OBSERVED claims (source/field names) plus the external job specification as independent evidence. No binding depends solely on an INFERRED or UNKNOWN claim.
+
+```json
+{
+  "model_id": "reservation_guard",
+  "model_version": 1,
+  "task": "reservation",
+  "purpose": "Accept a requested date unless it is invalid, a holiday, or already reserved; otherwise append the reservation.",
+  "sources": {
+    "holidays": {
+      "path": "fixtures/holidays.json",
+      "collection": "holidays"
+    },
+    "reservations": {
+      "path": "fixtures/reservations.json",
+      "collection": "reservations"
+    }
+  },
+  "source_fields": {
+    "holidays": "date",
+    "reservations": "date",
+    "incoming_request": "requested_date"
+  },
+  "rules": [
+    {
+      "rule": "date_well_formed",
+      "refusal": "INVALID_DATE"
+    },
+    {
+      "rule": "not_holiday",
+      "refusal": "HOLIDAY"
+    },
+    {
+      "rule": "not_reserved",
+      "refusal": "ALREADY_RESERVED"
+    }
+  ],
+  "on_accept": "append_to_reservations"
+}
+```

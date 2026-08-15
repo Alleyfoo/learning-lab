@@ -1,0 +1,56 @@
+```json
+{
+  "model_id": "reservation_guard",
+  "model_version": 1,
+  "task": "reservation",
+  "purpose": "Accept a requested date unless it is invalid, a holiday, or already reserved; otherwise append the reservation.",
+  "sources": {
+    "holidays": {
+      "path": "fixtures/holidays.json",
+      "collection": "holidays"
+    },
+    "reservations": {
+      "path": "fixtures/reservations.json",
+      "collection": "reservations"
+    }
+  },
+  "source_fields": {
+    "holidays": "date",
+    "reservations": "date",
+    "incoming_request": "requested_date"
+  },
+  "rules": [
+    {
+      "rule": "date_well_formed",
+      "refusal": "INVALID_DATE"
+    },
+    {
+      "rule": "not_holiday",
+      "refusal": "HOLIDAY"
+    },
+    {
+      "rule": "not_reserved",
+      "refusal": "ALREADY_RESERVED"
+    }
+  ],
+  "on_accept": "append_to_reservations"
+}
+```
+
+**Reasoning for load-bearing bindings:**
+
+| Binding | Claim relied on | Status | Verdict |
+|---|---|---|---|
+| `incoming_request.requested_date` is the date to check | field structure, type, value_shape YYYY-MM-DD | OBSERVED | ✅ |
+| `holidays.date` holds holiday dates to reject | source name "holidays" (OBSERVED); `date` field with YYYY-MM-DD values (OBSERVED) | OBSERVED | ✅ — the name "holidays" directly matches the job's term "holiday"; the INFERRED meaning claim is supplementary, not load-bearing |
+| `reservations.date` is the date the booking is for (used to detect "already reserved") | field meaning | CONFIRMED (was INFERRED, confirmed by human) | ✅ |
+
+**Non-load-bearing UNKNOWN/INFERRED claims (and why):**
+
+- *reservations.created* (INFERRED "date submitted") — the job checks booking dates, not creation dates.
+- *reservations.ref* (INFERRED "identifier") — not used by any rule.
+- *reservations.tier* (UNKNOWN meaning) — no rule references tier.
+- *holidays.name* (INFERRED "name of a holiday") — only the `date` field is needed.
+- *"whether a reservation may fall on a holiday"* (UNKNOWN) — the job instructs us to reject holidays first; existing data inconsistencies do not affect rule logic.
+- *"what resource is being reserved"* (UNKNOWN) — the job and the incoming request are date-only; no resource field exists in the request, so the "already reserved" check is purely date-based.
+- *"single-day vs multi-day"* (UNKNOWN) — `reservations.date` is CONFIRMED as "the date the booking is for" and no end-date/duration field exists (OBSERVED); the rule can only and need only compare exact dates.

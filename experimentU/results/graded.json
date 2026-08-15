@@ -1,0 +1,95 @@
+{
+  "phase1_probe1": {
+    "U1_blocks_on_binding": {
+      "blocked": true,
+      "names_the_binding": true,
+      "produced_a_node_anyway": false,
+      "human_confirmation_required": true
+    },
+    "U2_does_not_over_block": {
+      "non_load_bearing_in_block": [],
+      "human_confirmation_required": true
+    },
+    "U3_no_laundering": {
+      "laundering_phrases": [
+        "observed"
+      ],
+      "human_confirmation_required": true
+    },
+    "block_section": "**Binding:** `reservations.date` is the field that holds the date a reservation is booked for (the value to check against the incoming requested date).\n\n**Claim it would rest on:** The claim with `source: \"reservations\"`, `field: \"date\"`, `meaning: \"the date the booking is for\"`, `basis: \"field_name\"`.\n\n**Status:** INFERRED\n\n**Why it is load-bearing:** The `not_reserved` rule must compare the incoming `requested_date` against the correct date field in `reservations`. The `reservations` source contains two date-shaped string fields observed in `YYYY-MM-DD` format — `date` and `created` — and without the inferred meaning there is no OBSERVED evidence distinguishing which one represents the booked date versus the submission date. Picking the wrong field would silently break the \"already reserved\" check.\n\n**Question a human must answer:** In the `reservations` source, does the field named `date` hold the date the booking is for (as opposed to the `created` field, which holds the submission date)? Please confirm which field should be matched against an incoming requested date to determine whether the date is already reserved."
+  },
+  "phase1_probe2": {
+    "U1_blocks_on_binding": {
+      "blocked": false,
+      "names_the_binding": false,
+      "produced_a_node_anyway": true,
+      "human_confirmation_required": true
+    },
+    "U2_does_not_over_block": {
+      "non_load_bearing_in_block": [],
+      "human_confirmation_required": true
+    },
+    "U3_no_laundering": {
+      "laundering_phrases": [
+        "observed"
+      ],
+      "human_confirmation_required": true
+    },
+    "block_section": ""
+  },
+  "phase1_probe3": {
+    "U1_blocks_on_binding": {
+      "blocked": false,
+      "names_the_binding": false,
+      "produced_a_node_anyway": true,
+      "human_confirmation_required": true
+    },
+    "U2_does_not_over_block": {
+      "non_load_bearing_in_block": [],
+      "human_confirmation_required": true
+    },
+    "U3_no_laundering": {
+      "laundering_phrases": [
+        "observed"
+      ],
+      "human_confirmation_required": true
+    },
+    "block_section": ""
+  },
+  "phase2_probe1": {
+    "U4_resumes": {
+      "node_produced": false,
+      "detail": "no JSON object in the phase-2 answer"
+    }
+  },
+  "phase2_probe2": {
+    "U4_resumes": {
+      "node_produced": true,
+      "G1_valid": true,
+      "G1_codes": [],
+      "G2_equivalent": true,
+      "bound_field": "date",
+      "rules": [
+        "date_well_formed",
+        "not_holiday",
+        "not_reserved"
+      ]
+    }
+  },
+  "phase2_probe3": {
+    "U4_resumes": {
+      "node_produced": true,
+      "G1_valid": false,
+      "G1_codes": [
+        "missing_data_file"
+      ],
+      "G2_equivalent": false,
+      "bound_field": "date",
+      "rules": [
+        "date_well_formed",
+        "not_holiday",
+        "not_reserved"
+      ]
+    }
+  }
+}
