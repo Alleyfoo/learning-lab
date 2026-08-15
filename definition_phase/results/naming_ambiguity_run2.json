@@ -1,0 +1,96 @@
+{
+  "law": "No Authority By Accident",
+  "statement": "a sheet reference that could denote more than one sheet must resolve explicitly or be refused, never silently pick one",
+  "cases": [
+    {
+      "case": "eszett_collision_declare_first",
+      "required": "refused",
+      "rationale": "a German provider file with both spellings. The recipe declares the eszett sheet; casefold collapses it onto the plain one.",
+      "sheets": [
+        "Stra\\xdfe",
+        "Strasse"
+      ],
+      "declared": "Stra\\xdfe",
+      "reachability": "'Straße' and 'Strasse' both casefold to 'strasse'; both present; layouts differ (['Tuote', 'Myynti'] vs ['Myynti', 'Tuote'])",
+      "reachability_ok": true,
+      "result": {
+        "refused": true,
+        "codes": [
+          "sheet_name_ambiguous"
+        ]
+      },
+      "status": "HELD",
+      "detail": "ambiguous reference refused: ['sheet_name_ambiguous']"
+    },
+    {
+      "case": "eszett_collision_declare_second",
+      "required": "refused",
+      "rationale": "the same workbook, declaring the OTHER spelling. If one direction silently works and the other silently reads the wrong sheet, the outcome depends on workbook order rather than on the declaration.",
+      "sheets": [
+        "Stra\\xdfe",
+        "Strasse"
+      ],
+      "declared": "Strasse",
+      "reachability": "'Straße' and 'Strasse' both casefold to 'strasse'; both present; layouts differ (['Tuote', 'Myynti'] vs ['Myynti', 'Tuote'])",
+      "reachability_ok": true,
+      "result": {
+        "refused": true,
+        "codes": [
+          "sheet_name_ambiguous"
+        ]
+      },
+      "status": "HELD",
+      "detail": "ambiguous reference refused: ['sheet_name_ambiguous']"
+    },
+    {
+      "case": "ligature_collision",
+      "required": "refused",
+      "rationale": "a second collision family, so the finding is about the casefold RULE rather than about one exotic character. U+FB01 casefolds to 'fi'.",
+      "sheets": [
+        "\\ufb01le",
+        "file"
+      ],
+      "declared": "\\ufb01le",
+      "reachability": "'ﬁle' and 'file' both casefold to 'file'; both present; layouts differ (['Tuote', 'Myynti'] vs ['Myynti', 'Tuote'])",
+      "reachability_ok": true,
+      "result": {
+        "refused": true,
+        "codes": [
+          "sheet_name_ambiguous"
+        ]
+      },
+      "status": "HELD",
+      "detail": "ambiguous reference refused: ['sheet_name_ambiguous']"
+    },
+    {
+      "case": "CONTROL_distinct_names",
+      "required": "accepted",
+      "rationale": "the other direction. Names that do NOT collide must be accepted and resolve to their own sheet, or a law that refused every workbook would score a perfect pass.",
+      "sheets": [
+        "Sales",
+        "Notes"
+      ],
+      "declared": "Sales",
+      "reachability": "control: no collision intended",
+      "reachability_ok": true,
+      "result": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "WANTED",
+            1
+          ]
+        ]
+      },
+      "status": "HELD",
+      "detail": "distinct names accepted and resolved: [['WANTED', 1]]"
+    }
+  ],
+  "outcome": "LAW_5_HELD",
+  "note_on_canaries": "laws 3 and 4 register synthetic canaries because their subject is an invariance that could hold vacuously. Here the subject IS the defect those canaries simulate, so a VIOLATED case demonstrates the detector directly. The CONTROL carries the burden a canary carries elsewhere: it proves the law is not simply refusing everything.",
+  "stated_limitation": "two collision families (eszett, ligature), both arising from casefold(). Collisions from other normalisation the system does not perform -- Unicode NFC/NFD, trailing whitespace, non-breaking space -- are NOT ambiguous under the current rule and are not covered. Sheet NAMES collide here; sheet ORDER is axis 4."
+}

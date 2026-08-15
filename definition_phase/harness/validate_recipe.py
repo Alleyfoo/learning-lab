@@ -69,6 +69,9 @@ PROBLEM_CODES = (
     "reconciliation_failure",
     # origin aliasing: one sheet reached by two declarations (PRO-2 instance 10)
     "sheet_origin_aliased",
+    # naming ambiguity: two sheets the workbook keeps apart and the resolver
+    # cannot (cross-sheet law 5)
+    "sheet_name_ambiguous",
     # sheetset
     "sheetset_member_layout_mismatch",
     # approval (does NOT make the recipe invalid)
@@ -242,6 +245,9 @@ def validate(recipe: Recipe, wb: WorkbookView) -> Report:
                     if fld.role == "metadata" and ref.kind != "cell":
                         problems.append(Problem("field_source_kind_mismatch", fwhere,
                                                 f"metadata needs a cell referent, got {ref.kind}"))
+
+    # ---- 1b. naming ambiguity, BEFORE anything resolves ---------------------
+    _check_sheet_name_ambiguity(wb, problems)
 
     # ---- 2. resolution ------------------------------------------------------
     # `@name` cannot resolve until the header row is known, so header rows are
@@ -600,6 +606,44 @@ def _rule_rows(exc: Exclusion, wb: WorkbookView, sheet: str, n_rows: int,
                 normalize_for("label_in", values[resolved.col0]) in wanted:
             hits.add(r)
     return hits
+
+
+def _check_sheet_name_ambiguity(wb: WorkbookView, problems: list[Problem]) -> None:
+    """Two sheets the WORKBOOK keeps apart that the resolver cannot (law 5).
+
+    `WorkbookView.actual_sheet` is `self._by_key.get(name.casefold())`, so any two
+    sheet names casefolding to one string collapse into a single entry: one wins
+    by build order and the other becomes unreachable, with nothing reporting it.
+    A recipe naming either spelling then executes against whichever won.
+
+    `casefold()` is more aggressive than `lower()` by design, so this needs no
+    case-only duplicate (Excel and openpyxl both refuse to create one):
+
+        "Stra{eszett}e".casefold() == "strasse" == "Strasse".casefold()
+
+    Both are legal, DISTINCT Excel sheet names, and the collision is supplied by
+    whoever produced the file rather than by the recipe.
+
+    Refused at WORKBOOK scope rather than only when a reference names the
+    colliding key, for two reasons. The grammar has no member-relative or
+    disambiguating referent, so there is no spelling a recipe could use to mean
+    "the other one" -- refusal is the only honest outcome. And the collision also
+    blinds the coverage check: both names casefold to one key, so declaring
+    either spelling marks BOTH sheets covered and `sheet_unclassified` never
+    fires on the one that was never read.
+    """
+    by_key: dict[str, list[str]] = {}
+    for name in wb.sheet_names:
+        by_key.setdefault(name.casefold(), []).append(name)
+
+    for key, names in by_key.items():
+        if len(names) > 1:
+            shown = [n.encode("unicode_escape").decode() for n in names]
+            problems.append(Problem(
+                "sheet_name_ambiguous", key,
+                f"{len(names)} sheets collapse to the resolver key {key!r}: "
+                f"{shown}. Only one is reachable and the recipe cannot say which, "
+                f"so the workbook is refused rather than resolved by accident."))
 
 
 def _check_sheet_origin_aliasing(recipe: Recipe, wb: WorkbookView,
@@ -1009,6 +1053,46 @@ def _self_test() -> int:
     check(validate(_rfj_alias(json.loads(json.dumps(ss_raw))), wb).valid,
           "a sheetset over DISTINCT members must remain valid")
 
+    # --- naming ambiguity (cross-sheet law 5) --------------------------------
+    # Two sheet names the workbook keeps apart that casefold to one resolver
+    # key. Needs its own workbook: no committed fixture collides, which is why
+    # the defect survived until law 5 went looking for it.
+    import tempfile as _tempfile
+
+    from openpyxl import Workbook as _Workbook
+
+    with _tempfile.TemporaryDirectory() as _td:
+        _p = Path(_td) / "collide.xlsx"
+        _book = _Workbook()
+        _ws = _book.active
+        _ws.title = "Straße"                 # casefold -> "strasse"
+        _ws.append(["Tuote"]), _ws.append(["a"])
+        _ws2 = _book.create_sheet()
+        _ws2.title = "Strasse"                     # casefold -> "strasse"
+        _ws2.append(["Tuote"]), _ws2.append(["b"])
+        _book.save(_p)
+        _wb_collide = WorkbookView(_p)
+
+        check(len(_wb_collide.sheet_names) == 2,
+              f"the fixture must keep BOTH names, or there is no collision to "
+              f"detect: {_wb_collide.sheet_names}")
+
+        _amb = json.loads(json.dumps(aliased_raw))
+        _amb["sheets"] = [{"sheet": "sheet:Straße", "role": "data",
+                           "header_row": "sheet:Straße!1",
+                           "data_region": "remainder",
+                           "fields": [{"target": "t", "source": "sheet:Straße!@Tuote",
+                                       "role": "id", "type": "string"}],
+                           "exclude": [], "ambiguities": []}]
+        rep_amb = validate(_rfj_alias(_amb), _wb_collide)
+        seen_codes |= rep_amb.codes()
+        check("sheet_name_ambiguous" in rep_amb.codes(),
+              f"two sheets collapsing to one resolver key must be refused: "
+              f"{sorted(rep_amb.codes())}")
+        check(not rep_amb.valid,
+              "an ambiguous workbook must not validate -- resolving it would be "
+              "authority by accident")
+
     # --- broken 1: the SILENCE case, caught statically -----------------------
     b1 = load_recipe(ROOT / "recipes" / "broken" / "W1_sales_missing_total_row.json")
     rep1 = validate(b1, wb)
@@ -1168,8 +1252,13 @@ def _self_test() -> int:
         "legacy adapter round-trip / dry run pulls real values / v1.2 row shape catches "
         "the footnote / v1.3 reconciliation catches the C8 subtotal and provably does NOT "
         "catch C14 / executor contract refuses two unpivots, an unimplemented transform "
-        "and an unhonoured sheet role without firing on a clean recipe / all 25 problem "
-        "codes exercised)\n"
+        "and an unhonoured sheet role without firing on a clean recipe / two sheets "
+        "collapsing to one resolver key refused / "
+        # Computed, not typed. It read "all 25" while PROBLEM_CODES held 27 --
+        # a hardcoded count in the line that reports coverage is a claim that
+        # goes stale the moment a code is added, which is the failure this
+        # suite's own completeness rule exists to prevent.
+        f"all {len(PROBLEM_CODES)} problem codes exercised)\n"
     )
     return 0
 
