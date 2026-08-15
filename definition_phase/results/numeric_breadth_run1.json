@@ -1,0 +1,177 @@
+{
+  "measurement": "executor breadth for type:number, plus a construct census",
+  "numeric": [
+    {
+      "case": "native_int",
+      "required": "honoured",
+      "input": "1234",
+      "emitted": "1234",
+      "recorded_unhonoured": false,
+      "status": "HONOURED",
+      "detail": "1234"
+    },
+    {
+      "case": "native_float",
+      "required": "honoured",
+      "input": "12.5",
+      "emitted": "12.5",
+      "recorded_unhonoured": false,
+      "status": "HONOURED",
+      "detail": "12.5"
+    },
+    {
+      "case": "decimal_dot",
+      "required": "honoured",
+      "input": "'1.5'",
+      "emitted": "1.5",
+      "recorded_unhonoured": false,
+      "status": "HONOURED",
+      "detail": "1.5"
+    },
+    {
+      "case": "decimal_comma",
+      "required": "honoured",
+      "input": "'1,5'",
+      "emitted": "1.5",
+      "recorded_unhonoured": false,
+      "status": "HONOURED",
+      "detail": "1.5"
+    },
+    {
+      "case": "negative",
+      "required": "honoured",
+      "input": "'-42'",
+      "emitted": "-42",
+      "recorded_unhonoured": false,
+      "status": "HONOURED",
+      "detail": "-42"
+    },
+    {
+      "case": "sep_comma_3digits",
+      "required": "recorded",
+      "input": "'1,234'",
+      "emitted": "1.234",
+      "recorded_unhonoured": false,
+      "status": "SILENTLY_WRONG",
+      "detail": "emitted the number 1.234 from an unresolvable notation, with nothing recorded"
+    },
+    {
+      "case": "sep_dot_3digits",
+      "required": "recorded",
+      "input": "'1.234'",
+      "emitted": "1.234",
+      "recorded_unhonoured": false,
+      "status": "SILENTLY_WRONG",
+      "detail": "emitted the number 1.234 from an unresolvable notation, with nothing recorded"
+    },
+    {
+      "case": "space_thousands",
+      "required": "recorded",
+      "input": "'1 234'",
+      "emitted": "'1 234'",
+      "recorded_unhonoured": true,
+      "status": "RECORDED",
+      "detail": "passed through as '1 234', recorded"
+    },
+    {
+      "case": "nbsp_thousands",
+      "required": "recorded",
+      "input": "'1\\xa0234'",
+      "emitted": "'1\\xa0234'",
+      "recorded_unhonoured": true,
+      "status": "RECORDED",
+      "detail": "passed through as '1\\xa0234', recorded"
+    },
+    {
+      "case": "us_full",
+      "required": "recorded",
+      "input": "'1,234.56'",
+      "emitted": "'1,234.56'",
+      "recorded_unhonoured": true,
+      "status": "RECORDED",
+      "detail": "passed through as '1,234.56', recorded"
+    },
+    {
+      "case": "fi_full",
+      "required": "recorded",
+      "input": "'1 234,56'",
+      "emitted": "'1 234,56'",
+      "recorded_unhonoured": true,
+      "status": "RECORDED",
+      "detail": "passed through as '1 234,56', recorded"
+    },
+    {
+      "case": "currency_prefix",
+      "required": "recorded",
+      "input": "'€1234'",
+      "emitted": "'€1234'",
+      "recorded_unhonoured": true,
+      "status": "RECORDED",
+      "detail": "passed through as '€1234', recorded"
+    },
+    {
+      "case": "currency_suffix",
+      "required": "recorded",
+      "input": "'1234 €'",
+      "emitted": "'1234 €'",
+      "recorded_unhonoured": true,
+      "status": "RECORDED",
+      "detail": "passed through as '1234 €', recorded"
+    },
+    {
+      "case": "percent",
+      "required": "recorded",
+      "input": "'15%'",
+      "emitted": "'15%'",
+      "recorded_unhonoured": true,
+      "status": "RECORDED",
+      "detail": "passed through as '15%', recorded"
+    },
+    {
+      "case": "accounting_neg",
+      "required": "recorded",
+      "input": "'(1234)'",
+      "emitted": "'(1234)'",
+      "recorded_unhonoured": true,
+      "status": "RECORDED",
+      "detail": "passed through as '(1234)', recorded"
+    },
+    {
+      "case": "blank",
+      "required": "recorded",
+      "input": "''",
+      "emitted": "''",
+      "recorded_unhonoured": true,
+      "status": "RECORDED",
+      "detail": "passed through as '', recorded"
+    }
+  ],
+  "census": [
+    {
+      "construct": "transform:coerce",
+      "status": "REFUSED",
+      "detail": "['executor_cannot_honour']",
+      "expected": "REFUSED (executor_cannot_honour)"
+    },
+    {
+      "construct": "multi-measure",
+      "status": "HONOURED",
+      "detail": "['id', 'm1', 'm2'] [['A', 1, 2]]",
+      "expected": "HONOURED (two measures are independent columns)"
+    },
+    {
+      "construct": "formula_without_cached_value",
+      "status": "RECORDED",
+      "detail": "emitted ''; reason \"value '' does not parse as a number\"",
+      "expected": "RECORDED",
+      "residual": "the reason says the value does not parse as a number, which is true but not WHY: the cell held a formula Excel never evaluated. A consumer cannot tell it from a genuinely empty cell."
+    }
+  ],
+  "outcome": "BREADTH_SILENT_WRONG",
+  "counts": {
+    "honoured": 5,
+    "recorded": 9,
+    "silently_wrong": 2
+  },
+  "stated_limitation": "sixteen numeric notations, author-chosen, one cell each. Says nothing about how often each occurs in real provider files -- that is the UQ-1 question and is kept separate. `type:number` only; string, boolean and date are not re-measured here (date is G1)."
+}
