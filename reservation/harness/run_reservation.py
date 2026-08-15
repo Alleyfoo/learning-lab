@@ -26,11 +26,16 @@ HERE = Path(__file__).resolve().parent
 BASE = HERE.parent
 sys.path.insert(0, str(HERE))
 
+LAB = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(LAB / "taskmodel"))
+
 import reservation_model  # noqa: E402
+import task_model  # noqa: E402
 from execute_reservation import (  # noqa: E402
     SUPPORTED_ON_ACCEPT, SUPPORTED_RULES, UnhonourableModel, execute, execute_many,
 )
-from reservation_model import load_model, validate  # noqa: E402
+from reservation_model import validate  # noqa: E402
+from task_model import load_model, vocabulary_parity  # noqa: E402
 
 RESULTS = BASE / "results"
 MODEL_PATH = BASE / "models" / "reservation_v1.json"
@@ -89,17 +94,10 @@ def check_vocabulary_parity() -> dict:
     So the guard stays (defence in depth, and it is what makes partial execution
     impossible), and THIS is the check with teeth.
     """
-    declared = set(reservation_model.RULES)
-    implemented = set(SUPPORTED_RULES)
-    declared_accept = set(reservation_model.ON_ACCEPT)
-    implemented_accept = set(SUPPORTED_ON_ACCEPT)
-    return {
-        "rules_declared_not_implemented": sorted(declared - implemented),
-        "rules_implemented_not_declared": sorted(implemented - declared),
-        "on_accept_declared_not_implemented": sorted(declared_accept - implemented_accept),
-        "on_accept_implemented_not_declared": sorted(implemented_accept - declared_accept),
-        "agree": declared == implemented and declared_accept == implemented_accept,
-    }
+    return vocabulary_parity(
+        declared={"rules": reservation_model.RULES,
+                  "on_accept": reservation_model.ON_ACCEPT},
+        implemented={"rules": SUPPORTED_RULES, "on_accept": SUPPORTED_ON_ACCEPT})
 
 
 def run_all() -> dict:
@@ -141,7 +139,7 @@ def run_all() -> dict:
         raw = json.loads(MODEL_PATH.read_text(encoding="utf-8"))
         by_name = {r["rule"]: r for r in raw["rules"]}
         for order, want_reason in PRECEDENCE_EXPECTED:
-            variant = reservation_model.model_from_json(
+            variant = task_model.parse(
                 {**raw, "rules": [by_name[n] for n in order]})
             vrep = validate(variant, BASE)
             if not vrep.valid:
@@ -174,7 +172,7 @@ def run_all() -> dict:
         observed = []
         for order, _ in PRECEDENCE_EXPECTED:
             del order                       # deliberately ignored, as the defect would
-            hardcoded = reservation_model.model_from_json(
+            hardcoded = task_model.parse(
                 {**raw, "rules": [by_name[n] for n in fixed]})
             observed.append(execute(hardcoded, BASE, PRECEDENCE_REQUEST).reason)
         expected = [want for _, want in PRECEDENCE_EXPECTED]
@@ -183,7 +181,7 @@ def run_all() -> dict:
     # --- the executor must refuse an invalid model, not run it ---------------
     refused_invalid_model = False
     broken = load_model(MODEL_PATH)
-    broken.on_accept = "delete_everything"
+    broken.body["on_accept"] = "delete_everything"
     try:
         execute(broken, BASE, "2026-05-20")
     except UnhonourableModel:

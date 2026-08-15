@@ -1,6 +1,7 @@
 {
   "model_version": 1,
   "model_id": "enrichment_v1",
+  "task": "enrichment",
   "sources": {
     "orders":   {"path": "fixtures/orders.json",   "collection": "orders"},
     "products": {"path": "fixtures/products.json", "collection": "products"}

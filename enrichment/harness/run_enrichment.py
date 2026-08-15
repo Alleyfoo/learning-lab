@@ -30,11 +30,16 @@ HERE = Path(__file__).resolve().parent
 BASE = HERE.parent
 sys.path.insert(0, str(HERE))
 
+LAB = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(LAB / "taskmodel"))
+
 import enrichment_model  # noqa: E402
+import task_model  # noqa: E402
 from enrichment_model import validate  # noqa: E402
 from execute_enrichment import (  # noqa: E402
     SUPPORTED_OPS, SUPPORTED_POLICIES, UnhonourableModel, execute,
 )
+from task_model import vocabulary_parity  # noqa: E402
 
 RESULTS = BASE / "results"
 MODEL_PATH = BASE / "models" / "enrichment_v1.json"
@@ -73,7 +78,7 @@ def _model(mutate=None):
     raw = _raw()
     if mutate:
         mutate(raw)
-    return enrichment_model.model_from_json(raw)
+    return task_model.parse(raw)
 
 
 def check_vocabulary_parity() -> dict:
@@ -83,14 +88,9 @@ def check_vocabulary_parity() -> dict:
     guard is unreachable while the validator rejects unknown tokens first, so
     the guard is defence in depth and THIS is the check with teeth.
     """
-    return {
-        "ops_declared_not_implemented":
-            sorted(set(enrichment_model.OPS) - set(SUPPORTED_OPS)),
-        "policies_declared_not_implemented":
-            sorted(set(enrichment_model.POLICIES) - set(SUPPORTED_POLICIES)),
-        "agree": (set(enrichment_model.OPS) == set(SUPPORTED_OPS)
-                  and set(enrichment_model.POLICIES) == set(SUPPORTED_POLICIES)),
-    }
+    return vocabulary_parity(
+        declared={"ops": enrichment_model.OPS, "policies": enrichment_model.POLICIES},
+        implemented={"ops": SUPPORTED_OPS, "policies": SUPPORTED_POLICIES})
 
 
 def run_all() -> dict:

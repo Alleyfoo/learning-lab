@@ -1,0 +1,60 @@
+{
+  "question": "can a RELATIONSHIP and a COMPUTATION be declared by the model and faithfully executed?",
+  "model_valid": true,
+  "model_problems": [],
+  "vocabulary_parity": {
+    "agree": true,
+    "ops": {
+      "declared_not_implemented": [],
+      "implemented_not_declared": []
+    },
+    "policies": {
+      "declared_not_implemented": [],
+      "implemented_not_declared": []
+    }
+  },
+  "arithmetic_canary": {
+    "fired": true,
+    "detail": "float arithmetic produced ['59.97', '0.7000000000000001']"
+  },
+  "checks": [
+    {
+      "check": "baseline_rows",
+      "status": "PASS",
+      "detail": "[['O-1', 'Widget', '3', '19.99', '59.97'], ['O-2', 'Grommet', '7', '0.10', '0.70']]",
+      "rationale": "the join and the computation together, including 7 x 0.10 = 0.70 which float arithmetic gets wrong"
+    },
+    {
+      "check": "baseline_refusals",
+      "status": "PASS",
+      "detail": "[('P-999', 'MISSING_PRODUCT'), ('P-300', 'NON_NUMERIC_OPERAND')]",
+      "rationale": "a missing key and a non-numeric operand are refused by NAME, not dropped and not filled in"
+    },
+    {
+      "check": "computation_follows_declaration",
+      "status": "PASS",
+      "detail": "declared right operand -> weight; totals ['0.75', '10.50']",
+      "rationale": "changing WHICH declared field is multiplied must change the output; an executor multiplying a hardcoded unit_price would not move"
+    },
+    {
+      "check": "missing_policy_follows_declaration",
+      "status": "PASS",
+      "detail": "{'refuse_row': {'n_rows': 2, 'run_refused': False}, 'refuse_run': {'n_rows': 0, 'run_refused': True}}",
+      "rationale": "the SAME data under two declared policies must behave differently, and refuse_run must deliver no rows at all rather than a partial table beside a refusal"
+    },
+    {
+      "check": "ambiguous_key_refused",
+      "status": "PASS",
+      "detail": "run_refused=\"AMBIGUOUS_PRODUCT: 'P-100' matches 2 reference rows\", rows=0",
+      "rationale": "P-100 appears twice at DIFFERENT prices; picking the first is authority by accident and here it is worth money"
+    },
+    {
+      "check": "refuses_unhonourable_model",
+      "status": "PASS",
+      "detail": "True",
+      "rationale": "an op the executor does not implement stops the run instead of being approximated"
+    }
+  ],
+  "outcome": "RELATION_AND_COMPUTATION_FAITHFUL",
+  "stated_limitation": "three products, four order lines, one model, one operation. No multi-key joins, many-to-many, nested lookups, currency, units or rounding policy. Says the SHAPE works -- a declared relationship and a declared computation are both followed -- not that the model is complete."
+}

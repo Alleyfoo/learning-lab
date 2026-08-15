@@ -1,8 +1,11 @@
 {
   "model_version": 1,
   "model_id": "reservation_v1",
-  "holidays": "fixtures/holidays.json",
-  "reservations": "fixtures/reservations.json",
+  "task": "reservation",
+  "sources": {
+    "holidays":     {"path": "fixtures/holidays.json",     "collection": "holidays"},
+    "reservations": {"path": "fixtures/reservations.json", "collection": "reservations"}
+  },
   "rules": [
     {"rule": "date_well_formed", "refusal": "INVALID_DATE"},
     {"rule": "not_holiday", "refusal": "HOLIDAY"},

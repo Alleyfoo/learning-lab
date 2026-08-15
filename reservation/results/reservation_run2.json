@@ -1,0 +1,221 @@
+{
+  "question": "can the system model a real data task and execute it deterministically, with the model owning the decisions?",
+  "model_valid": true,
+  "model_problems": [],
+  "vocabulary_parity": {
+    "agree": true,
+    "rules": {
+      "declared_not_implemented": [],
+      "implemented_not_declared": []
+    },
+    "on_accept": {
+      "declared_not_implemented": [],
+      "implemented_not_declared": []
+    }
+  },
+  "executor_refuses_invalid_model": true,
+  "precedence_canary_fired": true,
+  "cases": [
+    {
+      "case": "ordinary_free_day",
+      "request": "2026-05-20",
+      "rationale": "a real date, not in the holiday list, not in the reservation list",
+      "expected": {
+        "accepted": true,
+        "reason": null
+      },
+      "observed": {
+        "accepted": true,
+        "reason": null,
+        "evaluated": [
+          "date_well_formed",
+          "not_holiday",
+          "not_reserved"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "impossible_date",
+      "request": "2026-02-30",
+      "rationale": "well-formed-looking and not a real day; the check is that the date EXISTS, not that the string matches a pattern",
+      "expected": {
+        "accepted": false,
+        "reason": "INVALID_DATE"
+      },
+      "observed": {
+        "accepted": false,
+        "reason": "INVALID_DATE",
+        "evaluated": [
+          "date_well_formed"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "not_a_date",
+      "request": "next tuesday",
+      "rationale": "free text must be refused by the same rule, not crash the executor",
+      "expected": {
+        "accepted": false,
+        "reason": "INVALID_DATE"
+      },
+      "observed": {
+        "accepted": false,
+        "reason": "INVALID_DATE",
+        "evaluated": [
+          "date_well_formed"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "wrong_format",
+      "request": "20/05/2026",
+      "rationale": "a real day written the wrong way is still not an ISO date; v1 declares one format and does not guess between conventions",
+      "expected": {
+        "accepted": false,
+        "reason": "INVALID_DATE"
+      },
+      "observed": {
+        "accepted": false,
+        "reason": "INVALID_DATE",
+        "evaluated": [
+          "date_well_formed"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "holiday",
+      "request": "2026-12-25",
+      "rationale": "in the declared holiday list",
+      "expected": {
+        "accepted": false,
+        "reason": "HOLIDAY"
+      },
+      "observed": {
+        "accepted": false,
+        "reason": "HOLIDAY",
+        "evaluated": [
+          "date_well_formed",
+          "not_holiday"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "already_reserved",
+      "request": "2026-03-10",
+      "rationale": "in the declared reservation list",
+      "expected": {
+        "accepted": false,
+        "reason": "ALREADY_RESERVED"
+      },
+      "observed": {
+        "accepted": false,
+        "reason": "ALREADY_RESERVED",
+        "evaluated": [
+          "date_well_formed",
+          "not_holiday",
+          "not_reserved"
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "holiday_AND_reserved",
+      "request": "2026-12-06",
+      "rationale": "BOTH true. The reported reason must follow the model's declared rule ORDER, not whichever check the executor happened to run first -- authority by accident is what cross-sheet law 5 is named after",
+      "expected": {
+        "accepted": false,
+        "reason": "HOLIDAY"
+      },
+      "observed": {
+        "accepted": false,
+        "reason": "HOLIDAY",
+        "evaluated": [
+          "date_well_formed",
+          "not_holiday"
+        ]
+      },
+      "status": "PASS"
+    }
+  ],
+  "sequence": [
+    {
+      "step": 0,
+      "request": "2026-07-14",
+      "expected": {
+        "accepted": true,
+        "reason": null
+      },
+      "observed": {
+        "accepted": true,
+        "reason": null
+      },
+      "reservations_after": [
+        "2026-03-10",
+        "2026-03-11",
+        "2026-12-06",
+        "2026-07-14"
+      ],
+      "status": "PASS"
+    },
+    {
+      "step": 1,
+      "request": "2026-07-14",
+      "expected": {
+        "accepted": false,
+        "reason": "ALREADY_RESERVED"
+      },
+      "observed": {
+        "accepted": false,
+        "reason": "ALREADY_RESERVED"
+      },
+      "reservations_after": [
+        "2026-03-10",
+        "2026-03-11",
+        "2026-12-06",
+        "2026-07-14"
+      ],
+      "status": "PASS"
+    }
+  ],
+  "precedence": [
+    {
+      "order": [
+        "date_well_formed",
+        "not_holiday",
+        "not_reserved"
+      ],
+      "request": "2026-12-06",
+      "expected_reason": "HOLIDAY",
+      "observed_reason": "HOLIDAY",
+      "evaluated": [
+        "date_well_formed",
+        "not_holiday"
+      ],
+      "status": "PASS",
+      "detail": "the reported reason follows the DECLARED order"
+    },
+    {
+      "order": [
+        "date_well_formed",
+        "not_reserved",
+        "not_holiday"
+      ],
+      "request": "2026-12-06",
+      "expected_reason": "ALREADY_RESERVED",
+      "observed_reason": "ALREADY_RESERVED",
+      "evaluated": [
+        "date_well_formed",
+        "not_reserved"
+      ],
+      "status": "PASS",
+      "detail": "the reported reason follows the DECLARED order"
+    }
+  ],
+  "outcome": "TASK_MODELLED_AND_EXECUTED",
+  "stated_limitation": "fixture data, one model, seven single requests and one two-step sequence. No recurrence, no ranges, no capacity, no time zones, no concurrent requests, and no persistence -- the executor returns a new list and writes nothing. This says the SPLIT works on a small real task; it says nothing about the model being complete."
+}

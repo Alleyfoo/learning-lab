@@ -29,9 +29,12 @@ from typing import Any, Optional
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from reservation_model import (  # noqa: E402
-    Model, load_dates, load_model, validate,
-)
+LAB = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(LAB / "taskmodel"))
+
+import reservation_model  # noqa: E402  (registers the task type)
+from reservation_model import load_dates, on_accept, rules_of, validate  # noqa: E402
+from task_model import TaskModel as Model, assert_refusal, load_model  # noqa: E402
 
 
 class UnhonourableModel(Exception):
@@ -96,27 +99,29 @@ def execute(model: Model, base: Path, request: str) -> Decision:
 
     # Contract check BEFORE any evaluation, so an unhonourable model cannot be
     # partially executed and then abandoned halfway through its rule list.
-    for rule in model.rules:
-        if rule.rule not in SUPPORTED_RULES:
+    for rule in rules_of(model):
+        if rule.get("rule") not in SUPPORTED_RULES:
             raise UnhonourableModel(
-                f"rule {rule.rule!r} is declared but not implemented")
-    if model.on_accept not in SUPPORTED_ON_ACCEPT:
+                f"rule {rule.get('rule')!r} is declared but not implemented")
+    if on_accept(model) not in SUPPORTED_ON_ACCEPT:
         raise UnhonourableModel(
-            f"on_accept {model.on_accept!r} is declared but not implemented")
+            f"on_accept {on_accept(model)!r} is declared but not implemented")
 
-    holidays = frozenset(load_dates(base, model.holidays_path, "holidays"))
-    reservations = load_dates(base, model.reservations_path, "reservations")
+    holidays = frozenset(load_dates(model, base, "holidays"))
+    reservations = load_dates(model, base, "reservations")
 
     evaluated: list[str] = []
-    for rule in model.rules:                      # DECLARED order, not ours
-        evaluated.append(rule.rule)
-        if not _eval_rule(rule.rule, request, holidays, reservations):
+    for rule in rules_of(model):                  # DECLARED order, not ours
+        evaluated.append(rule["rule"])
+        if not _eval_rule(rule["rule"], request, holidays, reservations):
             # First failure decides. Later rules are deliberately NOT evaluated:
             # `not_holiday` has no defined answer for a malformed date, and
             # reporting a second reason would imply it was checked when it was
             # not.
-            return Decision(accepted=False, request=request, reason=rule.refusal,
-                            evaluated=evaluated, reservations=reservations)
+            return Decision(
+                accepted=False, request=request,
+                reason=assert_refusal("reservation", rule["refusal"]),
+                evaluated=evaluated, reservations=reservations)
 
     # on_accept: append, returning a NEW list.
     return Decision(accepted=True, request=request, reason=None,
@@ -132,7 +137,7 @@ def execute_many(model: Model, base: Path, requests: list[str]) -> list[Decision
     the test does not depend on the executor writing anything to disk.
     """
     out: list[Decision] = []
-    current = load_dates(base, model.reservations_path, "reservations")
+    current = load_dates(model, base, "reservations")
     for request in requests:
         decision = _execute_against(model, base, request, current)
         out.append(decision)
@@ -143,13 +148,15 @@ def execute_many(model: Model, base: Path, requests: list[str]) -> list[Decision
 def _execute_against(model: Model, base: Path, request: str,
                      reservations: tuple[str, ...]) -> Decision:
     """`execute`, but against an in-memory reservation list."""
-    holidays = frozenset(load_dates(base, model.holidays_path, "holidays"))
+    holidays = frozenset(load_dates(model, base, "holidays"))
     evaluated: list[str] = []
-    for rule in model.rules:
-        evaluated.append(rule.rule)
-        if not _eval_rule(rule.rule, request, holidays, reservations):
-            return Decision(accepted=False, request=request, reason=rule.refusal,
-                            evaluated=evaluated, reservations=reservations)
+    for rule in rules_of(model):
+        evaluated.append(rule["rule"])
+        if not _eval_rule(rule["rule"], request, holidays, reservations):
+            return Decision(
+                accepted=False, request=request,
+                reason=assert_refusal("reservation", rule["refusal"]),
+                evaluated=evaluated, reservations=reservations)
     return Decision(accepted=True, request=request, reason=None,
                     evaluated=evaluated, reservations=tuple(reservations) + (request,))
 

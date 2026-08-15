@@ -1,28 +1,30 @@
 #!/usr/bin/env python3
-"""The MODEL half of the reservation task: declare and validate, never evaluate.
+"""The reservation task's BODY: declare and validate its own rules, never evaluate.
 
-This module knows what a well-formed reservation model IS. It does not decide
-whether any particular date is acceptable — that is `execute_reservation.py`, and
-keeping the two apart is the thing this small task exists to test.
+Identity and sources are the shared envelope's job (`taskmodel/task_model.py`).
+What is left here is what only this task has: an ordered rule list whose order is
+precedence, and an on-accept effect.
 
-Nothing here loads a requested date, and nothing here reads a calendar to answer
-a question. If a function in this file ever needs to know today's date or a
-specific request, the separation has been lost.
+Nothing here loads a requested date. If a function in this file ever needs one,
+the separation has been lost.
 
 See `reservation/design/reservation_model_v1.md`.
 """
 from __future__ import annotations
 
-import json
-from dataclasses import dataclass
+import sys
 from pathlib import Path
-from typing import Any, Optional, Sequence
+from typing import Optional
 
-MODEL_VERSIONS = (1,)
+LAB = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(LAB / "taskmodel"))
 
-# Closed vocabularies. A model may not invent a rule or a refusal reason, for the
-# same reason the recipe format has a closed problem-code list: an unknown token
-# is a modelling error, not a thing to interpret generously.
+from task_model import (  # noqa: E402
+    Problem, Report, TaskModel, TaskType, load_collection, load_model, register,
+    validate as validate_envelope,
+)
+
+# Closed vocabularies. A model may not invent a rule or a refusal reason.
 RULES = ("date_well_formed", "not_holiday", "not_reserved")
 REFUSALS = ("INVALID_DATE", "HOLIDAY", "ALREADY_RESERVED")
 ON_ACCEPT = ("append_to_reservations",)
@@ -32,125 +34,70 @@ ON_ACCEPT = ("append_to_reservations",)
 # rule among three -- it is the precondition of the other two.
 MUST_BE_FIRST = "date_well_formed"
 
-PROBLEM_CODES = (
-    "unknown_model_version",
-    "missing_key",
+# This task's OWN codes. The four envelope codes (unknown_model_version,
+# missing_key, missing_data_file, malformed_data_file) live on the floor now and
+# are not repeated here.
+BODY_PROBLEM_CODES = (
     "unknown_rule",
     "unknown_refusal",
     "unknown_on_accept",
     "duplicate_rule",
     "wellformedness_not_first",
     "no_rules",
-    "missing_data_file",
-    "malformed_data_file",
+    "malformed_data_file",     # element shape: the envelope proves only a LIST
+    "missing_key",             # a rule without a declared refusal
 )
 
 
-@dataclass(frozen=True)
-class Rule:
-    rule: str
-    refusal: str
+def rules_of(model: TaskModel) -> list[dict]:
+    return list(model.body.get("rules") or [])
 
 
-@dataclass(frozen=True)
-class Problem:
-    code: str
-    where: str
-    detail: str = ""
-
-    def __str__(self) -> str:
-        return f"{self.code}@{self.where}: {self.detail}" if self.detail \
-            else f"{self.code}@{self.where}"
+def rule_names(model: TaskModel) -> tuple[str, ...]:
+    return tuple(str(r.get("rule", "")) for r in rules_of(model))
 
 
-@dataclass
-class Model:
-    model_version: int
-    model_id: str
-    holidays_path: str
-    reservations_path: str
-    rules: tuple[Rule, ...]
-    on_accept: str
-
-    def rule_names(self) -> tuple[str, ...]:
-        return tuple(r.rule for r in self.rules)
-
-    def refusal_for(self, rule: str) -> Optional[str]:
-        for r in self.rules:
-            if r.rule == rule:
-                return r.refusal
-        return None
+def refusal_for(model: TaskModel, rule: str) -> Optional[str]:
+    for r in rules_of(model):
+        if r.get("rule") == rule:
+            return r.get("refusal")
+    return None
 
 
-@dataclass
-class Report:
-    problems: list[Problem]
-
-    @property
-    def valid(self) -> bool:
-        return not self.problems
-
-    def codes(self) -> set[str]:
-        return {p.code for p in self.problems}
+def on_accept(model: TaskModel) -> str:
+    return str(model.body.get("on_accept", ""))
 
 
-def model_from_json(raw: dict) -> Model:
-    """Structural parse only. Judgement about the result belongs to validate()."""
-    rules = tuple(Rule(rule=str(r.get("rule", "")), refusal=str(r.get("refusal", "")))
-                  for r in raw.get("rules", []) or [])
-    return Model(
-        model_version=raw.get("model_version", 0),
-        model_id=str(raw.get("model_id", "")),
-        holidays_path=str(raw.get("holidays", "")),
-        reservations_path=str(raw.get("reservations", "")),
-        rules=rules,
-        on_accept=str(raw.get("on_accept", "")),
-    )
-
-
-def load_model(path: Path) -> Model:
-    return model_from_json(json.loads(Path(path).read_text(encoding="utf-8")))
-
-
-def validate(model: Model, base: Path) -> Report:
-    """Is this a model the executor can be asked to run?
-
-    `base` is the directory the model's data paths are relative to. Data files are
-    checked for EXISTENCE and SHAPE here, because a model naming a file that is
-    not there is a broken model -- not an execution-time surprise.
-    """
+def validate_body(model: TaskModel, base: Path) -> list[Problem]:
     problems: list[Problem] = []
     where = model.model_id or "<no model_id>"
+    rules = rules_of(model)
 
-    if model.model_version not in MODEL_VERSIONS:
-        problems.append(Problem("unknown_model_version", where,
-                                str(model.model_version)))
-    if not model.model_id:
-        problems.append(Problem("missing_key", "<model>", "model_id"))
-
-    # --- rules ---------------------------------------------------------------
-    if not model.rules:
+    if not rules:
         problems.append(Problem("no_rules", where,
                                 "a model with no rules would accept everything"))
+
     seen: set[str] = set()
-    for i, rule in enumerate(model.rules):
+    for i, rule in enumerate(rules):
         rwhere = f"{where}:rules[{i}]"
-        if rule.rule not in RULES:
-            problems.append(Problem("unknown_rule", rwhere, rule.rule))
-        elif rule.rule in seen:
-            problems.append(Problem("duplicate_rule", rwhere, rule.rule))
+        name = str(rule.get("rule", ""))
+        refusal = str(rule.get("refusal", ""))
+        if name not in RULES:
+            problems.append(Problem("unknown_rule", rwhere, name))
+        elif name in seen:
+            problems.append(Problem("duplicate_rule", rwhere, name))
         else:
-            seen.add(rule.rule)
-        if not rule.refusal:
+            seen.add(name)
+        if not refusal:
             problems.append(Problem("missing_key", rwhere,
                                     "a rule needs a declared refusal reason"))
-        elif rule.refusal not in REFUSALS:
-            problems.append(Problem("unknown_refusal", rwhere, rule.refusal))
+        elif refusal not in REFUSALS:
+            problems.append(Problem("unknown_refusal", rwhere, refusal))
 
     # Enforced rather than silently reordered: reordering a model to make it
     # runnable would mean the executed order is not the declared order, which is
     # the whole property the declared list exists to give.
-    names = model.rule_names()
+    names = rule_names(model)
     if MUST_BE_FIRST in names and names[0] != MUST_BE_FIRST:
         problems.append(Problem(
             "wellformedness_not_first", where,
@@ -158,131 +105,117 @@ def validate(model: Model, base: Path) -> Report:
             f"rules before it have no defined answer for a string that is not a "
             f"date"))
 
-    if model.on_accept not in ON_ACCEPT:
-        problems.append(Problem("unknown_on_accept", where, model.on_accept))
+    if on_accept(model) not in ON_ACCEPT:
+        problems.append(Problem("unknown_on_accept", where, on_accept(model)))
 
-    # --- declared data -------------------------------------------------------
-    for label, rel, key in (("holidays", model.holidays_path, "holidays"),
-                            ("reservations", model.reservations_path, "reservations")):
-        if not rel:
-            problems.append(Problem("missing_key", where, label))
-            continue
-        path = (base / rel).resolve()
-        if not path.exists():
-            problems.append(Problem("missing_data_file", f"{where}:{label}", str(rel)))
+    # Element shape. The envelope proved a LIST arrived; that these are date
+    # STRINGS is this task's knowledge and nobody else's.
+    for name in ("holidays", "reservations"):
+        if name not in model.sources:
+            problems.append(Problem("missing_key", where, f"sources.{name}"))
             continue
         try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            problems.append(Problem("malformed_data_file", f"{where}:{label}", str(exc)))
-            continue
-        values = data.get(key)
-        if not isinstance(values, list) or not all(isinstance(v, str) for v in values):
-            problems.append(Problem(
-                "malformed_data_file", f"{where}:{label}",
-                f"expected a list of date strings under {key!r}"))
+            values = load_collection(model, base, name)
+        except (OSError, ValueError):
+            continue                      # already reported by the envelope
+        if not all(isinstance(v, str) for v in values):
+            problems.append(Problem("malformed_data_file", f"{where}:{name}",
+                                    "expected a list of date strings"))
 
-    return Report(problems=problems)
+    return problems
 
 
-def load_dates(base: Path, rel: str, key: str) -> tuple[str, ...]:
-    """The declared date list, as written. No parsing, no normalisation.
+TASK = register(TaskType(name="reservation", refusals=REFUSALS,
+                         validate_body=validate_body,
+                         body_problem_codes=BODY_PROBLEM_CODES))
 
-    Whether a stored string is a well-formed date is a question the EXECUTOR asks
-    through a declared rule. Silently dropping unparseable entries here would
-    make the data quietly disagree with what the file says.
-    """
-    data = json.loads((base / rel).resolve().read_text(encoding="utf-8"))
-    return tuple(data.get(key, []))
+
+def validate(model: TaskModel, base: Path) -> Report:
+    """Envelope + this task's body, in one call for the harness's convenience."""
+    return validate_envelope(model, base)
+
+
+def load_dates(model: TaskModel, base: Path, source: str) -> tuple[str, ...]:
+    return tuple(load_collection(model, base, source))
 
 
 def _self_test() -> int:
     import copy
+    import json
     import tempfile
 
-    here = Path(__file__).resolve().parent
-    base = here.parent
+    import task_model
+
+    base = Path(__file__).resolve().parent.parent
     failures: list[str] = []
-    seen_codes: set[str] = set()
+    seen: set[str] = set()
 
     def check(cond: bool, msg: str) -> None:
         if not cond:
             failures.append(msg)
 
     raw = json.loads((base / "models" / "reservation_v1.json").read_text(encoding="utf-8"))
-
-    # --- control: the shipped model is valid ---------------------------------
-    rep = validate(model_from_json(raw), base)
-    seen_codes |= rep.codes()
+    rep = validate(task_model.parse(raw), base)
+    seen |= rep.codes()
     check(rep.valid, f"the shipped model must validate: {[str(p) for p in rep.problems]}")
 
     def probe(mutate) -> Report:
         bad = copy.deepcopy(raw)
         mutate(bad)
-        r = validate(model_from_json(bad), base)
-        seen_codes.update(r.codes())
+        r = validate(task_model.parse(bad), base)
+        seen.update(r.codes())
         return r
 
-    # --- each declared problem code, exercised -------------------------------
+    # --- envelope codes, now owned by the floor ------------------------------
     r = probe(lambda d: d.update(model_version=99))
     check("unknown_model_version" in r.codes(), f"version: {sorted(r.codes())}")
-
     r = probe(lambda d: d.pop("model_id"))
-    check("missing_key" in r.codes(), f"missing model_id: {sorted(r.codes())}")
+    check("missing_key" in r.codes(), f"model_id: {sorted(r.codes())}")
+    r = probe(lambda d: d["sources"]["holidays"].update(path="fixtures/nope.json"))
+    check("missing_data_file" in r.codes(), f"missing file: {sorted(r.codes())}")
+    r = probe(lambda d: d.update(task="not_a_task"))
+    check("unknown_task" in r.codes(), f"unknown task: {sorted(r.codes())}")
 
+    # --- this task's own codes ----------------------------------------------
     r = probe(lambda d: d["rules"].append({"rule": "not_a_rule", "refusal": "HOLIDAY"}))
     check("unknown_rule" in r.codes(), f"unknown rule: {sorted(r.codes())}")
-
     r = probe(lambda d: d["rules"].__setitem__(
         1, {"rule": "not_holiday", "refusal": "NOT_A_REASON"}))
     check("unknown_refusal" in r.codes(), f"unknown refusal: {sorted(r.codes())}")
-
     r = probe(lambda d: d["rules"].append({"rule": "not_holiday", "refusal": "HOLIDAY"}))
-    check("duplicate_rule" in r.codes(), f"duplicate rule: {sorted(r.codes())}")
-
-    # The load-bearing structural rule.
-    def reorder(d):
-        d["rules"] = [d["rules"][1], d["rules"][0], d["rules"][2]]
-    r = probe(reorder)
+    check("duplicate_rule" in r.codes(), f"duplicate: {sorted(r.codes())}")
+    r = probe(lambda d: d.update(rules=[d["rules"][1], d["rules"][0], d["rules"][2]]))
     check("wellformedness_not_first" in r.codes(),
           f"well-formedness must be required first: {sorted(r.codes())}")
-
     r = probe(lambda d: d.update(rules=[]))
     check("no_rules" in r.codes(), f"empty rules: {sorted(r.codes())}")
-
     r = probe(lambda d: d.update(on_accept="delete_everything"))
     check("unknown_on_accept" in r.codes(), f"on_accept: {sorted(r.codes())}")
-
-    r = probe(lambda d: d.update(holidays="fixtures/nope.json"))
-    check("missing_data_file" in r.codes(), f"missing file: {sorted(r.codes())}")
-
-    with tempfile.TemporaryDirectory() as td:
-        bad = Path(td) / "bad.json"
-        bad.write_text('{"holidays": "not a list"}', encoding="utf-8")
-        m = model_from_json({**raw, "holidays": bad.name})
-        r2 = validate(m, Path(td))
-        seen_codes |= r2.codes()
-        check("malformed_data_file" in r2.codes(),
-              f"malformed data must be caught by the MODEL, not at execution: "
-              f"{sorted(r2.codes())}")
-
-    # A rule without a refusal reason.
     r = probe(lambda d: d["rules"].__setitem__(1, {"rule": "not_holiday"}))
     check("missing_key" in r.codes(), f"rule without refusal: {sorted(r.codes())}")
 
-    untested = sorted(set(PROBLEM_CODES) - seen_codes)
-    check(not untested, f"declared but unexercised problem codes: {untested}")
+    with tempfile.TemporaryDirectory() as td:
+        bad = Path(td) / "bad.json"
+        bad.write_text('{"holidays": [1, 2, 3]}', encoding="utf-8")
+        m = task_model.parse({**raw, "sources": {
+            **raw["sources"],
+            "holidays": {"path": bad.name, "collection": "holidays"}}})
+        r2 = validate(m, Path(td))
+        seen |= r2.codes()
+        check("malformed_data_file" in r2.codes(),
+              f"non-string elements must be caught by the BODY: {sorted(r2.codes())}")
+
+    untested = sorted(set(BODY_PROBLEM_CODES) - seen)
+    check(not untested, f"declared but unexercised body problem codes: {untested}")
 
     if failures:
-        import sys
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
         return 1
-    print(f"SELF-TEST PASSED (shipped model valid / all {len(PROBLEM_CODES)} problem "
-          f"codes exercised / well-formedness enforced first rather than reordered)")
+    print(f"SELF-TEST PASSED (shipped model valid / all {len(BODY_PROBLEM_CODES)} body "
+          f"codes exercised / envelope codes delegated to taskmodel / "
+          f"well-formedness enforced first rather than reordered)")
     return 0
 
 
 if __name__ == "__main__":
-    import sys
-
     raise SystemExit(_self_test() if sys.argv[1:2] == ["--self-test"] else 2)

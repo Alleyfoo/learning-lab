@@ -32,9 +32,14 @@ from typing import Any, Callable, Optional
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+LAB = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(LAB / "taskmodel"))
+
+import enrichment_model  # noqa: E402  (registers the task type)
 from enrichment_model import (  # noqa: E402
-    Compute, Model, Ref, load_model, load_rows, validate,
+    driving_source, load_rows, lookup_of, on_non_numeric, outputs_of, validate,
 )
+from task_model import TaskModel as Model, assert_refusal, load_model  # noqa: E402
 
 
 class UnhonourableModel(Exception):
@@ -120,54 +125,59 @@ def execute(model: Model, base: Path,
             "refusing to execute an invalid model: "
             + "; ".join(str(p) for p in report.problems[:4]))
 
-    for out in model.outputs:
+    lookup = lookup_of(model)
+    outputs = outputs_of(model)
+    driving = driving_source(model)
+
+    for out in outputs:
         if out.compute is not None and out.compute.op not in SUPPORTED_OPS:
             raise UnhonourableModel(f"op {out.compute.op!r} declared, not implemented")
-    for policy in (model.lookup.on_missing, model.lookup.on_ambiguous,
-                   model.on_non_numeric):
+    for policy in (lookup.on_missing, lookup.on_ambiguous, on_non_numeric(model)):
         if policy not in SUPPORTED_POLICIES:
             raise UnhonourableModel(f"policy {policy!r} declared, not implemented")
 
-    driving = load_rows(model, base, model.driving_source)
-    reference = load_rows(model, base, model.lookup.into)
+    driving_rows = load_rows(model, base, driving)
+    reference = load_rows(model, base, lookup.into)
 
     # Index by the DECLARED right-hand key. Every matching row is kept, so
     # ambiguity is a fact the executor can report rather than one it resolves by
     # taking the first.
     index: dict[str, list[dict]] = {}
     for row in reference:
-        index.setdefault(str(row.get(model.lookup.match_right, "")), []).append(row)
+        index.setdefault(str(row.get(lookup.match_right, "")), []).append(row)
 
-    out = Enrichment(columns=[o.target for o in model.outputs])
+    out = Enrichment(columns=[o.target for o in outputs])
 
-    for row in driving:
-        key = str(row.get(model.lookup.match_left, ""))
+    for row in driving_rows:
+        key = str(row.get(lookup.match_left, ""))
         matches = index.get(key, [])
 
         if len(matches) == 0:
-            if model.lookup.on_missing == "refuse_run":
+            if lookup.on_missing == "refuse_run":
                 return _refuse_run(out, f"MISSING_PRODUCT for {key!r}")
-            out.refused.append({"key": key, "reason": "MISSING_PRODUCT",
+            out.refused.append({"key": key,
+                                "reason": assert_refusal("enrichment", "MISSING_PRODUCT"),
                                 "row": row})
             continue
         if len(matches) > 1:
-            if model.lookup.on_ambiguous == "refuse_run":
+            if lookup.on_ambiguous == "refuse_run":
                 return _refuse_run(out, f"AMBIGUOUS_PRODUCT: {key!r} matches "
                                         f"{len(matches)} reference rows")
-            out.refused.append({"key": key, "reason": "AMBIGUOUS_PRODUCT",
+            out.refused.append({"key": key,
+                                "reason": assert_refusal("enrichment", "AMBIGUOUS_PRODUCT"),
                                 "row": row})
             continue
 
-        env = {model.driving_source: row, model.lookup.into: matches[0]}
+        env = {driving: row, lookup.into: matches[0]}
 
         values: list[Any] = []
         refusal: Optional[str] = None
-        for spec in model.outputs:
+        for spec in outputs:
             if spec.compute is not None:
                 left = _to_number(env[spec.compute.left.source].get(spec.compute.left.field))
                 right = _to_number(env[spec.compute.right.source].get(spec.compute.right.field))
                 if left is None or right is None:
-                    refusal = "NON_NUMERIC_OPERAND"
+                    refusal = assert_refusal("enrichment", "NON_NUMERIC_OPERAND")
                     break
                 product = (multiply(left, right) if multiply
                            else _apply(spec.compute.op, left, right))
@@ -183,14 +193,14 @@ def execute(model: Model, base: Path,
                 # different -- it has no source text, so its representation is
                 # whatever the arithmetic produced.
                 if _to_number(raw) is None:
-                    refusal = "NON_NUMERIC_OPERAND"
+                    refusal = assert_refusal("enrichment", "NON_NUMERIC_OPERAND")
                     break
                 values.append(raw)
             else:
                 values.append(raw)
 
         if refusal:
-            if model.on_non_numeric == "refuse_run":
+            if on_non_numeric(model) == "refuse_run":
                 return _refuse_run(out, f"{refusal} on {key!r}")
             out.refused.append({"key": key, "reason": refusal, "row": row})
             continue
