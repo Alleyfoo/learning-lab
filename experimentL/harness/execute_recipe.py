@@ -20,6 +20,7 @@ The output column order is the recipe's field order, with the unpivot's
 from __future__ import annotations
 
 import json
+import re
 import sys
 from dataclasses import dataclass, field as dc_field
 from pathlib import Path
@@ -35,6 +36,13 @@ from macro_v2 import is_number  # noqa: E402
 from recipe import Recipe, SheetEntry, load_recipe  # noqa: E402
 from referents import WorkbookView, parse, resolve  # noqa: E402
 from validate_recipe import validate  # noqa: E402
+
+
+# A number whose ONLY separator is followed by exactly three digits. Thousands
+# and decimal readings of it differ by a factor of 1000 and the format carries no
+# locale to choose between them (gap G2). Anchored, and deliberately narrow: more
+# or fewer than three trailing digits is not ambiguous.
+_AMBIGUOUS_GROUPING = re.compile(r"^[+-]?\d{1,3}[.,]\d{3}$")
 
 
 class InsufficientRecipe(Exception):
@@ -76,6 +84,31 @@ def _coerce(value: Any, declared: Optional[str], target: str,
         return text
     if declared == "number":
         numeric = normalize_for("numeric_parse", text)
+        if _AMBIGUOUS_GROUPING.match(numeric):
+            # GAP G2, the sibling of G1. A single separator followed by exactly
+            # three digits cannot be resolved without a locale, and the recipe
+            # format carries none:
+            #
+            #     "1,234"  ->  1234 (US thousands)  or  1.234 (FI decimal)
+            #     "1.234"  ->  1.234 (US decimal)   or  1234  (FI thousands)
+            #
+            # The old code did `float(numeric.replace(",", "."))`, which committed
+            # to the decimal reading every time and emitted 1.234 for a US
+            # thousands separator -- a factor-1000 error, marked honoured, with
+            # nothing recorded.
+            #
+            # Not fixed by implementing locale parsing. G1's standing trap: that
+            # is a result, and a declared format string is the obvious answer
+            # belonging in its own freeze. One digit after the separator is NOT
+            # ambiguous -- no thousands group has one digit -- so "1,5" and "1.5"
+            # are still honoured as decimals.
+            unhonoured.append({
+                "target": target, "declared": "number", "gap": "G2",
+                "reason": f"value {text!r} has a separator followed by exactly "
+                          f"three digits and the recipe format carries no locale, "
+                          f"so thousands and decimal readings differ by 1000 and "
+                          f"neither is recoverable from the declaration"})
+            return text
         if is_number(numeric):
             number = float(numeric.replace(",", "."))
             return int(number) if number.is_integer() else number
