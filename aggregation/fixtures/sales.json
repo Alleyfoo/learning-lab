@@ -1,0 +1,10 @@
+{
+  "_note": "Sale lines. Row order is deliberate: South appears before North, so first-appearance ordering and sorted ordering DIFFER and the declared choice is observable. The East row carries a non-numeric quantity on purpose.",
+  "sales": [
+    {"region": "South", "product": "P-100", "quantity": "5", "amount": "1.00"},
+    {"region": "North", "product": "P-100", "quantity": "2", "amount": "0.10"},
+    {"region": "North", "product": "P-200", "quantity": "3", "amount": "0.20"},
+    {"region": "South", "product": "P-100", "quantity": "1", "amount": "2.50"},
+    {"region": "East",  "product": "P-300", "quantity": "x", "amount": "1.00"}
+  ]
+}

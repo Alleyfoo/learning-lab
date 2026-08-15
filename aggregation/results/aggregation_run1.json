@@ -1,0 +1,78 @@
+{
+  "question": "can GROUPING and AGGREGATION ACROSS ROWS be declared by the model and faithfully executed?",
+  "model_valid": true,
+  "model_problems": [],
+  "vocabulary_parity": {
+    "agree": true,
+    "ops": {
+      "declared_not_implemented": [],
+      "implemented_not_declared": []
+    },
+    "group_orders": {
+      "declared_not_implemented": [],
+      "implemented_not_declared": []
+    },
+    "policies": {
+      "declared_not_implemented": [],
+      "implemented_not_declared": []
+    }
+  },
+  "canaries": [
+    {
+      "name": "float_sum",
+      "fired": true,
+      "detail": "float would give ['3.5', '0.30000000000000004'], Decimal gives ['3.50', '0.30']"
+    },
+    {
+      "name": "shared_accumulator",
+      "fired": true,
+      "detail": "one accumulator across groups gives [['South', 4, '11', '3.80'], ['North', 4, '11', '3.80']]"
+    }
+  ],
+  "checks": [
+    {
+      "check": "baseline_rows",
+      "status": "PASS",
+      "detail": "['region', 'n_rows', 'total_quantity', 'total_amount'] [['South', 2, '6', '3.50'], ['North', 2, '5', '0.30']]",
+      "rationale": "grouping and both aggregate kinds together, including 0.10 + 0.20 = 0.30 which float arithmetic gets wrong"
+    },
+    {
+      "check": "refused_row_forms_no_group",
+      "status": "PASS",
+      "detail": "refused=['NON_NUMERIC_OPERAND'], groups=['South', 'North']",
+      "rationale": "the East row is refused BEFORE grouping, so it forms no group; a group exists only if a surviving row contributed to it"
+    },
+    {
+      "check": "grouping_follows_declaration",
+      "status": "PASS",
+      "detail": "[['P-100', 3, '8', '3.60'], ['P-200', 1, '3', '0.20']]",
+      "rationale": "changing the declared grouping key must re-partition the rows; an executor grouping by a hardcoded region would not move"
+    },
+    {
+      "check": "group_order_follows_declaration",
+      "status": "PASS",
+      "detail": "{'first_appearance': ['South', 'North'], 'sorted_by_key': ['North', 'South']}",
+      "rationale": "the SAME groups in two declared orders. The fixture puts South before North so the two orderings genuinely differ -- identical orderings would make this a no-op"
+    },
+    {
+      "check": "aggregate_field_follows_declaration",
+      "status": "PASS",
+      "detail": "total_amount now sums 'quantity': ['6', '5']",
+      "rationale": "which field is summed comes from the declaration, not the target name -- `total_amount` summing quantity is what the model said"
+    },
+    {
+      "check": "policy_follows_declaration",
+      "status": "PASS",
+      "detail": "{'refuse_row': {'n_rows': 2, 'run_refused': False}, 'refuse_run': {'n_rows': 0, 'run_refused': True}}",
+      "rationale": "refuse_run must deliver NO groups rather than the groups formed before the bad row was reached"
+    },
+    {
+      "check": "refuses_unhonourable_model",
+      "status": "PASS",
+      "detail": "True",
+      "rationale": "an op the executor does not implement stops the run"
+    }
+  ],
+  "outcome": "GROUPING_AND_AGGREGATION_FAITHFUL",
+  "stated_limitation": "five sale lines, one source, one grouping key at a time, two ops. No multi-key grouping exercised (the format allows it and the corpus does not test it), no having/filter, no ordering of ROWS within a group, no min/max/avg. Says the SHAPE works -- declared grouping and declared aggregation are both followed, and the accumulator does not leak -- not that the model is complete."
+}

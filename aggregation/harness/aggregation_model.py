@@ -1,0 +1,248 @@
+#!/usr/bin/env python3
+"""The aggregation task's BODY: grouping keys and aggregates, declared not evaluated.
+
+The third task shape, and the first with STATE ACROSS ROWS. Reservation decides
+one value; enrichment decides each row independently against a reference table.
+Here a row's contribution lands in an accumulator shared with other rows in its
+group, which is a kind of failure neither earlier task could have.
+
+Identity and sources are the shared envelope's job (`taskmodel/task_model.py`);
+this file is the first task written ON that floor rather than migrated onto it.
+
+Groups nothing and sums nothing — that is `execute_aggregation.py`.
+
+See `aggregation/design/aggregation_model_v1.md`.
+"""
+from __future__ import annotations
+
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
+
+LAB = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(LAB / "taskmodel"))
+
+from task_model import (  # noqa: E402
+    Problem, Report, TaskModel, TaskType, load_collection, register,
+    validate as validate_envelope,
+)
+
+OPS = ("count", "sum")
+GROUP_ORDERS = ("first_appearance", "sorted_by_key")
+POLICIES = ("refuse_row", "refuse_run")
+REFUSALS = ("NON_NUMERIC_OPERAND",)
+
+# Which ops take a field, and which do not. A pairing rule rather than two
+# independent enums: `sum` without a field has nothing to add, and `count` with
+# one implies a filter it does not apply. PRO-2 instance 8 in the recipe line was
+# exactly this -- `id` x `unpivot` were each supported and the PAIR meant nothing.
+OP_TAKES_FIELD = {"count": False, "sum": True}
+
+BODY_PROBLEM_CODES = (
+    "missing_key",
+    "unknown_source",
+    "unknown_op",
+    "unknown_policy",
+    "unknown_group_order",
+    "duplicate_target",
+    "no_group_by",
+    "no_aggregates",
+    "op_field_mismatch",
+    "field_not_in_source",
+    "malformed_data_file",
+)
+
+
+@dataclass(frozen=True)
+class Aggregate:
+    target: str
+    op: str
+    field: Optional[str] = None
+
+
+def driving_source(model: TaskModel) -> str:
+    return str(model.body.get("driving_source", ""))
+
+
+def group_by(model: TaskModel) -> tuple[str, ...]:
+    return tuple(model.body.get("group_by") or ())
+
+
+def group_order(model: TaskModel) -> str:
+    return str(model.body.get("group_order", ""))
+
+
+def aggregates_of(model: TaskModel) -> tuple[Aggregate, ...]:
+    return tuple(Aggregate(target=str(a.get("target", "")),
+                           op=str(a.get("op", "")),
+                           field=a.get("field"))
+                 for a in (model.body.get("aggregates") or ()))
+
+
+def on_non_numeric(model: TaskModel) -> str:
+    return str(model.body.get("on_non_numeric", ""))
+
+
+def validate_body(model: TaskModel, base: Path) -> list[Problem]:
+    problems: list[Problem] = []
+    where = model.model_id or "<no model_id>"
+    driving = driving_source(model)
+
+    columns: dict[str, set[str]] = {}
+    for name in model.sources:
+        try:
+            rows = load_collection(model, base, name)
+        except (OSError, ValueError):
+            continue                       # already reported by the envelope
+        if not all(isinstance(r, dict) for r in rows):
+            problems.append(Problem("malformed_data_file", f"{where}:sources.{name}",
+                                    "expected a list of objects"))
+            continue
+        columns[name] = {k for row in rows for k in row}
+
+    if driving not in set(model.sources):
+        problems.append(Problem("unknown_source", where, f"driving_source {driving!r}"))
+
+    if on_non_numeric(model) not in POLICIES:
+        problems.append(Problem("unknown_policy", f"{where}:on_non_numeric",
+                                on_non_numeric(model)))
+
+    # Group ordering is DECLARED. Emitting groups in whatever order the
+    # accumulator happened to fill is order-by-accident, and cross-sheet law 4
+    # is the reason that is not acceptable even when it looks stable.
+    if group_order(model) not in GROUP_ORDERS:
+        problems.append(Problem("unknown_group_order", where, group_order(model)))
+
+    keys = group_by(model)
+    if not keys:
+        problems.append(Problem("no_group_by", where,
+                                "a model with no grouping keys would aggregate "
+                                "everything into one unnamed bucket"))
+    for key in keys:
+        if driving in columns and key not in columns[driving]:
+            problems.append(Problem("field_not_in_source", f"{where}:group_by",
+                                    f"{driving}.{key}"))
+
+    aggregates = aggregates_of(model)
+    if not aggregates:
+        problems.append(Problem("no_aggregates", where, "a model with no aggregates emits nothing"))
+
+    seen: set[str] = set()
+    for i, agg in enumerate(aggregates):
+        awhere = f"{where}:aggregates[{i}]"
+        if not agg.target:
+            problems.append(Problem("missing_key", awhere, "target"))
+        elif agg.target in seen or agg.target in keys:
+            problems.append(Problem("duplicate_target", awhere, agg.target))
+        else:
+            seen.add(agg.target)
+
+        if agg.op not in OPS:
+            problems.append(Problem("unknown_op", awhere, agg.op))
+            continue
+
+        # The PAIRING, not the two enums separately.
+        takes_field = OP_TAKES_FIELD[agg.op]
+        if takes_field and not agg.field:
+            problems.append(Problem("op_field_mismatch", awhere,
+                                    f"{agg.op!r} needs a field to aggregate"))
+        if not takes_field and agg.field:
+            problems.append(Problem("op_field_mismatch", awhere,
+                                    f"{agg.op!r} takes no field, but {agg.field!r} "
+                                    f"was given -- it implies a filter that is not "
+                                    f"applied"))
+        if agg.field and driving in columns and agg.field not in columns[driving]:
+            problems.append(Problem("field_not_in_source", awhere,
+                                    f"{driving}.{agg.field}"))
+
+    return problems
+
+
+TASK = register(TaskType(name="aggregation", refusals=REFUSALS,
+                         validate_body=validate_body,
+                         body_problem_codes=BODY_PROBLEM_CODES))
+
+
+def validate(model: TaskModel, base: Path) -> Report:
+    return validate_envelope(model, base)
+
+
+def _self_test() -> int:
+    import copy
+    import json
+    import tempfile
+
+    import task_model
+
+    base = Path(__file__).resolve().parent.parent
+    failures: list[str] = []
+    seen: set[str] = set()
+
+    def check(cond: bool, msg: str) -> None:
+        if not cond:
+            failures.append(msg)
+
+    raw = json.loads((base / "models" / "aggregation_v1.json").read_text(encoding="utf-8"))
+    rep = validate(task_model.parse(raw), base)
+    seen |= rep.codes()
+    check(rep.valid, f"the shipped model must validate: {[str(p) for p in rep.problems]}")
+
+    def probe(mutate) -> Report:
+        bad = copy.deepcopy(raw)
+        mutate(bad)
+        r = validate(task_model.parse(bad), base)
+        seen.update(r.codes())
+        return r
+
+    r = probe(lambda d: d.update(driving_source="nope"))
+    check("unknown_source" in r.codes(), f"driving: {sorted(r.codes())}")
+    r = probe(lambda d: d.update(on_non_numeric="shrug"))
+    check("unknown_policy" in r.codes(), f"policy: {sorted(r.codes())}")
+    r = probe(lambda d: d.update(group_order="whatever_order_it_filled"))
+    check("unknown_group_order" in r.codes(), f"group_order: {sorted(r.codes())}")
+    r = probe(lambda d: d.update(group_by=[]))
+    check("no_group_by" in r.codes(), f"no group_by: {sorted(r.codes())}")
+    r = probe(lambda d: d.update(group_by=["colour"]))
+    check("field_not_in_source" in r.codes(), f"bad group key: {sorted(r.codes())}")
+    r = probe(lambda d: d.update(aggregates=[]))
+    check("no_aggregates" in r.codes(), f"no aggregates: {sorted(r.codes())}")
+    r = probe(lambda d: d["aggregates"][0].update(op="median"))
+    check("unknown_op" in r.codes(), f"op: {sorted(r.codes())}")
+    r = probe(lambda d: d["aggregates"].append(dict(d["aggregates"][0])))
+    check("duplicate_target" in r.codes(), f"duplicate: {sorted(r.codes())}")
+    r = probe(lambda d: d["aggregates"][0].pop("target"))
+    check("missing_key" in r.codes(), f"no target: {sorted(r.codes())}")
+
+    # --- the PAIRING, both directions ---------------------------------------
+    r = probe(lambda d: d["aggregates"][1].pop("field"))
+    check("op_field_mismatch" in r.codes(), f"sum without field: {sorted(r.codes())}")
+    r = probe(lambda d: d["aggregates"][0].update(field="quantity"))
+    check("op_field_mismatch" in r.codes(), f"count WITH field: {sorted(r.codes())}")
+
+    r = probe(lambda d: d["aggregates"][1].update(field="colour"))
+    check("field_not_in_source" in r.codes(), f"bad sum field: {sorted(r.codes())}")
+
+    with tempfile.TemporaryDirectory() as td:
+        bad = Path(td) / "bad.json"
+        bad.write_text('{"sales": ["not an object"]}', encoding="utf-8")
+        m = task_model.parse({**raw, "sources": {
+            "sales": {"path": bad.name, "collection": "sales"}}})
+        r2 = validate(m, Path(td))
+        seen |= r2.codes()
+        check("malformed_data_file" in r2.codes(), f"element shape: {sorted(r2.codes())}")
+
+    untested = sorted(set(BODY_PROBLEM_CODES) - seen)
+    check(not untested, f"declared but unexercised body problem codes: {untested}")
+
+    if failures:
+        sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
+        return 1
+    print(f"SELF-TEST PASSED (shipped model valid / all {len(BODY_PROBLEM_CODES)} body "
+          f"codes exercised / op-field PAIRING checked in both directions / group "
+          f"ordering must be declared)")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(_self_test() if sys.argv[1:2] == ["--self-test"] else 2)

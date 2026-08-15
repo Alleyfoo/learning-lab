@@ -1,0 +1,17 @@
+{
+  "model_version": 1,
+  "model_id": "aggregation_v1",
+  "task": "aggregation",
+  "sources": {
+    "sales": {"path": "fixtures/sales.json", "collection": "sales"}
+  },
+  "driving_source": "sales",
+  "group_by": ["region"],
+  "group_order": "first_appearance",
+  "aggregates": [
+    {"target": "n_rows", "op": "count"},
+    {"target": "total_quantity", "op": "sum", "field": "quantity"},
+    {"target": "total_amount", "op": "sum", "field": "amount"}
+  ],
+  "on_non_numeric": "refuse_row"
+}
