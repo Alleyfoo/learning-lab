@@ -163,6 +163,32 @@ def execute(recipe: Recipe, wb: WorkbookView) -> Execution:
                 raise InsufficientRecipe(
                     f"cannot resolve layout_from {entry.layout_from} for {entry.sheet}")
             header_rows0[proto] = header_ref.row0
+            binding_sheet = proto
+        else:
+            binding_sheet = next(iter(members))
+
+        def _resolve_here(source: str, _binding=binding_sheet):
+            """Resolve, and refuse anything that landed somewhere else (law 6).
+
+            The resolver returns the ACTUAL sheet it resolved to; until this
+            check existed the executor used only `col0` from it, so a resolution
+            that landed on the wrong sheet contributed that sheet's COLUMN NUMBER
+            to a read of this one. The output was wrong rather than refused,
+            which is executor rule 1 -- read only what the recipe names --
+            unenforced at the one place it can be checked.
+
+            The comparison is against the entry's BINDING sheet, not the sheet
+            being read: a sheetset binds to its prototype and reads from each
+            member, so those legitimately differ. Requiring them to match would
+            ban sheetsets rather than tighten anything.
+            """
+            r = resolve(source, wb, header_rows0=header_rows0)
+            if r.ok and r.sheet != _binding:
+                raise InsufficientRecipe(
+                    f"{source!r} resolved to sheet {r.sheet!r}, but {entry.sheet} "
+                    f"binds against {_binding!r}. Reading it would take one "
+                    f"sheet's column positions into another sheet's rows.")
+            return r
 
         entry_columns: Optional[list[str]] = None
 
@@ -181,7 +207,7 @@ def execute(recipe: Recipe, wb: WorkbookView) -> Execution:
 
             for fld in entry.fields:
                 if fld.role == "metadata":
-                    r = resolve(fld.source, wb, header_rows0=header_rows0)
+                    r = _resolve_here(fld.source)
                     values = wb.row_values(member, r.row0)
                     cell0 = values[r.col0] if r.col0 < len(values) else ""
                     scalars[fld.target] = _coerce(cell0, fld.type, fld.target,
@@ -200,7 +226,7 @@ def execute(recipe: Recipe, wb: WorkbookView) -> Execution:
                     raise InsufficientRecipe(
                         f"derived field {fld.target!r} needs transform {op!r}, "
                         "which the executor does not implement")
-                r = resolve(fld.source, wb, header_rows0=header_rows0)
+                r = _resolve_here(fld.source)
                 cols = list(range(r.col0, r.col0_last + 1))
                 if fld.role == "id":
                     id_fields.append((fld.target, cols[0], fld.type))

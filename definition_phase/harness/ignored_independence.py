@@ -67,6 +67,17 @@ The lesson generalises past this law: a corpus can pass completely while blind t
 an entire class of defect, and the canary is what tells the two apart. Both must
 fire AND be reached, or the run is VOID.
 
+## `resolution_leak` changed how it FIRES (law 6, 2026-08-15)
+
+It used to fire as an output difference. Law 6 added a read-origin check to the
+executor, so the induced leak is now REFUSED at execution and the canary fires by
+refusal instead. That is a strengthening — the path is closed at the executor
+rather than merely visible in the result — but it is recorded because a canary
+quietly changing its firing mechanism is exactly the kind of drift that makes a
+suite stop meaning what it says. This module now distinguishes refusal at
+VALIDATION (the stimulus never arrived: canary does NOT fire) from refusal at
+EXECUTION (the stimulus arrived and was caught: canary fires).
+
 Usage
 -----
     python definition_phase/harness/ignored_independence.py            # run + record
@@ -86,7 +97,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(LAB / "experimentL" / "harness"))
 
 import execute_recipe  # noqa: E402
-from execute_recipe import execute  # noqa: E402
+from execute_recipe import InsufficientRecipe, execute  # noqa: E402
 from recipe import recipe_from_json  # noqa: E402
 from referents import WorkbookView  # noqa: E402
 from validate_recipe import validate  # noqa: E402
@@ -189,9 +200,17 @@ def _outcome(path: Path, ignored_role: str = "ignore") -> dict:
     recipe = _recipe(ignored_role)
     report = validate(recipe, wb)
     if not report.valid:
-        return {"refused": True, "codes": sorted(report.codes())}
-    ex = execute(recipe, wb)
-    return {"refused": False, "columns": list(ex.columns),
+        return {"refused": True, "at": "validation", "codes": sorted(report.codes())}
+    try:
+        ex = execute(recipe, wb)
+    except InsufficientRecipe as exc:
+        # Law 6 added a read-origin check, so an induced resolution leak is now
+        # REFUSED here rather than producing wrong output. Refusal at EXECUTION
+        # is a different fact from refusal at validation and must not be
+        # collapsed into it: one means the stimulus was caught, the other means
+        # it never arrived.
+        return {"refused": True, "at": "execution", "codes": [str(exc)]}
+    return {"refused": False, "at": None, "columns": list(ex.columns),
             "rows": [list(r) for r in ex.rows],
             "member_contribution": dict(ex.member_contribution)}
 
@@ -392,6 +411,16 @@ def _canary_resolution_leak() -> dict:
     finally:
         execute_recipe.resolve = original
 
+    # Since law 6 (2705335 -> the read-origin check) this canary fires by
+    # REFUSAL rather than by an output difference: the executor now compares the
+    # sheet a referent resolved to against the entry's binding sheet and raises.
+    # That is a strengthening, not a weakening -- the leak path is closed at the
+    # executor instead of merely being visible in the result. Before law 6 the
+    # assertion was `base["rows"] != mut["rows"]`, and it fired that way.
+    if base.get("at") == "execution" or mut.get("at") == "execution":
+        return {"name": "resolution_leak", "fired": True, "reached": True,
+                "detail": ("leaky resolver refused at execution by the law-6 "
+                           f"read-origin check: {(base.get('codes') or mut.get('codes'))[0]}")}
     if base["refused"] or mut["refused"]:
         return {"name": "resolution_leak", "fired": False, "reached": False,
                 "detail": f"never executed: {base.get('codes')} / {mut.get('codes')}"}

@@ -50,6 +50,11 @@ members_in_file_order  sheetset members expand in WORKBOOK order rather than
 
 Both must fire AND be reached, or the run is VOID.
 
+`first_sheet_wins` used to fire as an output difference; since law 6 added the
+executor's read-origin check it fires by REFUSAL at execution instead. See law 3
+for the full note — refusal at VALIDATION still means the stimulus never arrived
+and does NOT count as firing.
+
 ## Run 1 was VOID, and for the SAME reason law 3 run 1 was
 
 Four of four permutations passed, the control held, `members_in_file_order`
@@ -88,7 +93,7 @@ sys.path.insert(0, str(LAB / "experimentL" / "harness"))
 
 import execute_recipe  # noqa: E402
 import validate_recipe  # noqa: E402
-from execute_recipe import execute  # noqa: E402
+from execute_recipe import InsufficientRecipe, execute  # noqa: E402
 from recipe import recipe_from_json  # noqa: E402
 from referents import WorkbookView  # noqa: E402
 from validate_recipe import validate  # noqa: E402
@@ -169,9 +174,15 @@ def _outcome(path: Path, members: Optional[list[str]] = None) -> dict:
     recipe = _recipe(members)
     report = validate(recipe, wb)
     if not report.valid:
-        return {"refused": True, "codes": sorted(report.codes())}
-    ex = execute(recipe, wb)
-    return {"refused": False, "columns": list(ex.columns),
+        return {"refused": True, "at": "validation", "codes": sorted(report.codes())}
+    try:
+        ex = execute(recipe, wb)
+    except InsufficientRecipe as exc:
+        # See law 3's note: since law 6 an induced resolution leak is refused
+        # here rather than producing wrong output, and refusal at EXECUTION is a
+        # different fact from refusal at validation.
+        return {"refused": True, "at": "execution", "codes": [str(exc)]}
+    return {"refused": False, "at": None, "columns": list(ex.columns),
             "rows": [list(r) for r in ex.rows],
             "member_contribution": dict(ex.member_contribution)}
 
@@ -315,6 +326,12 @@ def _canary_first_sheet_wins() -> dict:
     finally:
         execute_recipe.resolve = original
 
+    # Fires by REFUSAL since law 6 closed this path at the executor; before that
+    # it fired as `a["rows"] != b["rows"]`. Strengthening, not weakening.
+    if a.get("at") == "execution" or b.get("at") == "execution":
+        return {"name": "first_sheet_wins", "fired": True, "reached": True,
+                "detail": ("first-sheet resolution refused at execution by the "
+                           f"law-6 read-origin check: {(a.get('codes') or b.get('codes'))[0]}")}
     if a["refused"] or b["refused"]:
         return {"name": "first_sheet_wins", "fired": False, "reached": False,
                 "detail": f"never executed: {a.get('codes')} / {b.get('codes')}"}

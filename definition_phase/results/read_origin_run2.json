@@ -1,0 +1,130 @@
+{
+  "law": "Read Origin Matches Declared Origin",
+  "statement": "every cell read must come from the sheet the referent resolved to, or from a declared member of the entry whose prototype it resolved against",
+  "cases": [
+    {
+      "case": "CONTROL_correct_resolution",
+      "required": "executes",
+      "rationale": "an ordinary entry under a correct resolver must execute unchanged. A check that refused correct recipes would be worse than no check at all.",
+      "recipe": "plain",
+      "induced_defect": null,
+      "workbook_order": [
+        "AAA_decoy",
+        "Jan",
+        "Feb"
+      ],
+      "result": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "J-1",
+            1
+          ]
+        ]
+      },
+      "status": "HELD",
+      "detail": "executed correctly: [['J-1', 1]]"
+    },
+    {
+      "case": "CONTROL_sheetset_prototype",
+      "required": "executes",
+      "rationale": "a sheetset resolves against the PROTOTYPE and reads from each MEMBER, so resolved origin and read origin legitimately differ. A naive 'resolved sheet == read sheet' rule would ban sheetsets, which is the wrong fix rather than a stricter one.",
+      "recipe": "sheetset",
+      "induced_defect": null,
+      "workbook_order": [
+        "AAA_decoy",
+        "Jan",
+        "Feb"
+      ],
+      "result": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "J-1",
+            1
+          ],
+          [
+            "F-1",
+            2
+          ]
+        ]
+      },
+      "status": "HELD",
+      "detail": "executed correctly: [['J-1', 1], ['F-1', 2]]"
+    },
+    {
+      "case": "first_sheet_wins_resolver",
+      "required": "refused",
+      "rationale": "DA-1 from this repo's reuse audit, induced. Resolution lands on the decoy sheet and contributes ITS column numbers to a read of Jan. The executor must refuse rather than emit the wrong columns.",
+      "recipe": "plain",
+      "induced_defect": "first_sheet",
+      "workbook_order": [
+        "AAA_decoy",
+        "Jan",
+        "Feb"
+      ],
+      "result": {
+        "refused": true,
+        "at": "execution",
+        "codes": [
+          "'sheet:Jan!@Tuote' resolved to sheet 'AAA_decoy', but sheet:Jan binds against 'Jan'. Reading it would take one sheet's column positions into another sheet's rows."
+        ]
+      },
+      "status": "HELD",
+      "detail": "refused at execution: [\"'sheet:Jan!@Tuote' resolved to sheet 'AAA_decoy', but sheet:Jan binds against 'Jan'. Reading it would take one sheet's column positions into another sheet's rows.\"]"
+    },
+    {
+      "case": "foreign_sheet_resolver",
+      "required": "refused",
+      "rationale": "resolution lands on a sheet that is neither the declared one nor any member. The broadest form of the same defect.",
+      "recipe": "plain",
+      "induced_defect": "foreign",
+      "workbook_order": [
+        "AAA_decoy",
+        "Jan",
+        "Feb"
+      ],
+      "result": {
+        "refused": true,
+        "at": "execution",
+        "codes": [
+          "'sheet:Jan!@Tuote' resolved to sheet 'AAA_decoy', but sheet:Jan binds against 'Jan'. Reading it would take one sheet's column positions into another sheet's rows."
+        ]
+      },
+      "status": "HELD",
+      "detail": "refused at execution: [\"'sheet:Jan!@Tuote' resolved to sheet 'AAA_decoy', but sheet:Jan binds against 'Jan'. Reading it would take one sheet's column positions into another sheet's rows.\"]"
+    },
+    {
+      "case": "foreign_sheet_resolver_on_sheetset",
+      "required": "refused",
+      "rationale": "the same induced defect against a sheetset, so the fix cannot be 'trust anything whose entry is a sheetset'. The prototype is declared; the decoy is not.",
+      "recipe": "sheetset",
+      "induced_defect": "foreign",
+      "workbook_order": [
+        "AAA_decoy",
+        "Jan",
+        "Feb"
+      ],
+      "result": {
+        "refused": true,
+        "at": "execution",
+        "codes": [
+          "'sheet:Jan!@Tuote' resolved to sheet 'AAA_decoy', but sheetset:M binds against 'Jan'. Reading it would take one sheet's column positions into another sheet's rows."
+        ]
+      },
+      "status": "HELD",
+      "detail": "refused at execution: [\"'sheet:Jan!@Tuote' resolved to sheet 'AAA_decoy', but sheetset:M binds against 'Jan'. Reading it would take one sheet's column positions into another sheet's rows.\"]"
+    }
+  ],
+  "outcome": "LAW_6_HELD",
+  "note_on_method": "the stimulus is necessarily an INDUCED resolver defect: with a correct resolver the violation cannot occur, so the property under test is whether the output depends on the resolver being right. LAW_6_HELD means a resolution defect becomes a refusal rather than silently wrong data; it says nothing about how likely one is.",
+  "stated_limitation": "two induced defect shapes (first-sheet-wins, fixed-foreign-sheet), both landing on a sheet with a REVERSED layout so the defect is observable. A defect landing on a same-layout sheet would produce identical output and is indistinguishable from correct operation by output alone -- which is the argument for checking origin rather than comparing results."
+}
