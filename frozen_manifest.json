@@ -16,6 +16,16 @@
       "note": "adopted 2026-08-15"
     },
     {
+      "path": "definition_phase/design/authority_path_freeze_v1.md",
+      "sha256": "f125bf5b5b4de4a354d8ef26886f224b13509bbcce8b295e93071966ac525aa8",
+      "note": "adopted 2026-08-15"
+    },
+    {
+      "path": "definition_phase/design/observable_error_v1.md",
+      "sha256": "165bef3c83f529c668c3e56c4169fa8f798cbd9ffc9fd25623cd819b51c93fa6",
+      "note": "adopted 2026-08-15"
+    },
+    {
       "path": "definition_phase/fixtures/W1_multisheet.xlsx",
       "sha256": "20048967188ad17438e8586038539825c3a7c42ba257aaa0ce9b4481ba2ab015",
       "note": "adopted 2026-08-14"
@@ -24,6 +34,11 @@
       "path": "definition_phase/fixtures/W2_hidden_content.xlsx",
       "sha256": "cdc6f468377f80df50503f152b68240cd2f7fb940b578a5741719d68a216032d",
       "note": "adopted 2026-08-14"
+    },
+    {
+      "path": "definition_phase/harness/approval.py",
+      "sha256": "896c941fc4335f7c821cba457f0fa3c255f45b24e98d4efe59ad8c806c51d13f",
+      "note": "adopted 2026-08-15"
     },
     {
       "path": "definition_phase/recipes/W1_months.json",
@@ -59,6 +74,16 @@
       "path": "definition_phase/recipes/broken/W1_sales_missing_total_row.json",
       "sha256": "a17af499584d4f0b786c16d26e6895040fef1a059c75ae91f54f2c6d625d32e8",
       "note": "adopted 2026-08-14"
+    },
+    {
+      "path": "experimentL/harness/execute_recipe.py",
+      "sha256": "b3a513883122f4a8aa1578ea0b38e1afb8ccc91e3a4087eaac4ce82475d8cd26",
+      "note": "adopted 2026-08-15"
+    },
+    {
+      "path": "scripts/check_surfaced.py",
+      "sha256": "eb1db8c30f52b70b4097a1430084df21ce2f9bca0f69631f42c1cafbf377ea25",
+      "note": "adopted 2026-08-15"
     }
   ],
   "_note": "Frozen artifacts NOT covered by any experiment's expected.json. Per-experiment expected.json files remain authoritative for what they cover; this file never duplicates them. Do not edit a hash to make a check pass -- if an artifact legitimately changed, that is a re-freeze and belongs in a commit that says so."

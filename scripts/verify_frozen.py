@@ -168,7 +168,23 @@ def adopt() -> int:
                           # same sense a fixture is: editing one moves the
                           # boundary two runs are compared across. See
                           # scripts/agent_binding.py.
-                          ".claude/agents/*.md")
+                          ".claude/agents/*.md",
+                          # The authority path, frozen 2026-08-15 as
+                          # `authority-path-v1`. Pinned so it stays answerable
+                          # LATER which guarantees existed WHEN -- the stated
+                          # reason for freezing at this boundary. A change here
+                          # is a re-freeze, not a hash edit. See
+                          # definition_phase/design/authority_path_freeze_v1.md.
+                          "definition_phase/design/authority_path_freeze_v1.md",
+                          "definition_phase/design/observable_error_v1.md",
+                          # The implementation, not only the prose. A freeze that
+                          # pins what the guarantees SAY while the code providing
+                          # them drifts silently is the staleness this repo keeps
+                          # finding -- Experiment M's record drifted for several
+                          # commits with nothing noticing.
+                          "experimentL/harness/execute_recipe.py",
+                          "definition_phase/harness/approval.py",
+                          "scripts/check_surfaced.py")
         for p in LAB.glob(pattern))
 
     # Stamped with the day the hash was actually taken. It was hardcoded, which
