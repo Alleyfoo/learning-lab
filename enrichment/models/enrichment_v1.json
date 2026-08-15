@@ -1,0 +1,28 @@
+{
+  "model_version": 1,
+  "model_id": "enrichment_v1",
+  "sources": {
+    "orders":   {"path": "fixtures/orders.json",   "collection": "orders"},
+    "products": {"path": "fixtures/products.json", "collection": "products"}
+  },
+  "driving_source": "orders",
+  "lookup": {
+    "into": "products",
+    "match_left": "product_id",
+    "match_right": "product_id",
+    "on_missing": "refuse_row",
+    "on_ambiguous": "refuse_run"
+  },
+  "outputs": [
+    {"target": "order_id",     "from": "orders",   "field": "order_id"},
+    {"target": "product_name", "from": "products", "field": "name"},
+    {"target": "quantity",     "from": "orders",   "field": "quantity", "type": "number"},
+    {"target": "unit_price",   "from": "products", "field": "unit_price", "type": "number"},
+    {"target": "line_total",   "compute": {
+        "op": "multiply",
+        "left":  {"from": "orders",   "field": "quantity"},
+        "right": {"from": "products", "field": "unit_price"}
+    }}
+  ],
+  "on_non_numeric": "refuse_row"
+}

@@ -1,0 +1,9 @@
+{
+  "_note": "P-100 appears twice with DIFFERENT prices. Used only by the ambiguity case: a lookup key that denotes two rows must not silently pick one.",
+  "products": [
+    {"product_id": "P-100", "name": "Widget",     "unit_price": "19.99", "weight": "0.25"},
+    {"product_id": "P-100", "name": "Widget (v2)","unit_price": "24.99", "weight": "0.25"},
+    {"product_id": "P-200", "name": "Grommet",    "unit_price": "0.10",  "weight": "1.50"},
+    {"product_id": "P-300", "name": "Sprocket",   "unit_price": "5.00",  "weight": "2.00"}
+  ]
+}

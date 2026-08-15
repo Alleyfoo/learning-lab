@@ -1,0 +1,9 @@
+{
+  "_note": "Order lines. O-3 names a product that does not exist; O-4 carries a non-numeric quantity. Both are deliberate.",
+  "orders": [
+    {"order_id": "O-1", "product_id": "P-100", "quantity": "3"},
+    {"order_id": "O-2", "product_id": "P-200", "quantity": "7"},
+    {"order_id": "O-3", "product_id": "P-999", "quantity": "1"},
+    {"order_id": "O-4", "product_id": "P-300", "quantity": "two"}
+  ]
+}
