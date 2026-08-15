@@ -1,0 +1,121 @@
+Below is the programmatically extracted structure of three data sources.
+You have not been told what any of them are for.
+
+{
+  "holidays.json": {
+    "collection": "holidays",
+    "item_count": 6,
+    "fields": {
+      "date": {
+        "type": "str",
+        "examples": [
+          "2026-01-01",
+          "2026-01-06",
+          "2026-05-01"
+        ],
+        "distinct_values": 6
+      },
+      "name": {
+        "type": "str",
+        "examples": [
+          "New Year's Day",
+          "Epiphany",
+          "May Day"
+        ],
+        "distinct_values": 6
+      }
+    }
+  },
+  "incoming_request.json": {
+    "collection": "incoming_request",
+    "item_count": 1,
+    "fields": {
+      "requested_date": {
+        "type": "str",
+        "examples": [
+          "2026-07-14"
+        ],
+        "distinct_values": 1
+      },
+      "reason": {
+        "type": "str",
+        "examples": [
+          "Workshop"
+        ],
+        "distinct_values": 1
+      },
+      "tier": {
+        "type": "str",
+        "examples": [
+          "B"
+        ],
+        "distinct_values": 1
+      }
+    }
+  },
+  "reservations.json": {
+    "collection": "reservations",
+    "item_count": 4,
+    "fields": {
+      "ref": {
+        "type": "str",
+        "examples": [
+          "R-1042",
+          "R-1043",
+          "R-1051"
+        ],
+        "distinct_values": 4
+      },
+      "date": {
+        "type": "str",
+        "examples": [
+          "2026-03-10",
+          "2026-03-11",
+          "2026-04-02"
+        ],
+        "distinct_values": 4
+      },
+      "created": {
+        "type": "str",
+        "examples": [
+          "2026-01-15",
+          "2026-01-15",
+          "2026-02-28"
+        ],
+        "distinct_values": 3
+      },
+      "reason": {
+        "type": "str",
+        "examples": [
+          "Team offsite",
+          "Board meeting",
+          "Supplier visit"
+        ],
+        "distinct_values": 4
+      },
+      "tier": {
+        "type": "str",
+        "examples": [
+          "B",
+          "A",
+          "C"
+        ],
+        "distinct_values": 3
+      }
+    }
+  }
+}
+
+Tell me what these sources appear to contain. For each one:
+- name the collection and its fields
+- say what you think each field represents
+- say what you think each item represents
+
+Then, in a clearly separated section headed exactly "CANNOT DETERMINE", list
+anything you cannot work out from this data alone. Be specific about which
+field or which pair of fields, and say what the open question is.
+
+If something IS determinable, do not put it in that section. Only list genuine
+ambiguity.
+
+Write for a person to read. Do not produce JSON, a schema, or code.
