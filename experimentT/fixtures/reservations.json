@@ -1,0 +1,8 @@
+{
+  "reservations": [
+    {"ref": "R-1042", "date": "2026-03-10", "created": "2026-01-15", "reason": "Team offsite", "tier": "B"},
+    {"ref": "R-1043", "date": "2026-03-11", "created": "2026-01-15", "reason": "Board meeting", "tier": "A"},
+    {"ref": "R-1051", "date": "2026-04-02", "created": "2026-02-28", "reason": "Supplier visit", "tier": "C"},
+    {"ref": "R-1060", "date": "2026-05-19", "created": "2026-03-03", "reason": "Training day", "tier": "B"}
+  ]
+}

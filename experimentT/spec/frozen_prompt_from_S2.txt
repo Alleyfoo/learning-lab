@@ -1,0 +1,114 @@
+An inspection of some data sources produced the description below.
+You did not perform the inspection and cannot see the data yourself.
+
+--- BEGIN INSPECTION REPORT ---
+### holidays.json
+
+**Collection name:** holidays
+**Fields:**
+- **date:** A specific calendar date, formatted as YYYY-MM-DD, on which a holiday occurs.
+- **name:** The descriptive name or title of the holiday.
+
+**What each item represents:** 
+A single holiday or non-working day. The collection as a whole appears to be a calendar or list of dates when normal operations or bookings might not be allowed.
+
+### incoming_request.json
+
+**Collection name:** incoming_request
+**Fields:**
+- **requested_date:** The specific calendar date (YYYY-MM-DD) for which a booking or service is being asked for.
+- **reason:** A short description of the purpose of the requested booking.
+- **tier:** A classification category for the request, using a letter grade (e.g., A, B, C). 
+
+**What each item represents:** 
+A single, new submission asking for a reservation or booking to be made on a specific date for a specific reason, categorized by a specific tier.
+
+### reservations.json
+
+**Collection name:** reservations
+**Fields:**
+- **ref:** A unique reference string or identifier assigned to the reservation.
+- **date:** The calendar date on which the reservation is scheduled to take place.
+- **created:** The calendar date on which the reservation was originally submitted or registered into the system.
+- **reason:** A short description of the purpose of the reservation.
+- **tier:** A classification category for the reservation, using a letter grade (e.g., A, B, C). 
+
+**What each item represents:** 
+An existing, confirmed, or past booking. Each item records when a booking was made, when it is scheduled for, why it is happening, what tier it belongs to, and its unique identifier.
+
+***
+
+### CANNOT DETERMINE
+
+- **The "tier" field (in incoming_request.json and reservations.json):** It uses values like "A", "B", and "C", but it cannot be determined what these tiers actually represent. The open question is whether tier indicates the priority or importance of the event, the seniority of the person making the booking, or the grade of the facility/resource being reserved.
+
+- **The scope of the holidays (in holidays.json):** While the collection lists dates and names of holidays, the open question is whether these are national public holidays, company-specific non-working days, or simply dates when a specific venue is closed.
+
+- **The relationship between incoming_request and reservations (across incoming_request.json and reservations.json):** Both collections share the fields "reason" and "tier", which suggests an incoming request might eventually become a reservation. However, we cannot determine the exact workflow or rules. The open question is whether an incoming request automatically generates a reservation item upon approval, and how the missing fields (like "ref" and "created") are populated during that process.
+
+- **The nature of the resource being reserved (across incoming_request.json and reservations.json):** Neither collection specifies what physical or virtual object is actually being booked. The open question is whether these reservations are for a single meeting room, multiple pieces of equipment, or a whole venue, and whether multiple reservations can exist for the same "date".
+
+- **The relationship between "created" and "date" (in reservations.json):** While "created" appears to be the date the booking was made and "date" is the date the booking occurs, we cannot determine if there are system constraints governing this pair. The open question is whether there is a minimum or maximum lead time required between when a reservation is created and when the requested date can occur.
+--- END INSPECTION REPORT ---
+
+THE JOB the person wants:
+Accept a requested date unless it is invalid, a holiday, or already reserved; otherwise append the reservation.
+
+Produce a deterministic node definition for that job.
+
+THE REQUIRED SHAPE. Fill in every "..." and keep every key exactly as written:
+{
+  "model_id": "...",
+  "model_version": "...",
+  "task": "...",
+  "purpose": "...",
+  "sources": {
+    "<source name>": {
+      "path": "...",
+      "collection": "..."
+    }
+  },
+  "source_fields": {
+    "<source name>": "<which item field holds the date>"
+  },
+  "rules": [
+    {
+      "rule": "...",
+      "refusal": "..."
+    }
+  ],
+  "on_accept": "..."
+}
+
+`task` must be "reservation" and `model_version` must be 1.
+The data files are {
+  "holidays": "fixtures/holidays.json",
+  "reservations": "fixtures/reservations.json"
+}
+
+PERMITTED RULE NAMES (decide which to use, and in what order):
+[
+  "not_reserved",
+  "date_well_formed",
+  "not_holiday"
+]
+
+PERMITTED REFUSAL CODES (decide which rule each belongs to):
+[
+  "HOLIDAY",
+  "ALREADY_RESERVED",
+  "INVALID_DATE"
+]
+
+PERMITTED on_accept VALUE:
+"append_to_reservations"
+
+Rules are evaluated in the order you declare them, and the FIRST rule that fails
+decides which refusal is reported.
+
+Output the JSON object first.
+
+Then, if the task depends on anything the inspection report INFERRED rather than
+established from the data, add a section headed exactly "CONFIRMATION REQUIRED"
+naming what needs confirming and why. If everything the task depends on was
+actually established, write "CONFIRMATION REQUIRED: none".
