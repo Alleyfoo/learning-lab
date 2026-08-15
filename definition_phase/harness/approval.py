@@ -60,14 +60,28 @@ from hidden_content import scan_sheet  # noqa: E402
 from recipe import Recipe  # noqa: E402
 from structure_view import render_structure, render_values, sheet_rows  # noqa: E402
 
-CURRENT_RENDERER_VERSION = "review-v2"
+CURRENT_RENDERER_VERSION = "review-v3"
+
+# Two questions that must NOT be allowed to collapse into one:
+#
+#     Execution.degraded    did execution fail to deliver something the recipe
+#                           DECLARED?
+#     the review renderer   was that degradation actually AVAILABLE to the human
+#                           granting authority?
+#
+# Conflating them is OPEN-2 in a new costume: "the execution object contained it,
+# therefore the approval was informed". It was not, unless the renderer that
+# produced the reviewed view put it on screen -- which is what `review_view_hash`
+# plus `renderer_version` records, and what `meets_current_review_policy` refuses
+# to grant retroactively.
 
 
 # ---------------------------------------------------------------------------
 # renderers — versioned, and kept available so history stays verifiable
 # ---------------------------------------------------------------------------
 
-def _render_v1(sheets: dict, findings: list[dict]) -> str:
+def _render_v1(sheets: dict, findings: list[dict],
+               recipe=None, wb_path=None) -> str:
     """review-v1: the naive rendering — values only.
 
     Kept because approvals were made under it, not because it is good. It shows
@@ -81,7 +95,8 @@ def _render_v1(sheets: dict, findings: list[dict]) -> str:
     return "\n".join(out)
 
 
-def _render_v2(sheets: dict, findings: list[dict]) -> str:
+def _render_v2(sheets: dict, findings: list[dict],
+               recipe=None, wb_path=None) -> str:
     """review-v2: values, plus the structure view, plus hidden-content findings.
 
     The difference that matters is the findings block: under v1 a reviewer could
@@ -101,9 +116,98 @@ def _render_v2(sheets: dict, findings: list[dict]) -> str:
     return "\n".join(out)
 
 
-RENDERERS: dict[str, Callable[[dict, list[dict]], str]] = {
+def _render_v3(sheets: dict, findings: list[dict], recipe=None, wb_path=None) -> str:
+    """review-v3: v2, plus what the recipe DECLARED and what this workbook DELIVERS.
+
+    Observable Error v1 crossing the human boundary. The rule is the same one the
+    result surface enforces:
+
+        if the system promises X and delivers something weaker than X, that
+        weakening must travel with the result
+
+    and a human granting authority is a consumer of that result like any other.
+    Under v2 a reviewer could approve a recipe declaring `amount: number` against
+    a workbook that delivers strings, with nothing on screen to say so.
+
+    The observed column comes from the EXECUTOR, not from a reimplementation of
+    its coercion rules. Two implementations of "would this be honoured" is the
+    PRO-2 shape this programme keeps finding: they agree until they do not, and
+    the reviewer sees the one that is wrong.
+    """
+    out = [_render_v2(sheets, findings)]
+
+    declared: list[tuple[str, str]] = []
+    if recipe is not None:
+        for entry in recipe.data_sheets():
+            for fld in entry.fields:
+                declared.append((fld.target, fld.type or "(untyped)"))
+
+    out.append("# declared types")
+    if declared:
+        for target, dtype in declared:
+            out.append(f"    {target}: {dtype}")
+    else:
+        out.append("    none declared")
+
+    out.append("# observed on this workbook")
+    if recipe is None or wb_path is None:
+        # Not reachable through review_view(), which always passes both. Stated
+        # rather than assumed: a renderer that silently omitted the section
+        # would show the reviewer a clean-looking view of a degraded recipe.
+        out.append("    UNAVAILABLE -- renderer was given no recipe or workbook")
+        out.append("RESULT DEGRADATION UNKNOWN")
+        return "\n".join(out)
+
+    unhonoured, note = _observed_degradation(recipe, wb_path)
+    if note:
+        out.append(f"    UNAVAILABLE -- {note}")
+        out.append("RESULT DEGRADATION UNKNOWN")
+        return "\n".join(out)
+
+    for target, dtype in declared:
+        reason = unhonoured.get(target)
+        if reason:
+            out.append(f"    {target}: unhonoured -- {reason}")
+        else:
+            out.append(f"    {target}: honoured")
+    out.append("RESULT DEGRADED" if unhonoured else "RESULT NOT DEGRADED")
+    return "\n".join(out)
+
+
+def _observed_degradation(recipe, wb_path) -> tuple[dict, Optional[str]]:
+    """Per-target degradation as the EXECUTOR reports it.
+
+    Returns ({target: short reason}, None) or ({}, why-it-could-not-be-determined).
+    A recipe that cannot execute is not "not degraded" -- the reviewer is told
+    the question could not be answered, which is different from being told no.
+    """
+    import sys as _sys
+
+    _sys.path.insert(0, str(HERE.parent.parent / "experimentL" / "harness"))
+    from execute_recipe import InsufficientRecipe, execute  # noqa: E402
+
+    from referents import WorkbookView  # noqa: E402
+
+    wb = WorkbookView(wb_path)
+    try:
+        ex = execute(recipe, wb)
+    except InsufficientRecipe as exc:
+        return {}, f"the recipe cannot execute on this workbook: {exc}"
+
+    out: dict[str, str] = {}
+    for item in ex.degradation:
+        target = item.get("target", "?")
+        gap = item.get("gap")
+        declared_type = item.get("declared", "?")
+        out[target] = (f"delivered as string (gap {gap})" if gap
+                       else f"declared {declared_type}, {item.get('reason', '')}")
+    return out, None
+
+
+RENDERERS: dict[str, Callable[..., str]] = {
     "review-v1": _render_v1,
     "review-v2": _render_v2,
+    "review-v3": _render_v3,
 }
 
 
@@ -205,7 +309,8 @@ def review_view(recipe: Recipe, wb_path: Path, renderer_version: str) -> Optiona
     renderer = RENDERERS.get(renderer_version)
     if renderer is None:
         return None
-    return renderer(_declared_sheets(recipe, wb_path), detector_findings(wb_path))
+    return renderer(_declared_sheets(recipe, wb_path), detector_findings(wb_path),
+                    recipe, wb_path)
 
 
 # ---------------------------------------------------------------------------
@@ -352,12 +457,18 @@ def _self_test() -> int:
         # --- 4. undeclared renderer change -----------------------------------
         # The renderer's OUTPUT changes while its version string does not. A
         # version alone cannot catch this; the view hash can.
-        original = RENDERERS["review-v2"]
+        # Patches whatever the CURRENT renderer is, not a hardcoded name: the
+        # record above was made under CURRENT_RENDERER_VERSION, and pinning this
+        # to "review-v2" made the case silently stop testing anything the moment
+        # v3 became current.
+        original = RENDERERS[CURRENT_RENDERER_VERSION]
         try:
-            RENDERERS["review-v2"] = lambda sheets, findings: original(sheets, findings) + "\n# extra"
+            RENDERERS[CURRENT_RENDERER_VERSION] = (
+                lambda sheets, findings, recipe=None, wb_path=None:
+                original(sheets, findings, recipe, wb_path) + "\n# extra")
             r4 = verify(record, recipe, wb_path)
         finally:
-            RENDERERS["review-v2"] = original
+            RENDERERS[CURRENT_RENDERER_VERSION] = original
         check(r4.checks["review_view"] == "REVIEW_VIEW_CHANGED",
               f"a renderer changed without bumping its version must be caught: {r4.checks}")
 
@@ -368,8 +479,9 @@ def _self_test() -> int:
         check(r5.historically_valid,
               f"a v1 approval must REMAIN historically valid: {r5.as_dict()}")
         check(not r5.meets_current_review_policy,
-              "…and must NOT silently acquire the v2 renderer's protections")
-        check("review-v1" in r5.policy_reason and "review-v2" in r5.policy_reason,
+              "…and must NOT silently acquire the current renderer's protections")
+        check("review-v1" in r5.policy_reason
+              and CURRENT_RENDERER_VERSION in r5.policy_reason,
               f"the reason must name both renderers: {r5.policy_reason}")
 
         # v1 genuinely showed less: the two renderings must differ, or the
@@ -379,6 +491,66 @@ def _self_test() -> int:
         check(v1 != v2, "the two renderers must actually differ")
         check("hidden content" in v2 and "hidden content" not in v1,
               "v2 must expose hidden-content findings that v1 did not")
+
+        # --- 7. review-v3: Observable Error crossing the human boundary -------
+        # Execution.degraded answers "did execution fail to deliver something the
+        # recipe declared?". The RENDERER answers "was that degradation actually
+        # available to the human granting authority?". These must stay separate,
+        # or it becomes tempting to argue that because the execution object
+        # contained it, the approval was informed -- which is OPEN-2 exactly.
+        sys.path.insert(0, str(lab / "experimentL" / "harness"))
+        from execute_recipe import execute as _execute  # noqa: E402
+
+        from referents import WorkbookView as _WBV  # noqa: E402
+
+        ex = _execute(recipe, _WBV(wb_path))
+        check(ex.degraded,
+              "this fixture must BE degraded, or case 7 proves nothing about "
+              "showing degradation")
+
+        v3 = review_view(recipe, wb_path, "review-v3")
+        check("RESULT DEGRADED" not in v2,
+              "review-v2 must NOT show degradation -- that is the gap v3 closes")
+        check("RESULT DEGRADED" in v3,
+              f"review-v3 must show that the result is degraded:\n{v3[-400:]}")
+        check("unhonoured" in v3,
+              "v3 must name WHICH declaration was not honoured, not merely that "
+              "something was")
+        for tgt in ("paivitetty", "tuote", "myynti"):
+            check(tgt in v3, f"v3 must list the declared field {tgt!r}")
+
+        # A v2 approval of a degraded recipe: historically valid, and NOT covered
+        # by v3's policy. The whole point -- an approval granted before degraded
+        # types were visible does not acquire that protection retroactively.
+        v2_record = make_record(recipe, wb_path, "designer", "2026-02-01T09:00:00Z",
+                                renderer_version="review-v2")
+        r7 = verify(v2_record, recipe, wb_path)
+        check(r7.historically_valid,
+              f"a v2 approval must remain historically valid: {r7.as_dict()}")
+        check(not r7.meets_current_review_policy,
+              "a v2 approval must NOT acquire v3's degraded-type protection")
+
+        # --- 8. CONTROL: v3 must not cry degradation when nothing is ----------
+        # Same workbook, same shape, with the one unhonourable declaration
+        # (`date`, gap G1) declared as `string` instead. If v3 shouted here it
+        # would be noise, and a reviewer who sees it every time stops reading it.
+        clean_raw = copy.deepcopy(raw)
+        for entry in clean_raw["sheets"]:
+            for fld in entry.get("fields", []):
+                if fld.get("type") == "date":
+                    fld["type"] = "string"
+        clean_recipe = recipe_from_json(clean_raw)
+        clean_ex = _execute(clean_recipe, _WBV(wb_path))
+        check(not clean_ex.degraded,
+              f"the control must NOT be degraded, or it controls nothing: "
+              f"{clean_ex.degradation}")
+        v3_clean = review_view(clean_recipe, wb_path, "review-v3")
+        check("RESULT NOT DEGRADED" in v3_clean,
+              "v3 must say plainly that a clean result is clean")
+        check("RESULT DEGRADED" not in v3_clean,
+              f"v3 must not report degradation on a clean recipe:\n{v3_clean[-300:]}")
+        check("unhonoured" not in v3_clean,
+              "a clean control must name no unhonoured declaration")
 
         # --- 6. renderer gone ------------------------------------------------
         ghost = ApprovalRecord(**{**asdict(record), "renderer_version": "review-v0"})
@@ -398,8 +570,10 @@ def _self_test() -> int:
         "SELF-TEST PASSED (control verifies / recipe, source, findings and review-view "
         "changes each fail on their OWN link / invisible-ink change caught with values "
         "identical / undeclared renderer change caught / v1 approval stays historically "
-        "valid and does NOT meet v2 policy / missing renderer distinguished from "
-        "tampering / all 5 reasons exercised)\n")
+        "valid and does NOT meet current policy / missing renderer distinguished from "
+        "tampering / review-v3 shows declared-vs-observed types and v2 does not / a v2 "
+        "approval of a degraded recipe stays valid without acquiring v3's protection / "
+        "v3 stays quiet on a clean recipe / all 5 reasons exercised)\n")
     return 0
 
 
