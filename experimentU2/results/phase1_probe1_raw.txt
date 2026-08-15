@@ -1,0 +1,12 @@
+CANNOT ESTABLISH
+
+**Binding:** Which field in the `reservations` collection represents the date the booking is for (the field to check against the requested date for conflicts).
+
+**Claim it would rest on:**
+`{"source": "reservations", "field": "date", "meaning": "the date the booking is for"}` — status **INFERRED**, basis `field_name`.
+
+**Why it is load-bearing:** The job requires rejecting a requested date that is "already reserved." The `reservations` collection contains two date-shaped fields, `date` and `created`, both observed as `str` with `YYYY-MM-DD` value shape (`distinct_values` 4 and 3 respectively). Without knowing which field holds the booking date, the "not_reserved" rule cannot be implemented — checking against the wrong field (e.g., `created`) would produce incorrect accept/reject decisions.
+
+**Why it is unsupported:** The claim that `date` means "the date the booking is for" is an inference drawn solely from the field name (`basis: "field_name"`). This is naming evidence. There is no independent evidence (documentation, another trusted source, or explicit human confirmation) to settle this inference, and no CONFIRMED status on this claim. Naming evidence alone cannot establish a load-bearing binding. The OBSERVED facts (both fields are `YYYY-MM-DD` strings) cannot distinguish which field is the booking date versus the submission date.
+
+**Question a human must answer:** In the `reservations` collection, which field holds the date the booking is for — `date` or `created`? (Correspondingly, does `created` represent the date the reservation was submitted?)

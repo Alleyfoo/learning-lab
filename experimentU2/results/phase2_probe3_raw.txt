@@ -1,0 +1,53 @@
+```json
+{
+  "model_id": "reservation_validator",
+  "model_version": 1,
+  "task": "reservation",
+  "purpose": "Accept a requested date unless it is invalid, a holiday, or already reserved; otherwise append the reservation.",
+  "sources": {
+    "holidays": {
+      "path": "fixtures/holidays.json",
+      "collection": "holidays"
+    },
+    "reservations": {
+      "path": "fixtures/reservations.json",
+      "collection": "reservations"
+    }
+  },
+  "source_fields": {
+    "holidays": "date",
+    "reservations": "date",
+    "incoming_request": "requested_date"
+  },
+  "rules": [
+    {
+      "rule": "date_well_formed",
+      "refusal": "INVALID_DATE"
+    },
+    {
+      "rule": "not_holiday",
+      "refusal": "HOLIDAY"
+    },
+    {
+      "rule": "not_reserved",
+      "refusal": "ALREADY_RESERVED"
+    }
+  ],
+  "on_accept": "append_to_reservations"
+}
+```
+
+**Reasoning on load-bearing bindings:**
+
+1. **`incoming_request.requested_date` is the date to validate and check** — OBSERVED: the field exists with value_shape `YYYY-MM-DD`. No inferred meaning is needed; the value shape tells us what the value *is*, and the job description refers to "a requested date."
+
+2. **`holidays.date` is the field holding holiday dates** — The `holidays` collection meaning is CONFIRMED by a human ("dates on which something is observed or closed"). The field `date` is OBSERVED with value_shape `YYYY-MM-DD`. No INFERRED or UNKNOWN claim is load-bearing here: the collection meaning is settled, and the field's existence and shape are directly observed. (The INFERRED meaning of `holidays.name` is not load-bearing since the holiday check only needs the date field.)
+
+3. **`reservations.date` is the field holding booked dates** — CONFIRMED by a human: "the date the booking is for" (was INFERRED, now settled). This is the only field needed for the `not_reserved` rule.
+
+**Non-load-bearing claims** (not relied upon for any rule):
+- `reservations.created` (INFERRED) — not used by any rule.
+- `reservations.ref` (INFERRED) — not used by any rule.
+- `reservations.tier` (UNKNOWN) — not used by any rule.
+- `incoming_request.reason` / `incoming_request.tier` — not used by any rule.
+- The three UNKNOWN questions (holiday-reservation overlap, resource identity, single vs. multi-day) — none affect the three rule checks, which each operate on a single requested date independently.

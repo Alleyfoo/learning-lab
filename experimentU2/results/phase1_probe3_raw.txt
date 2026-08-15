@@ -1,0 +1,23 @@
+## CANNOT ESTABLISH
+
+### Binding 1: `holidays.date` represents holiday dates (load-bearing for the `not_holiday` rule)
+
+- **Claim it would rest on:** `holidays` collection meaning = "dates on which something is observed or closed" (basis: `collection_name_and_values`)
+- **Status:** INFERRED
+- **Question a human must answer:** Does the `holidays` collection contain dates on which reservations should be refused? Specifically, does `holidays.date` hold the holiday date against which a requested date should be compared?
+
+---
+
+### Binding 2: `reservations.date` represents the date an existing booking is for (load-bearing for the `not_reserved` rule)
+
+- **Claim it would rest on:** `reservations.date` meaning = "the date the booking is for" (basis: `field_name`)
+- **Status:** INFERRED
+- **Question a human must answer:** Does `reservations.date` hold the date the booking is for, as opposed to some other date (e.g., the date the booking was created, which is tracked separately in `reservations.created`)?
+
+---
+
+### Binding 3: Whether `reservations.date` is a single-day value or the start of a multi-day booking (load-bearing for the `not_reserved` rule)
+
+- **Claim it would rest on:** "whether the dates are single-day or the start of a multi-day booking" (note: "no end-date or duration field exists")
+- **Status:** UNKNOWN
+- **Question a human must answer:** Does each reservation occupy exactly the single date in `reservations.date`, or does it span multiple days beginning from that date? If multi-day, what determines the end of the booking period?

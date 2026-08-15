@@ -1,0 +1,11 @@
+CANNOT ESTABLISH
+
+Binding: `reservations.date` represents the date the booking is for
+Claim it would rest on: `{"source": "reservations", "field": "date", "meaning": "the date the booking is for", "status": "INFERRED", "basis": "field_name"}`
+Claim status: INFERRED
+Question a human must answer: Does the `date` field in the `reservations` collection represent the date the booking is for?
+
+Binding: `holidays` collection represents dates on which something is observed or closed
+Claim it would rest on: `{"source": "holidays", "meaning": "dates on which something is observed or closed", "status": "INFERRED", "basis": "collection_name_and_values"}`
+Claim status: INFERRED
+Question a human must answer: Does the `holidays` collection represent dates on which something is observed or closed?

@@ -43,23 +43,43 @@ def split_block(text: str) -> str:
     return "" if not match else text[match.end():].strip()
 
 
+# A node definition, as opposed to any JSON that happens to appear. A correct
+# BLOCK quotes the claim it is blocking on -- as JSON -- so "contains an object"
+# is not "produced a node". U2 phase 1 probes 1 and 2 were miscounted as having
+# emitted a node when they had done the right thing and quoted their evidence.
+NODE_KEYS = ("task", "rules", "on_accept", "model_version")
+
+
+def _looks_like_node(obj) -> bool:
+    return isinstance(obj, dict) and sum(k in obj for k in NODE_KEYS) >= 2
+
+
 def extract_node(text: str):
+    """The LAST node-shaped object in the text, or None.
+
+    Every top-level object is considered, not just the first: a block that
+    quotes a claim before emitting nothing must not be read as emitting that
+    claim.
+    """
     body = re.sub(r"```(?:json)?", "", text)
-    start = body.find("{")
-    if start < 0:
-        return None
-    depth = 0
-    for i in range(start, len(body)):
-        if body[i] == "{":
-            depth += 1
-        elif body[i] == "}":
-            depth -= 1
-            if depth == 0:
-                try:
-                    return json.loads(body[start:i + 1])
-                except json.JSONDecodeError:
-                    return None
-    return None
+    found = None
+    starts = [i for i, c in enumerate(body) if c == "{"]
+    for start in starts:
+        depth = 0
+        for i in range(start, len(body)):
+            if body[i] == "{":
+                depth += 1
+            elif body[i] == "}":
+                depth -= 1
+                if depth == 0:
+                    try:
+                        obj = json.loads(body[start:i + 1])
+                    except json.JSONDecodeError:
+                        break
+                    if _looks_like_node(obj):
+                        found = obj
+                    break
+    return found
 
 
 def grade_phase1(text: str) -> dict:
@@ -123,6 +143,21 @@ Question for a human: does `reservations.date` represent the date being reserved
           f"a focused block must not mention tier/resource: {g['U2_does_not_over_block']}")
     check(not g["U3_no_laundering"]["laundering_phrases"],
           f"a correct block launders nothing: {g['U3_no_laundering']}")
+
+    # --- a correct block that QUOTES its evidence as JSON -------------------
+    # The miscount that made U2 phase 1 read 1/3 when it was 3/3.
+    quoting = """CANNOT ESTABLISH
+Binding: reservations.date is the reservation date.
+Claim it would rest on:
+{"source": "reservations", "field": "date", "meaning": "the date the booking is
+for", "status": "INFERRED", "basis": "field_name"}
+Question: which field holds the booking date?
+"""
+    gq = grade_phase1(quoting)
+    check(gq["U1_blocks_on_binding"]["blocked"]
+          and not gq["U1_blocks_on_binding"]["produced_a_node_anyway"],
+          f"quoting a claim as JSON inside a block is NOT emitting a node: "
+          f"{gq['U1_blocks_on_binding']}")
 
     # --- CANARY: produced a node instead of blocking -----------------------
     silent = json.dumps(grade_T.BASE_NODE)

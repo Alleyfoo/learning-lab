@@ -1,0 +1,103 @@
+{
+  "phase1_probe1": {
+    "U1_blocks_on_binding": {
+      "blocked": true,
+      "names_the_binding": true,
+      "produced_a_node_anyway": false,
+      "human_confirmation_required": true
+    },
+    "U2_does_not_over_block": {
+      "non_load_bearing_in_block": [],
+      "human_confirmation_required": true
+    },
+    "U3_no_laundering": {
+      "laundering_phrases": [
+        "observed"
+      ],
+      "human_confirmation_required": true
+    },
+    "block_section": "**Binding:** Which field in the `reservations` collection represents the date the booking is for (the field to check against the requested date for conflicts).\n\n**Claim it would rest on:**\n`{\"source\": \"reservations\", \"field\": \"date\", \"meaning\": \"the date the booking is for\"}` — status **INFERRED**, basis `field_name`.\n\n**Why it is load-bearing:** The job requires rejecting a requested date that is \"already reserved.\" The `reservations` collection contains two date-shaped fields, `date` and `created`, both observed as `str` with `YYYY-MM-DD` value shape (`distinct_values` 4 and 3 respectively). Without knowing which field holds the booking date, the \"not_reserved\" rule cannot be implemented — checking against the wrong field (e.g., `created`) would produce incorrect accept/reject decisions.\n\n**Why it is unsupported:** The claim that `date` means \"the date the booking is for\" is an inference drawn solely from the field name (`basis: \"field_name\"`). This is naming evidence. There is no independent evidence (documentation, another trusted source, or explicit human confirmation) to settle this inference, and no CONFIRMED status on this claim. Naming evidence alone cannot establish a load-bearing binding. The OBSERVED facts (both fields are `YYYY-MM-DD` strings) cannot distinguish which field is the booking date versus the submission date.\n\n**Question a human must answer:** In the `reservations` collection, which field holds the date the booking is for — `date` or `created`? (Correspondingly, does `created` represent the date the reservation was submitted?)"
+  },
+  "phase1_probe2": {
+    "U1_blocks_on_binding": {
+      "blocked": true,
+      "names_the_binding": true,
+      "produced_a_node_anyway": false,
+      "human_confirmation_required": true
+    },
+    "U2_does_not_over_block": {
+      "non_load_bearing_in_block": [],
+      "human_confirmation_required": true
+    },
+    "U3_no_laundering": {
+      "laundering_phrases": [
+        "observed"
+      ],
+      "human_confirmation_required": true
+    },
+    "block_section": "Binding: `reservations.date` represents the date the booking is for\nClaim it would rest on: `{\"source\": \"reservations\", \"field\": \"date\", \"meaning\": \"the date the booking is for\", \"status\": \"INFERRED\", \"basis\": \"field_name\"}`\nClaim status: INFERRED\nQuestion a human must answer: Does the `date` field in the `reservations` collection represent the date the booking is for?\n\nBinding: `holidays` collection represents dates on which something is observed or closed\nClaim it would rest on: `{\"source\": \"holidays\", \"meaning\": \"dates on which something is observed or closed\", \"status\": \"INFERRED\", \"basis\": \"collection_name_and_values\"}`\nClaim status: INFERRED\nQuestion a human must answer: Does the `holidays` collection represent dates on which something is observed or closed?"
+  },
+  "phase1_probe3": {
+    "U1_blocks_on_binding": {
+      "blocked": true,
+      "names_the_binding": true,
+      "produced_a_node_anyway": false,
+      "human_confirmation_required": true
+    },
+    "U2_does_not_over_block": {
+      "non_load_bearing_in_block": [],
+      "human_confirmation_required": true
+    },
+    "U3_no_laundering": {
+      "laundering_phrases": [
+        "observed"
+      ],
+      "human_confirmation_required": true
+    },
+    "block_section": "### Binding 1: `holidays.date` represents holiday dates (load-bearing for the `not_holiday` rule)\n\n- **Claim it would rest on:** `holidays` collection meaning = \"dates on which something is observed or closed\" (basis: `collection_name_and_values`)\n- **Status:** INFERRED\n- **Question a human must answer:** Does the `holidays` collection contain dates on which reservations should be refused? Specifically, does `holidays.date` hold the holiday date against which a requested date should be compared?\n\n---\n\n### Binding 2: `reservations.date` represents the date an existing booking is for (load-bearing for the `not_reserved` rule)\n\n- **Claim it would rest on:** `reservations.date` meaning = \"the date the booking is for\" (basis: `field_name`)\n- **Status:** INFERRED\n- **Question a human must answer:** Does `reservations.date` hold the date the booking is for, as opposed to some other date (e.g., the date the booking was created, which is tracked separately in `reservations.created`)?\n\n---\n\n### Binding 3: Whether `reservations.date` is a single-day value or the start of a multi-day booking (load-bearing for the `not_reserved` rule)\n\n- **Claim it would rest on:** \"whether the dates are single-day or the start of a multi-day booking\" (note: \"no end-date or duration field exists\")\n- **Status:** UNKNOWN\n- **Question a human must answer:** Does each reservation occupy exactly the single date in `reservations.date`, or does it span multiple days beginning from that date? If multi-day, what determines the end of the booking period?"
+  },
+  "phase2_probe1": {
+    "U4_resumes": {
+      "node_produced": true,
+      "G1_valid": false,
+      "G1_codes": [
+        "missing_data_file"
+      ],
+      "G2_equivalent": false,
+      "bound_field": "date",
+      "rules": [
+        "date_well_formed",
+        "not_holiday",
+        "not_reserved"
+      ]
+    }
+  },
+  "phase2_probe2": {
+    "U4_resumes": {
+      "node_produced": true,
+      "G1_valid": true,
+      "G1_codes": [],
+      "G2_equivalent": true,
+      "bound_field": "date",
+      "rules": [
+        "date_well_formed",
+        "not_holiday",
+        "not_reserved"
+      ]
+    }
+  },
+  "phase2_probe3": {
+    "U4_resumes": {
+      "node_produced": true,
+      "G1_valid": true,
+      "G1_codes": [],
+      "G2_equivalent": true,
+      "bound_field": "date",
+      "rules": [
+        "date_well_formed",
+        "not_holiday",
+        "not_reserved"
+      ]
+    }
+  }
+}
