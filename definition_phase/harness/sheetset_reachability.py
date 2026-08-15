@@ -10,14 +10,22 @@ Before that can be measured, one question has to be answered:
 
     can the axis-2 stimulus REACH an observation point at all?
 
+## Status
+
+**Reports REACHABLE since 2026-08-15** (`173ab5d`), and law 2 has since been
+written and run (`sheetset_contribution.py`). Kept as a standing precondition
+check, not as history: if the executor ever loses the ability to union members,
+law 2 would start passing vacuously — every case refused, nothing observed — and
+this probe is what distinguishes that from the law genuinely holding.
+
 ## Why this probe exists rather than the law
 
-`executor_contract.py` declares `sheetset` unsupported — "the executor resolves a
-single sheet per data entry and cannot union a sheetset, so the recipe would
-refuse at execution after validating cleanly" (PRO-2 instance 7). If that is
-still true, a sheetset recipe never produces authoritative output, so "A + C
-contributed while B disappeared" has nothing to be observed *in*, and a run would
-report a refusal that says nothing about partial honour.
+`executor_contract.py` used to declare `sheetset` unsupported — "the executor
+resolves a single sheet per data entry and cannot union a sheetset, so the recipe
+would refuse at execution after validating cleanly" (PRO-2 instance 7). While
+that held, a sheetset recipe never produced authoritative output, so "A + C
+contributed while B disappeared" had nothing to be observed *in*, and a run would
+have reported a refusal that says nothing about partial honour.
 
 That failure has now happened three times in this repo — cross-sheet law 1 run 1
 (`duplicate_target`), run 3 (`sheet_unclassified`), and the multiplicity axes

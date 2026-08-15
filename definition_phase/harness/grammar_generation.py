@@ -115,10 +115,16 @@ def expected(sheet_ref: str, sheet_role: str, field_role: str, source_kind: str,
     if sheet_role != "data":
         return Expectation(accept=not reasons, reasons=reasons)
 
-    # The sheetset restriction is on DATA entries specifically: the contract says
-    # the executor cannot union a sheetset it must read. An IGNORED sheetset is
-    # coherent -- its members are covered and never touched. Applying the rule
-    # unconditionally was the same modelling error in a second place.
+    # Read from SUPPORTED_SHEET_REFS rather than naming a kind, so this tracked
+    # the contract automatically when `sheetset` became supported (173ab5d) and
+    # stopped expecting a refusal on its own.
+    #
+    # The restriction it used to express was on DATA entries specifically: the
+    # executor could not union a sheetset it had to READ. An IGNORED sheetset was
+    # coherent even then -- its members are covered and never touched. Applying
+    # the rule unconditionally was this module's modelling error in a second
+    # place, and the lesson outlives the restriction: an unsupported construct is
+    # only unsupported where it is actually exercised.
     if sheet_ref not in SUPPORTED_SHEET_REFS:
         reasons.append(f"{sheet_ref} data entry is not supported")
 

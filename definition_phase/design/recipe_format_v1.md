@@ -90,15 +90,27 @@ complete and wrong.
 
 ## 3. Sheetsets — "do several sheets belong together?"
 
-> **STATUS 2026-08-14: expressible, and NOT executable.** The format describes a
-> sheetset and the validator checks it, including member-layout conformance — but
-> the executor resolves one sheet per data entry and cannot union a set, so such a
-> recipe is now **refused up front** (`executor_cannot_honour`) instead of
-> validating cleanly and failing at execution. Found by the semantic parity check
-> (`harness/semantic_parity.py`), not by inspection: it is the seventh instance of
-> the PRO-2 family and the first that level-two completeness structurally could not
-> see, because a sheetset is a *referent kind*, not an enum value. The design below
-> stands as the intended shape; implementing it is open work.
+> **STATUS 2026-08-15: expressible AND executable.** The executor unions members
+> (`173ab5d`), closing PRO-2 instance 7. The design below is now implemented
+> rather than intended.
+>
+> The load-bearing part of that change is not the union: it is that the validator
+> builds a coverage map **per member**. Members legitimately differ in row count,
+> and a prototype-shaped map would leave a longer member's extra rows
+> unclassified and unread — unioning A and C while B's tail vanished. That is
+> No Partial Honour at collection scope, and implementing the union against the
+> prototype's map would have built the defect in rather than caught it. Bindings
+> are still expressed against the prototype, which is sound **only** because a
+> member whose header row does not match it is refused.
+>
+> **History, kept because it is the useful part.** Until 2026-08-15 a sheetset
+> validated cleanly and failed at execution, then was refused up front with
+> `executor_cannot_honour`. That was the seventh instance of the PRO-2 family and
+> the first level-two completeness structurally could not see, because a sheetset
+> is a *referent kind*, not an enum value. It had to be found by behaviour
+> (`harness/semantic_parity.py`) because `required_constructs()` did not
+> enumerate sheet reference kinds at all — a gap closed at the same time, so the
+> completeness check can now find the next one itself.
 
 A `sheetset` entry declares that several sheets share one layout and union into
 one output. Twelve monthly sheets, period taken from the sheet name, is the case.
