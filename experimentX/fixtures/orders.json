@@ -1,0 +1,8 @@
+{
+  "_note": "Order lines. Every item value appears in BOTH products.sku and products.code, so value overlap cannot discriminate the join key either.",
+  "orders": [
+    {"item": "A-100", "quantity": "3"},
+    {"item": "B-200", "quantity": "7"},
+    {"item": "C-300", "quantity": "2"}
+  ]
+}

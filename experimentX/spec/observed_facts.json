@@ -1,0 +1,129 @@
+[
+  {
+    "claim": {
+      "source": "orders",
+      "fields": [
+        "item",
+        "quantity"
+      ],
+      "row_count": 3
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "item",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "orders",
+      "field": "quantity",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "fields": [
+        "code",
+        "description",
+        "price",
+        "sku"
+      ],
+      "row_count": 3
+    },
+    "status": "OBSERVED",
+    "basis": "source_structure"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "code",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "description",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "price",
+      "type": "str",
+      "distinct_values": 3,
+      "value_shape": "decimal written as a string"
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "source": "products",
+      "field": "sku",
+      "type": "str",
+      "distinct_values": 3
+    },
+    "status": "OBSERVED",
+    "basis": "measured_from_values"
+  },
+  {
+    "claim": {
+      "left": "orders.item",
+      "right": "products.code",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "left": "orders.item",
+      "right": "products.sku",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "left": "products.code",
+      "right": "orders.item",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  },
+  {
+    "claim": {
+      "left": "products.sku",
+      "right": "orders.item",
+      "values_of_left_found_in_right": "3/3",
+      "right_values_are_unique": true
+    },
+    "status": "OBSERVED",
+    "basis": "value_containment"
+  }
+]

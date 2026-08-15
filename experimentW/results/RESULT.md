@@ -114,7 +114,56 @@ unconventional, is untested. W shows the chain carries status end to end on
 inspection output it did not curate; it does not show the chain is robust to a
 job it was not designed for.
 
-`incoming_request.requested_date` being treated as load-bearing is arguably
-correct and arguably a category error — it is the runtime input, not a modelled
-source. W does not settle which, and the graded checks deliberately do not score
-it either way.
+## Clarification: input contract is not a source interpretation
+
+W left `incoming_request.requested_date` unscored. It is settled now, and the
+answer is that the question conflated two axes:
+
+```text
+SOURCE BINDING     a fact interpreted from someone else's persisted data
+                   -> OBSERVED / INFERRED / UNKNOWN / CONFIRMED
+
+INPUT CONTRACT     a fact supplied to the node by definition
+                   -> declared semantics, no provenance needed
+```
+
+`reservations.date` means something about external data nobody here wrote, so it
+carries provenance. `incoming_request.requested_date` is the node's own declared
+interface — **we named that field ourselves when we defined the node.** Asking a
+human to confirm that `requested_date` means the requested date, every time the
+node is modelled, is circular.
+
+A task can depend on both, and this one does:
+
+```text
+requested_date                INPUT CONTRACT
+reservations.date             CONFIRMED source binding
+holidays.date                 CONFIRMED source binding
+holidays collection meaning   CONFIRMED source interpretation
+```
+
+So all three probes blocking on `incoming_request.requested_date` is a **false
+positive** — correct about load-bearing, wrong about which axis it sits on. It
+cost nothing here because the confirmation was mechanical, but a real deployment
+would be asking humans to re-confirm its own interface on every run.
+
+The architectural consequence: **the node does not need epistemic provenance for
+everything. It needs it where meaning came from interpreting somebody else's
+data.**
+
+```text
+       established input contract
+                  |
+                  v
+            +-----------+
+sources --->| task node |---> allowed effect
+            +-----------+
+               ^
+               |
+       source interpretations
+       with provenance
+```
+
+W is frozen with this clarification. The run is not re-graded: the checks were
+preregistered not to score that referent, and the finding is about what the
+inspector should have been told, not about how W measured it.

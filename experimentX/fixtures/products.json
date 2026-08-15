@@ -1,0 +1,8 @@
+{
+  "_note": "sku and code are CROSSED on the first two rows. Both are complete, plausible join keys; joining on either succeeds for every order with no missing and no ambiguous rows -- but they select DIFFERENT products, so the prices differ. Nothing in the data can settle which is correct. Numbers are strings for the same reason as the original enrichment fixtures.",
+  "products": [
+    {"sku": "A-100", "code": "B-200", "description": "Widget",   "price": "19.99"},
+    {"sku": "B-200", "code": "A-100", "description": "Grommet",  "price": "0.10"},
+    {"sku": "C-300", "code": "C-300", "description": "Sprocket", "price": "5.00"}
+  ]
+}
