@@ -1,0 +1,376 @@
+{
+  "law": "Ignored Means Ignored",
+  "statement": "varying a sheet declared role:ignore must not change authoritative output, whatever it contains",
+  "canaries": [
+    {
+      "name": "role_counterfactual",
+      "fired": true,
+      "reached": true,
+      "detail": "as data, varying the sheet moved the output: [['A-1', 10], ['A-2', 20], ['X-1', 1]] -> [['A-1', 10], ['A-2', 20], ['X-9', 777]]"
+    },
+    {
+      "name": "resolution_leak",
+      "fired": true,
+      "reached": true,
+      "detail": "leaky resolver let the ignored sheet steer the read: [['A-1', 10], ['A-2', 20]] -> [['10', 'A-1'], ['20', 'A-2']]"
+    }
+  ],
+  "cases": [
+    {
+      "case": "same_headers",
+      "required": "invariant",
+      "rationale": "the ignored sheet answers to the same @Name referents as the data sheet, and sits first in workbook order. A resolver that takes the first matching sheet reads it.",
+      "varied_sheet": "AAA_ignored",
+      "reachability": "AAA_ignored differs between the two workbooks (35 vs 37 chars)",
+      "reachability_ok": true,
+      "baseline": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "mutation": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "status": "HELD",
+      "detail": "output unchanged: 2 rows, [['A-1', 10], ['A-2', 20]]"
+    },
+    {
+      "case": "same_headers_reordered",
+      "required": "invariant",
+      "rationale": "the ignored sheet carries the same header NAMES in different COLUMN POSITIONS. Added after the first run of this law: with identical positions, a referent mis-resolved to the wrong SHEET is invisible, because only the column INDEX crosses into the read. Varying the order is what makes a resolution leak observable at all.",
+      "varied_sheet": "AAA_ignored",
+      "reachability": "AAA_ignored differs between the two workbooks (35 vs 35 chars)",
+      "reachability_ok": true,
+      "baseline": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "mutation": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "status": "HELD",
+      "detail": "output unchanged: 2 rows, [['A-1', 10], ['A-2', 20]]"
+    },
+    {
+      "case": "same_labels",
+      "required": "invariant",
+      "rationale": "the label the exclusion rule denotes (SUMMA) is planted on the ignored sheet. A rule that scans by label rather than by resolved column reaches across.",
+      "varied_sheet": "AAA_ignored",
+      "reachability": "AAA_ignored differs between the two workbooks (37 vs 69 chars)",
+      "reachability_ok": true,
+      "baseline": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "mutation": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "status": "HELD",
+      "detail": "output unchanged: 2 rows, [['A-1', 10], ['A-2', 20]]"
+    },
+    {
+      "case": "same_data_verbatim",
+      "required": "invariant",
+      "rationale": "the ignored sheet is a byte-identical copy of the data sheet. Identity by CONTENT rather than by declared role would union it, which is law 1's mistake arriving through a different door.",
+      "varied_sheet": "AAA_ignored",
+      "reachability": "AAA_ignored differs between the two workbooks (68 vs 83 chars)",
+      "reachability_ok": true,
+      "baseline": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "mutation": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "status": "HELD",
+      "detail": "output unchanged: 2 rows, [['A-1', 10], ['A-2', 20]]"
+    },
+    {
+      "case": "larger_than_data_sheet",
+      "required": "invariant",
+      "rationale": "the ignored sheet has more rows and more columns than the data sheet. Any dimension taken from the workbook rather than from the declared sheet shows up here.",
+      "varied_sheet": "AAA_ignored",
+      "reachability": "AAA_ignored differs between the two workbooks (49 vs 306 chars)",
+      "reachability_ok": true,
+      "baseline": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "mutation": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "status": "HELD",
+      "detail": "output unchanged: 2 rows, [['A-1', 10], ['A-2', 20]]"
+    },
+    {
+      "case": "hidden_content",
+      "required": "invariant",
+      "rationale": "the ignored sheet carries white-on-white text and a hidden row -- visible to the machine, invisible on screen. The white-text asymmetry aimed at ignored material.",
+      "varied_sheet": "AAA_ignored",
+      "reachability": "AAA_ignored differs between the two workbooks (35 vs 55 chars)",
+      "reachability_ok": true,
+      "baseline": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "mutation": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "status": "HELD",
+      "detail": "output unchanged: 2 rows, [['A-1', 10], ['A-2', 20]]"
+    },
+    {
+      "case": "CONTROL_vary_the_data_sheet",
+      "required": "must_differ",
+      "rationale": "the other direction. Varying the DATA sheet MUST change the output, or this suite would pass by returning a constant and the invariance results would mean nothing.",
+      "varied_sheet": "Sales",
+      "reachability": "Sales differs between the two workbooks (68 vs 83 chars)",
+      "reachability_ok": true,
+      "baseline": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 2
+        }
+      },
+      "mutation": {
+        "refused": false,
+        "columns": [
+          "tuote",
+          "myynti"
+        ],
+        "rows": [
+          [
+            "A-1",
+            10
+          ],
+          [
+            "A-2",
+            20
+          ],
+          [
+            "A-3",
+            30
+          ]
+        ],
+        "member_contribution": {
+          "Sales": 3
+        }
+      },
+      "status": "HELD",
+      "detail": "data change moved the output: 2 -> 3 rows"
+    }
+  ],
+  "outcome": "LAW_3_HELD",
+  "stated_limitation": "six relevance shapes, chosen by their author, and TWO registered leak paths (role counterfactual, resolution). Other leak paths are undemonstrated. A sheet is 'ignored' here by DECLARED ROLE only; ignoring by any other mechanism is not covered. Sheet ORDERING is held fixed (ignored sheet first) rather than varied -- that is axis 4."
+}
