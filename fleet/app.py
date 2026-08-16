@@ -39,6 +39,8 @@ sys.path.insert(0, str(APP))
 import fleet  # noqa: E402
 import inbox as inbox_mod  # noqa: E402
 import investigation as inv_mod  # noqa: E402
+import map_component  # noqa: E402
+import system_map  # noqa: E402
 
 st.set_page_config(page_title="Worker fleet", layout="wide")
 
@@ -65,9 +67,35 @@ def has_inbox(w) -> bool:
 
 
 by_name = {w.name: w for w in workers}
-choice = st.sidebar.radio("Workers", ["Fleet"] + list(by_name))
+# A map click selects a worker in the view that already exists. The map is
+# navigation, not a second task-detail implementation.
+options = ["Fleet", "System map"] + list(by_name)
+if "map_pick" in st.session_state and st.session_state["map_pick"] in by_name:
+    st.session_state["nav"] = st.session_state.pop("map_pick")
+choice = st.sidebar.radio("Workers", options, key="nav")
 st.sidebar.caption(f"{len(workers)} established worker(s)\n\n"
                    f"{len({w.engine for w in workers})} engine(s) in use")
+
+# ---------------------------------------------------------------------------
+# SYSTEM MAP
+# ---------------------------------------------------------------------------
+if choice == "System map":
+    st.title("System map")
+    st.caption("Derived entirely from fleet state — nothing here is stored, and "
+               "nothing you do to the picture changes the system.")
+    graph = system_map.build(workers)
+    clicked = map_component.system_map(graph["nodes"], graph["edges"],
+                                       height=720, key="fleet_map")
+    st.markdown(" · ".join(
+        f"<span style='color:{colour}'>&#9632;</span> {label}"
+        for label, colour in system_map.legend()), unsafe_allow_html=True)
+    st.caption(f"{len(graph['nodes'])} nodes, {len(graph['edges'])} edges. "
+               f"Task nodes are clickable; the rest are labels for now.")
+    picked = system_map.name_from((clicked or {}).get("id"))
+    if picked:
+        st.session_state["map_pick"] = picked
+        st.rerun()
+    st.stop()
 
 # ---------------------------------------------------------------------------
 # FLEET
