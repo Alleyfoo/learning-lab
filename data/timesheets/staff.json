@@ -1,0 +1,7 @@
+{
+  "staff": [
+    {"staff_id": "E-14", "name": "R. Ahmed",    "hourly_rate": "42.50", "team": "Survey"},
+    {"staff_id": "E-27", "name": "J. Laine",    "hourly_rate": "38.00", "team": "Survey"},
+    {"staff_id": "E-31", "name": "M. Koskinen", "hourly_rate": "51.75", "team": "Analysis"}
+  ]
+}

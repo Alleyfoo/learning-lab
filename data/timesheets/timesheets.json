@@ -1,0 +1,8 @@
+{
+  "timesheets": [
+    {"entry": "T-1001", "staff_ref": "E-14", "hours": "7.5",   "week": "2026-03-02"},
+    {"entry": "T-1002", "staff_ref": "E-27", "hours": "40",    "week": "2026-03-02"},
+    {"entry": "T-1003", "staff_ref": "E-31", "hours": "12.25", "week": "2026-03-09"},
+    {"entry": "T-1004", "staff_ref": "E-14", "hours": "38",    "week": "2026-03-09"}
+  ]
+}

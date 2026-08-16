@@ -85,6 +85,10 @@ def workspaces() -> list[Workspace]:
     for sub in sorted(p.name for p in ydir.glob("*") if p.is_dir()):
         out.append(Workspace(f"experiment Y - condition {sub}",
                              LAB / "experimentY", f"fixtures/{sub}"))
+    ddir = LAB / "data"
+    if ddir.is_dir():
+        for sub in sorted(p.name for p in ddir.glob("*") if p.is_dir()):
+            out.insert(0, Workspace(sub, LAB / "data", sub))
     xdir = LAB / "experimentX" / "fixtures"
     if xdir.is_dir():
         out.append(Workspace("experiment X - ambiguous join", LAB / "experimentX",
