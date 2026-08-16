@@ -268,7 +268,7 @@ def inspect_prompt(observed: list[dict], goal: str) -> str:
 
 
 def define_prompt(report: list[dict], goal: str, sources: dict,
-                  resumed: bool = False) -> str:
+                  resumed: bool = False, deferred: Optional[list] = None) -> str:
     skeleton = {
         "model_version": 1, "model_id": "...", "task": "enrichment",
         "sources": sources, "driving_source": "...",
@@ -292,6 +292,20 @@ see the data yourself.
 {resume}
 THE JOB the person wants, in their words:
 {goal}
+
+WHAT THE DETERMINISTIC EXECUTOR ALREADY DOES. These are facts about the runtime
+you are writing for, not choices, so do not ask about them:
+
+  - Arithmetic is exact decimal. There is no rounding, no currency conversion
+    and no locale handling. A value that must be numeric is CHECKED, never
+    rewritten, and is emitted exactly as the source wrote it.
+  - `compute.op` may only be "multiply". There is no other operation available,
+    so the shape of any computation is fixed: two declared operands, multiplied.
+  - Every field of the driving source is preserved in the output automatically,
+    ahead of the columns you declare. You do not need to add identity columns
+    and should not ask whether to.
+  - An operand that turns out not to be numeric is refused under
+    `on_non_numeric`. Nothing is silently coerced.
 
 THE RULE YOU MUST FOLLOW:
 {RULE}
@@ -330,8 +344,10 @@ def interpret(observed: list[dict], goal: str, ask: Ask) -> tuple[list[dict], di
 
 
 def define(report: list[dict], goal: str, sources: dict, ask: Ask,
-           resumed: bool = False) -> tuple[Optional[dict], Optional[list]]:
-    text = ask(define_prompt(report, goal, sources, resumed))
+           resumed: bool = False, deferred: Optional[list] = None,
+           observed: Optional[list[dict]] = None
+           ) -> tuple[Optional[dict], Optional[list]]:
+    text = ask(define_prompt(report, goal, sources, resumed, deferred))
     block = _w_run.block_of(text)
     if block is not None:
         return None, block
@@ -342,7 +358,33 @@ def define(report: list[dict], goal: str, sources: dict, ask: Ask,
         # `missing_data_file` on the first real run -- it rewrote the paths.
         # The program owns what it already knows.
         node["sources"] = json.loads(json.dumps(sources))
+        if observed is not None:
+            node = preserve_input_row(node, observed)
     return node, None
+
+
+def propose(report: list[dict], goal: str, sources: dict, observed: list[dict],
+            ask: Ask, resumed: bool = False):
+    """Define, then triage any block. Returns (model, questions, deferred).
+
+    A block made entirely of non-load-bearing questions is not put to the
+    person: the definer is told why each is settled and asked again. Deferred
+    questions are returned so they can be SHOWN -- filtered out of the way, not
+    out of sight.
+    """
+    all_deferred: list = []
+    for attempt in (1, 2):
+        model, block = define(report, goal, sources, ask, resumed,
+                              all_deferred or None, observed)
+        if block is None:
+            return model, [], all_deferred
+        asked, deferred = triage(block, observed)
+        all_deferred += deferred
+        if asked:
+            return None, asked, all_deferred
+        if attempt == 2 or not deferred:
+            break
+    return None, [], all_deferred
 
 
 def _node_of(text: str):
@@ -352,6 +394,53 @@ def _node_of(text: str):
         if isinstance(obj, dict) and sum(k in obj for k in keys) >= 3:
             found = obj
     return found
+
+
+# ---------------------------------------------------------------------------
+# 4b. enrichment semantics: the input row is PRESERVED
+# ---------------------------------------------------------------------------
+
+def fields_of(observed: list[dict], source: str) -> list[str]:
+    for claim in observed:
+        if claim["claim"].get("source") == source and "fields" in claim["claim"]:
+            return list(claim["claim"]["fields"])
+    return []
+
+
+def preserve_input_row(model: dict, observed: list[dict]) -> dict:
+    """Enrichment ADDS fields to a row. It does not replace the row.
+
+    The first real journeys all produced `price, line_total` and nothing else —
+    literally what the sentence asked for, and three rows that cannot be traced
+    back to an order. Identity is not something a person should have to request:
+    a row you cannot attribute is not an enriched row, it is a different table.
+
+    So the driving source's own fields lead every output, in the order the
+    observer reports them. A column the definer already declared for one of
+    those fields keeps ITS spec — including `type: number` — and simply moves
+    into position, so nothing the definer decided is discarded.
+
+    Done here, in the model, rather than in the executor: the executor stays
+    unchanged and the model still declares in full what will happen.
+    """
+    driving = model.get("driving_source")
+    declared = list(model.get("outputs") or [])
+    if not driving or not declared:
+        return model
+
+    by_field = {out.get("field"): out for out in declared
+                if out.get("from") == driving and out.get("field")}
+    leading = []
+    for field in fields_of(observed, driving):
+        leading.append(by_field.get(field)
+                       or {"target": field, "from": driving, "field": field})
+    kept_targets = {out["target"] for out in leading}
+    trailing = [out for out in declared
+                if out.get("target") not in kept_targets
+                and out not in by_field.values()]
+
+    model["outputs"] = leading + trailing
+    return model
 
 
 # ---------------------------------------------------------------------------
@@ -370,6 +459,116 @@ class Question:
     @property
     def referent(self) -> dict:
         return {"source": self.source, "field": self.field}
+
+
+def _measured(observed: list[dict], source, field) -> Optional[dict]:
+    if isinstance(source, list) or not field:
+        return None
+    for claim in observed:
+        body = claim["claim"]
+        if body.get("source") == source and body.get("field") == field:
+            return body
+    return None
+
+
+def _relevant_lefts(observed: list[dict], source, field) -> list[str]:
+    """The join directions a referent could actually be about.
+
+    Direction matters, and getting it wrong is not theoretical: in condition A
+    the reverse candidate `products.code -> orders.item` has 2/3 coverage and is
+    therefore unestablished, which made A's perfectly settled join look
+    ambiguous and asked the person a question the evidence had already answered.
+
+    A relationship is only relevant here if it could be this model's lookup:
+
+      - a relational claim (`source` is a list) is about `source[0].field`
+      - a scalar referent may be a lookup TARGET, so every join into it counts
+      - a scalar referent is only treated as a lookup KEY when at least one of
+        its own candidates is complete and unique -- a field that matches
+        nothing completely is not a join anybody is proposing
+    """
+    rels = relationships(observed)
+    if isinstance(source, list):
+        if not source:
+            return []
+        if field:
+            return [f"{source[0]}.{field}"]
+        # A question naming two collections and no field is a question about
+        # their RELATIONSHIP -- the only cross-collection thing an enrichment
+        # model expresses. Judging it against every join between them keeps a
+        # join question load-bearing while a question about arithmetic between
+        # the same two sources, which the model fixes as `op: multiply`, is not.
+        others = set(source[1:])
+        return sorted({r["left"] for r in rels
+                       if r["left"].split(".")[0] == source[0]
+                       and r["right"].split(".")[0] in others})
+    if not field:
+        return []
+
+    me = f"{source}.{field}"
+    lefts = [r["left"] for r in rels if r["right"] == me]
+    if any(r["left"] == me for r in rels) and sufficiency(observed, me)["sufficient"]:
+        lefts.append(me)
+    return sorted(set(lefts))
+
+
+def _in_unsettled_relationship(observed: list[dict], source, field) -> Optional[str]:
+    """The first relevant join direction the policy has not settled, if any."""
+    for left in _relevant_lefts(observed, source, field):
+        if not sufficiency(observed, left)["established"]:
+            return left
+    return None
+
+
+def triage(block: list, observed: list[dict]) -> tuple[list, list]:
+    """Split a definer's block into what must be asked and what must not.
+
+    > A question is surfaced only if different answers could alter the
+    > executable model or the authoritative output.
+
+    An enrichment model can express exactly two data-dependent decisions: which
+    relationship the lookup joins on, and whether a field may serve as a numeric
+    operand. Nothing else it declares varies with an interpretation.
+
+    So a blocked referent is load-bearing when it is one side of a join the
+    sufficiency policy has not settled, or when the observer never measured it
+    at all. A field the observer HAS measured is settled either way — if
+    `value_kind` is `numeric_string` it can be multiplied, and if it is `text` no
+    human assurance makes `"two"` parse. Currency, units and domain meaning are
+    real questions that this model does not branch on, so they are recorded and
+    do not block a calculation that does not depend on them.
+
+    This is judged on referents and measurements, never on the wording of the
+    question -- prose classification is how three graders in this programme went
+    wrong.
+    """
+    asked, deferred = [], []
+    for entry in block:
+        source, field = entry.get("source"), entry.get("field")
+        lefts = _relevant_lefts(observed, source, field)
+        unsettled = _in_unsettled_relationship(observed, source, field)
+        if lefts:
+            fit = sufficiency(observed, unsettled or lefts[0])
+            if not fit["established"]:
+                asked.append((entry, f"the lookup joins on this; the policy finds "
+                                     f"{len(fit['sufficient'])} equally complete "
+                                     f"candidates, so the answer changes which "
+                                     f"reference row supplies every output"))
+                continue
+            deferred.append((entry, f"the join {fit['sufficient'][0]['right']} is "
+                                    f"established by measured coverage"))
+            continue
+
+        measured = _measured(observed, source, field)
+        if measured is None:
+            asked.append((entry, "the observer measured nothing about this "
+                                 "subject, so its role cannot be settled locally"))
+            continue
+        deferred.append((entry, f"observed `{source}.{field}` is "
+                                f"{measured['value_kind']} "
+                                f"(e.g. {', '.join(map(str, measured['examples']))}); "
+                                f"no answer to this changes the model or its output"))
+    return asked, deferred
 
 
 def questions_from(block: list, observed: list[dict]) -> list[Question]:
@@ -403,7 +602,7 @@ def answer(report: list[dict], question: Question, human_answer: str) -> list[di
     Confirmation resolves claims, not workflows: a second unresolved load-bearing
     claim must still stop the run, and does.
     """
-    out = []
+    out, settled = [], False
     for claim in boundary.confirm(report, [question.referent]):
         if claim.get("status") == "CONFIRMED":
             claim = dict(claim)
@@ -414,7 +613,22 @@ def answer(report: list[dict], question: Question, human_answer: str) -> list[di
             body["meaning"] = human_answer
             claim["claim"] = body
             claim["confirmed_by"] = "human"
+            settled = True
         out.append(claim)
+
+    if not settled:
+        # The block came from the DEFINER, whose referent need not match any
+        # claim the inspector wrote. When it does not, confirmation used to
+        # match nothing silently -- the person answered, the report was
+        # unchanged, and the definer blocked again on the same question.
+        #
+        # A human answer is authority in its own right, so it becomes a claim at
+        # the referent that was actually asked about. There is no prior status
+        # to preserve because there was no prior claim.
+        out.append({"claim": {"source": question.source, "field": question.field,
+                              "meaning": human_answer},
+                    "status": "CONFIRMED", "confirmed_by": "human",
+                    "was": None})
     return out
 
 
@@ -611,6 +825,112 @@ def _self_test() -> int:
     wrong_after["lookup"]["match_right"] = "code"
     check(check_join_supported(wrong_after, obs_c, settled) is not None,
           "CANARY: a model contradicting the human answer must be refused")
+
+    # --- enrichment ADDS to the row, it does not replace it ----------------
+    # Every first-run journey produced `price, line_total` and no `item`: three
+    # rows nobody could trace back to an order.
+    thin = {"driving_source": "orders", "outputs": [
+        {"target": "price", "from": "products", "field": "price",
+         "type": "number"},
+        {"target": "line_total", "compute": {
+            "op": "multiply", "left": {"from": "orders", "field": "quantity"},
+            "right": {"from": "products", "field": "price"}}}]}
+    obs_a = observed_facts(by_label["experiment Y - condition A"],
+                           sources_in(by_label["experiment Y - condition A"]))
+    kept = preserve_input_row(json.loads(json.dumps(thin)), obs_a)
+    targets = [o["target"] for o in kept["outputs"]]
+    check(targets[:2] == ["item", "quantity"] and targets[-1] == "line_total",
+          f"the driving row must lead the output: {targets}")
+    check("price" in targets and len(targets) == 4,
+          f"added columns are kept, not duplicated: {targets}")
+
+    # a definer-declared spec for a driving field keeps ITS spec, in position
+    typed = {"driving_source": "orders", "outputs": [
+        {"target": "quantity", "from": "orders", "field": "quantity",
+         "type": "number"},
+        {"target": "line_total", "compute": {
+            "op": "multiply", "left": {"from": "orders", "field": "quantity"},
+            "right": {"from": "products", "field": "price"}}}]}
+    kept = preserve_input_row(typed, obs_a)
+    quantity = next(o for o in kept["outputs"] if o["target"] == "quantity")
+    check(quantity.get("type") == "number",
+          f"a declared numeric assertion must survive repositioning: {quantity}")
+    check([o["target"] for o in kept["outputs"]] == ["item", "quantity",
+                                                     "line_total"],
+          f"and must not be duplicated: {[o['target'] for o in kept['outputs']]}")
+
+    # --- triage: ask only what could change the model ----------------------
+    obs_c = observed_facts(by_label["experiment Y - condition C"],
+                           sources_in(by_label["experiment Y - condition C"]))
+    join_q = {"source": ["orders", "products"], "field": "item",
+              "question": "code or sku?"}
+    numeric_q = {"source": "orders", "field": "quantity",
+                 "question": "are these really counts?"}
+    currency_q = {"source": "products", "field": "price",
+                  "question": "what currency is this?"}
+    unknown_q = {"source": "orders", "field": "nonexistent",
+                 "question": "what is this?"}
+
+    asked, deferred = triage([join_q, numeric_q, currency_q], obs_c)
+    check([e.get("field") for e, _ in asked] == ["item"],
+          f"only the join may be asked in C: {[e.get('field') for e, _ in asked]}")
+    check({e.get("field") for e, _ in deferred} == {"quantity", "price"},
+          f"CANARY: numeric and currency questions must be deferred, not asked: "
+          f"{[(e.get('field'), w) for e, w in deferred]}")
+    check(all("numeric_string" in why for _, why in deferred),
+          f"deferral must cite the MEASUREMENT that settles it: {deferred}")
+
+    # in A the join IS established, so even a join question defers
+    asked, deferred = triage([join_q, currency_q], obs_a)
+    check(not asked, f"CANARY: nothing is asked in A: {[e for e, _ in asked]}")
+    check(any("established by measured coverage" in why for _, why in deferred),
+          f"an established join must defer with its reason: {deferred}")
+
+    # a subject the observer never measured is still asked about
+    asked, _ = triage([unknown_q], obs_a)
+    check([e.get("field") for e, _ in asked] == ["nonexistent"],
+          "CANARY: an unmeasured subject must still be asked about")
+
+    # a cross-collection question with NO field is about the relationship
+    formula_q = {"source": ["orders", "products"], "field": None,
+                 "question": "what is the exact formula for the line total?"}
+    asked, deferred = triage([formula_q], obs_a)
+    check(not asked and deferred,
+          f"CANARY: with the join established, a formula question between the "
+          f"same two sources must NOT block -- the model fixes op: multiply: "
+          f"{[(e.get('question'), w) for e, w in asked]}")
+    asked, _ = triage([formula_q], obs_c)
+    check(asked, "but with the join unsettled, a relational question IS asked")
+
+    # a field referent that names one SIDE of an unsettled join is load-bearing
+    side_q = {"source": "products", "field": "code", "question": "is this the key?"}
+    asked, _ = triage([side_q], obs_c)
+    check([e.get("field") for e, _ in asked] == ["code"],
+          "CANARY: naming one side of an unsettled join is load-bearing, even "
+          "though the field itself is measured")
+
+    # --- an answer to a referent nobody claimed must still land ------------
+    # Found on the second real journey: the definer blocked on a referent the
+    # inspector had not written a claim for, confirmation matched nothing, and
+    # condition C looped on the same question.
+    bare = boundary.merge(obs_c, boundary.ingest(
+        [{"claim": {"source": "orders", "field": "quantity",
+                    "meaning": "how many"},
+          "status": "INFERRED", "basis": ["field_name"]}]))
+    q_novel = Question(["orders", "products"], "item", "the join", "which?")
+    after = answer(bare, q_novel, "orders.item matches products.sku")
+    settled_claims = [c for c in after if c.get("status") == "CONFIRMED"]
+    check(len(settled_claims) == 1
+          and settled_claims[0]["claim"]["field"] == "item",
+          f"an answer must always produce exactly one confirmed claim: "
+          f"{settled_claims}")
+    check(confirmed_join(after) == "products.sku",
+          f"…and the join check must be able to read it: {confirmed_join(after)}")
+    check([c for c in after if c["status"] == "OBSERVED"]
+          == [c for c in bare if c["status"] == "OBSERVED"],
+          "…without disturbing a single observation")
+    check(len([c for c in after if c["status"] == "INFERRED"]) == 1,
+          "CANARY: and without settling the neighbouring inference")
 
     # --- the LLM channel still cannot mint an observation ------------------
     r = boundary.ingest([{"claim": {"source": "orders", "field": "item"},

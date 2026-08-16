@@ -51,10 +51,16 @@ def run(ws, human_answer: str, goal: str = GOAL) -> dict:
     out["rejected"] = [r["code"] for r in ingest["rejected"]]
     out["stripped"] = [s["removed"] for s in ingest["stripped"]]
 
-    model, block = pipeline.define(report, goal, sources, ask)
-    out["asked"] = block is not None
-    if block is not None:
-        q = pipeline.questions_from(block, observed)[0]
+    model, asked, deferred = pipeline.propose(report, goal, sources, observed, ask)
+    out["asked"] = bool(asked)
+    out["questions_asked"] = [{"referent": f"{e.get('source')}.{e.get('field')}",
+                               "question": e.get("question") or e.get("binding"),
+                               "why_load_bearing": why} for e, why in asked]
+    out["questions_deferred"] = [{"referent": f"{e.get('source')}.{e.get('field')}",
+                                  "question": e.get("question") or e.get("binding"),
+                                  "why_not_asked": why} for e, why in deferred]
+    if asked:
+        q = pipeline.questions_from([e for e, _ in asked], observed)[0]
         out["question"] = q.text
         out["options"] = q.options
         # Answer what was ACTUALLY asked. The first real run asked about the
@@ -67,8 +73,13 @@ def run(ws, human_answer: str, goal: str = GOAL) -> dict:
         out["answer_given"] = reply
         report = pipeline.answer(report, q, reply)
         out["confirmed"] = [c["claim"] for c in report if c["status"] == "CONFIRMED"]
-        model, block = pipeline.define(report, goal, sources, ask, resumed=True)
-        out["asked_again"] = block is not None
+        model, asked2, more = pipeline.propose(report, goal, sources, observed,
+                                               ask, resumed=True)
+        out["asked_again"] = bool(asked2)
+        out["questions_deferred"] += [
+            {"referent": f"{e.get('source')}.{e.get('field')}",
+             "question": e.get("question") or e.get("binding"),
+             "why_not_asked": why} for e, why in more]
     if model is None:
         out["error"] = "no model produced"
         return out

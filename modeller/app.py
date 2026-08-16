@@ -75,7 +75,7 @@ st.header("1 · Data")
 
 spaces = {w.label: w for w in pipeline.workspaces()}
 label = st.selectbox("Where the data is", list(spaces),
-                     key="ws", on_change=lambda: reset("report", "model", "block"))
+                     key="ws", on_change=lambda: reset("report", "model", "asked", "deferred"))
 ws = spaces[label]
 
 found = pipeline.sources_in(ws)
@@ -86,7 +86,7 @@ if not found:
 picked_names = st.multiselect(
     "Sources to use", [f"{s.filename} → {s.collection}" for s in found],
     default=[f"{s.filename} → {s.collection}" for s in found],
-    on_change=lambda: reset("report", "model", "block"))
+    on_change=lambda: reset("report", "model", "asked", "deferred"))
 chosen = [s for s in found if f"{s.filename} → {s.collection}" in picked_names]
 if len(chosen) < 2:
     st.info("Select at least two sources — enrichment joins one to another.")
@@ -125,12 +125,12 @@ goal = st.text_area(
           "the line total.", height=80)
 
 if st.button("Work out the task", type="primary"):
-    reset("report", "model", "block", "answered")
+    reset("report", "model", "asked", "deferred")
     with st.spinner("Inspecting…"):
         S["report"], S["ingest"] = pipeline.interpret(observed, goal, ask)
     with st.spinner("Defining the task…"):
-        S["model"], S["block"] = pipeline.define(
-            S["report"], goal, pipeline.source_spec(ws, chosen), ask)
+        S["model"], S["asked"], S["deferred"] = pipeline.propose(
+            S["report"], goal, pipeline.source_spec(ws, chosen), observed, ask)
 
 if "report" not in S:
     st.stop()
@@ -183,9 +183,18 @@ for leftname in pipeline.join_left_candidates(observed):
 # ---------------------------------------------------------------------------
 # 4. Missing truth
 # ---------------------------------------------------------------------------
-if S.get("block"):
+if S.get("deferred"):
+    with st.expander(f"{len(S['deferred'])} question(s) recorded but not asked — "
+                     f"the answer would not change the model"):
+        for entry, why in S["deferred"]:
+            st.write(f"`{entry.get('source')}.{entry.get('field')}` — "
+                     f"{entry.get('question') or entry.get('binding')}")
+            st.caption(why)
+
+if S.get("asked"):
     st.header("4 · One thing I cannot establish")
-    questions = pipeline.questions_from(S["block"], observed)
+    questions = pipeline.questions_from([e for e, _ in S["asked"]], observed)
+    st.caption("Load-bearing: " + S["asked"][0][1])
     q = questions[0]
     st.warning(q.text)
     if len(questions) > 1:
@@ -198,9 +207,9 @@ if S.get("block"):
                   f".{q.field} matches {choice}") if q.options else choice
         S["report"] = pipeline.answer(S["report"], q, answer)
         with st.spinner("Resuming…"):
-            S["model"], S["block"] = pipeline.define(
-                S["report"], goal, pipeline.source_spec(ws, chosen), ask,
-                resumed=True)
+            S["model"], S["asked"], S["deferred"] = pipeline.propose(
+                S["report"], goal, pipeline.source_spec(ws, chosen), observed,
+                ask, resumed=True)
         st.rerun()
     st.stop()
 
