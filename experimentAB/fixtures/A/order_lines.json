@@ -1,0 +1,29 @@
+{
+  "_note": "The plausibly named `Unit price` is also the field that reconciles against Checked total.",
+  "order_lines": [
+    {
+      "Line": "OL-1",
+      "Article": "ART-1",
+      "Qty": "12",
+      "Checked total": "5.40"
+    },
+    {
+      "Line": "OL-2",
+      "Article": "ART-2",
+      "Qty": "3",
+      "Checked total": "0.24"
+    },
+    {
+      "Line": "OL-3",
+      "Article": "ART-1",
+      "Qty": "40",
+      "Checked total": "18.00"
+    },
+    {
+      "Line": "OL-4",
+      "Article": "ART-3",
+      "Qty": "1",
+      "Checked total": "184.90"
+    }
+  ]
+}

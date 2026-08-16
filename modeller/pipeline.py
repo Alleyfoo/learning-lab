@@ -510,7 +510,13 @@ def _relevant_lefts(observed: list[dict], source, field) -> list[str]:
         return []
 
     me = f"{source}.{field}"
-    lefts = [r["left"] for r in rels if r["right"] == me]
+    # Only lefts that are plausible join keys at all. A left with no complete,
+    # unique candidate is not a join anybody is proposing -- and coincidental
+    # value overlap creates such candidates readily: `184.90` appearing in both
+    # a total and a price produced a 1/4 "relationship" that made an OPERAND
+    # question look relational and asked about it wrongly.
+    lefts = [r["left"] for r in rels
+             if r["right"] == me and sufficiency(observed, r["left"])["sufficient"]]
     if any(r["left"] == me for r in rels) and sufficiency(observed, me)["sufficient"]:
         lefts.append(me)
     return sorted(set(lefts))
@@ -568,6 +574,31 @@ def triage(block: list, observed: list[dict]) -> tuple[list, list]:
             asked.append((entry, "the observer measured nothing about this "
                                  "subject, so its role cannot be settled locally"))
             continue
+
+        # A numeric field's ROLE is a separate question from its usability. Where
+        # several numeric fields sit side by side, only their names tell them
+        # apart, and a name may not settle a load-bearing binding. Measurement
+        # settles it if a computation reconciles; otherwise a person must.
+        if measured.get("value_kind") == "numeric_string":
+            siblings = [c for c in observed
+                        if c["claim"].get("source") == source
+                        and c["claim"].get("value_kind") == "numeric_string"]
+            if len(siblings) > 1:
+                fit = operand_sufficiency(observed)
+                if fit["established"]:
+                    pair = fit["sufficient"][0]
+                    deferred.append((entry, f"{pair['left']} x {pair['right']} "
+                                            f"reconciles against {pair['equals']} "
+                                            f"({pair['holds']}), which settles "
+                                            f"the operand roles by measurement"))
+                else:
+                    asked.append((entry, f"`{source}` has "
+                                         f"{len(siblings)} numeric fields and no "
+                                         f"computation reconciles, so only the "
+                                         f"field NAME distinguishes them -- which "
+                                         f"cannot settle a load-bearing operand"))
+                continue
+
         deferred.append((entry, f"observed `{source}.{field}` is "
                                 f"{measured['value_kind']} "
                                 f"(e.g. {', '.join(map(str, measured['examples']))}); "
@@ -639,6 +670,105 @@ def answer(report: list[dict], question: Question, human_answer: str) -> list[di
 # ---------------------------------------------------------------------------
 # 6. verification, validation, deterministic preview
 # ---------------------------------------------------------------------------
+
+def computations(observed: list[dict]) -> list[dict]:
+    return [c["claim"]["candidate_computation"] for c in observed
+            if "candidate_computation" in c["claim"]]
+
+
+def _complete_hold(holds: str) -> bool:
+    left, _, right = holds.partition("/")
+    return left == right and left != "0"
+
+
+def operand_sufficiency(observed: list[dict]) -> dict:
+    """Which operand pair a computation may be built from, by MEASUREMENT.
+
+    Coverage settles which rows go together. It says nothing about which columns
+    are the operands, and `Unit price` next to `VAT rate` is told apart by its
+    NAME alone -- exactly the evidence this programme refuses to let become
+    authority. A real workbook exposed this: the answer was right because the
+    column was well named, not because anything established it.
+
+    > An operand pair is MECHANICALLY SUFFICIENT when it is the SOLE pair that
+    > reconciles completely against an independently supplied target column.
+
+    "Independently supplied" is the load-bearing part. The target was produced by
+    someone else's system, so a pair that reproduces it is supported by evidence
+    no one in this chain manufactured.
+    """
+    holding = [c for c in computations(observed) if _complete_hold(c["holds"])]
+    by_target: dict[str, list] = {}
+    for c in holding:
+        by_target.setdefault(c["equals"], []).append(c)
+    sufficient = [pair[0] for pair in by_target.values() if len(pair) == 1]
+    return {"candidates": computations(observed), "reconciling": holding,
+            "sufficient": sufficient,
+            "established": len(sufficient) == 1,
+            "verdict": ("established" if len(sufficient) == 1 else
+                        "ambiguous" if len(sufficient) > 1 else "unsupported")}
+
+
+def confirmed_operands(report: Optional[list[dict]]) -> Optional[tuple]:
+    """An operand pair a human settled, as (left, right)."""
+    for claim in report or []:
+        if claim.get("status") != "CONFIRMED":
+            continue
+        meaning = str(claim["claim"].get("meaning") or "")
+        if " multiplied by " in meaning:
+            left, _, right = meaning.partition(" multiplied by ")
+            return left.strip().strip(".`"), right.strip().strip(".`")
+    return None
+
+
+def check_operands_supported(model: dict, observed: list[dict],
+                             report: Optional[list[dict]] = None) -> Optional[str]:
+    """The program's own verdict on the model's declared compute operands.
+
+    Same shape as `check_join_supported`: the definer is not taken at its word.
+    A computation whose operands are neither reconciled by measurement nor
+    settled by a human is refused, however plausible the column names are.
+    """
+    for out in model.get("outputs") or []:
+        compute = out.get("compute")
+        if not compute:
+            continue
+        left = f"{compute['left']['from']}.{compute['left']['field']}"
+        right = f"{compute['right']['from']}.{compute['right']['field']}"
+
+        settled = confirmed_operands(report)
+        if settled:
+            if {left, right} != set(settled):
+                return (f"a human settled the operands as {settled[0]} x "
+                        f"{settled[1]}, but the model declares {left} x {right}")
+            continue
+
+        fit = operand_sufficiency(observed)
+        if fit["verdict"] == "unsupported":
+            candidates = _operand_candidates(model, observed)
+            if len(candidates) <= 1:
+                continue      # only one numeric operand available; nothing to
+                              # tell apart, so nothing to establish
+            return (f"nothing independently distinguishes the operands of "
+                    f"`{out['target']}`; {len(candidates)} numeric candidates "
+                    f"and no column reconciles")
+        if fit["verdict"] == "ambiguous":
+            return (f"{len(fit['sufficient'])} operand pairs reconcile equally; "
+                    f"the computation is not established by evidence")
+        pair = fit["sufficient"][0]
+        if {pair["left"], pair["right"]} != {left, right}:
+            return (f"the declared operands {left} x {right} are not the pair "
+                    f"that reconciles ({pair['left']} x {pair['right']})")
+    return None
+
+
+def _operand_candidates(model: dict, observed: list[dict]) -> list[str]:
+    """Numeric fields in the looked-up source -- what could be mistaken for what."""
+    into = (model.get("lookup") or {}).get("into")
+    return sorted(f"{c['claim']['source']}.{c['claim']['field']}" for c in observed
+                  if c["claim"].get("source") == into
+                  and c["claim"].get("value_kind") == "numeric_string")
+
 
 def confirmed_join(report: list[dict]) -> Optional[str]:
     """The right-hand side a human settled on, if one was ever asked for.
@@ -935,6 +1065,59 @@ def _self_test() -> int:
           "…without disturbing a single observation")
     check(len([c for c in after if c["status"] == "INFERRED"]) == 1,
           "CANARY: and without settling the neighbouring inference")
+
+    # --- OPERAND ROLES: measurement over naming, including the mirror ------
+    def _ab(cond):
+        return observe.observed_claims(LAB / "experimentAB" / "fixtures" / cond)
+
+    def _model(right):
+        return {"driving_source": "order_lines",
+                "lookup": {"into": "price_list", "match_left": "Article",
+                           "match_right": "Article"},
+                "outputs": [{"target": "Cost", "compute": {
+                    "op": "multiply",
+                    "left": {"from": "order_lines", "field": "Qty"},
+                    "right": {"from": "price_list", "field": right}}}]}
+
+    obs_a, obs_b, obs_c = _ab("A"), _ab("B"), _ab("C")
+    check(operand_sufficiency(obs_a)["sufficient"][0]["right"]
+          == "price_list.Unit price", "A: the reconciling pair is Unit price")
+    check(operand_sufficiency(obs_b)["sufficient"][0]["right"]
+          == "price_list.VAT rate",
+          "MIRROR: in B the arithmetic backs the WORSE-named field")
+    check(operand_sufficiency(obs_c)["verdict"] == "unsupported",
+          "C: nothing reconciles")
+
+    check(check_operands_supported(_model("Unit price"), obs_a, []) is None,
+          "A accepts the pair that reconciles")
+    check(check_operands_supported(_model("VAT rate"), obs_a, []) is not None,
+          "CANARY: A refuses the pair that does not, however it is named")
+    check(check_operands_supported(_model("VAT rate"), obs_b, []) is None,
+          "MIRROR: B accepts `VAT rate` because it is what reconciles")
+    check(check_operands_supported(_model("Unit price"), obs_b, []) is not None,
+          "CANARY: B REFUSES the plausibly named field -- naming is not "
+          "authority")
+    for name in ("Unit price", "VAT rate"):
+        check(check_operands_supported(_model(name), obs_c, []) is not None,
+              f"CANARY: C must refuse {name} -- nothing distinguishes them")
+
+    # --- a human settles C, and the binding then holds --------------------
+    settled = [{"status": "CONFIRMED", "was": "INFERRED", "claim": {
+        "meaning": "order_lines.Qty multiplied by price_list.Unit price"}}]
+    check(check_operands_supported(_model("Unit price"), obs_c, settled) is None,
+          "C proceeds once a human settles the operands")
+    check(check_operands_supported(_model("VAT rate"), obs_c, settled) is not None,
+          "CANARY: and a model contradicting that answer is refused")
+
+    # --- triage asks in C and stays quiet in A ----------------------------
+    q = {"source": "price_list", "field": "Unit price",
+         "question": "is this the unit price?"}
+    asked_c, _ = triage([q], obs_c)
+    check(asked_c and "only the field NAME" in asked_c[0][1],
+          f"C must ASK about the operand role: {asked_c}")
+    asked_a, deferred_a = triage([q], obs_a)
+    check(not asked_a and any("reconciles against" in why for _, why in deferred_a),
+          f"A must NOT ask -- measurement settled it: {asked_a or deferred_a}")
 
     # --- the LLM channel still cannot mint an observation ------------------
     r = boundary.ingest([{"claim": {"source": "orders", "field": "item"},

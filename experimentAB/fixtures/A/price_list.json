@@ -1,0 +1,20 @@
+{
+  "_note": "The plausibly named `Unit price` is also the field that reconciles against Checked total.",
+  "price_list": [
+    {
+      "Article": "ART-1",
+      "Unit price": "0.45",
+      "VAT rate": "25.5"
+    },
+    {
+      "Article": "ART-2",
+      "Unit price": "0.08",
+      "VAT rate": "25.5"
+    },
+    {
+      "Article": "ART-3",
+      "Unit price": "184.90",
+      "VAT rate": "25.5"
+    }
+  ]
+}

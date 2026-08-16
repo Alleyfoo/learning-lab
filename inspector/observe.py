@@ -18,6 +18,20 @@ other, and all three probes correctly blocked on the gap.
 one kind, with examples, so a modeller can see what a field holds instead of
 inferring it from a shape that may not have been reported.
 
+## Candidate computations
+
+Coverage settles *which rows go together*. It says nothing about *which columns
+are the operands*, and two numeric columns can be equally well measured with only
+their NAMES to tell them apart. So the program also reports which arithmetic
+relationships actually hold over an established join:
+
+```text
+left x right == target, on N of M joined rows
+```
+
+That is evidence independent of naming, which is the only kind this programme
+lets settle a load-bearing binding.
+
 ## Candidate relationships
 
 For every field pair across two sources, the program reports what a join on that
@@ -120,7 +134,82 @@ def observed_claims(fixtures: Path) -> list[dict]:
                         "left_coverage": f"{hits}/{len(lvals)}",
                         "right_unique": len(set(rlist)) == len(rlist)}},
                         "status": "OBSERVED", "basis": "value_containment"})
+
+    claims += _candidate_computations(collections, claims)
     return claims
+
+
+def _numeric_fields(items: list[dict]) -> list[str]:
+    return [f for f in sorted(items[0])
+            if value_kind([i[f] for i in items if f in i]) == "numeric_string"]
+
+
+def _candidate_computations(collections: dict, claims: list[dict]) -> list[dict]:
+    """Which arithmetic relationships actually HOLD in this data.
+
+    Counting again, not interpreting. For every join the coverage measurements
+    already establish, and every triple of numeric fields, this reports whether
+    `left x right == target` on the joined rows.
+
+    It exists because coverage settles *which rows go together* and says nothing
+    about *which columns are the operands*. Two numeric columns can be equally
+    well measured and only their NAMES tell them apart, and a name is precisely
+    what this programme does not let become authority. Arithmetic that
+    reconciles against a column nobody in this chain produced is evidence that
+    is independent of naming.
+    """
+    out: list[dict] = []
+    sufficient = []
+    for claim in claims:
+        rel = claim["claim"].get("candidate_relationship")
+        if not rel:
+            continue
+        covered, _, total = rel["left_coverage"].partition("/")
+        if covered == total and rel["right_unique"]:
+            sufficient.append(rel)
+
+    for rel in sufficient:
+        lsrc, lkey = rel["left"].split(".", 1)
+        rsrc, rkey = rel["right"].split(".", 1)
+        left_items, right_items = collections[lsrc], collections[rsrc]
+        index = {str(i[rkey]): i for i in right_items if rkey in i}
+        joined = [(i, index[str(i[lkey])]) for i in left_items
+                  if lkey in i and str(i[lkey]) in index]
+        if not joined:
+            continue
+
+        for lf in _numeric_fields(left_items):
+            for rf in _numeric_fields(right_items):
+                for target_src, target_items in ((lsrc, left_items),
+                                                 (rsrc, right_items)):
+                    for tf in _numeric_fields(target_items):
+                        if (target_src, tf) in ((lsrc, lf), (rsrc, rf)):
+                            continue
+                        holds = 0
+                        for left_row, right_row in joined:
+                            row = left_row if target_src == lsrc else right_row
+                            missing = (lf not in left_row or rf not in right_row
+                                       or tf not in row)
+                            if missing:
+                                continue
+                            try:
+                                product = (Decimal(str(left_row[lf]))
+                                           * Decimal(str(right_row[rf])))
+                                if product == Decimal(str(row[tf])):
+                                    holds += 1
+                            except (InvalidOperation, ValueError, ArithmeticError):
+                                pass
+                        if not holds:
+                            continue
+                        out.append({"claim": {"candidate_computation": {
+                            "left": f"{lsrc}.{lf}", "op": "multiply",
+                            "right": f"{rsrc}.{rf}",
+                            "equals": f"{target_src}.{tf}",
+                            "holds": f"{holds}/{len(joined)}",
+                            "via": f"{rel['left']} -> {rel['right']}"}},
+                            "status": "OBSERVED",
+                            "basis": "arithmetic_reconciliation"})
+    return out
 
 
 def _self_test() -> int:

@@ -1,0 +1,20 @@
+{
+  "_note": "MIRROR: the columns were swapped on entry. `VAT rate` holds the price and reconciles; `Unit price` does not. Naming and arithmetic disagree.",
+  "price_list": [
+    {
+      "Article": "ART-1",
+      "Unit price": "25.5",
+      "VAT rate": "0.45"
+    },
+    {
+      "Article": "ART-2",
+      "Unit price": "25.5",
+      "VAT rate": "0.08"
+    },
+    {
+      "Article": "ART-3",
+      "Unit price": "25.5",
+      "VAT rate": "184.90"
+    }
+  ]
+}

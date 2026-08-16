@@ -1,0 +1,25 @@
+{
+  "_note": "No Checked total column, so nothing independent distinguishes `Unit price` from `VAT rate`.",
+  "order_lines": [
+    {
+      "Line": "OL-1",
+      "Article": "ART-1",
+      "Qty": "12"
+    },
+    {
+      "Line": "OL-2",
+      "Article": "ART-2",
+      "Qty": "3"
+    },
+    {
+      "Line": "OL-3",
+      "Article": "ART-1",
+      "Qty": "40"
+    },
+    {
+      "Line": "OL-4",
+      "Article": "ART-3",
+      "Qty": "1"
+    }
+  ]
+}
