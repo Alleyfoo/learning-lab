@@ -44,6 +44,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(LAB / "inspector"))
 
 import builder  # noqa: E402
+import manifest as manifest_mod  # noqa: E402
 import observe  # noqa: E402
 
 
@@ -619,9 +620,44 @@ def interpret(observed: list[dict], goal: str, ask: Ask) -> tuple[list[dict], di
     return boundary.merge(observed, ingested), ingested.as_dict()
 
 
+MANIFEST_ASK = """
+
+ALSO RETURN A DELIVERABLE MANIFEST alongside the model, as a second JSON object.
+The person's request was broken into these obligations, and every one must be
+accounted for before this can be established:
+
+{obligations}
+
+{{"MANIFEST": {{"o1": {{"via": "construct", "path": "<dotted path into the model
+that satisfies this, e.g. compare or classify.both_different>"}}}}}}
+
+`via` is "construct", "question" or "unsupported"; "unsupported" also needs a
+`reason`. A `construct` path is CHECKED against the model you just wrote, so do
+not name one you did not include."""
+
+
+def with_manifest(prompt: str, obligations_list: list) -> str:
+    """Ask for the manifest alongside the model, never instead of it."""
+    if not obligations_list:
+        return prompt
+    listed = chr(10).join(f"  {o['id']}: {o['clause']}" for o in obligations_list)
+    return prompt + MANIFEST_ASK.format(obligations=listed)
+
+
+def manifest_of(text: str):
+    for obj in _w_run._objects(text):
+        if isinstance(obj, dict) and isinstance(obj.get("MANIFEST"), dict):
+            return obj["MANIFEST"]
+    return None
+
+
+_LAST_MANIFEST: dict = {"value": None}
+
+
 def define(report: list[dict], goal: str, sources: dict, ask: Ask,
            resumed: bool = False, deferred: Optional[list] = None,
-           observed: Optional[list[dict]] = None, task: str = "enrichment"
+           observed: Optional[list[dict]] = None, task: str = "enrichment",
+           obligations_list: Optional[list[dict]] = None
            ) -> tuple[Optional[dict], Optional[list]]:
     if task == "aggregation":
         prompt = aggregation_prompt(report, goal, sources, resumed)
@@ -629,7 +665,8 @@ def define(report: list[dict], goal: str, sources: dict, ask: Ask,
         prompt = reconciliation_prompt(report, goal, sources, resumed)
     else:
         prompt = define_prompt(report, goal, sources, resumed, deferred)
-    text = ask(prompt)
+    text = ask(with_manifest(prompt, obligations_list or []))
+    _LAST_MANIFEST["value"] = manifest_of(text)
     block = _w_run.block_of(text)
     if block is not None:
         return None, block
