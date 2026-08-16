@@ -1,0 +1,64 @@
+{
+  "worker": "april-invoicing",
+  "version": 1,
+  "model_digest": "b384b18d5ad9f1d312cdf23337497ff57b77bdd9f6531378190fa3d88c71ec66",
+  "failure": [
+    "field_not_in_source@order_line_cost:lookup.match_right: Article"
+  ],
+  "expected_fields": {
+    "order_lines": [
+      "Article",
+      "Delivery date",
+      "Line",
+      "Qty"
+    ],
+    "price_list": [
+      "Article",
+      "Unit price"
+    ]
+  },
+  "observed_fields": {
+    "order_lines": [
+      "Article",
+      "Delivery date",
+      "Line",
+      "Qty"
+    ],
+    "price_list": [
+      "Description",
+      "Item code",
+      "Unit price",
+      "VAT rate"
+    ]
+  },
+  "difference": {
+    "price_list": {
+      "declared_but_absent": [
+        "Article"
+      ],
+      "present_and_undeclared": [
+        "Description",
+        "Item code",
+        "VAT rate"
+      ]
+    }
+  },
+  "measured_relationships": [
+    {
+      "left": "order_lines.Article",
+      "right": "price_list.Item code",
+      "left_coverage": "2/2",
+      "right_unique": true
+    },
+    {
+      "left": "price_list.Item code",
+      "right": "order_lines.Article",
+      "left_coverage": "2/3",
+      "right_unique": true
+    }
+  ],
+  "history": {
+    "runs": 1,
+    "successes": 0
+  }
+}

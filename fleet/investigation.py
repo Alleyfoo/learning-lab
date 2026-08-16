@@ -180,7 +180,10 @@ def retry_queued(w: fleet.Worker) -> list[dict]:
     queue = w.directory / "exceptions"
     if not queue.is_dir():
         return []
-    names = sorted(p.name for p in queue.glob("*.json"))
+    # Any file type, not just JSON. A worker with an input adapter queues the
+    # ORIGINAL artefact -- a workbook -- and globbing "*.json" silently retried
+    # nothing while reporting success.
+    names = sorted(p.name for p in queue.iterdir() if p.is_file())
     for name in names:
         inbox_mod.retry(w, name)
     return inbox_mod.poll(w) if names else []

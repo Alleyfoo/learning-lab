@@ -1,2 +1,4 @@
 {"at": "2026-08-16T10:55:37+00:00", "version": 1, "ok": true, "rows": 4, "refused": 0, "refusals": [], "problems": []}
 {"at": "2026-08-16T10:55:37+00:00", "version": 1, "ok": true, "rows": 2, "refused": 0, "refusals": [], "problems": []}
+{"at": "2026-08-16T10:59:08+00:00", "version": 1, "ok": false, "rows": 0, "refused": 0, "refusals": [], "problems": ["field_not_in_source@order_line_cost:lookup.match_right: Article"]}
+{"at": "2026-08-16T10:59:54+00:00", "version": 2, "ok": true, "rows": 2, "refused": 0, "refusals": [], "problems": []}

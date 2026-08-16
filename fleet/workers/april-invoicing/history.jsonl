@@ -1,1 +1,2 @@
 {"version": 1, "at": "2026-08-16T10:55:37+00:00", "event": "established", "digest": "b384b18d5ad9f1d312cdf23337497ff57b77bdd9f6531378190fa3d88c71ec66", "why": "first established"}
+{"version": 2, "at": "2026-08-16T10:59:35+00:00", "event": "promoted", "digest": "9e23ca4e17901d2af04dd8c806b2bb5e7e10cd163da86f23ad47c53ac44e31e0", "supersedes": 1, "why": "the replacement is the sole candidate with complete coverage and unique right-side keys", "replacements": [{"source": "price_list", "from": "Article", "to": "Item code"}]}

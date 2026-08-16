@@ -1,0 +1,44 @@
+{
+  "opened": "2026-08-16T10:59:35+00:00",
+  "from_version": 1,
+  "failure": [
+    "field_not_in_source@order_line_cost:lookup.match_right: Article"
+  ],
+  "difference": {
+    "price_list": {
+      "declared_but_absent": [
+        "Article"
+      ],
+      "present_and_undeclared": [
+        "Description",
+        "Item code",
+        "VAT rate"
+      ]
+    }
+  },
+  "measured": [
+    {
+      "left": "order_lines.Article",
+      "right": "price_list.Item code",
+      "left_coverage": "2/2",
+      "right_unique": true
+    },
+    {
+      "left": "price_list.Item code",
+      "right": "order_lines.Article",
+      "left_coverage": "2/3",
+      "right_unique": true
+    }
+  ],
+  "state": "resolved",
+  "proposal": [
+    {
+      "source": "price_list",
+      "from": "Article",
+      "to": "Item code"
+    }
+  ],
+  "why": "the replacement is the sole candidate with complete coverage and unique right-side keys",
+  "resolved_at": "2026-08-16T10:59:35+00:00",
+  "resolved_to_version": 2
+}
