@@ -170,9 +170,9 @@ def save_model(task: str, rel: str, raw: dict) -> Path:
 # validate / preview
 # ---------------------------------------------------------------------------
 
-def validate_raw(task: str, raw: dict) -> Report:
+def validate_raw(task: str, raw: dict, base: Optional[Path] = None) -> Report:
     """The task's OWN validator, through the floor. Nothing is added here."""
-    return task_model.validate(task_model.parse(raw), TASKS[task].base)
+    return task_model.validate(task_model.parse(raw), base or TASKS[task].base)
 
 
 @dataclass
@@ -191,14 +191,21 @@ class Preview:
                 "run_refused": self.run_refused}
 
 
-def preview(task: str, raw: dict, request: Optional[str] = None) -> Preview:
+def preview(task: str, raw: dict, request: Optional[str] = None,
+            base: Optional[Path] = None) -> Preview:
     """Run the task deterministically and shape the result for a human.
 
     An invalid model is never executed -- the problems ARE the preview, which is
     the point: a person should see why before seeing output.
+
+    `base` overrides where the model's source paths resolve from. It exists
+    because the modeller now works over data the user SELECTS, which need not
+    live under the task's own directory; the executor is unchanged and still
+    resolves exactly the paths the model declares.
     """
     binding = TASKS[task]
-    report = validate_raw(task, raw)
+    root = base or binding.base
+    report = validate_raw(task, raw, base=root)
     if not report.valid:
         return Preview(ok=False, problems=[str(p) for p in report.problems])
 
@@ -208,7 +215,7 @@ def preview(task: str, raw: dict, request: Optional[str] = None) -> Preview:
 
     model = task_model.parse(raw)
     try:
-        result = binding.run(model, binding.base, request)
+        result = binding.run(model, root, request)
     except Exception as exc:                     # noqa: BLE001 - shown, not swallowed
         return Preview(ok=False, problems=[f"{type(exc).__name__}: {exc}"])
 
