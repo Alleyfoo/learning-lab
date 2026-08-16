@@ -59,17 +59,31 @@ def _load(name: str, path: Path):
 boundary = _load("_w_boundary", LAB / "experimentW" / "harness" / "boundary.py")
 _w_run = _load("_w_run", LAB / "experimentW" / "harness" / "run_W.py")
 
-# Task types the modeller can build. Which one a job needs is decided by
-# STRUCTURE, not by the goal sentence: enrichment requires two collections to
-# join, aggregation requires one to group. A purchase-invoice workbook has one
-# collection, so enrichment is not merely unlikely -- it is inexpressible.
+# Task types the modeller can build.
+#
+# Structure ELIMINATES shapes that cannot be expressed; it does not pick the
+# task. With one collection there is nothing to join, so enrichment is
+# inexpressible and aggregation is what remains -- but "one collection means
+# aggregation" is NOT a rule. A one-sheet job might be "calculate margin for
+# every row", and a two-source job might aggregate after a join. Promoting
+# workbook count to task semantics would be inventing meaning from a count.
 TASKS = ("enrichment", "aggregation")
 TASK = "enrichment"          # kept for callers that model enrichment directly
 
 
+def expressible(chosen) -> tuple:
+    """Task shapes the selected sources could support. Eliminating, not choosing."""
+    return ("aggregation",) if len(chosen) < 2 else ("enrichment", "aggregation")
+
+
 def task_for(chosen) -> str:
-    """The only task type the selected sources can support."""
-    return "aggregation" if len(chosen) < 2 else "enrichment"
+    """The remaining shape when only one is expressible.
+
+    With more than one expressible, the choice is a modelling decision and this
+    returns the first -- a place where the modeller currently decides too little,
+    recorded rather than papered over.
+    """
+    return expressible(chosen)[0]
 
 
 # ---------------------------------------------------------------------------

@@ -31,7 +31,7 @@ from task_model import (  # noqa: E402
 OPS = ("count", "sum")
 # Row selection, kept as small as the job needs. `starts_with` on an ISO date
 # expresses "this month" with no date arithmetic and no calendar knowledge.
-SELECT_OPS = ("equals", "starts_with")
+SELECT_OPS = ("equals", "starts_with", "in_month")
 GROUP_ORDERS = ("first_appearance", "sorted_by_key")
 POLICIES = ("refuse_row", "refuse_run")
 REFUSALS = ("NON_NUMERIC_OPERAND",)
@@ -53,6 +53,8 @@ BODY_PROBLEM_CODES = (
     "no_aggregates",
     "unknown_select_op",
     "select_missing_key",
+    "unknown_run_parameter",
+    "select_value_and_value_from",
     "op_field_mismatch",
     "field_not_in_source",
     "malformed_data_file",
@@ -70,6 +72,18 @@ def driving_source(model: TaskModel) -> str:
     return str(model.body.get("driving_source", ""))
 
 
+def declared_inputs(model: TaskModel) -> tuple[str, ...]:
+    """Parameters a RUN must supply. Configuration is the model; these are not.
+
+    Which date field a period applies to is a task decision, settled once. WHICH
+    period is run context and changes every execution. Encoding "the current
+    month" in the executor would put that semantics outside the model again and
+    make a run unreproducible, so a declared input has no default and no clock
+    behind it: a run that does not supply one is refused.
+    """
+    return tuple(str(i) for i in (model.body.get("inputs") or ()))
+
+
 @dataclass(frozen=True)
 class Selection:
     """One declared row-selection clause.
@@ -80,15 +94,37 @@ class Selection:
     """
     field: str
     op: str
-    value: str
+    value: str = ""
+    value_from: str = ""
 
 
 def selections(model: TaskModel) -> tuple["Selection", ...]:
     return tuple(Selection(field=str(c.get("field", "")),
                            op=str(c.get("op", "")),
-                           value=str(c.get("value", "")))
+                           value=str(c.get("value", "")),
+                           value_from=str(c.get("value_from", "")))
                  for c in (model.body.get("select") or ())
                  if isinstance(c, dict))
+
+
+class MissingRunParameter(Exception):
+    """A declared input the run did not supply. Never defaulted."""
+
+
+def resolve(clauses: tuple, params: dict) -> tuple:
+    """Bind `value_from` clauses to this run's parameters."""
+    params = params or {}
+    out = []
+    for clause in clauses:
+        if not clause.value_from:
+            out.append(clause)
+            continue
+        if clause.value_from not in params:
+            raise MissingRunParameter(
+                f"select needs run parameter {clause.value_from!r}")
+        out.append(Selection(clause.field, clause.op,
+                             str(params[clause.value_from]), clause.value_from))
+    return tuple(out)
 
 
 def selects(row: dict, clauses: tuple) -> bool:
@@ -102,6 +138,13 @@ def selects(row: dict, clauses: tuple) -> bool:
             return False
         if clause.op == "starts_with" and not text.startswith(clause.value):
             return False
+        if clause.op == "in_month":
+            # Deliberately NOT calendar arithmetic. The month is supplied as an
+            # ISO `YYYY-MM` and matched as a prefix of an ISO date, so the
+            # executor knows nothing about calendars and a run is reproducible
+            # from its parameters alone.
+            if not text.startswith(f"{clause.value}-"):
+                return False
     return True
 
 
@@ -164,11 +207,21 @@ def validate_body(model: TaskModel, base: Path) -> list[Problem]:
             problems.append(Problem("field_not_in_source", f"{where}:group_by",
                                     f"{driving}.{key}"))
 
+    inputs = declared_inputs(model)
     for index, clause in enumerate(selections(model)):
         cwhere = f"{where}:select[{index}]"
-        if not clause.field or not clause.op or clause.value == "":
+        if clause.value and clause.value_from:
+            problems.append(Problem("select_value_and_value_from", cwhere,
+                                    "a clause is either fixed or bound to a run "
+                                    "parameter, never both"))
+        if not clause.field or not clause.op or (
+                not clause.value and not clause.value_from):
             problems.append(Problem("select_missing_key", cwhere,
-                                    "field, op and value are all required"))
+                                    "field, op, and one of value or value_from"))
+        if clause.value_from and clause.value_from not in inputs:
+            problems.append(Problem("unknown_run_parameter", cwhere,
+                                    f"{clause.value_from!r} is not in inputs "
+                                    f"{list(inputs)}"))
         if clause.op and clause.op not in SELECT_OPS:
             problems.append(Problem("unknown_select_op", cwhere, clause.op))
         if clause.field and driving in columns and clause.field not in columns[driving]:
@@ -321,6 +374,51 @@ def _self_test() -> int:
           "CANARY: one failing clause excludes the row")
     check(not selects({"region": "n"}, clauses),
           "CANARY: a missing field must never match")
+
+    # --- run parameters: configuration vs run context -----------------------
+    def _params(inputs, clauses):
+        m = task_model.parse({**raw, "inputs": inputs, "select": clauses})
+        return validate(m, base).codes()
+
+    bound = [{"field": "region", "op": "equals", "value_from": "which_region"}]
+    ok = _params(["which_region"], bound)
+    seen |= ok
+    check(not (ok & {"unknown_run_parameter", "select_missing_key",
+                     "select_value_and_value_from"}),
+          f"a clause bound to a DECLARED input is valid: {sorted(ok)}")
+
+    codes = _params([], bound)
+    seen |= codes
+    check("unknown_run_parameter" in codes,
+          f"CANARY: a clause may only bind to an input the model DECLARES: "
+          f"{sorted(codes)}")
+
+    codes = _params(["which_region"],
+                    [{"field": "region", "op": "equals", "value": "north",
+                      "value_from": "which_region"}])
+    seen |= codes
+    check("select_value_and_value_from" in codes,
+          f"CANARY: a clause is fixed or bound, never both -- otherwise which "
+          f"one applied would depend on the reader: {sorted(codes)}")
+
+    # resolve(): no defaults, no clock
+    from aggregation_model import (MissingRunParameter, Selection as _S,
+                                   resolve as _resolve)
+    clause = (_S("date", "in_month", "", "reporting_month"),)
+    got = _resolve(clause, {"reporting_month": "2026-06"})
+    check(got[0].value == "2026-06", f"a supplied parameter binds: {got}")
+    try:
+        _resolve(clause, {})
+        check(False, "CANARY: a missing run parameter must REFUSE, never default")
+    except MissingRunParameter:
+        pass
+
+    # in_month is prefix matching, NOT calendar arithmetic
+    june = (_S("date", "in_month", "2026-06"),)
+    check(selects({"date": "2026-06-30"}, june), "a June date is in June")
+    check(not selects({"date": "2026-07-01"}, june), "a July date is not")
+    check(not selects({"date": "2026-061"}, june),
+          "CANARY: in_month must not match a longer month number by prefix")
 
     untested = sorted(set(BODY_PROBLEM_CODES) - seen)
     check(not untested, f"declared but unexercised body problem codes: {untested}")

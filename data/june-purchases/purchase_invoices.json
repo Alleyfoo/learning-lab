@@ -1,5 +1,5 @@
 {
-  "_note": "converted from june-purchase-invoices.xlsx",
+  "_note": "converted from purchase-invoices.xlsx",
   "purchase_invoices": [
     {
       "Invoice": "PI-3301",
@@ -54,6 +54,24 @@
       "Net": "76.10",
       "VAT": "19.41",
       "Gross": "95.51"
+    },
+    {
+      "Invoice": "PI-3401",
+      "Supplier": "Kesko Oyj",
+      "Invoice date": "2026-07-03",
+      "Due date": "2026-08-03",
+      "Net": "1005.00",
+      "VAT": "256.28",
+      "Gross": "1261.28"
+    },
+    {
+      "Invoice": "PI-3402",
+      "Supplier": "Fastems Oy",
+      "Invoice date": "2026-07-20",
+      "Due date": "2026-08-20",
+      "Net": "310.00",
+      "VAT": "79.05",
+      "Gross": "389.05"
     }
   ]
 }

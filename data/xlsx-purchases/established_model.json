@@ -27,9 +27,12 @@
   "select": [
     {
       "field": "Invoice date",
-      "op": "starts_with",
-      "value": "2026-06"
+      "op": "in_month",
+      "value_from": "reporting_month"
     }
   ],
-  "on_non_numeric": "refuse_row"
+  "on_non_numeric": "refuse_row",
+  "inputs": [
+    "reporting_month"
+  ]
 }

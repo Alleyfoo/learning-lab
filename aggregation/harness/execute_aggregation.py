@@ -36,7 +36,7 @@ sys.path.insert(0, str(LAB / "taskmodel"))
 
 import aggregation_model  # noqa: E402  (registers the task type)
 from aggregation_model import (  # noqa: E402
-    selections, selects,  # noqa: E402
+    declared_inputs, resolve, selections, selects,  # noqa: E402
     aggregates_of, driving_source, group_by, group_order, on_non_numeric, validate,
 )
 from task_model import TaskModel as Model, assert_refusal, load_collection, load_model  # noqa: E402
@@ -61,11 +61,15 @@ class Aggregation:
     # difference between "no invoices" and "filtered them all out".
     not_selected: int = 0
     selection: list = dc_field(default_factory=list)
+    # What THIS run was given. Recorded so a stored result says which period it
+    # covers, rather than leaving that to whoever kept the filename.
+    run_parameters: dict = dc_field(default_factory=dict)
 
     def as_dict(self) -> dict:
         return {"columns": self.columns, "rows": self.rows,
                 "refused": self.refused, "run_refused": self.run_refused,
-                "not_selected": self.not_selected, "selection": self.selection}
+                "not_selected": self.not_selected, "selection": self.selection,
+                "run_parameters": self.run_parameters}
 
 
 def _to_number(text: Any) -> Optional[Decimal]:
@@ -85,7 +89,8 @@ def _refuse_run(out: Aggregation, reason: str) -> Aggregation:
 
 
 def execute(model: Model, base: Path,
-            accumulator_factory: Optional[Callable[[], dict]] = None) -> Aggregation:
+            accumulator_factory: Optional[Callable[[], dict]] = None,
+            params: Optional[dict] = None) -> Aggregation:
     report = validate(model, base)
     if not report.valid:
         raise UnhonourableModel(
@@ -112,7 +117,9 @@ def execute(model: Model, base: Path,
     # DECLARED row selection, applied before grouping. Excluded rows are
     # counted and the clauses are reported, so a total over a subset says it
     # was a subset -- nothing is scoped outside the model.
-    clauses = selections(model)
+    clauses = resolve(selections(model), params or {})
+    out.run_parameters = {k: str(v) for k, v in sorted((params or {}).items())
+                          if k in declared_inputs(model)}
     if clauses:
         kept = [r for r in rows if isinstance(r, dict) and selects(r, clauses)]
         out.not_selected = len(rows) - len(kept)

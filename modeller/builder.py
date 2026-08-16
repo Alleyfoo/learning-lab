@@ -86,17 +86,18 @@ class TaskBinding:
 TASKS: dict[str, TaskBinding] = {
     "reservation": TaskBinding(
         "reservation", LAB / "reservation",
-        lambda m, b, request=None: execute_reservation.execute(m, b, request),
+        lambda m, b, request=None, params=None: execute_reservation.execute(m, b, request),
         needs_request=True, request_label="requested date (YYYY-MM-DD)"),
     "enrichment": TaskBinding(
         "enrichment", LAB / "enrichment",
-        lambda m, b, request=None: execute_enrichment.execute(m, b)),
+        lambda m, b, request=None, params=None: execute_enrichment.execute(m, b)),
     "aggregation": TaskBinding(
         "aggregation", LAB / "aggregation",
-        lambda m, b, request=None: execute_aggregation.execute(m, b)),
+        lambda m, b, request=None, params=None:
+            execute_aggregation.execute(m, b, params=params)),
     "reconciliation": TaskBinding(
         "reconciliation", LAB / "reconciliation",
-        lambda m, b, request=None: execute_reconciliation.execute(m, b)),
+        lambda m, b, request=None, params=None: execute_reconciliation.execute(m, b)),
 }
 
 
@@ -192,7 +193,8 @@ class Preview:
 
 
 def preview(task: str, raw: dict, request: Optional[str] = None,
-            base: Optional[Path] = None) -> Preview:
+            base: Optional[Path] = None,
+            params: Optional[dict] = None) -> Preview:
     """Run the task deterministically and shape the result for a human.
 
     An invalid model is never executed -- the problems ARE the preview, which is
@@ -215,7 +217,7 @@ def preview(task: str, raw: dict, request: Optional[str] = None,
 
     model = task_model.parse(raw)
     try:
-        result = binding.run(model, root, request)
+        result = binding.run(model, root, request, params)
     except Exception as exc:                     # noqa: BLE001 - shown, not swallowed
         return Preview(ok=False, problems=[f"{type(exc).__name__}: {exc}"])
 
@@ -233,7 +235,12 @@ def preview(task: str, raw: dict, request: Optional[str] = None,
         rows=[list(r) for r in result.rows],
         refused=list(getattr(result, "refused", [])),
         run_refused=getattr(result, "run_refused", None),
-        notes=[f"{len(result.rows)} row(s)"])
+        notes=[f"{len(result.rows)} row(s)"]
+              + ([f"run parameters: {getattr(result, 'run_parameters', {})}"]
+                 if getattr(result, "run_parameters", None) else [])
+              + ([f"{result.not_selected} row(s) excluded by the declared "
+                  f"selection {getattr(result, 'selection', [])}"]
+                 if getattr(result, "not_selected", 0) else []))
 
 
 # ---------------------------------------------------------------------------
