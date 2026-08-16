@@ -1,165 +1,360 @@
-# Data Task Modelling Lab
+# Learning Lab
 
-Research output for the workorder **Agentic Data Task Modelling** (2026-08-09).
+Research into a supervisory LLM that sits **above** a deterministic fleet of modelled tasks.
 
-**Status: research only. No implementation is authorized beyond Experiment 1.**
+The project started as a data-task modelling study and then crossed into a broader question:
 
-## The research object, restated
+> **What is the main LLM actually for once established work is deterministic, explicit, inspectable, and usually does not need an LLM at runtime?**
 
-> The interesting problem is not whether agents can learn an executable schema. It is
-> **deciding when that learned schema is allowed to run again.**
+The answer emerging from the experiments is not “put an agent in every workflow.” It is closer to:
 
-```text
-MODELLING → candidate procedure → VERIFICATION
-   → published procedure + applicability contract
-   → future input → APPLICABILITY CHECK
-        ├── match            → deterministic work
-        └── mismatch/unknown → escalation
-```
+> **The AI designs, supervises, investigates and improves the workers. The workers do the work.**
 
-**Non-claim N1 — structural and statistical agreement cannot prove semantic continuity.**
-Some semantic changes are observationally indistinguishable from the available data. The system
-may never output "semantically unchanged" — only *"no evidence of change, at detection floor X,
-declared with α and power."*
+This repository is a research lab, not a production framework.
 
-### The artifact: a warranted procedure
+---
+
+## The architecture
+
+The inherited floor is a deterministic task-and-fleet system: task models, workers, inbox/recovery, committing runtime, confirmations, investigations and a system map. Ordinary established work runs without an LLM.
 
 ```text
-  PROCEDURE            what to do
-  APPLICABILITY CLAIM  when we believe it describes the source
-  DETECTION CAPABILITY which changes our evidence can reasonably expose
-  EVIDENCE             why we currently trust those claims
-  EXPIRY               when the evidence is no longer sufficient
-  UNDECIDABLE REGION   what this machinery cannot establish
+new work       -> LLM helps DEFINE -> deterministic worker
+normal work    -> deterministic runtime
+something bad  -> exception -> LLM may INVESTIGATE
+
+fleet-wide state / history
+        ↓
+SUPERVISORY LLM
+        ↓
+what matters?
+what changed?
+what should be investigated?
+what could the platform improve?
 ```
 
-Execution asks **"does this procedure currently have sufficient warrant for autonomous use?"** —
-not "does the Excel match the schema?" The last component is what separates this from schema
-memory: a model that cannot enumerate what it *cannot* establish is making an implicit claim of
-completeness it has no basis for.
+The supervisor is not continuously “thinking.” The platform can remain continuously alive while the LLM wakes only when useful: operator request, event, schedule or later reflection trigger.
 
-### Three states, kept apart
+The deterministic fleet is the **experimental apparatus**. The research target is the intelligence above it.
+
+---
+
+## What the supervisor is for
+
+Four roles have emerged:
+
+| Role | Question |
+| --- | --- |
+| **Interpreter** | What does a new request mean, and what truths are load-bearing? |
+| **Supervisor** | What is happening across the fleet that is worth the operator knowing? |
+| **Investigator** | What changed, why did something fail, and what repair is safe to propose? |
+| **Reflector** | What keeps recurring, what have we learned, and what should the system improve? |
+
+The important separation is authority:
 
 ```text
-WORLD STATE          Does this procedure actually still describe the source?
-EVIDENCE STATE       How strongly can we establish that?
-AUTHORIZATION STATE  Are we willing to let it run unattended?
+LLM may observe, analyse, explain and propose
+                    ≠
+LLM may silently change production authority
 ```
 
-Independent. **Authorization to rely on a model can expire without evidence of source change** —
-that is epistemic decay in the contract, not drift in the source. Agents must never be able to
-report the former as the latter.
+The established runtime remains deterministic. The supervisor does not promote worker versions, apply effects, mutate customer data or quietly rewrite rules.
+
+---
+
+## The learning idea
+
+“Learning” here does **not** mean updating model weights.
+
+The experiments have produced several distinct things the supervisor can learn:
 
 ```text
-APPLICABLE + WELL-EVIDENCED   -> autonomous execution
-POSSIBLY APPLICABLE + STALE   -> re-anchor required
-OBSERVED MISMATCH             -> modelling escalation
-SEMANTIC STATUS UNDECIDABLE   -> external evidence / human gate
+KNOWLEDGE     what the system means
+PREFERENCE    what the operator considers worth attention
+METHOD        how to investigate/supervise well
+IMPROVEMENT   what could make the platform better
+RULE          what the system must not silently violate
 ```
 
-### Three reasons to escalate
+These are deliberately different objects.
+
+A human correction such as “enrichment workers are non-committing by design” is semantic knowledge, not a mechanically observed fact. An operator saying “do not interrupt me merely because run history is thin” is a preference. A lesson such as “check shared dependencies and blast radius, not only failing workers” is a supervisory method.
+
+The Rulebook is different again: it records institutional constraints such as confirmations being version-bound or successful effects requiring read-back verification.
+
+### The longer learning loop
+
+The direction now being tested is:
 
 ```text
-1. observed mismatch        structure/statistics changed
-2. epistemic insufficiency  question is below the detection floor
-3. evidence expiry          NOTHING LOOKS WRONG - the independent anchor is stale
+LLM invents a useful question
+        ↓
+uses tools / Python to analyse it
+        ↓
+the question proves useful repeatedly
+        ↓
+supervisor proposes a platform improvement
+        ↓
+Rulebook / authority / human gate
+        ↓
+mechanical deterministic measurement is added
+        ↓
+future LLM needs less ad-hoc reasoning for the same fact
 ```
 
-Reason 3 is a legitimate terminal state, not a failure:
-`VALIDATION PASSES / APPLICABILITY VALID / EVIDENCE TOO STALE -> RE-ANCHOR REQUIRED`.
-Ordinary monitoring has no state for this and reports it as health.
+This is intentionally almost the reverse of “make the agent increasingly autonomous.”
 
-## Decision
+> **If the system learns successfully, repeated intelligence should become cheaper explicit machinery.**
 
-### AMEND, then BUILD (narrow)
+The platform owns mechanically observed facts. The LLM still owns interpretation.
 
-- **AMEND** — `Data-tool.Template` must gain declared applicability, grain/invariants, a
-  separated canonical layer, instance versioning and provenance before any modelling network
-  is built. It is a reader configuration, not a task model.
-- **BUILD** — Experiment 1 only ([Drift Discrimination Harness](experiment_001_drift_discrimination.md)).
-  No agents, no LLM, no new architecture.
-- **DO NOT BUILD YET** — the agentic modelling network, the retrieval index, the escalation
-  protocol, or any cross-repo merge.
-
-## Headline findings
-
-1. Producing a rerunnable, agent-independent transformation is **already established prior
-   art** — five of eight surveyed external systems do it, and schema-mapping reuse dates to
-   2005. It is not the open problem.
-2. One-off transformation generation is **~70–80% accurate** in published systems
-   (AutoDCWorkflow ops F1 ≈ 0.71; SpreadsheetLLM table detection F1 = 78.9). Adequate for
-   human-reviewed work, inadequate for unattended publication.
-3. The open problem is therefore **verification, applicability and drift classification** —
-   which no surveyed system implements.
-4. **Semantic change is undetectable from structure by definition, and frequently undetectable
-   from statistics too** (N1). The contribution available here is *honest quantification of what
-   cannot be known* — a published detection floor per contract — not detection.
-5. **The memory object is a triple**: executable procedure + applicability contract +
-   evidence/history. Not `mapping.json`. Historical agreement counts as evidence only to the
-   extent the history is independently trustworthy, so baselines are tiered T0–T3 and carry
-   `periods_since_independent_anchor`.
-6. **None of the four existing repositories contain any LLM code.** The modelling plane is
-   greenfield; the deterministic scaffolding already exists.
-7. `Data-tool` has a persistent artifact and no publication boundary. `Data-agents` has the
-   publication shape and no memory. Neither has applicability. That is the missing middle.
-
-## Deliverables
-
-| # | Document | Contents |
-| --- | --- | --- |
-| 1 | [research_agentic_data_task_modelling.md](research_agentic_data_task_modelling.md) | Main report — answers Q1–Q10, gap analysis, decision |
-| 2 | [comparative_system_table.md](comparative_system_table.md) | 10 systems × 19 columns, split into 4 readable panels |
-| 3 | [repo_reuse_map.md](repo_reuse_map.md) | Field- and line-level inventory of the four repositories |
-| 4 | [falsification_ledger.md](falsification_ledger.md) | H1–H6 tested, with contrary evidence recorded |
-| 5 | [unanswered_questions.md](unanswered_questions.md) | 11 open questions, tiered; plus questions closed by this study |
-| 6 | [experiment_001_drift_discrimination.md](experiment_001_drift_discrimination.md) | The single recommended first experiment |
-| 7 | Decision | §13 of the main report; summarized above |
-| 8 | [workorder_amendment_001.md](workorder_amendment_001.md) | Amendment 001 — renames L4, adds N1, memory triple, revised sequence |
-| 9 | [workorder_amendment_002.md](workorder_amendment_002.md) | Amendment 002 — detection power (α + power), evidence dimensions replacing tiers, three escalation reasons, preregistration |
-| 10 | [workorder_amendment_003.md](workorder_amendment_003.md) | **Amendment 003 — read first.** Warranted procedure, frozen terminology, `safety_factor` withdrawn, RUN A/RUN B split. **Conceptual amendments closed** |
-| 11 | [operating_procedure.md](operating_procedure.md) | Measurement phase: orthogonality of the two measurements, contamination rule, combination step |
-
-## Status: measurement phase
-
-**Conceptual amendments are closed.** Exactly two things are authorized:
+For example:
 
 ```text
-EXPERIMENT 1                      UQ-1 AUDIT
-synthetic / controlled            real archived history
-"Does the warrant machinery       "How often do these conditions
- behave as claimed?"               actually occur in business data?"
+OBSERVED
+55 / 70 workers use dependency X
+
+INFERRED
+that concentration creates an important blast-radius risk
 ```
 
-They must not inform each other's design — see the contamination rule in
-[operating_procedure.md](operating_procedure.md). Combined afterwards, they answer whether the
-architecture is worth building at all. **Both answers are acceptable results.**
+The second claim must never be laundered into the first.
 
-## Sequence
+---
+
+## Supervisor harness
+
+S6 established a small explicit harness around the supervisor rather than adopting a large external agent framework.
+
+The harness owns runtime mechanics:
 
 ```text
-1. Amend research WO                                    <- done
-2. Define applicability levels (L0-L5) + evidence tiers
-3. Build deterministic drift corpus
-4. Measure false-apply / false-escalate
-5. Determine what applicability evidence is actually useful
-6. THEN give agents the job of producing
-   procedures + applicability claims + backing evidence
+trigger / operator request
+        ↓
+SupervisorHarness
+  ├─ context providers
+  ├─ model interaction
+  ├─ scoped tools
+  ├─ authority policy
+  └─ append-only session events
+        ↓
+Supervisor LLM
+        ↓
+0..N tool-assisted steps
+        ↓
+final output / nothing
 ```
 
-Step 6 is last because before step 5, "build a schema" is an underspecified instruction.
+Current providers/capabilities wrap the existing code rather than replacing it:
 
-## Method
+- `supervisor/snapshot.py` — read-only fleet context
+- `supervisor/bench.py` — restricted Python analysis over copied data
+- `supervisor/memory.py` — knowledge, preferences and methods
+- `supervisor/rulebook.py` — Rulebook and Improvement register
+- `supervisor/harness.py` — explicit tool/context/policy/session boundary
+- `supervisor/core.py` — original model loop retained for the earlier experiments
 
-- Four repositories cloned read-only and inspected at pinned commits (`Data-tool` `ab10b8c`,
-  `Data-agents` `22ec1dd`, `Pipe-transformation` `3f7c941`, `data-frame-tool` `60c5127`).
-  Nothing was modified or merged.
-- Eight external system families researched from primary sources where available
-  (arXiv full texts, project repositories, vendor documentation).
-- Unknowns are marked `unknown/not established` rather than inferred. Two PDFs that could not
-  be text-extracted are flagged in [unanswered_questions.md](unanswered_questions.md).
+One design rule was borrowed from DeepSeek Harness because it fits this project unusually well:
 
-## Highest-priority action that is not software
+> **Anything model-visible must be reconstructable from the session record.**
 
-Start the **UQ-1 retrospective audit**: classify 12–24 months of archived provider deliveries
-into cosmetic / structural / semantic change events. That distribution determines whether the
-proposed architecture pays for itself, cannot be obtained from any paper, and requires no code.
+S6 records context, declared tools/authority, every model request/response, every tool call/result and the final supervisor output in an append-only session log.
+
+### Authority floor
+
+The harness may allow capabilities such as:
+
+```text
+read fleet state
+analyse copied data
+read knowledge / preferences / methods / rules
+write supervisor-owned session history
+write supervisor-owned improvement proposals
+```
+
+It explicitly denies production authority such as:
+
+```text
+modify workers or models
+promote versions
+execute the production runtime
+apply effects
+alter customer/source data
+unrestricted filesystem
+shell
+network
+```
+
+---
+
+## Experiments S1–S6
+
+The current research staircase is deliberately empirical: each round is frozen before moving to the next.
+
+### S1 — What is worth telling me?
+
+A cold supervisor reviewed small read-only fleet snapshots with an optional Python bench.
+
+It surfaced a real failed effect and distinguished healthy refusals from failures, but over-reported on a boring healthy worker and misread some system semantics. It also found genuine fleet-level reporting defects unprompted.
+
+Python use: **0/4 runs**. At that scale, the fleet was readable directly.
+
+See [`s1/results/FINDINGS.md`](s1/results/FINDINGS.md).
+
+### S2 — Can feedback change supervision?
+
+The S1 failure was split into two persistent memory classes:
+
+- system semantic knowledge from operator correction;
+- operator supervision preference.
+
+The memory transferred to a genuinely different enrichment worker: the supervisor stopped repeating the S1 architecture misreads and low-value warnings, while still leading with a real failed-effect condition.
+
+This established that experience can change interpretation and attention threshold **without changing the workers underneath**.
+
+See [`s2/results/FINDINGS.md`](s2/results/FINDINGS.md).
+
+### S3 — Improvement Box + Rulebook
+
+The supervisor was given a durable Improvement register and a small Rulebook seeded only with already-established architectural constraints.
+
+It correctly distinguished:
+
+- a compatible real improvement;
+- a semantic duplicate of that improvement;
+- a proposal that conflicts with version-bound confirmations;
+- a mirror proposal on the same topic that respects the rule.
+
+The conflict stayed stable across rule ordering permutations.
+
+Core principle:
+
+> **An improvement may contradict an active rule. It may not do so silently.**
+
+See [`s3/results/FINDINGS.md`](s3/results/FINDINGS.md).
+
+### S4 — Does scale trigger computation?
+
+A cold supervisor reviewed a frozen 70-worker / 473-run fleet with the same broad prompt and no memory, rulebook or personality.
+
+At ~77k tokens of fleet state, it autonomously reached for the Python bench: **4 calls across 3 turns**, with no instruction to use Python.
+
+It computed cross-worker/time-series findings such as:
+
+- rising refusal trends;
+- post-promotion regressions;
+- stale confirmations after promotion;
+- actual exception state minus fleet-reported exceptions.
+
+It hit **6/7** planted signals. The clean miss was executor concentration: the data existed, but the supervisor never formed the concentration question.
+
+See [`s4/results/FINDINGS.md`](s4/results/FINDINGS.md).
+
+### S5 — Can a supervisor learn a method?
+
+The S4 concentration miss became operator feedback:
+
+> consider shared dependencies and blast radius, not only individual worker health.
+
+The distiller produced a new **method** memory class. The learned method was deliberately abstracted away from the taught example (engines).
+
+On a different fleet, the cold supervisor missed a 55/70 shared-input concentration. With the learned method loaded, it counted and surfaced that different dependency type, and also noticed other concentrations it had not been taught explicitly.
+
+A distributed mirror showed that the method mainly taught the supervisor **to look**, rather than simply to invent concentration everywhere.
+
+See [`s5/results/FINDINGS.md`](s5/results/FINDINGS.md).
+
+### S6 — Supervisor Harness Floor
+
+S6 was a refactor/proof round, not a new intelligence experiment.
+
+The frozen S4 fleet was re-run through the explicit `SupervisorHarness`.
+
+| | Old S4 loop | Harnessed S4 |
+| --- | ---: | ---: |
+| Python calls | 4 | 4 |
+| Turns | 3 | 2 |
+| Python errors | 2 | 0 |
+| Hand-judged signals | 6/7 | 6/7 |
+| Reconstructable session | no | yes |
+| Authority boundary | implicit | explicit |
+
+The intelligence result stayed the same, including the same concentration miss. The recurring fresh-namespace `NameError` disappeared because the Python tool contract finally stated that each call receives a fresh namespace; the bench semantics themselves were not changed.
+
+See [`s6/results/FINDINGS.md`](s6/results/FINDINGS.md).
+
+---
+
+## Evidence discipline
+
+This lab tries hard not to turn one successful run into a universal claim.
+
+Recurring practices include:
+
+- freeze expectations before model calls;
+- preserve misses and surprising outputs;
+- mirror/counterexample cases;
+- permutation tests where ordering could confound a result;
+- distinguish mechanically observed facts from LLM inference;
+- distinguish operator correction from mechanical truth;
+- keep historical experiments frozen;
+- treat keyword scans as hints, not authoritative semantic grading;
+- record model/tool transcripts and provenance.
+
+Several rounds intentionally document errors in their own oracle or first-pass evaluator rather than silently correcting the result after the fact.
+
+Individual experiments are still generally **one model / one seed / one run**, so they are evidence of behaviour, not a distribution of reliability.
+
+---
+
+## Current direction
+
+The next research direction is to close the learning loop:
+
+> **When a supervisory question repeatedly proves useful, can it be proposed, conflict-checked and human-approved into a deterministic platform measurement — while keeping fact and interpretation separate?**
+
+The concentration/blast-radius method is a natural first candidate because it now has a history across S4–S6.
+
+The intended test is not merely “can we add another field to the snapshot?” It is whether the full authority path works:
+
+```text
+repeated useful analysis
+→ improvement proposal
+→ rule/conflict check
+→ human approval
+→ deterministic measurement
+→ cheaper future supervision
+```
+
+No autonomous self-modification is authorized.
+
+---
+
+## Repository history
+
+This repository inherited the full history and tags of `Alleyfoo/Data-Task-Modelling-Lab`.
+
+The old source repository was frozen at `bb128b8` / tag `learning-lab-start`; active development continues here. [`MIGRATION.json`](MIGRATION.json) records the crossing.
+
+Older root-level research documents and experiment directories are intentionally preserved. They are the history and deterministic floor that led to the current Learning Lab; they are not the best starting point for understanding the current research target.
+
+For the detailed chronological state, see [`.handoff.md`](.handoff.md).
+
+---
+
+## Status
+
+**S1–S6 complete and frozen.**
+
+Current floor:
+
+```text
+S1  supervisor can notice
+S2  supervisor can learn meaning + attention
+S3  supervisor can reason against institutional rules
+S4  supervisor can invent computation at fleet scale
+S5  supervisor can learn and transfer a way of investigating
+S6  supervisor has an explicit auditable harness and authority boundary
+```
+
+The project is now testing whether useful intelligence can teach the deterministic platform what should become ordinary machinery — without giving the LLM silent production authority.
