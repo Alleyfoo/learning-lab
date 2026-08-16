@@ -1,0 +1,16 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\n\n# 1. Engine concentration\nengines = {}\nfor w in workers:\n    e = w[\"engine\"]\n    engines[e] = engines.get(e, 0) + 1\n\n# 2. Digest concentration\ndigests = {}\nfor w in workers:\n    d = w[\"vers"
+  }
+]

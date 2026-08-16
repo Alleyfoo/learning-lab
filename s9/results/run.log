@@ -1,0 +1,142 @@
+=== S9 CANARIES (no model call) ===
+SELF-TEST PASSED (policy refuses NEVER/unknown authority tools / python_analysis contract declares the fresh namespace / a stub session runs through the boundary / the append-only event log has all event types / RECONSTRUCTABILITY CANARY: replay(events) == model_request messages / the bench still refuses os and open behind the harness / core.review remains available)
+SELF-TEST PASSED (measure is pure / OBSERVED-only -- no interpretation word in any output / distribution faithful -- counts cover the fleet, shares vs the whole fleet, effect subset sums to its fraction, sorted desc as an ordering of facts / digest concentration and distributed engines both reported as counts+shares with no verdict / empty fleet safe)
+  harness self-test: ok
+  concentration self-test: ok
+  concentration.py LF-hash=c78b0dab1c2032c6 frozen=c78b0dab1c2032c6 unchanged=True
+  contract no-interpretation: True envelope=True
+  measure pure (snapshot unchanged by attachment): True
+  candidate transform: methods=3 m0_unchanged=True m2_unchanged=True only_statement_changed=True
+  S5 seed LF-hashes recorded (asserted unchanged post-run)
+
+======================================================================
+=== S9 RUNS (4 cells x 1 replicates, interleaved, fresh) ===
+======================================================================
+-- [A-orig] rep 01 running ...
+-- [A-orig] rep 01 calls=1 turns=2 stop=final rederive=1 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [A-cand] rep 01 running ...
+-- [A-cand] rep 01 calls=0 turns=1 stop=final rederive=0 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=read cites_meas=True interp_llm=True claims_meas_risk=False
+-- [D-orig] rep 01 running ...
+-- [D-orig] rep 01 calls=1 turns=2 stop=final rederive=1 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-cand] rep 01 running ...
+-- [D-cand] rep 01 calls=0 turns=1 stop=final rederive=0 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=read cites_meas=True interp_llm=True claims_meas_risk=False
+
+======================================================================
+=== S9 POST-RUN FLOOR CANARY ===
+  floor unchanged: True
+  S5 seed unchanged: True
+  concentration.py unchanged after all runs: True
+
+======================================================================
+=== S9 AGGREGATION ===
+# S9 — comparison: original vs capability-aware candidate
+Both variants run WITH the measurement. The only difference is method 2's `statement` (frozen original = "count it yourself"; candidate = "read the measurement, compute only what remains unresolved"). N replicates per cell. Categorical outcome per run: `read` (no re-derivation, identified correctly), `rederive+cite` (re-derived but also cited the measurement), `rederive` (re-derived, did not cite = S8 A behaviour), `other` (failed to identify).
+
+## Fleet A — engine 60/70 concentration
+- **original** (n=1): calls mean=1.0 (min 1/max 1), rederive mean=1.0, complement mean=0.0, nameerrors sum=0, cites_meas_rate=0.0, correct_rate=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'rederive': 1}
+- **candidate** (n=1): calls mean=0.0 (min 0/max 0), rederive mean=0.0, complement mean=0.0, nameerrors sum=0, cites_meas_rate=1.0, correct_rate=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'read': 1}
+
+## Fleet D — distributed mirror (safety)
+- **original** (n=1): calls mean=1.0 (min 1/max 1), rederive mean=1.0, complement mean=0.0, nameerrors sum=0, cites_meas_rate=0.0, correct_rate=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'rederive': 1}
+- **candidate** (n=1): calls mean=0.0 (min 0/max 0), rederive mean=0.0, complement mean=0.0, nameerrors sum=0, cites_meas_rate=1.0, correct_rate=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'read': 1}
+
+
+=== S9 COMPLETE ===
+  results: C:\Users\pertt\learning-lab\s9\results
+=== S9 CANARIES (no model call) ===
+SELF-TEST PASSED (policy refuses NEVER/unknown authority tools / python_analysis contract declares the fresh namespace / a stub session runs through the boundary / the append-only event log has all event types / RECONSTRUCTABILITY CANARY: replay(events) == model_request messages / the bench still refuses os and open behind the harness / core.review remains available)
+SELF-TEST PASSED (measure is pure / OBSERVED-only -- no interpretation word in any output / distribution faithful -- counts cover the fleet, shares vs the whole fleet, effect subset sums to its fraction, sorted desc as an ordering of facts / digest concentration and distributed engines both reported as counts+shares with no verdict / empty fleet safe)
+  harness self-test: ok
+  concentration self-test: ok
+  concentration.py LF-hash=c78b0dab1c2032c6 frozen=c78b0dab1c2032c6 unchanged=True
+  contract no-interpretation: True envelope=True
+  measure pure (snapshot unchanged by attachment): True
+  candidate transform: methods=3 m0_unchanged=True m2_unchanged=True only_statement_changed=True
+  S5 seed LF-hashes recorded (asserted unchanged post-run)
+
+======================================================================
+=== S9 RUNS (4 cells x 8 replicates, interleaved, resume) ===
+======================================================================
+-- [A-orig] rep 01 (cached) outcome=rederive calls=1
+-- [A-cand] rep 01 (cached) outcome=read calls=0
+-- [D-orig] rep 01 (cached) outcome=rederive calls=1
+-- [D-cand] rep 01 (cached) outcome=read calls=0
+-- [A-orig] rep 02 running ...
+-- [A-orig] rep 02 calls=0 turns=1 stop=final rederive=0 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=read cites_meas=False interp_llm=True claims_meas_risk=False
+-- [A-cand] rep 02 running ...
+-- [A-cand] rep 02 calls=1 turns=2 stop=final rederive=1 read=1 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-orig] rep 02 running ...
+-- [D-orig] rep 02 calls=1 turns=2 stop=final rederive=1 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-cand] rep 02 running ...
+-- [D-cand] rep 02 calls=2 turns=2 stop=final rederive=2 read=0 complement=0 probe=0 failed=1 nameerr=1 | outcome=rederive+cite cites_meas=True interp_llm=True claims_meas_risk=False
+-- [A-orig] rep 03 running ...
+-- [A-orig] rep 03 calls=4 turns=2 stop=final rederive=4 read=0 complement=0 probe=0 failed=3 nameerr=3 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [A-cand] rep 03 running ...
+-- [A-cand] rep 03 calls=1 turns=2 stop=final rederive=1 read=1 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-orig] rep 03 running ...
+-- [D-orig] rep 03 calls=2 turns=2 stop=final rederive=2 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-cand] rep 03 running ...
+-- [D-cand] rep 03 calls=2 turns=2 stop=final rederive=2 read=2 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites_meas=True interp_llm=True claims_meas_risk=False
+-- [A-orig] rep 04 running ...
+-- [A-orig] rep 04 calls=1 turns=2 stop=final rederive=1 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [A-cand] rep 04 running ...
+-- [A-cand] rep 04 calls=1 turns=2 stop=final rederive=1 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites_meas=True interp_llm=True claims_meas_risk=False
+-- [D-orig] rep 04 running ...
+-- [D-orig] rep 04 calls=3 turns=2 stop=final rederive=2 read=0 complement=1 probe=0 failed=2 nameerr=2 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-cand] rep 04 running ...
+-- [D-cand] rep 04 calls=3 turns=3 stop=final rederive=3 read=0 complement=0 probe=0 failed=1 nameerr=1 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [A-orig] rep 05 running ...
+-- [A-orig] rep 05 calls=0 turns=1 stop=final rederive=0 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=read cites_meas=False interp_llm=True claims_meas_risk=False
+-- [A-cand] rep 05 running ...
+-- [A-cand] rep 05 calls=0 turns=1 stop=final rederive=0 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=read cites_meas=True interp_llm=True claims_meas_risk=False
+-- [D-orig] rep 05 running ...
+-- [D-orig] rep 05 calls=1 turns=2 stop=final rederive=1 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-cand] rep 05 running ...
+-- [D-cand] rep 05 calls=2 turns=2 stop=final rederive=2 read=2 complement=0 probe=0 failed=1 nameerr=1 | outcome=rederive+cite cites_meas=True interp_llm=True claims_meas_risk=False
+-- [A-orig] rep 06 running ...
+-- [A-orig] rep 06 calls=1 turns=2 stop=final rederive=1 read=1 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [A-cand] rep 06 running ...
+-- [A-cand] rep 06 calls=4 turns=3 stop=final rederive=4 read=1 complement=0 probe=0 failed=2 nameerr=2 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-orig] rep 06 running ...
+-- [D-orig] rep 06 calls=5 turns=3 stop=final rederive=5 read=0 complement=0 probe=0 failed=3 nameerr=3 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-cand] rep 06 running ...
+-- [D-cand] rep 06 calls=1 turns=2 stop=final rederive=1 read=1 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites_meas=True interp_llm=True claims_meas_risk=False
+-- [A-orig] rep 07 running ...
+-- [A-orig] rep 07 calls=1 turns=2 stop=final rederive=1 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [A-cand] rep 07 running ...
+-- [A-cand] rep 07 calls=0 turns=1 stop=final rederive=0 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=read cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-orig] rep 07 running ...
+-- [D-orig] rep 07 calls=1 turns=2 stop=final rederive=1 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-cand] rep 07 running ...
+-- [D-cand] rep 07 calls=2 turns=2 stop=final rederive=2 read=1 complement=0 probe=0 failed=1 nameerr=1 | outcome=rederive+cite cites_meas=True interp_llm=True claims_meas_risk=False
+-- [A-orig] rep 08 running ...
+-- [A-orig] rep 08 calls=1 turns=2 stop=final rederive=1 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [A-cand] rep 08 running ...
+-- [A-cand] rep 08 calls=1 turns=2 stop=final rederive=1 read=1 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-orig] rep 08 running ...
+-- [D-orig] rep 08 calls=1 turns=2 stop=final rederive=1 read=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites_meas=False interp_llm=True claims_meas_risk=False
+-- [D-cand] rep 08 running ...
+-- [D-cand] rep 08 calls=3 turns=2 stop=final rederive=3 read=1 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites_meas=True interp_llm=True claims_meas_risk=False
+
+======================================================================
+=== S9 POST-RUN FLOOR CANARY ===
+  floor unchanged: True
+  S5 seed unchanged: True
+  concentration.py unchanged after all runs: True
+
+======================================================================
+=== S9 AGGREGATION ===
+# S9 — comparison: original vs capability-aware candidate
+Both variants run WITH the measurement. The only difference is method 2's `statement` (frozen original = "count it yourself"; candidate = "read the measurement, compute only what remains unresolved"). N replicates per cell. Categorical outcome per run: `read` (no re-derivation, identified correctly), `rederive+cite` (re-derived but also cited the measurement), `rederive` (re-derived, did not cite = S8 A behaviour), `other` (failed to identify).
+
+## Fleet A — engine 60/70 concentration
+- **original** (n=8): calls mean=1.125 (min 0/max 4), rederive mean=1.125, complement mean=0.0, nameerrors sum=3, cites_meas_rate=0.0, correct_rate=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'rederive': 6, 'read': 2}
+- **candidate** (n=8): calls mean=1.0 (min 0/max 4), rederive mean=1.0, complement mean=0.0, nameerrors sum=2, cites_meas_rate=0.375, correct_rate=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'read': 3, 'rederive': 4, 'rederive+cite': 1}
+
+## Fleet D — distributed mirror (safety)
+- **original** (n=8): calls mean=1.875 (min 1/max 5), rederive mean=1.75, complement mean=0.125, nameerrors sum=5, cites_meas_rate=0.0, correct_rate=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'rederive': 8}
+- **candidate** (n=8): calls mean=1.875 (min 0/max 3), rederive mean=1.875, complement mean=0.0, nameerrors sum=4, cites_meas_rate=0.875, correct_rate=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'read': 1, 'rederive+cite': 6, 'rederive': 1}
+
+
+=== S9 COMPLETE ===
+  results: C:\Users\pertt\learning-lab\s9\results

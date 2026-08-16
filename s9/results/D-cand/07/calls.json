@@ -1,0 +1,32 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\n\n# Basic counts\nby_task = collections.Counter(w[\"task\"] for w in workers)\nprint(\"Workers by task:\", dict(by_task))\n\n# Reservation workers detail\nresv = [w for w in "
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Check the relationship between the PermissionError and the shared effect\n# How many workers depend on append_to_reservations?\neffect_workers = [w[\"name\"] for w in workers if w[\"effect\"] == \"append_to_reservations\"]\npri"
+  }
+]

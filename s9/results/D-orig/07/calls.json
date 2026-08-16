@@ -1,0 +1,16 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Task type distribution\ntask_counts = collections.Counter(w[\"task\"] for w in workers)\nprint(\"=== Task types ===\")\nfor t, c in task_counts.mos"
+  }
+]

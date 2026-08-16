@@ -1,0 +1,44 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\nprint(\"Total workers:\", len(workers))\n\n# Task type breakdown\nby_task = collections.Counter(w[\"task\"] for w in workers)\nprint(\"\\nBy task:\", dict(by_task))\n\n# Engine "
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let me also check: all reservation workers share the same digest, same engine, same effect\n# And how many reservation workers there are total\nres_workers = [w for w in workers if w[\"task\"]==\"reservation\"]\nprint(\"Reserv"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\n\nres_workers = [w for w in workers if w[\"task\"]==\"reservation\"]\nprint(\"Reservation workers:\", len(res_workers))\nprint(\"All same digest?\", len(set(w[\"version_history\"][0][\"digest\"] for w in r"
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\n\n# Basic counts\nprint(\"Total workers:\", len(workers))\n\n# By task\nby_task = collections.Counter(w[\"task\"] for w in workers)\nprint(\"\\nBy task:\", dict(by_task))\n\n# By "
+  }
+]

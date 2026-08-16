@@ -1,0 +1,60 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "\nimport json, collections\n\nworkers = snapshot[\"workers\"]\ndc = snapshot[\"dependency_concentration\"][\"measurement\"]\n\n# 1. Engine concentration\nprint(\"=== ENGINE CONCENTRATION ===\")\nfor e in dc[\"by_type\"][\"engine\"]:\n    pri"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "\n# Let me also check the reservation workers' shared dependencies more carefully\nprint(\"=== RESERVATION WORKERS DETAIL ===\")\nfor w in workers:\n    if w[\"task\"] == \"reservation\":\n        print(f\"\\n  {w['name']}:\")\n       "
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "\n# Summary of fleet health\nprint(\"=== FLEET HEALTH SUMMARY ===\")\ntotal = len(workers)\nok = sum(1 for w in workers if w[\"summary\"][\"last_status\"] == \"ok\")\nexc = sum(1 for w in workers if w[\"summary\"][\"last_status\"] == \"ex"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\n\n# Reservation workers detail\nprint(\"=== RESERVATION WORKERS DETAIL ===\")\nfor w in workers:\n    if w[\"task\"] == \"reservation\":\n        print(f\"\\n  {w['name']}:\")\n        print(f\"    engine: "
+  }
+]

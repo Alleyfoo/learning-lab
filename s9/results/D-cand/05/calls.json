@@ -1,0 +1,34 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ndc = snapshot[\"dependency_concentration\"][\"measurement\"]\n\n# Basic counts\nprint(\"Total workers:\", snapshot[\"worker_count\"])\nprint(\"Pending exceptions:\", len(snapshot"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Check: all reservation workers share the same digest and effect\nrese_workers = [w for w in workers if w[\"task\"] == \"reservation\"]\ndigests = set()\nfor w in rese_workers:\n    for vh in w[\"version_history\"]:\n        diges"
+  }
+]

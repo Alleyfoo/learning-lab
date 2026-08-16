@@ -1,0 +1,30 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\nprint(\"Total workers:\", len(workers))\n\n# Task type breakdown\nby_task = collections.Counter(w[\"task\"] for w in workers)\nprint(\"\\nBy task:\", dict(by_task))\n\n# Engine "
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let's look at the reservation workers more carefully - all refused ALREADY_RESERVED\n# and the one exception worker\n\n# Check the effect concentration - all 17 reservation workers share append_to_reservations\n# and the s"
+  }
+]

@@ -1,0 +1,331 @@
+{
+  "A": {
+    "dominant": {
+      "type": "engine",
+      "identity": "enrichment/harness/execute_enrichment.py",
+      "count": 60,
+      "share": 0.857,
+      "of": 70
+    },
+    "orig": {
+      "cell": "A-orig",
+      "n": 8,
+      "call_count": {
+        "mean": 1.125,
+        "min": 0,
+        "max": 4,
+        "values": [
+          1,
+          0,
+          4,
+          1,
+          0,
+          1,
+          1,
+          1
+        ]
+      },
+      "rederivation": {
+        "mean": 1.125,
+        "values": [
+          1,
+          0,
+          4,
+          1,
+          0,
+          1,
+          1,
+          1
+        ]
+      },
+      "measurement_read": {
+        "mean": 0.125,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "complementary": {
+        "mean": 0.0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "nameerrors": {
+        "sum": 3,
+        "values": [
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "categorical": {
+        "rederive": 6,
+        "read": 2
+      },
+      "cites_measurement_rate": 0.0,
+      "correct_rate": 1.0,
+      "claims_measurement_says_risk_any": false,
+      "interpretation_with_llm_all": true
+    },
+    "cand": {
+      "cell": "A-cand",
+      "n": 8,
+      "call_count": {
+        "mean": 1.0,
+        "min": 0,
+        "max": 4,
+        "values": [
+          0,
+          1,
+          1,
+          1,
+          0,
+          4,
+          0,
+          1
+        ]
+      },
+      "rederivation": {
+        "mean": 1.0,
+        "values": [
+          0,
+          1,
+          1,
+          1,
+          0,
+          4,
+          0,
+          1
+        ]
+      },
+      "measurement_read": {
+        "mean": 0.5,
+        "values": [
+          0,
+          1,
+          1,
+          0,
+          0,
+          1,
+          0,
+          1
+        ]
+      },
+      "complementary": {
+        "mean": 0.0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "nameerrors": {
+        "sum": 2,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "categorical": {
+        "read": 3,
+        "rederive": 4,
+        "rederive+cite": 1
+      },
+      "cites_measurement_rate": 0.375,
+      "correct_rate": 1.0,
+      "claims_measurement_says_risk_any": false,
+      "interpretation_with_llm_all": true
+    }
+  },
+  "D": {
+    "dominant": null,
+    "orig": {
+      "cell": "D-orig",
+      "n": 8,
+      "call_count": {
+        "mean": 1.875,
+        "min": 1,
+        "max": 5,
+        "values": [
+          1,
+          1,
+          2,
+          3,
+          1,
+          5,
+          1,
+          1
+        ]
+      },
+      "rederivation": {
+        "mean": 1.75,
+        "values": [
+          1,
+          1,
+          2,
+          2,
+          1,
+          5,
+          1,
+          1
+        ]
+      },
+      "measurement_read": {
+        "mean": 0.0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "complementary": {
+        "mean": 0.125,
+        "values": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "nameerrors": {
+        "sum": 5,
+        "values": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          3,
+          0,
+          0
+        ]
+      },
+      "categorical": {
+        "rederive": 8
+      },
+      "cites_measurement_rate": 0.0,
+      "correct_rate": 1.0,
+      "claims_measurement_says_risk_any": false,
+      "interpretation_with_llm_all": true
+    },
+    "cand": {
+      "cell": "D-cand",
+      "n": 8,
+      "call_count": {
+        "mean": 1.875,
+        "min": 0,
+        "max": 3,
+        "values": [
+          0,
+          2,
+          2,
+          3,
+          2,
+          1,
+          2,
+          3
+        ]
+      },
+      "rederivation": {
+        "mean": 1.875,
+        "values": [
+          0,
+          2,
+          2,
+          3,
+          2,
+          1,
+          2,
+          3
+        ]
+      },
+      "measurement_read": {
+        "mean": 0.875,
+        "values": [
+          0,
+          0,
+          2,
+          0,
+          2,
+          1,
+          1,
+          1
+        ]
+      },
+      "complementary": {
+        "mean": 0.0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "nameerrors": {
+        "sum": 4,
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          1,
+          0
+        ]
+      },
+      "categorical": {
+        "read": 1,
+        "rederive+cite": 6,
+        "rederive": 1
+      },
+      "cites_measurement_rate": 0.875,
+      "correct_rate": 1.0,
+      "claims_measurement_says_risk_any": false,
+      "interpretation_with_llm_all": true
+    }
+  }
+}

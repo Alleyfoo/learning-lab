@@ -1,0 +1,72 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import Counter, defaultdict\n\nworkers = snapshot[\"workers\"]\n\n# Basic counts\nprint(\"Total workers:\", len(workers))\nprint()\n\n# By task type\ntask_counts = Counter(w[\"task\"] for w in workers)\nprin"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let me look more carefully at the reservation workers and their shared state\n# All reservation workers use the same engine, same effect, same digest, same model\n# They all request 2026-05-05 and all get ALREADY_RESERVE"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let me understand the full picture of shared dependencies\n\n# 1. Engine concentration: 4 engines, each serving 17-18 workers\n# 2. Effect concentration: 1 effect (append_to_reservations) serving 17 workers (24.3% of flee"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let me also check: the reservation workers all request the same date (2026-05-05)\n# and all get ALREADY_RESERVED. This means the shared reservations store already \n# has 2026-05-05 reserved, and all 17 workers keep try"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['effect', 'digest'] from worker records"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import defaultdict\n\nworkers = snapshot[\"workers\"]\n\n# Reservation workers detail\nprint(\"=== Reservation workers detail ===\")\nfor w in workers:\n    if w[\"task\"] == \"reservation\":\n        rr = w"
+  }
+]

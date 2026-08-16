@@ -1,0 +1,44 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ntotal = snapshot[\"worker_count\"]\n\n# Task type distribution\ntask_counts = collections.Counter(w[\"task\"] for w in workers)\nprint(\"Task types:\", dict(task_counts))\n\n# "
+  },
+  {
+    "purposes": [
+      "complementary"
+    ],
+    "primary": "complementary",
+    "evidence": {
+      "complementary": "reads complementary fields ['task', 'customer', 'name', 'investigation']"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Check all reservation workers' run patterns\nres_workers = [w for w in workers if w[\"task\"] == \"reservation\"]\nprint(\"Reservation worker run patterns:\")\nfor w in res_workers:\n    s = w[\"summary\"]\n    print(f\"  {w['name']"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Summary of concentration risks\nprint(\"=== DEPENDENCY CONCENTRATION SUMMARY ===\\n\")\n\n# Engine: 4 engines, each ~25%\nprint(\"ENGINES (4 identities, each ~25% of fleet):\")\nfor eng, cnt in collections.Counter(w[\"engine\"] fo"
+  }
+]

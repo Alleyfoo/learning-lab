@@ -1,0 +1,400 @@
+{
+  "run_id": "20260816T221818Z",
+  "model": "glm-5.2:cloud",
+  "options": {
+    "temperature": 0.2,
+    "num_ctx": 131072
+  },
+  "max_turns": 10,
+  "replicates_per_cell": 8,
+  "cells": [
+    "A-orig",
+    "A-cand",
+    "D-orig",
+    "D-cand"
+  ],
+  "canary": {
+    "harness_self_test": true,
+    "concentration_self_test": true,
+    "concentration_py_normalized_hash": "c78b0dab1c2032c6",
+    "concentration_py_unchanged": true,
+    "contract_no_interpretation_word": true,
+    "contract_bad_word": null,
+    "envelope_no_interpretation_word": true,
+    "envelope_bad_word": null,
+    "measure_pure_snapshot_unchanged": true,
+    "seed_lf_hashes_before": {
+      "methods.jsonl": "d12a1fb057684c9d",
+      "knowledge.jsonl": "6f4bc110a53548df",
+      "preferences.jsonl": "0128fe3320a61647"
+    },
+    "seed_lf_hashes_match_head": {
+      "methods.jsonl": true,
+      "knowledge.jsonl": true,
+      "preferences.jsonl": true
+    },
+    "candidate_method_count": 3,
+    "candidate_method0_unchanged": true,
+    "candidate_method2_unchanged": true,
+    "candidate_method1_diff_keys": [
+      "statement"
+    ],
+    "candidate_method1_only_statement_changed": true,
+    "candidate_method1_statement_is_oracle": true,
+    "original_method2_statement_is_oracle": true,
+    "candidate_uses_same_knowledge_preferences": true,
+    "floor_hashes_before": {
+      "snapshot.py": "df37d914a8b8b12d",
+      "rulebook.jsonl": "7949cde4e8724f1b",
+      "concentration.py": "8a4d8d4cdbaec2a8"
+    },
+    "canaries_ok": true
+  },
+  "post_run_floor_canary": {
+    "floor_hashes_after": {
+      "snapshot.py": "df37d914a8b8b12d",
+      "rulebook.jsonl": "7949cde4e8724f1b",
+      "concentration.py": "8a4d8d4cdbaec2a8"
+    },
+    "seed_lf_hashes_after": {
+      "methods.jsonl": "d12a1fb057684c9d",
+      "knowledge.jsonl": "6f4bc110a53548df",
+      "preferences.jsonl": "0128fe3320a61647"
+    },
+    "concentration_py_lf_after": "c78b0dab1c2032c6",
+    "floor_unchanged": true,
+    "seed_unchanged": true,
+    "concentration_py_unchanged_after": true
+  },
+  "comparison": {
+    "A": {
+      "dominant": {
+        "type": "engine",
+        "identity": "enrichment/harness/execute_enrichment.py",
+        "count": 60,
+        "share": 0.857,
+        "of": 70
+      },
+      "orig": {
+        "cell": "A-orig",
+        "n": 8,
+        "call_count": {
+          "mean": 1.125,
+          "min": 0,
+          "max": 4,
+          "values": [
+            1,
+            0,
+            4,
+            1,
+            0,
+            1,
+            1,
+            1
+          ]
+        },
+        "rederivation": {
+          "mean": 1.125,
+          "values": [
+            1,
+            0,
+            4,
+            1,
+            0,
+            1,
+            1,
+            1
+          ]
+        },
+        "measurement_read": {
+          "mean": 0.125,
+          "values": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        },
+        "complementary": {
+          "mean": 0.0,
+          "values": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "nameerrors": {
+          "sum": 3,
+          "values": [
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "categorical": {
+          "rederive": 6,
+          "read": 2
+        },
+        "cites_measurement_rate": 0.0,
+        "correct_rate": 1.0,
+        "claims_measurement_says_risk_any": false,
+        "interpretation_with_llm_all": true
+      },
+      "cand": {
+        "cell": "A-cand",
+        "n": 8,
+        "call_count": {
+          "mean": 1.0,
+          "min": 0,
+          "max": 4,
+          "values": [
+            0,
+            1,
+            1,
+            1,
+            0,
+            4,
+            0,
+            1
+          ]
+        },
+        "rederivation": {
+          "mean": 1.0,
+          "values": [
+            0,
+            1,
+            1,
+            1,
+            0,
+            4,
+            0,
+            1
+          ]
+        },
+        "measurement_read": {
+          "mean": 0.5,
+          "values": [
+            0,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            1
+          ]
+        },
+        "complementary": {
+          "mean": 0.0,
+          "values": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "nameerrors": {
+          "sum": 2,
+          "values": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0
+          ]
+        },
+        "categorical": {
+          "read": 3,
+          "rederive": 4,
+          "rederive+cite": 1
+        },
+        "cites_measurement_rate": 0.375,
+        "correct_rate": 1.0,
+        "claims_measurement_says_risk_any": false,
+        "interpretation_with_llm_all": true
+      }
+    },
+    "D": {
+      "dominant": null,
+      "orig": {
+        "cell": "D-orig",
+        "n": 8,
+        "call_count": {
+          "mean": 1.875,
+          "min": 1,
+          "max": 5,
+          "values": [
+            1,
+            1,
+            2,
+            3,
+            1,
+            5,
+            1,
+            1
+          ]
+        },
+        "rederivation": {
+          "mean": 1.75,
+          "values": [
+            1,
+            1,
+            2,
+            2,
+            1,
+            5,
+            1,
+            1
+          ]
+        },
+        "measurement_read": {
+          "mean": 0.0,
+          "values": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "complementary": {
+          "mean": 0.125,
+          "values": [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "nameerrors": {
+          "sum": 5,
+          "values": [
+            0,
+            0,
+            0,
+            2,
+            0,
+            3,
+            0,
+            0
+          ]
+        },
+        "categorical": {
+          "rederive": 8
+        },
+        "cites_measurement_rate": 0.0,
+        "correct_rate": 1.0,
+        "claims_measurement_says_risk_any": false,
+        "interpretation_with_llm_all": true
+      },
+      "cand": {
+        "cell": "D-cand",
+        "n": 8,
+        "call_count": {
+          "mean": 1.875,
+          "min": 0,
+          "max": 3,
+          "values": [
+            0,
+            2,
+            2,
+            3,
+            2,
+            1,
+            2,
+            3
+          ]
+        },
+        "rederivation": {
+          "mean": 1.875,
+          "values": [
+            0,
+            2,
+            2,
+            3,
+            2,
+            1,
+            2,
+            3
+          ]
+        },
+        "measurement_read": {
+          "mean": 0.875,
+          "values": [
+            0,
+            0,
+            2,
+            0,
+            2,
+            1,
+            1,
+            1
+          ]
+        },
+        "complementary": {
+          "mean": 0.0,
+          "values": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "nameerrors": {
+          "sum": 4,
+          "values": [
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            1,
+            0
+          ]
+        },
+        "categorical": {
+          "read": 1,
+          "rederive+cite": 6,
+          "rederive": 1
+        },
+        "cites_measurement_rate": 0.875,
+        "correct_rate": 1.0,
+        "claims_measurement_says_risk_any": false,
+        "interpretation_with_llm_all": true
+      }
+    }
+  }
+}

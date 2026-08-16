@@ -1,0 +1,46 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\ndc = snapshot[\"dependency_concentration\"][\"measurement\"]\n\n# Engine concentration\nprint(\"=== ENGINE CONCENTRATION ===\")\nfor e in dc[\"by_type\"][\"engine\"]:\n    print(f\"  {e['identity']}: {e['wo"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\n\n# Reservation workers detail - all same request date?\nprint(\"=== RESERVATION WORKER RUN DETAILS ===\")\nfor w in workers:\n    if w[\"task\"] == \"reservation\":\n        last = w[\"recent_runs\"][0]"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\n\n# Summary of the whole fleet\nprint(f\"Total workers: {len(workers)}\")\n\n# Any worker with last_status != ok?\nprint(\"\\n=== NON-OK WORKERS ===\")\nfor w in workers:\n    if w[\"summary\"][\"last_stat"
+  }
+]

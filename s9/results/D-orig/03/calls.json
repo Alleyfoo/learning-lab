@@ -1,0 +1,30 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Task type distribution\nby_task = collections.Counter(w[\"task\"] for w in workers)\nprint(\"=== Task types ===\")\nfor k, v in by_task.most_common"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\nby_task = collections.Counter(w[\"task\"] for w in workers)\nprint(\"=== Task types ===\")\nfor k, v in by_task.most_common():\n    print(f\"  {k}: {v}\")\n\nb"
+  }
+]

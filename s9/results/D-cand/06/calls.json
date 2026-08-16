@@ -1,0 +1,18 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\ndc = snapshot[\"dependency_concentration\"][\"measurement\"]\n\n# Summary counts\nprint(\"Total workers:\", snapshot[\"worker_count\"])\nprint(\"Pending exceptions:\", len(snapshot[\"pending_exceptions\"]))"
+  }
+]

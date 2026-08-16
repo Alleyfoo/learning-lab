@@ -1,0 +1,58 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Engine concentration\nengines = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"=== ENGINE CONCENTRATION ===\")\nfor eng, cnt in engin"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Deeper look at the reservation exception worker\nfor w in workers:\n    if w[\"name\"] == \"rese-a-inv\":\n        print(\"=== rese-a-inv DETAIL ===\")\n        print(f\"  customer: {w['customer']}\")\n        print(f\"  effect: {w["
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Check the reservation workers' shared state dependency\n# All 3 reservation workers use append_to_reservations effect - do they share the same reservations store?\nprint(\"=== RESERVATION WORKERS - SHARED STATE RISK ===\")"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Check: are the 4 model digests really just rotating across customers/triggers?\n# Map digest to (task, customer pattern)\nprint(\"=== DIGEST -> TASK MAPPING ===\")\ndigest_task = collections.defaultdict(list)\nfor w in worke"
+  }
+]

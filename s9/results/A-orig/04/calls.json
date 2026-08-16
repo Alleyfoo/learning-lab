@@ -1,0 +1,16 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\n\n# Engine concentration\nfrom collections import Counter\nengine_counts = Counter(w[\"engine\"] for w in workers)\nprint(\"=== Engine concentration ===\")\nfor eng, cnt in engine_counts.most_common("
+  }
+]
