@@ -3,6 +3,5 @@
   "purpose": "Total what we owe each supplier for a reporting month.",
   "task": "aggregation",
   "base": "data",
-  "trigger": "data/june-purchases/",
-  "customer": "Demo / Lab"
+  "trigger": "data/june-purchases/"
 }

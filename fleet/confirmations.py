@@ -17,12 +17,18 @@ confirmations.jsonl   append-only, one line per confirmation, TAGGED WITH ITS
                       VERSION
 ```
 
-## Version-bound, like runs
+## Version-bound, and authority is NOT automatically inherited
 
-A confirmation was given about a particular established model. A later version
-inherits authority but not history — the rule `scripts/agent_binding.py` fixed
-and Experiment Z carried to workers — so v2 does not silently acquire v1's
-answers. If the same assumption still holds for v2, someone says so again.
+A confirmation was given about a particular established model. v2 gets neither
+v1's confirmation nor any retroactive authority from it: someone must establish
+that truth again for v2. That is the conservative rule these tests actually
+demonstrate, and it is stricter than the promotion rule for models — a promoted
+model carries forward as the thing that runs, but a human answer about the world
+does not carry forward at all.
+
+The lineage is `scripts/agent_binding.py`'s: adopting now certifies nothing
+about a past run. Here the same caution points the other way too — a past answer
+certifies nothing about a new version.
 
 ## Reconstructed as CONFIRMED, never OBSERVED
 
@@ -42,7 +48,9 @@ referent, an answer, a person, a version.
 from __future__ import annotations
 
 import json
+import shutil
 import sys
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -107,6 +115,82 @@ def discharged(directory: Path, version: int) -> set:
     return {e["obligation"] for e in load(directory, version)}
 
 
+class EstablishmentFailed(Exception):
+    """Establishment did not happen. Nothing partial is left behind."""
+
+
+@dataclass
+class Pending:
+    """An answer given during DEFINE, before any version exists.
+
+    A confirmation is bound to a version, and during DEFINE there is none -- the
+    model is still a proposal. So answers wait here and are written only when a
+    version is created, which is also the only moment their version number is
+    known.
+    """
+    obligation: str
+    clause: str
+    referent: str
+    answer: str
+    by: str = "human"
+    mechanically_verifiable: bool = False
+
+
+def required_confirmations(obligations_list: list, manifest: dict) -> set:
+    """Obligations the manifest says a person answered. These must persist."""
+    out = set()
+    for obligation in obligations_list or []:
+        entry = (manifest or {}).get(obligation["id"])
+        if isinstance(entry, dict) and entry.get("via") == "question":
+            out.add(obligation["id"])
+    return out
+
+
+def establish(root: Path, name: str, purpose: str, task: str, base: str,
+              model: dict, obligations_list: list, manifest: dict,
+              pending: list, trigger: Optional[str] = None,
+              establish_fn=None):
+    """Create the version AND persist every confirmation its manifest requires.
+
+    Either both happen or neither is reported. If a required confirmation cannot
+    be written and read back, the worker directory is removed and
+    `EstablishmentFailed` is raised -- a worker that runs while the truth it
+    depends on was silently lost is worse than one that was never established.
+    """
+    required = required_confirmations(obligations_list, manifest)
+    supplied = {p.obligation for p in pending}
+    missing = required - supplied
+    if missing:
+        raise EstablishmentFailed(
+            f"manifest requires human confirmation for {sorted(missing)} and no "
+            f"answer was given; establishment refused")
+
+    if establish_fn is None:
+        import fleet as _fleet
+        establish_fn = _fleet.establish
+    worker = establish_fn(root, name, purpose, task, base, model,
+                          trigger=trigger)
+    directory = worker.directory
+    version = worker.current_version
+    try:
+        for item in pending:
+            if item.obligation in required:
+                record(directory, version, item.obligation, item.clause,
+                       item.referent, item.answer, item.by,
+                       item.mechanically_verifiable)
+        # Read back from disk. A write that returned is not evidence -- the same
+        # rule the committing runtime applies to its effects.
+        landed = discharged(directory, version)
+        if not required <= landed:
+            raise EstablishmentFailed(
+                f"required confirmations {sorted(required - landed)} did not "
+                f"persist")
+    except Exception:
+        shutil.rmtree(directory, ignore_errors=True)
+        raise
+    return worker
+
+
 def _self_test() -> int:
     import shutil
     failures: list[str] = []
@@ -161,14 +245,63 @@ def _self_test() -> int:
 
         # --- VERSION-BOUND ---------------------------------------------------
         ok(as_claims(scratch, 2) == [] and discharged(scratch, 2) == set(),
-           "CANARY: v2 must NOT inherit v1's confirmation -- authority is "
-           "inherited, history is not")
+           "CANARY: v2 must NOT inherit v1's confirmation -- authority is not "
+           "automatically inherited across versions")
         record(scratch, 2, "o2", "the rows are outstanding invoices",
                "purchase_invoices.Gross", "still unpaid as of the July export")
         ok(len(load(scratch, 1)) == 1 and len(load(scratch, 2)) == 1,
            "each version keeps its own answer")
         ok(load(scratch, 1)[0]["answer"].startswith("all six"),
            "CANARY: v1's line is untouched by v2's -- append only")
+
+        # --- ESTABLISHMENT is all-or-nothing --------------------------------
+        import fleet as _fleet
+        model = json.loads((HERE.parent / "data" / "xlsx-purchases" /
+                            "established_model.json").read_text(encoding="utf-8"))
+        root = scratch / "workers"
+        root.mkdir(exist_ok=True)
+        pend = [Pending("o2", obs[1]["clause"], "purchase_invoices.Gross",
+                        "all six invoices are unpaid")]
+
+        # a required confirmation with no answer refuses, and leaves nothing
+        try:
+            establish(root, "w-missing", "p", "aggregation", "data", model,
+                      obs, man, [])
+            ok(False, "CANARY: establishment must refuse when a required "
+                      "confirmation was never answered")
+        except EstablishmentFailed:
+            ok(not (root / "w-missing").exists(),
+               "CANARY: and must leave no half-established worker behind")
+
+        # a persistence failure is reported as failure, not success
+        def _broken(*a, **k):
+            w = _fleet.establish(*a, **k)
+            (w.directory / FILENAME).mkdir()      # make the append impossible
+            return w
+
+        try:
+            establish(root, "w-broken", "p", "aggregation", "data", model,
+                      obs, man, pend, establish_fn=_broken)
+            ok(False, "CANARY: a failed confirmation write must fail the "
+                      "establishment")
+        except Exception:
+            ok(not (root / "w-broken").exists(),
+               "CANARY: and must roll the worker back")
+
+        worker = establish(root, "w-ok", "p", "aggregation", "data", model,
+                           obs, man, pend)
+        v = worker.current_version
+        ok(discharged(worker.directory, v) == {"o2"},
+           "a good establishment persists its required confirmations")
+
+        # --- RELOAD reproduces the establishable state, no second question --
+        reloaded = _fleet.load(worker.directory)
+        ok(M.check(obs, man, inventory,
+                   asked=list(discharged(reloaded.directory,
+                                         reloaded.current_version))) == [],
+           "CANARY: reload must be establishable again WITHOUT asking anyone")
+        ok(as_claims(reloaded.directory, v)[0]["status"] == "CONFIRMED",
+           "…with the answer still CONFIRMED")
 
         # --- an answer for the WRONG version does not discharge -------------
         ok(M.check(obs, man, inventory,
@@ -185,7 +318,10 @@ def _self_test() -> int:
           "time, exact obligation and referent, and mechanically_verifiable "
           "recorded / it discharges its obligation / v2 does NOT inherit v1's "
           "confirmation and v1's line is untouched / a version with no stored "
-          "answer still blocks)")
+          "answer still blocks / establishment REFUSES when a required "
+          "confirmation was never answered and when its write fails, rolling "
+          "the worker back both times / a good establishment persists them and "
+          "reload is establishable again WITHOUT asking anyone)")
     return 0
 
 

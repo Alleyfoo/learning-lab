@@ -1010,12 +1010,35 @@ def questions_from(block: list, observed: list[dict]) -> list[Question]:
     return out
 
 
-def answer(report: list[dict], question: Question, human_answer: str) -> list[dict]:
+# Answers given during DEFINE, before any version exists. A confirmation is
+# version-bound and there is no version yet -- the model is still a proposal --
+# so they wait here and are written at establishment, which is also the first
+# moment their version number is known.
+PENDING: list = []
+
+
+def pending_clear() -> None:
+    PENDING.clear()
+
+
+def pending_answers() -> list:
+    return list(PENDING)
+
+
+def answer(report: list[dict], question: Question, human_answer: str,
+           obligation: Optional[str] = None) -> list[dict]:
     """Apply a human answer to the ADDRESSED claim only.
 
     Confirmation resolves claims, not workflows: a second unresolved load-bearing
     claim must still stop the run, and does.
     """
+    if obligation:
+        source = question.source
+        referent = (f"{source[0] if isinstance(source, list) else source}"
+                    f".{question.field}" if question.field else str(source))
+        PENDING.append({"obligation": obligation, "clause": question.text,
+                        "referent": referent, "answer": human_answer})
+
     out, settled = [], False
     for claim in boundary.confirm(report, [question.referent]):
         if claim.get("status") == "CONFIRMED":
