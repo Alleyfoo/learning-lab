@@ -4,5 +4,6 @@
   "task": "reservation",
   "base": "fleet/workers/room-reservation/state",
   "trigger": "fleet/workers/room-reservation/state/fixtures/",
-  "work_item_identity": "content_digest"
+  "work_item_identity": "content_digest",
+  "customer": "Acme Oy"
 }

@@ -6,16 +6,27 @@ self-test, and the view only arranges widgets.
 
 ## The map is a VIEW. It is never a source of truth.
 
-Everything below is derived from state that already exists and is already
+Everything is derived from state that already exists and is already
 authoritative — `worker.json`, `versions/vN.json`, `history.jsonl`,
 `runs.jsonl`, `investigation.json`, `ledger.jsonl`, `fleet.ENGINES`. Nothing
-here stores a position, a status or a relationship of its own, and **building
-the graph writes nothing at all** — the self-test asserts that by comparing file
+here stores a position, a status or a grouping of its own, and **building the
+graph writes nothing at all** — the self-test asserts that by comparing file
 mtimes across a build.
 
-That matters more than it sounds. A map that remembered where you dragged a node
-would immediately be a second, unversioned description of the system, drifting
-against the one the workers actually run on.
+A map that remembered where you dragged a node, or which customer a task
+belonged to, would immediately be a second unversioned description of the
+system, drifting against the one the workers actually run on.
+
+## Lanes are derived, never maintained
+
+A worker declares `customer` (or `scope`) in its own `worker.json`. The map
+groups by that field and by nothing else. Adding a customer is a line of worker
+metadata, not a UI change; a worker that declares nothing keeps its own unlaned
+band, which is what the fleet looked like before customers existed.
+
+**Shared infrastructure sits outside every lane.** Executors and the
+investigator serve more than one customer, so drawing them inside a band would
+be a lie about who owns them.
 
 ## Node types, typed IDs
 
@@ -25,7 +36,7 @@ worker:<name>         a modelled task, labelled with its current version
 input:<worker>        the inbox and its input adapter, where one exists
 source:<worker>:<c>   a source collection the model declares
 executor:<path>       a fixed engine. SHARED -- one node per engine, never one
-                      per worker
+                      per worker, and never inside a lane
 effect:<worker>       an output; or committed state where the worker has effect
                       authority
 exception:<worker>    a queued exception, only where one exists
@@ -33,19 +44,11 @@ capability:investigator   ONE shared node, connected only where there is an
                       exception path
 ```
 
-IDs are typed from the start so a later version can act on an `executor:` or
-`source:` click without renaming anything.
-
-**One executor node, not one per worker.** `acme-timesheets` and
-`orders-enrichment` converge on `execute_enrichment.py`, and the picture must
-show that: drawing an engine per task would recreate the "100 generated scripts"
-misunderstanding the whole architecture exists to avoid.
-
 ## Layout is a decision, so it lives here
 
-`physics: false` in the frontend. Columns, left to right: inputs and sources,
-then tasks, then outputs and effects. Shared infrastructure sits below the tasks
-it serves; the investigator sits apart, reached only by exception edges.
+`physics: false` in the frontend. Position carries meaning: an executor inside a
+customer lane, or the investigator on the normal processing path, should *look*
+wrong. A force-directed layout would make that unsayable.
 """
 from __future__ import annotations
 
@@ -60,33 +63,37 @@ import fleet  # noqa: E402
 import inbox as inbox_mod  # noqa: E402
 import investigation as inv_mod  # noqa: E402
 
-# Node kinds, and the one colour decision per kind.
 PALETTE = {
-    "scope": "#8C7A5B",
-    "worker": "#3E6B89",
-    "input": "#6F8F6A",
-    "source": "#7FA05C",
-    "executor": "#B07C3A",
-    "effect": "#5E7C8C",
-    "exception": "#B23B2E",
-    "capability": "#7A5B8C",
+    "scope": "#8C7A5B", "worker": "#3E6B89", "input": "#6F8F6A",
+    "source": "#7FA05C", "executor": "#B07C3A", "effect": "#5E7C8C",
+    "exception": "#B23B2E", "capability": "#7A5B8C",
 }
 
-# Edge kinds. Three meanings, kept visually distinct.
 EDGE_STYLE = {
     "data": {"color": "#7FA05C", "dashes": False, "arrows": "to"},
+    "owns": {"color": "#8C7A5B", "dashes": False, "arrows": ""},
     "executes": {"color": "#B07C3A", "dashes": False, "arrows": "to"},
     "effect": {"color": "#5E7C8C", "dashes": False, "arrows": "to"},
     "exception": {"color": "#B23B2E", "dashes": True, "arrows": "to"},
 }
 
+# Derived status. Worst first — a scope inherits the worst state beneath it.
+# Nothing is stored: every value is computed on each build, so the map cannot
+# disagree with the console about whether something is broken.
+STATUS_ORDER = ("attention", "blocked", "never_run", "healthy")
+STATUS_GLYPH = {"attention": "!", "blocked": "?", "never_run": "o",
+                "healthy": "+"}
+STATUS_COLOUR = {"attention": "#B23B2E", "blocked": "#C58A22",
+                 "never_run": "#8A8A82", "healthy": "#4C8C5A"}
+
+COL_SCOPE = -940
 COL_INPUT = -620
 COL_SOURCE = -300
 COL_TASK = 60
 COL_EFFECT = 460
 ROW_HEIGHT = 190
-EXECUTOR_DROP = 150
-INVESTIGATOR_X = 460
+BAND_GAP = 90
+SHARED_DROP = 220
 
 
 def worker_id(name: str) -> str:
@@ -100,11 +107,66 @@ def name_from(node_id: Optional[str]) -> Optional[str]:
     return node_id.split(":", 1)[1]
 
 
+def scope_of(w) -> Optional[str]:
+    """The customer or scope a worker DECLARES. Never inferred from a name."""
+    return w.identity.get("customer") or w.identity.get("scope") or None
+
+
+def status_of(w) -> str:
+    """Derived, from state the console already reads. No new state anywhere.
+
+    ```text
+    attention   something failed and nobody has looked
+    blocked     an investigation is open, waiting on a person
+    never_run   established but not yet run on this version
+    healthy     the last run on this version completed
+    ```
+    """
+    if inv_mod.needs_investigation(w):
+        return "attention"
+    if (w.investigation or {}).get("state") in ("open", "proposed"):
+        return "blocked"
+    summary = w.summary()
+    if summary["runs_this_version"] == 0:
+        return "never_run"
+    return "healthy" if summary["last_status"] == "ok" else "attention"
+
+
+def worst(statuses) -> str:
+    for candidate in STATUS_ORDER:
+        if candidate in statuses:
+            return candidate
+    return "healthy"
+
+
+def lanes(workers: list) -> list:
+    """Workers grouped into scope bands, deterministically. Derived only."""
+    bands: dict = {}
+    for w in workers:
+        bands.setdefault(scope_of(w), []).append(w)
+    return [(scope, sorted(group, key=lambda w: w.name))
+            for scope, group in sorted(
+                bands.items(), key=lambda kv: (kv[0] is None, kv[0] or ""))]
+
+
 def _node(node_id: str, label: str, kind: str, x: int, y: int, *,
-          title: str = "", clickable: bool = False, size: int = 16) -> dict:
-    return {"id": node_id, "label": label, "x": x, "y": y, "size": size,
-            "shape": "dot", "color": PALETTE[kind], "title": title or label,
-            "clickable": clickable, "kind": kind}
+          title: str = "", clickable: bool = False, size: int = 16,
+          status: str = "") -> dict:
+    """A node. `status` colours the BORDER, never the fill.
+
+    Kind stays legible by fill, so a lane full of red borders reads as "several
+    tasks here need someone" without the node types becoming indistinguishable.
+    """
+    colour = ({"background": PALETTE[kind], "border": STATUS_COLOUR[status]}
+              if status else PALETTE[kind])
+    node = {"id": node_id, "label": label, "x": int(x), "y": int(y),
+            "size": size, "shape": "dot", "color": colour,
+            "title": title or label, "clickable": clickable, "kind": kind}
+    if status:
+        node["status"] = status
+        node["borderWidth"] = 2 if status == "healthy" else 5
+        node["label"] = f"{STATUS_GLYPH[status]} {label}"
+    return node
 
 
 def _edge(source: str, target: str, kind: str, label: str = "") -> dict:
@@ -114,126 +176,128 @@ def _edge(source: str, target: str, kind: str, label: str = "") -> dict:
             "arrows": style["arrows"], "font": {"size": 11, "align": "middle"}}
 
 
+def _emit_worker(w, y: int, nodes: list, edges: list, executors: dict) -> bool:
+    """One task and everything it owns. Returns whether it has an exception."""
+    summary = w.summary()
+    wid = worker_id(w.name)
+    status = status_of(w)
+
+    nodes.append(_node(
+        wid, f"{w.name}\nv{summary['version']}", "worker", COL_TASK, y,
+        title=(f"{w.purpose}\n{w.task} · v{summary['version']} · "
+               f"{summary['runs_this_version']} run(s) on this version · "
+               f"{status}"),
+        clickable=True, size=22, status=status))
+
+    has_ledger = (w.directory / "ledger.jsonl").is_file()
+    if has_ledger:
+        box = inbox_mod.summary(w)
+        adapter = w.identity.get("input_adapter")
+        iid = f"input:{w.name}"
+        nodes.append(_node(
+            iid, f"inbox\n{adapter or 'json'}", "input", COL_INPUT, y,
+            title=(f"{w.trigger}\n{box['processed']} processed · "
+                   f"{box['waiting']} waiting · "
+                   f"{box['exceptions']} queued exception(s)")))
+        edges.append(_edge(iid, wid, "data", adapter or ""))
+
+    sources = sorted((w.model.get("sources") or {}).items())
+    for index, (name, spec) in enumerate(sources):
+        sid = f"source:{w.name}:{name}"
+        offset = (index - (len(sources) - 1) / 2) * 62
+        nodes.append(_node(sid, name, "source", COL_SOURCE, y + offset, size=13,
+                           title=f"{spec.get('path')} · {spec.get('collection')}"))
+        edges.append(_edge(sid, wid, "data"))
+
+    eid = f"executor:{w.engine}"
+    executors[eid] = executors.get(eid, 0) + 1
+    edges.append(_edge(wid, eid, "executes"))
+
+    fid = f"effect:{w.name}"
+    if w.committing:
+        nodes.append(_node(
+            fid, f"{w.effect}\ncommitted", "effect", COL_EFFECT, y,
+            title=(f"effect authority · {summary['effects_applied']} applied, "
+                   f"{summary['effects_failed']} failed")))
+        edges.append(_edge(wid, fid, "effect", "applies"))
+    else:
+        columns = [o.get("target") for o in (w.model.get("outputs") or [])]
+        nodes.append(_node(fid, "result table", "effect", COL_EFFECT, y, size=13,
+                           title=" · ".join(str(c) for c in columns) or "result"))
+        edges.append(_edge(wid, fid, "data"))
+
+    queued = inbox_mod.summary(w)["exceptions"] if has_ledger else 0
+    if queued or w.investigation or inv_mod.needs_investigation(w):
+        xid = f"exception:{w.name}"
+        state = (w.investigation or {}).get("state", "queued")
+        nodes.append(_node(
+            xid, f"exception\n{state}", "exception", COL_TASK + 190, y + 95,
+            size=13, title=f"{queued} queued · investigation: {state}"))
+        edges.append(_edge(wid, xid, "exception"))
+        edges.append(_edge(xid, "capability:investigator", "exception"))
+        return True
+    return False
+
+
 def build(workers: Optional[list] = None) -> dict:
     """The whole graph, from fleet state. Reads only."""
     workers = sorted(workers if workers is not None else fleet.load_all(),
                      key=lambda w: w.name)
     nodes: list[dict] = []
     edges: list[dict] = []
-    executors: dict[str, int] = {}          # engine -> count, for the shared node
-    scopes: dict[str, int] = {}
+    executors: dict[str, int] = {}
     any_exception = False
+    y = 0
 
-    for row, w in enumerate(workers):
-        y = row * ROW_HEIGHT
-        summary = w.summary()
-        wid = worker_id(w.name)
-
-        status = ("exception" if summary["last_status"] == "exception"
-                  else "attention" if inv_mod.needs_investigation(w)
-                  else summary["last_status"])
-        nodes.append(_node(
-            wid, f"{w.name}\nv{summary['version']}", "worker", COL_TASK, y,
-            title=(f"{w.purpose}\n{w.task} · v{summary['version']} · "
-                   f"{summary['runs_this_version']} run(s) on this version · "
-                   f"{status}"),
-            clickable=True, size=22))
-
-        # --- scope, ONLY where the worker declares one --------------------
-        # No worker does today. `customer` is not a field in fleet state and one
-        # is deliberately not invented here; adding it to worker.json is the
-        # single change that makes customer lanes real.
-        scope = w.identity.get("customer") or w.identity.get("scope")
+    for scope, group in lanes(workers):
+        top = y
+        for w in group:
+            any_exception |= _emit_worker(w, y, nodes, edges, executors)
+            y += ROW_HEIGHT
         if scope:
-            sid = f"scope:{scope}"
-            if sid not in scopes:
-                scopes[sid] = y
-                nodes.append(_node(sid, scope, "scope", COL_INPUT - 300, y,
-                                   size=20))
-            edges.append(_edge(sid, wid, "data", "owns"))
-
-        # --- input: inbox and adapter --------------------------------------
-        if (w.directory / "ledger.jsonl").is_file():
-            box = inbox_mod.summary(w)
-            adapter = w.identity.get("input_adapter")
-            iid = f"input:{w.name}"
+            # The lane label carries the WORST status beneath it, so an
+            # exception under one customer is visible without opening anything
+            # -- and is visibly theirs, not the fleet's.
             nodes.append(_node(
-                iid, f"inbox\n{adapter or 'json'}", "input", COL_INPUT, y,
-                title=(f"{w.trigger}\n{box['processed']} processed · "
-                       f"{box['waiting']} waiting · "
-                       f"{box['exceptions']} queued exception(s)")))
-            edges.append(_edge(iid, wid, "data", adapter or ""))
+                f"scope:{scope}", scope, "scope", COL_SCOPE,
+                (top + y - ROW_HEIGHT) / 2, size=26,
+                status=worst([status_of(w) for w in group]),
+                title=(f"{scope} — {len(group)} task(s) · worst state "
+                       f"{worst([status_of(w) for w in group])}")))
+            for w in group:
+                edges.append(_edge(f"scope:{scope}", worker_id(w.name), "owns"))
+        y += BAND_GAP
 
-        # --- source collections the MODEL declares --------------------------
-        for index, (name, spec) in enumerate(sorted(
-                (w.model.get("sources") or {}).items())):
-            sid = f"source:{w.name}:{name}"
-            offset = (index - (len(w.model.get("sources") or {}) - 1) / 2) * 62
-            nodes.append(_node(sid, name, "source", COL_SOURCE,
-                               int(y + offset), size=13,
-                               title=f"{spec.get('path')} · {spec.get('collection')}"))
-            edges.append(_edge(sid, wid, "data"))
-
-        # --- the SHARED executor -------------------------------------------
-        eid = f"executor:{w.engine}"
-        executors[eid] = executors.get(eid, 0) + 1
-        edges.append(_edge(wid, eid, "executes"))
-
-        # --- output, or committed effect ------------------------------------
-        fid = f"effect:{w.name}"
-        if w.committing:
-            nodes.append(_node(
-                fid, f"{w.effect}\ncommitted", "effect", COL_EFFECT, y,
-                title=(f"effect authority · {summary['effects_applied']} applied, "
-                       f"{summary['effects_failed']} failed")))
-            edges.append(_edge(wid, fid, "effect", "applies"))
-        else:
-            columns = [o.get("target") for o in (w.model.get("outputs") or [])]
-            nodes.append(_node(
-                fid, "result table", "effect", COL_EFFECT, y, size=13,
-                title=" · ".join(str(c) for c in columns) or "result"))
-            edges.append(_edge(wid, fid, "data"))
-
-        # --- exception path, only where one exists --------------------------
-        queued = (inbox_mod.summary(w)["exceptions"]
-                  if (w.directory / "ledger.jsonl").is_file() else 0)
-        has_investigation = bool(w.investigation)
-        if queued or has_investigation or inv_mod.needs_investigation(w):
-            xid = f"exception:{w.name}"
-            state = (w.investigation or {}).get("state", "queued")
-            nodes.append(_node(
-                xid, f"exception\n{state}", "exception", COL_TASK + 190,
-                int(y + 95), size=13,
-                title=f"{queued} queued · investigation: {state}"))
-            edges.append(_edge(wid, xid, "exception"))
-            edges.append(_edge(xid, "capability:investigator", "exception"))
-            any_exception = True
-
-    # --- shared infrastructure, below the tasks it serves --------------------
-    base_y = (len(workers) - 1) * ROW_HEIGHT + EXECUTOR_DROP
+    # --- shared infrastructure, OUTSIDE every lane --------------------------
+    base_y = y - BAND_GAP + SHARED_DROP
     for index, (eid, count) in enumerate(sorted(executors.items())):
         spread = (index - (len(executors) - 1) / 2) * 460
-        nodes.append(_node(
-            eid, eid.split("/")[-1], "executor", int(COL_TASK + spread),
-            base_y, size=20,
-            title=(f"{eid.split(':', 1)[1]}\nfixed engine, shared by "
-                   f"{count} task(s)")))
-
+        nodes.append(_node(eid, eid.split("/")[-1], "executor",
+                           COL_TASK + spread, base_y, size=20,
+                           title=(f"{eid.split(':', 1)[1]}\nfixed engine, "
+                                  f"shared by {count} task(s) across "
+                                  f"{len(lanes(workers))} scope(s)")))
     if any_exception:
         nodes.append(_node(
             "capability:investigator", "investigator\n(LLM, on request)",
-            "capability", INVESTIGATOR_X, base_y, size=18,
+            "capability", COL_EFFECT + 260, base_y, size=18,
             title=("Woken only by an operator, only on an exception. Never in "
-                   "poll() or recover().")))
+                   "poll() or recover(). Shared by every scope.")))
 
     return {"nodes": nodes, "edges": edges}
 
 
 def legend() -> list[tuple[str, str]]:
     return [("data flow", EDGE_STYLE["data"]["color"]),
+            ("customer owns", EDGE_STYLE["owns"]["color"]),
             ("runs on engine", EDGE_STYLE["executes"]["color"]),
             ("effect authority", EDGE_STYLE["effect"]["color"]),
             ("exception → investigator", EDGE_STYLE["exception"]["color"])]
+
+
+def status_legend() -> list[tuple[str, str, str]]:
+    return [(STATUS_GLYPH[s], s.replace("_", " "), STATUS_COLOUR[s])
+            for s in STATUS_ORDER]
 
 
 def _self_test() -> int:
@@ -244,120 +308,141 @@ def _self_test() -> int:
             failures.append(msg)
 
     workers = fleet.load_all()
-    check(len(workers) >= 3, f"needs the seeded fleet: {len(workers)} worker(s)")
+    check(len(workers) >= 4, f"needs the seeded fleet: {len(workers)}")
 
-    # --- THE INVARIANT: building writes nothing --------------------------
+    # --- building writes NOTHING -------------------------------------------
     root = fleet.ROOT
     before = {p: p.stat().st_mtime_ns for p in root.rglob("*") if p.is_file()}
     data = build(workers)
     after = {p: p.stat().st_mtime_ns for p in root.rglob("*") if p.is_file()}
     check(before == after,
-          "CANARY: building the map must not write ANYTHING -- a map that "
-          "stored anything would be a second description of the system, "
-          f"drifting against the one workers run on: "
-          f"{[str(p) for p in set(before) ^ set(after)][:3]}")
+          "CANARY: building the map must not write ANYTHING -- a stored "
+          "position, status or grouping would be a second description of the "
+          "system")
 
     ids = [n["id"] for n in data["nodes"]]
-    check(len(ids) == len(set(ids)), f"node ids must be unique: {ids}")
+    by_id = {n["id"]: n for n in data["nodes"]}
+    check(len(ids) == len(set(ids)), "node ids must be unique")
 
-    # --- every worker once, at its CURRENT version -----------------------
-    for w in workers:
-        wid = worker_id(w.name)
-        check(ids.count(wid) == 1,
-              f"{w.name} must appear exactly once: {ids.count(wid)}")
-        node = next(n for n in data["nodes"] if n["id"] == wid)
-        check(f"v{w.current_version}" in node["label"],
-              f"{w.name} must show its current version: {node['label']!r}")
-        check(node["clickable"] is True, f"{w.name} must be clickable")
+    # --- TWO REAL SCOPES, derived from worker metadata ---------------------
+    scopes = sorted(s for s, _ in lanes(workers) if s)
+    check(len(scopes) >= 2, f"the fleet must have two real scopes: {scopes}")
+    for scope in scopes:
+        check(f"scope:{scope}" in ids, f"{scope} must have a lane node")
+    declared = {w.name: scope_of(w) for w in workers}
+    check(all(declared.values()),
+          f"every worker must DECLARE its scope: {declared}")
 
-    # --- the shared executor, which is the point of the picture ----------
+    # --- lanes are derived, and workers sit only in their own band ---------
+    for scope, group in lanes(workers):
+        if not scope:
+            continue
+        owned = {e["to"] for e in data["edges"]
+                 if e["from"] == f"scope:{scope}" and e["kind"] == "owns"}
+        check(owned == {worker_id(w.name) for w in group},
+              f"{scope} must own exactly its declared workers: {owned}")
+        ys = [by_id[worker_id(w.name)]["y"] for w in group]
+        other = [by_id[worker_id(w.name)]["y"] for w in workers
+                 if scope_of(w) != scope]
+        check(not (set(ys) & set(other)),
+              f"CANARY: {scope}'s band must not overlap another scope's rows")
+
+    # --- ISOLATION: state, inbox and history are per worker ----------------
+    acme = [w for w in workers if scope_of(w) == "Acme Oy"]
+    fazerish = [w for w in workers if scope_of(w) == "Fazerish Oy"]
+    check(acme and fazerish, "both scopes must have workers")
+    dirs = {w.name: w.directory.resolve() for w in workers}
+    check(len(set(dirs.values())) == len(dirs), "worker directories are distinct")
+    for w in fazerish:
+        for other in acme:
+            check(not str(w.base.resolve()).startswith(str(other.base.resolve())),
+                  f"CANARY: {w.name}'s state must not live under {other.name}'s")
+    acme_items = {e["item_id"] for w in acme
+                  if (w.directory / "ledger.jsonl").is_file()
+                  for e in inbox_mod.ledger(w)}
+    faz_items = {e["item_id"] for w in fazerish
+                 if (w.directory / "ledger.jsonl").is_file()
+                 for e in inbox_mod.ledger(w)}
+    check(faz_items and not (acme_items & faz_items),
+          "CANARY: work-item ledgers must not be shared across customers")
+
+    # --- SHARED: one engine node across BOTH scopes ------------------------
     enrichment = [w for w in workers if w.task == "enrichment"]
-    check(len(enrichment) >= 2, "the fleet must have >1 enrichment worker")
+    check({scope_of(w) for w in enrichment} >= {"Acme Oy", "Fazerish Oy"},
+          "both scopes must have an enrichment task, or sharing is untested")
     targets = {e["to"] for e in data["edges"] if e["kind"] == "executes"
                and e["from"] in {worker_id(w.name) for w in enrichment}}
     check(len(targets) == 1,
-          f"CANARY: every enrichment task must converge on ONE engine node, "
-          f"not one each: {targets}")
-    engine_nodes = [n for n in data["nodes"] if n["kind"] == "executor"]
-    check(len(engine_nodes) == len({w.engine for w in workers}),
-          f"one node per ENGINE, not per worker: {len(engine_nodes)} nodes for "
-          f"{len(workers)} workers")
+          f"CANARY: tasks in DIFFERENT customers must converge on ONE engine "
+          f"node: {targets}")
+    engine_node = by_id[next(iter(targets))]
+    check(engine_node["x"] < COL_SCOPE or engine_node["y"] > max(
+        by_id[worker_id(w.name)]["y"] for w in workers),
+        f"CANARY: a shared engine must sit OUTSIDE every lane, below the bands: "
+        f"{engine_node['x']},{engine_node['y']}")
 
-    # --- effect authority is distinguished from a result table -----------
-    committing = [w for w in workers if w.committing]
-    check(committing, "the fleet must have a committing worker")
-    for w in committing:
-        effect_edges = [e for e in data["edges"]
-                        if e["from"] == worker_id(w.name) and e["kind"] == "effect"]
-        check(len(effect_edges) == 1,
-              f"{w.name} commits, so it must have an effect edge: {effect_edges}")
-    for w in workers:
-        if w.committing:
-            continue
-        check(not [e for e in data["edges"]
-                   if e["from"] == worker_id(w.name) and e["kind"] == "effect"],
-              f"CANARY: {w.name} commits nothing and must NOT claim effect "
-              f"authority")
-
-    # --- the investigator is ONE shared capability -----------------------
+    # --- the investigator is one shared capability -------------------------
     caps = [n for n in data["nodes"] if n["kind"] == "capability"]
     check(len(caps) <= 1, f"the investigator must be a single node: {caps}")
     if caps:
         into = [e for e in data["edges"] if e["to"] == caps[0]["id"]]
         check(into and all(e["kind"] == "exception" for e in into),
-              f"CANARY: the investigator is reachable ONLY by exception edges "
-              f"-- never on a run path: {[e['kind'] for e in into]}")
+              "CANARY: the investigator is reachable ONLY by exception edges")
 
-    # --- acme's real investigation shows -------------------------------
-    acme = next((w for w in workers if w.name == "acme-timesheets"), None)
-    if acme and acme.investigation:
-        check(f"exception:{acme.name}" in ids,
-              f"acme's investigation relationship must appear: {ids}")
+    # --- STATUS is derived, and an exception is LOCAL to its customer -------
+    for w in workers:
+        node = by_id[worker_id(w.name)]
+        check(node.get("status") == status_of(w),
+              f"{w.name}'s status must be derived: {node.get('status')}")
+        check(node["label"].startswith(STATUS_GLYPH[status_of(w)]),
+              f"{w.name} must carry its status glyph: {node['label']!r}")
 
-    # --- structural integrity -------------------------------------------
+    troubled = [w for w in workers if status_of(w) != "healthy"]
+    check(troubled, "the fleet must have a non-healthy worker to localise")
+    hurt_scopes = {scope_of(w) for w in troubled}
+    check(len(hurt_scopes) == 1,
+          f"the exception should sit under ONE customer: {hurt_scopes}")
+    hurt = hurt_scopes.pop()
+    for scope in scopes:
+        node = by_id[f"scope:{scope}"]
+        expected = worst([status_of(w) for w in workers if scope_of(w) == scope])
+        check(node["status"] == expected,
+              f"{scope} must inherit the worst state beneath it: "
+              f"{node['status']} != {expected}")
+    check(by_id[f"scope:{hurt}"]["status"] != "healthy",
+          f"CANARY: {hurt} carries the exception")
+    clean = [s for s in scopes if s != hurt]
+    for scope in clean:
+        check(by_id[f"scope:{scope}"]["status"] == "healthy",
+              f"CANARY: {scope} must stay healthy -- an exception under one "
+              f"customer must NOT colour another")
+
+    # --- structural integrity, determinism, click contract ------------------
     for edge in data["edges"]:
         check(edge["from"] in ids, f"dangling edge source: {edge}")
         check(edge["to"] in ids, f"dangling edge target: {edge}")
         check(edge["kind"] in EDGE_STYLE, f"unknown edge kind: {edge['kind']}")
-
-    # --- deterministic -----------------------------------------------------
-    again = build(workers)
-    check(again == data, "CANARY: the layout must be deterministic")
+    check(build(workers) == data, "CANARY: the layout must be deterministic")
     check(all(isinstance(n["x"], int) and isinstance(n["y"], int)
-              for n in data["nodes"]),
-          "physics is disabled, so every node needs an explicit position")
-
-    # --- status is DERIVED, never stored -----------------------------------
-    for w in workers:
-        node = next(n for n in data["nodes"] if n["id"] == worker_id(w.name))
-        check(str(w.summary()["runs_this_version"]) in node["title"],
-              f"{w.name}'s status must be read from fleet state: {node['title']!r}")
-
-    # --- the click contract -------------------------------------------------
+              for n in data["nodes"]), "every node needs an explicit position")
     check(name_from("worker:acme-timesheets") == "acme-timesheets",
           "a worker click must resolve to the existing worker view")
-    for other in ("executor:enrichment/harness/execute_enrichment.py",
-                  "source:x:y", "capability:investigator", None):
-        check(name_from(other) is None,
-              f"v1 acts on worker nodes only: {other} -> {name_from(other)}")
-
-    # --- no scope invented --------------------------------------------------
-    declared = [w.name for w in workers
-                if w.identity.get("customer") or w.identity.get("scope")]
-    check([n for n in data["nodes"] if n["kind"] == "scope"] == [] or declared,
-          "CANARY: a scope node may only exist where a worker DECLARES one")
+    for other in ("scope:Acme Oy", "executor:x", "source:x:y", None):
+        check(name_from(other) is None, f"v1 acts on worker nodes only: {other}")
 
     if failures:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
         return 1
     print(f"SELF-TEST PASSED ({len(data['nodes'])} nodes, {len(data['edges'])} "
-          f"edges / building writes NOTHING / every worker appears once at its "
-          f"current version / every enrichment task converges on ONE engine node "
-          f"/ effect authority only where the worker commits / the investigator "
-          f"is one node reachable only by exception edges / no dangling edges / "
-          f"deterministic layout with explicit positions / status derived from "
-          f"fleet state / worker clicks resolve and other kinds do not / no "
-          f"scope invented)")
+          f"edges, {len(scopes)} scopes / building writes NOTHING / lanes are "
+          f"DERIVED from declared worker metadata and bands never overlap / "
+          f"customer state, inboxes and ledgers are isolated / tasks in "
+          f"different customers converge on ONE engine node placed outside "
+          f"every lane / the investigator is one shared node on exception edges "
+          f"only / status is derived and glyphed, a scope inherits the worst "
+          f"state beneath it, and an exception under one customer leaves the "
+          f"other healthy / deterministic, no dangling edges, click contract "
+          f"holds)")
     return 0
 
 

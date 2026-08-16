@@ -1,9 +1,10 @@
 {
-  "name": "april-invoicing",
+  "name": "fazerish-invoicing",
   "purpose": "Cost each order line: quantity times the article's unit price from the price list.",
   "task": "enrichment",
-  "base": "fleet/workers/april-invoicing/state",
-  "trigger": "fleet/workers/april-invoicing/inbox/ (*.xlsx)",
+  "base": "fleet/workers/fazerish-invoicing/state",
+  "trigger": "fleet/workers/fazerish-invoicing/inbox/ (*.xlsx)",
+  "customer": "Fazerish Oy",
   "input_adapter": "xlsx",
   "work_item_identity": "content_digest",
   "adapter_sheets": [
@@ -17,6 +18,5 @@
       "collection": "price_list",
       "header_row": 1
     }
-  ],
-  "customer": "Acme Oy"
+  ]
 }

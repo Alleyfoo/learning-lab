@@ -89,8 +89,16 @@ if choice == "System map":
     st.markdown(" · ".join(
         f"<span style='color:{colour}'>&#9632;</span> {label}"
         for label, colour in system_map.legend()), unsafe_allow_html=True)
-    st.caption(f"{len(graph['nodes'])} nodes, {len(graph['edges'])} edges. "
-               f"Task nodes are clickable; the rest are labels for now.")
+    st.markdown("**status** &nbsp; " + " · ".join(
+        f"<span style='color:{colour}'><b>{glyph}</b> {label}</span>"
+        for glyph, label, colour in system_map.status_legend()),
+        unsafe_allow_html=True)
+    scopes = [s for s, _ in system_map.lanes(workers) if s]
+    st.caption(f"{len(graph['nodes'])} nodes, {len(graph['edges'])} edges, "
+               f"{len(scopes)} scope(s): {', '.join(scopes)}. Lanes are derived "
+               f"from each worker's declared `customer`; engines and the "
+               f"investigator are shared, so they sit outside every lane. Task "
+               f"nodes are clickable.")
     picked = system_map.name_from((clicked or {}).get("id"))
     if picked:
         st.session_state["map_pick"] = picked
