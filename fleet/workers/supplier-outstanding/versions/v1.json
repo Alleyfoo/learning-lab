@@ -1,0 +1,38 @@
+{
+  "model_version": 1,
+  "model_id": "supplier_totals_june_2026",
+  "task": "aggregation",
+  "sources": {
+    "purchase_invoices": {
+      "path": "june-purchases/purchase_invoices.json",
+      "collection": "purchase_invoices"
+    }
+  },
+  "driving_source": "purchase_invoices",
+  "group_by": [
+    "Supplier"
+  ],
+  "group_order": "first_appearance",
+  "aggregates": [
+    {
+      "target": "invoice_count",
+      "op": "count"
+    },
+    {
+      "target": "total_owed",
+      "op": "sum",
+      "field": "Gross"
+    }
+  ],
+  "select": [
+    {
+      "field": "Invoice date",
+      "op": "in_month",
+      "value_from": "reporting_month"
+    }
+  ],
+  "on_non_numeric": "refuse_row",
+  "inputs": [
+    "reporting_month"
+  ]
+}

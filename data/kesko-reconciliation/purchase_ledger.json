@@ -1,0 +1,25 @@
+{
+  "_note": "converted from kesko-june-statement.xlsx",
+  "purchase_ledger": [
+    {
+      "Invoice": "PI-3301",
+      "Booked": "2026-06-03",
+      "Amount": "518.19"
+    },
+    {
+      "Invoice": "PI-3303",
+      "Booked": "2026-06-12",
+      "Amount": "119.94"
+    },
+    {
+      "Invoice": "PI-3305",
+      "Booked": "2026-06-24",
+      "Amount": "269.83"
+    },
+    {
+      "Invoice": "PI-3350",
+      "Booked": "2026-06-15",
+      "Amount": "88.00"
+    }
+  ]
+}

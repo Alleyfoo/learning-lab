@@ -1,0 +1,12 @@
+[
+  {
+    "sheet": "Statement",
+    "collection": "supplier_statement",
+    "header_row": 1
+  },
+  {
+    "sheet": "Our ledger",
+    "collection": "purchase_ledger",
+    "header_row": 1
+  }
+]

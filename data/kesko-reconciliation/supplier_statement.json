@@ -1,0 +1,25 @@
+{
+  "_note": "converted from kesko-june-statement.xlsx",
+  "supplier_statement": [
+    {
+      "Their ref": "PI-3301",
+      "Date": "2026-06-02",
+      "Amount": "518.19"
+    },
+    {
+      "Their ref": "PI-3303",
+      "Date": "2026-06-11",
+      "Amount": "110.94"
+    },
+    {
+      "Their ref": "PI-3305",
+      "Date": "2026-06-23",
+      "Amount": "269.83"
+    },
+    {
+      "Their ref": "PI-3399",
+      "Date": "2026-06-28",
+      "Amount": "440.00"
+    }
+  ]
+}
