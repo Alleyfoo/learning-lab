@@ -1,0 +1,72 @@
+{
+  "components": [
+    "count",
+    "dominant",
+    "group",
+    "share"
+  ],
+  "dims": [
+    "digest",
+    "effect",
+    "engine",
+    "trigger"
+  ],
+  "per_call": [
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "dominant",
+        "group",
+        "share"
+      ],
+      "dims": [
+        "digest",
+        "effect",
+        "engine",
+        "trigger"
+      ],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "Total workers: 70\n\nBy task type:\n  aggregation: 18\n  enrichment: 18\n  reconciliation: 17\n  reservation: 17\n\nBy engine:\n  aggregation/harness/execute_aggregation",
+      "error": null
+    },
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "dominant",
+        "group",
+        "share"
+      ],
+      "dims": [
+        "digest",
+        "effect",
+        "engine"
+      ],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "Engine by task:\n  aggregation:\n    aggregation/harness/execute_aggregation.py: 18\n  enrichment:\n    enrichment/harness/execute_enrichment.py: 18\n  reconciliatio",
+      "error": null
+    },
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "group",
+        "share"
+      ],
+      "dims": [
+        "digest",
+        "effect",
+        "engine",
+        "trigger"
+      ],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "rese-d-inv:\n  engine: reservation/harness/execute_reservation.py\n  effect: append_to_reservations\n  digest: 9545734c033d6890a3d11243281c10c4fc0ef63ae7f796f33ead",
+      "error": null
+    }
+  ],
+  "shape_complete": true
+}

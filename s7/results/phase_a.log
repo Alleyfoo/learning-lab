@@ -1,0 +1,33 @@
+=== S7 HARNESS SELF-TEST (no model call) ===
+SELF-TEST PASSED (policy refuses NEVER/unknown authority tools / python_analysis contract declares the fresh namespace / a stub session runs through the boundary / the append-only event log has all event types / RECONSTRUCTABILITY CANARY: replay(events) == model_request messages / the bench still refuses os and open behind the harness / core.review remains available)
+
+=== S7 CONCENTRATION SELF-TEST (no model call) ===
+SELF-TEST PASSED (measure is pure / OBSERVED-only -- no interpretation word in any output / distribution faithful -- counts cover the fleet, shares vs the whole fleet, effect subset sums to its fraction, sorted desc as an ordering of facts / digest concentration and distributed engines both reported as counts+shares with no verdict / empty fleet safe)
+
+======================================================================
+=== PHASE A -- repetition evidence (harnessed; WITH S5 method; NO measurement) ===
+======================================================================
+  memory seed: 2 knowledge, 2 preferences, 3 methods (the S5 concentration method)
+
+-- fleet A (dominant=('engine', 60)) workers=70 hash=6cb2c1ffaa1d4d77
+  [phase_a/A] harness run: contexts=['fleet', 'memory'] tools=[python_analysis] max_turns=10
+    python_calls=3 turns=2 stop=final shape=['count', 'dominant', 'group', 'share'] dims=['digest', 'effect', 'engine', 'trigger'] complete=True
+
+-- fleet B (dominant=('trigger', 55)) workers=70 hash=e9b8bf4cf0ccbcf6
+  [phase_a/B] harness run: contexts=['fleet', 'memory'] tools=[python_analysis] max_turns=10
+    python_calls=3 turns=2 stop=final shape=['count', 'dominant', 'group', 'share'] dims=['digest', 'effect', 'engine', 'trigger'] complete=True
+
+-- fleet C (dominant=('digest', 60)) workers=70 hash=37b286a7b9582e86
+  [phase_a/C] harness run: contexts=['fleet', 'memory'] tools=[python_analysis] max_turns=10
+    python_calls=1 turns=2 stop=final shape=['count', 'dominant', 'group', 'share'] dims=['digest', 'effect', 'engine', 'trigger'] complete=True
+
+-- fleet D (dominant=None) workers=70 hash=14bddbb3d2678f61
+  [phase_a/D] harness run: contexts=['fleet', 'memory'] tools=[python_analysis] max_turns=10
+    python_calls=3 turns=2 stop=final shape=['count', 'dominant', 'group', 'share'] dims=['digest', 'effect', 'engine', 'trigger'] complete=True
+
+======================================================================
+=== S7 COMPLETE ===
+======================================================================
+  phases run: ['A']
+
+  results: C:\Users\pertt\learning-lab\s7\results

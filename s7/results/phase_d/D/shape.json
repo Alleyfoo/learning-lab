@@ -1,0 +1,130 @@
+{
+  "components": [
+    "count",
+    "dominant",
+    "group"
+  ],
+  "dims": [
+    "digest",
+    "trigger"
+  ],
+  "per_call": [
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "group"
+      ],
+      "dims": [],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "Total workers: 70\nBy task: {'aggregation': 18, 'enrichment': 18, 'reconciliation': 17, 'reservation': 17}\nBy customer: {'Acme Oy': 12, 'Fazerish Oy': 12, 'Kesko",
+      "error": null
+    },
+    {
+      "turn": 0,
+      "components": [],
+      "dims": [],
+      "ok": false,
+      "refused": false,
+      "stdout_head": "",
+      "error": "NameError: name 'rese' is not defined"
+    },
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "group"
+      ],
+      "dims": [
+        "digest",
+        "trigger"
+      ],
+      "ok": false,
+      "refused": false,
+      "stdout_head": "",
+      "error": "NameError: name 'workers' is not defined"
+    },
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "group"
+      ],
+      "dims": [
+        "trigger"
+      ],
+      "ok": false,
+      "refused": false,
+      "stdout_head": "",
+      "error": "NameError: name 'workers' is not defined"
+    },
+    {
+      "turn": 0,
+      "components": [
+        "dominant",
+        "group"
+      ],
+      "dims": [],
+      "ok": false,
+      "refused": false,
+      "stdout_head": "",
+      "error": "NameError: name 'workers' is not defined"
+    },
+    {
+      "turn": 1,
+      "components": [
+        "count",
+        "group"
+      ],
+      "dims": [],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "Reservation workers: 17\nrese-d-54 Acme Oy\n   2026-03-21T00:00:00+00:00 state_before 4 state_after 4 refused ALREADY_RESERVED ok True problems []\n   2026-03-16T0",
+      "error": null
+    },
+    {
+      "turn": 1,
+      "components": [
+        "count",
+        "dominant",
+        "group"
+      ],
+      "dims": [
+        "digest",
+        "trigger"
+      ],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "Digest sharing:\n9545734c033d count 17\n    ('rese-d-54', 'reservation', 'Acme Oy', 'fleet/inbox/orders/*.xlsx')\n    ('rese-d-55', 'reservation', 'Fazerish Oy', '",
+      "error": null
+    },
+    {
+      "turn": 1,
+      "components": [
+        "count",
+        "group"
+      ],
+      "dims": [
+        "trigger"
+      ],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "Enrichment workers: 18\nAll same model? True\nModel references order_lines/price_list for all, but triggers vary:\nenri-d-00 Acme Oy fleet/inbox/orders/*.xlsx\nenri",
+      "error": null
+    },
+    {
+      "turn": 1,
+      "components": [
+        "dominant",
+        "group"
+      ],
+      "dims": [],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "Oldest last_run:\nenri-d-00 enrichment Acme Oy 2026-01-26T00:00:00+00:00\nenri-d-01 enrichment Fazerish Oy 2026-01-27T00:00:00+00:00\nenri-d-02 enrichment Kesko Oy",
+      "error": null
+    }
+  ],
+  "shape_complete": false
+}

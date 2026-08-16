@@ -1,0 +1,22 @@
+=== S7 HARNESS SELF-TEST (no model call) ===
+SELF-TEST PASSED (policy refuses NEVER/unknown authority tools / python_analysis contract declares the fresh namespace / a stub session runs through the boundary / the append-only event log has all event types / RECONSTRUCTABILITY CANARY: replay(events) == model_request messages / the bench still refuses os and open behind the harness / core.review remains available)
+
+=== S7 CONCENTRATION SELF-TEST (no model call) ===
+SELF-TEST PASSED (measure is pure / OBSERVED-only -- no interpretation word in any output / distribution faithful -- counts cover the fleet, shares vs the whole fleet, effect subset sums to its fraction, sorted desc as an ordering of facts / digest concentration and distributed engines both reported as counts+shares with no verdict / empty fleet safe)
+
+======================================================================
+=== PHASE C -- human-authorized deterministic implementation ===
+======================================================================
+  approval recorded. canary_passed=True
+  snapshot.py modified: False (must be False)
+  fleet A: measure pure (snapshot unchanged=True), no interpretation word=True; top engine=60, trigger=12, digest=17 (named dominant=('engine', 60))
+  fleet B: measure pure (snapshot unchanged=True), no interpretation word=True; top engine=18, trigger=55, digest=17 (named dominant=('trigger', 55))
+  fleet C: measure pure (snapshot unchanged=True), no interpretation word=True; top engine=20, trigger=12, digest=60 (named dominant=('digest', 60))
+  fleet D: measure pure (snapshot unchanged=True), no interpretation word=True; top engine=18, trigger=12, digest=17 (named dominant=None)
+
+======================================================================
+=== S7 COMPLETE ===
+======================================================================
+  phases run: ['canary', 'C']
+
+  results: C:\Users\pertt\learning-lab\s7\results

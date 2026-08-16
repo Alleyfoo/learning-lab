@@ -1,0 +1,73 @@
+{
+  "components": [
+    "count",
+    "dominant",
+    "group",
+    "share"
+  ],
+  "dims": [
+    "digest",
+    "effect",
+    "engine",
+    "trigger"
+  ],
+  "per_call": [
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "dominant",
+        "group",
+        "share"
+      ],
+      "dims": [
+        "digest",
+        "effect",
+        "engine",
+        "trigger"
+      ],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "Total workers: 70\n\nBy engine:\n  enrichment/harness/execute_enrichment.py: 60\n  aggregation/harness/execute_aggregation.py: 4\n  reconciliation/harness/execute_re",
+      "error": null
+    },
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "dominant",
+        "group",
+        "share"
+      ],
+      "dims": [
+        "digest",
+        "engine",
+        "trigger"
+      ],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "Digest -> workers:\n  0f52d374a78b...: 17 workers\n    engines: {'aggregation/harness/execute_aggregation.py': 1, 'enrichment/harness/execute_enrichment.py': 15, ",
+      "error": null
+    },
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "dominant",
+        "group",
+        "share"
+      ],
+      "dims": [
+        "digest",
+        "effect",
+        "engine",
+        "trigger"
+      ],
+      "ok": false,
+      "refused": false,
+      "stdout_head": "Reservation workers: 3\n  rese-a-68: digest=9545734c033d... engine=reservation/harness/execute_reservation.py effect=append_to_reservations customer=Kesko Oyj\n  ",
+      "error": "NameError: name 'digest_workers' is not defined"
+    }
+  ],
+  "shape_complete": true
+}

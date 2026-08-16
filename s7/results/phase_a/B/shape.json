@@ -1,0 +1,70 @@
+{
+  "components": [
+    "count",
+    "dominant",
+    "group",
+    "share"
+  ],
+  "dims": [
+    "digest",
+    "effect",
+    "engine",
+    "trigger"
+  ],
+  "per_call": [
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "dominant",
+        "group",
+        "share"
+      ],
+      "dims": [
+        "digest",
+        "effect",
+        "engine",
+        "trigger"
+      ],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "Total workers: 70\n\nBy task: {'aggregation': 18, 'enrichment': 18, 'reconciliation': 17, 'reservation': 17}\nBy engine: {'aggregation/harness/execute_aggregation.",
+      "error": null
+    },
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "dominant",
+        "group",
+        "share"
+      ],
+      "dims": [
+        "digest",
+        "engine"
+      ],
+      "ok": false,
+      "refused": false,
+      "stdout_head": "=== Reservation workers state_before/after ===\n",
+      "error": "NameError: name 'workers' is not defined"
+    },
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "group",
+        "share"
+      ],
+      "dims": [
+        "digest",
+        "engine",
+        "trigger"
+      ],
+      "ok": false,
+      "refused": false,
+      "stdout_head": "=== Trigger concentration ===\n",
+      "error": "NameError: name 'workers' is not defined"
+    }
+  ],
+  "shape_complete": true
+}

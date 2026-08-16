@@ -1,0 +1,118 @@
+{
+  "A": {
+    "snapshot_hash_before": "6cb2c1ffaa1d4d77",
+    "snapshot_hash_after": "6cb2c1ffaa1d4d77",
+    "snapshot_unchanged_by_measure": true,
+    "interpretation_word_found": null,
+    "worker_count": 70,
+    "top_per_type": {
+      "engine": {
+        "identity": "enrichment/harness/execute_enrichment.py",
+        "worker_count": 60,
+        "fleet_share": 0.857143
+      },
+      "trigger": {
+        "identity": "fleet/inbox/orders/*.xlsx",
+        "worker_count": 12,
+        "fleet_share": 0.171429
+      },
+      "effect": {
+        "identity": "append_to_reservations",
+        "worker_count": 3,
+        "fleet_share": 0.042857
+      },
+      "digest": {
+        "identity": "08c601d39795477a0f4e824be71ae03f7a62f3434d661d972c31358dffa732af",
+        "worker_count": 17,
+        "fleet_share": 0.242857
+      }
+    }
+  },
+  "B": {
+    "snapshot_hash_before": "e9b8bf4cf0ccbcf6",
+    "snapshot_hash_after": "e9b8bf4cf0ccbcf6",
+    "snapshot_unchanged_by_measure": true,
+    "interpretation_word_found": null,
+    "worker_count": 70,
+    "top_per_type": {
+      "engine": {
+        "identity": "aggregation/harness/execute_aggregation.py",
+        "worker_count": 18,
+        "fleet_share": 0.257143
+      },
+      "trigger": {
+        "identity": "fleet/B/inbox/master-catalogue/*.xlsx",
+        "worker_count": 55,
+        "fleet_share": 0.785714
+      },
+      "effect": {
+        "identity": "append_to_reservations",
+        "worker_count": 17,
+        "fleet_share": 0.242857
+      },
+      "digest": {
+        "identity": "9545734c033d6890a3d11243281c10c4fc0ef63ae7f796f33ead19399e4db610",
+        "worker_count": 17,
+        "fleet_share": 0.242857
+      }
+    }
+  },
+  "C": {
+    "snapshot_hash_before": "37b286a7b9582e86",
+    "snapshot_hash_after": "37b286a7b9582e86",
+    "snapshot_unchanged_by_measure": true,
+    "interpretation_word_found": null,
+    "worker_count": 70,
+    "top_per_type": {
+      "engine": {
+        "identity": "aggregation/harness/execute_aggregation.py",
+        "worker_count": 20,
+        "fleet_share": 0.285714
+      },
+      "trigger": {
+        "identity": "fleet/inbox/orders/*.xlsx",
+        "worker_count": 12,
+        "fleet_share": 0.171429
+      },
+      "effect": {
+        "identity": "append_to_reservations",
+        "worker_count": 10,
+        "fleet_share": 0.142857
+      },
+      "digest": {
+        "identity": "0f52d374a78b72998889220b23c928db17ebae4bc199188879bc59b38a891ba8",
+        "worker_count": 60,
+        "fleet_share": 0.857143
+      }
+    }
+  },
+  "D": {
+    "snapshot_hash_before": "14bddbb3d2678f61",
+    "snapshot_hash_after": "14bddbb3d2678f61",
+    "snapshot_unchanged_by_measure": true,
+    "interpretation_word_found": null,
+    "worker_count": 70,
+    "top_per_type": {
+      "engine": {
+        "identity": "aggregation/harness/execute_aggregation.py",
+        "worker_count": 18,
+        "fleet_share": 0.257143
+      },
+      "trigger": {
+        "identity": "fleet/inbox/orders/*.xlsx",
+        "worker_count": 12,
+        "fleet_share": 0.171429
+      },
+      "effect": {
+        "identity": "append_to_reservations",
+        "worker_count": 17,
+        "fleet_share": 0.242857
+      },
+      "digest": {
+        "identity": "9545734c033d6890a3d11243281c10c4fc0ef63ae7f796f33ead19399e4db610",
+        "worker_count": 17,
+        "fleet_share": 0.242857
+      }
+    }
+  }
+}

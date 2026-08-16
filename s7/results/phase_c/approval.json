@@ -1,0 +1,9 @@
+{
+  "approved_by": "experiment (human, on record)",
+  "approved_at": "2026-08-16T21:17:47+00:00",
+  "basis": "Phase A repetition evidence + Phase B compatible proposal + authority canary (supervisor cannot self-implement)",
+  "canary_passed": true,
+  "implements": "supervisor/concentration.py: measure(snapshot) -> dict",
+  "snapshot_py_modified": false,
+  "authority": "the measurement attaches to a snapshot for Phase D; it does not alter build() and contains no LLM semantics."
+}

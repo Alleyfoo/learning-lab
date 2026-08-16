@@ -1,0 +1,26 @@
+{
+  "components": [
+    "count",
+    "group"
+  ],
+  "dims": [
+    "trigger"
+  ],
+  "per_call": [
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "group"
+      ],
+      "dims": [
+        "trigger"
+      ],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "task: Counter({'enrichment': 60, 'aggregation': 4, 'reconciliation': 3, 'reservation': 3})\ncommitting: ['rese-a-68', 'rese-a-69', 'rese-a-inv']\nnon_ok: ['rese-a",
+      "error": null
+    }
+  ],
+  "shape_complete": false
+}

@@ -1,0 +1,93 @@
+{
+  "A": {
+    "dominant": [
+      "engine",
+      60
+    ],
+    "phase_a": {
+      "config": "WITH method, WITHOUT measurement",
+      "python_calls": 3,
+      "turns": 2,
+      "shape_components": [
+        "count",
+        "dominant",
+        "group",
+        "share"
+      ],
+      "shape_complete": true,
+      "dims_touched": [
+        "digest",
+        "effect",
+        "engine",
+        "trigger"
+      ]
+    },
+    "phase_d": {
+      "config": "COLD (no method), WITH measurement",
+      "python_calls": 1,
+      "turns": 2,
+      "shape_components": [
+        "count",
+        "group"
+      ],
+      "shape_complete": false,
+      "dims_touched": [
+        "trigger"
+      ],
+      "grounded_in_measurement": {
+        "cites_measurement": false,
+        "cites_share_or_count": false,
+        "claims_measurement_says_risk": false
+      }
+    },
+    "delta": {
+      "python_calls_A_minus_D": 2,
+      "turns_A_minus_D": 0
+    }
+  },
+  "D": {
+    "dominant": null,
+    "phase_a": {
+      "config": "WITH method, WITHOUT measurement",
+      "python_calls": 3,
+      "turns": 2,
+      "shape_components": [
+        "count",
+        "dominant",
+        "group",
+        "share"
+      ],
+      "shape_complete": true,
+      "dims_touched": [
+        "digest",
+        "effect",
+        "engine",
+        "trigger"
+      ]
+    },
+    "phase_d": {
+      "config": "COLD (no method), WITH measurement",
+      "python_calls": 9,
+      "turns": 3,
+      "shape_components": [
+        "count",
+        "dominant",
+        "group"
+      ],
+      "shape_complete": false,
+      "dims_touched": [
+        "digest",
+        "trigger"
+      ],
+      "grounded_in_measurement": {
+        "cites_measurement": false,
+        "cites_share_or_count": false,
+        "claims_measurement_says_risk": false
+      }
+    },
+    "delta": {
+      "python_calls_A_minus_D": -6,
+      "turns_A_minus_D": -1
+    }
+  }
+}

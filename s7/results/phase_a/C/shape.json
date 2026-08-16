@@ -1,0 +1,36 @@
+{
+  "components": [
+    "count",
+    "dominant",
+    "group",
+    "share"
+  ],
+  "dims": [
+    "digest",
+    "effect",
+    "engine",
+    "trigger"
+  ],
+  "per_call": [
+    {
+      "turn": 0,
+      "components": [
+        "count",
+        "dominant",
+        "group",
+        "share"
+      ],
+      "dims": [
+        "digest",
+        "effect",
+        "engine",
+        "trigger"
+      ],
+      "ok": true,
+      "refused": false,
+      "stdout_head": "Total workers: 70\n\nBy task: {'aggregation': 20, 'enrichment': 20, 'reconciliation': 20, 'reservation': 10}\nBy engine: {'aggregation/harness/execute_aggregation.",
+      "error": null
+    }
+  ],
+  "shape_complete": true
+}

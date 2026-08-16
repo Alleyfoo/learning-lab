@@ -1,0 +1,21 @@
+=== S7 HARNESS SELF-TEST (no model call) ===
+SELF-TEST PASSED (policy refuses NEVER/unknown authority tools / python_analysis contract declares the fresh namespace / a stub session runs through the boundary / the append-only event log has all event types / RECONSTRUCTABILITY CANARY: replay(events) == model_request messages / the bench still refuses os and open behind the harness / core.review remains available)
+
+=== S7 CONCENTRATION SELF-TEST (no model call) ===
+SELF-TEST PASSED (measure is pure / OBSERVED-only -- no interpretation word in any output / distribution faithful -- counts cover the fleet, shares vs the whole fleet, effect subset sums to its fraction, sorted desc as an ordering of facts / digest concentration and distributed engines both reported as counts+shares with no verdict / empty fleet safe)
+
+======================================================================
+=== PHASE B -- supervisor proposes promotion + rulebook conflict check ===
+======================================================================
+  asking the supervisor to write the proposal (1 model call)...
+  proposal written. Running the S3 Rulebook conflict check (rulebook.classify against the seeded rules)...
+  proposal id: IMP-005
+  compatible: True  conflicts_with: []  duplicate_of: None
+  rationale: This proposal introduces a new deterministic dependency-concentration measurement, which is unrelated to any existing registered improvement (all of which concern exception visibility or confirmation 
+
+======================================================================
+=== S7 COMPLETE ===
+======================================================================
+  phases run: ['A', 'B']
+
+  results: C:\Users\pertt\learning-lab\s7\results
