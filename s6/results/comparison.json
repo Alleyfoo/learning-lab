@@ -1,0 +1,106 @@
+{
+  "old_run_id": "20260816T182432Z",
+  "new_run_id": "20260816T190857Z",
+  "tool_use": {
+    "old": {
+      "python_used": true,
+      "python_calls": 4
+    },
+    "new": {
+      "python_used": true,
+      "python_calls": 4
+    }
+  },
+  "turns": {
+    "old": 3,
+    "new": 2
+  },
+  "stop_reason": {
+    "old": "final",
+    "new": "final"
+  },
+  "errors": {
+    "old_count": 2,
+    "new_count": 0,
+    "new_errors": []
+  },
+  "scan_verdicts": {
+    "old": {
+      "L1": "HIT",
+      "L2": "HIT",
+      "C1": "HIT",
+      "C2": "HIT",
+      "C3": "HIT",
+      "C5": "HIT",
+      "C6": "HIT"
+    },
+    "new": {
+      "L1": "HIT",
+      "L2": "HIT",
+      "C1": "HIT",
+      "C2": "HIT",
+      "C3": "HIT",
+      "C5": "PARTIAL",
+      "C6": "HIT"
+    }
+  },
+  "scan_delta": {
+    "C1": {
+      "old": "HIT",
+      "new": "HIT"
+    },
+    "C2": {
+      "old": "HIT",
+      "new": "HIT"
+    },
+    "C3": {
+      "old": "HIT",
+      "new": "HIT"
+    },
+    "C5": {
+      "old": "HIT",
+      "new": "PARTIAL"
+    },
+    "C6": {
+      "old": "HIT",
+      "new": "HIT"
+    },
+    "L1": {
+      "old": "HIT",
+      "new": "HIT"
+    },
+    "L2": {
+      "old": "HIT",
+      "new": "HIT"
+    }
+  },
+  "reconstructability": {
+    "replayed_turns": 2,
+    "event_count": 18
+  },
+  "authority": {
+    "allow": [
+      "read_fleet",
+      "analyse_copied_data",
+      "read_memory",
+      "read_rulebook",
+      "write_session_log",
+      "write_improvement_proposals"
+    ],
+    "never": [
+      "modify_workers",
+      "modify_models",
+      "promote_versions",
+      "execute_runtime",
+      "apply_effects",
+      "alter_customer_data",
+      "filesystem_unrestricted",
+      "shell",
+      "network"
+    ],
+    "tool_authority_classes": {
+      "python_analysis": "analyse_copied_data"
+    }
+  },
+  "note": "Exact prose and tool calls need not match. The harness assembles the system message from contracts, not core.py's prose, so the model sees a differently-worded but equivalent prompt. We compare behaviour and usefulness, not transcripts."
+}

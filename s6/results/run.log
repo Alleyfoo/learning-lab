@@ -1,0 +1,36 @@
+=== S6 HARNESS SELF-TEST (no model call) ===
+SELF-TEST PASSED (policy refuses NEVER/unknown authority tools / python_analysis contract declares the fresh namespace / a stub session runs through the boundary / the append-only event log has all event types / RECONSTRUCTABILITY CANARY: replay(events) == model_request messages / the bench still refuses os and open behind the harness / core.review remains available)
+
+=== S6 BUILD (frozen S4 fleet; reference-assert signals) ===
+  workers=70 runs=473 hash=a38f6a5a1382ab03
+  hash matches oracle (a38f6a5a1382ab03) -- stimulus frozen, identical to old S4
+
+=== S6 RUN (harnessed; cold; S1 prompt; num_ctx=131072; max_turns=10) ===
+  boundary: SupervisorHarness.run (NOT core.review)
+  contexts: [FleetContext] only (no memory, no rulebook)
+  tools: [python_analysis] (fresh namespace declared in contract)
+
+=== S6 ASSESS (against frozen S4 oracle; same scan as old S4) ===
+
+=== S6 RESULT ===
+  python_used=True  python_calls=4  turns=2  stop=final
+  verdicts: {'HIT': 6, 'PARTIAL': 1, 'MISS': 0}
+    L1: new=HIT      (old=HIT)  disc=['effect_applied', 'effect failed', 'permissionerror', 'append_to_reservations', 'investigation']
+    L2: new=HIT      (old=HIT)  disc=['field_not_in_source', 'price_list.article', 'article', 'investigation', 'open inv']
+    C1: new=HIT      (old=HIT)  disc=['trend', 'increasing', 'upward']
+    C2: new=HIT      (old=HIT)  disc=['regress', 'after promotion', 'post-promotion', 'v2', 'current version', 'new version']
+    C3: new=HIT      (old=HIT)  disc=['stale', 'older version', 're-confirm', 'not re-confirmed', 'v1', 'prior version']
+    C5: new=PARTIAL  (old=HIT)  disc=-
+    C6: new=HIT      (old=HIT)  disc=['not in', 'missing', 'gap', 'hidden', 'exception_files', 'absent', '6 workers']
+  errors: old=2 new=0
+  reconstructability: {'replayed_turns': 2, 'event_count': 18}
+  python calls (first lines of stdout):
+    turn 0 [ok] '=== WORKERS WITH EXCEPTIONS ===\n  enrich-fazerish-open-inv (Fazerish Oy): last=exception, all_time_exc=1, inv=open, committing=False, last_run=2026-02-06T00:00:00+00:00\n  hidden-exception-01 (Fazerish'
+    turn 0 [ok] "=== CONFIRM-STALE WORKERS: confirmation details ===\n  confirm-stale-01 (Tulikivi Oyj): confirmed v1 at 2026-01-16T00:00:00+00:00, current v2, obligation=o_outstanding, answer='these order lines are al"
+    turn 0 [ok] "=== WORKERS WITH NO CONFIRMATIONS ===\n  Count: 41\n  Workers: ['enrich-bg-11', 'enrich-bg-13', 'enrich-bg-14', 'enrich-bg-15', 'enrich-bg-17', 'enrich-bg-18', 'enrich-bg-19', 'enrich-bg-21', 'enrich-bg"
+    turn 0 [ok] "=== CONFIRM-STALE: operator-held fact currency ===\n  confirm-stale-01 (Tulikivi Oyj):\n    Fact confirmed: 'these order lines are all unpaid' at v1 (2026-01-16T00:00:00+00:00)\n    Promoted to v2: 2026-"
+
+  preserved: C:\Users\pertt\learning-lab\s6\results\run.json
+  preserved: C:\Users\pertt\learning-lab\s6\results\session.jsonl
+  preserved: C:\Users\pertt\learning-lab\s6\results\evidence.json
+  preserved: C:\Users\pertt\learning-lab\s6\results\comparison.json
