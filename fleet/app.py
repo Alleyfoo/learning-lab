@@ -60,7 +60,8 @@ if choice == "Fleet":
     st.title("Fleet")
     attention = [w for w in workers if w.open_investigation
                  or (w.runs and not w.runs[-1]["ok"])
-                 or (has_inbox(w) and inbox_mod.summary(w)["exceptions"])]
+                 or (has_inbox(w) and (inbox_mod.summary(w)["exceptions"]
+                                       or inbox_mod.summary(w)["in_flight"]))]
     if attention:
         st.error(f"{len(attention)} worker(s) need attention: "
                  + ", ".join(w.name for w in attention))
@@ -182,8 +183,13 @@ if has_inbox(w):
     cols[1].metric("processed", box["processed"])
     cols[2].metric("queued exceptions", box["exceptions"])
     cols[3].metric("duplicates skipped", box["duplicates_skipped"])
+    if box["in_flight"]:
+        st.warning(f"{box['in_flight']} item(s) left claimed by an interrupted "
+                   f"pass. Run recovery — it reconciles each against the "
+                   f"worker's actual state before deciding to retry.")
     st.caption(f"{box['items_seen']} distinct work item(s) seen, "
-               f"{box['completed']} completed, {box['in_flight']} in flight. "
+               f"{box['completed']} completed, {box['in_flight']} in flight, "
+               f"{box['recovered']} resolved by recovery. "
                f"An item is identified by the sha256 of its content, so a resent "
                f"file is the same work — it is not run again and its effect is "
                f"not applied again.")
@@ -196,7 +202,8 @@ if has_inbox(w):
         "reason": e.get("reason", "") or "",
         "effect": ("" if e.get("effect_applied") is None
                    else "applied" if e["effect_applied"] else "FAILED"),
-        "item": e["item_id"][:10],
+        "verdict": e.get("verdict", ""),
+        "item": (e.get("item_id") or "")[:10],
     } for e in inbox_mod.ledger(w)], use_container_width=True, hide_index=True)
     st.caption("Append-only. An item is claimed before it runs, so an "
                "interrupted pass leaves evidence rather than a file that looks "

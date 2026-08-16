@@ -88,6 +88,11 @@ def main(argv: list[str]) -> int:
         "reserved. Accepted dates are appended to this worker's own state.",
         "reservation", "fleet/workers/room-reservation/state", reservation,
         trigger="fleet/workers/room-reservation/state/fixtures/")
+    ident = json.loads((w3.directory / "worker.json").read_text(encoding="utf-8"))
+    ident["work_item_identity"] = "content_digest"
+    (w3.directory / "worker.json").write_text(
+        json.dumps(ident, indent=2) + chr(10), encoding="utf-8")
+    w3 = fleet.load(w3.directory)
     state = w3.directory / "state"
     shutil.copytree(LAB / "reservation" / "fixtures", state / "fixtures")
     w3 = fleet.load(w3.directory)
@@ -138,7 +143,36 @@ def main(argv: list[str]) -> int:
     inbox.poll(w3)
     w3 = fleet.load(w3.directory)
 
+    # --- two interruptions, and recovery ------------------------------
+    # A crash BEFORE the effect: nothing applied, so the work must not be lost.
+    drop("req-006.json", "2026-07-14")
+    try:
+        inbox.poll(w3, crash_at="after_claim")
+    except inbox.CrashInjected:
+        pass
+    w3 = fleet.load(w3.directory)
+    before_recovery = len(reservations())
+    inbox.recover(w3)
+    w3 = fleet.load(w3.directory)
+    after_before_crash = len(reservations())
+
+    # A crash AFTER the effect: it landed but was never recorded. Recovery must
+    # complete it without re-executing, or the date is booked twice.
+    drop("req-007.json", "2026-08-20")
+    try:
+        inbox.poll(w3, crash_at="after_effect")
+    except inbox.CrashInjected:
+        pass
+    w3 = fleet.load(w3.directory)
+    landed_uncorded = len(reservations())
+    inbox.recover(w3)
+    w3 = fleet.load(w3.directory)
+
     ended_with = len(reservations())
+    print(f"crash BEFORE effect: state {before_recovery} -> "
+          f"{after_before_crash} (work recovered, applied once)")
+    print(f"crash AFTER effect:  effect had landed at {landed_uncorded}, "
+          f"state after recovery {ended_with} (no duplicate)")
     print(f"inbox: duplicate resend left state at {after_duplicate}, "
           f"retry applied once")
     print("inbox summary:", json.dumps(inbox.summary(w3)))

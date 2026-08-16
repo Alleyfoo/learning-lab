@@ -3,5 +3,6 @@
   "purpose": "Accept a requested date unless it is malformed, a holiday, or already reserved. Accepted dates are appended to this worker's own state.",
   "task": "reservation",
   "base": "fleet/workers/room-reservation/state",
-  "trigger": "fleet/workers/room-reservation/state/fixtures/"
+  "trigger": "fleet/workers/room-reservation/state/fixtures/",
+  "work_item_identity": "content_digest"
 }

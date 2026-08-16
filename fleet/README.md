@@ -93,3 +93,45 @@ as the same item and is neither re-run nor re-applied.
 `retry()` moves one exception back to the inbox. That is a person's decision,
 not something the poller does on a timer. An item whose effect never landed
 applies it on retry; one that completed is caught by the ledger.
+
+## Recovery
+
+An interrupted pass leaves a `claimed` line with no terminal line. `recover()`
+resolves each one by reconciling against the worker's **verifiable state**,
+never by guessing:
+
+```text
+already_landed   the effect is present and the claim recorded it ABSENT, so
+                 this run applied it -> complete WITHOUT re-executing
+safe_to_retry    the effect is definitely absent, or none was earnable
+                 -> re-execute
+indeterminate    the question cannot be answered -> exception queue
+```
+
+The **precondition recorded with the claim** is what makes this answerable.
+Without it, "the date is in state" is ambiguous: this run may have put it there,
+or it may have been there all along and the decision was a refusal.
+
+`effect_landed()` deliberately does not reuse `runtime._landed`, which returns
+`False` when state cannot be read. That is right for the commit path — an effect
+that cannot be verified did not land — and wrong here, because "definitely
+absent" and "cannot tell" lead to opposite actions.
+
+### Demonstrated in both windows
+
+```text
+crash BEFORE the effect   nothing applied, file still in inbox
+                          -> safe_to_retry -> applied once. No work lost.
+crash AFTER the effect    effect landed, terminal line never written, file
+                          never moved -- a naive poller would rerun it
+                          -> already_landed -> completed with NO second effect
+                             and no extra run
+```
+
+## Scope
+
+Only `content_digest` work-item identity is implemented, and it is declared per
+worker in `work_item_identity`. An unknown or absent policy is refused, not
+defaulted. `payload_digest` is recorded separately on every ledger line — it is
+a fact about the bytes, whereas identity is a policy, and they coincide for this
+worker only.
