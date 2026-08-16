@@ -66,6 +66,19 @@ import fleet  # noqa: E402
 sys.path.insert(0, str(HERE.parent / "worker"))
 import runtime  # noqa: E402
 
+sys.path.insert(0, str(HERE.parent))
+
+
+def _xlsx():
+    """Imported on use, not on import.
+
+    An optional input adapter must not be a hard dependency of the console: a
+    fleet with no workbook worker should still be readable on a machine without
+    openpyxl. Found the moment the console was opened.
+    """
+    import adapters.xlsx as module
+    return module
+
 LEDGER = "ledger.jsonl"
 FOLDERS = ("inbox", "processed", "exceptions")
 
@@ -182,8 +195,13 @@ def identity_policy(w: fleet.Worker) -> str:
 
 def read_item(w: fleet.Worker, path: Path) -> Item:
     raw = path.read_bytes()
-    payload = json.loads(raw.decode("utf-8"))
     digest = hashlib.sha256(raw).hexdigest()
+    if path.suffix == ".xlsx":
+        # A workbook carries the DATA, not a request. It is converted into the
+        # worker's declared sources and the worker then runs as it always does.
+        payload = {"request": None}
+    else:
+        payload = json.loads(raw.decode("utf-8"))
     policy = identity_policy(w)
     # One policy today. The branch exists so a second one has somewhere to go
     # and so the coincidence stays visible rather than becoming an assumption.
@@ -192,8 +210,18 @@ def read_item(w: fleet.Worker, path: Path) -> Item:
 
 
 def waiting(w: fleet.Worker) -> list[Path]:
-    """Files in the inbox, in a deterministic order."""
-    return sorted((w.directory / "inbox").glob("*.json"))
+    """Files in the inbox, in a deterministic order.
+
+    A worker declaring an input adapter also accepts that adapter's file type.
+    The adapter converts; it does not decide anything.
+    """
+    patterns = ["*.json"]
+    if w.identity.get("input_adapter") == "xlsx":
+        patterns.append("*.xlsx")
+    found: list[Path] = []
+    for pattern in patterns:
+        found += list((w.directory / "inbox").glob(pattern))
+    return sorted(found)
 
 
 def poll(w: fleet.Worker, crash_at: Optional[str] = None) -> list[dict]:
@@ -241,6 +269,35 @@ def poll(w: fleet.Worker, crash_at: Optional[str] = None) -> list[dict]:
                     "precondition": _precondition(w, item.request)})
         if crash_at == "after_claim":
             raise CrashInjected("after_claim")
+
+        if path.suffix == ".xlsx":
+            xlsx = _xlsx()
+            conversion = xlsx.convert(path, xlsx.specs_from(
+                w.identity["adapter_sheets"]))
+            if not conversion.ok:
+                record = {"at": _now(), "item_id": item.item_id,
+                          "payload_digest": item.payload_digest,
+                          "file": path.name, "state": "exception",
+                          "request": None, "problems": conversion.problems,
+                          "reason": "the workbook could not be converted "
+                                    "faithfully"}
+                _append(w, record)
+                shutil.move(str(path), w.directory / "exceptions" / path.name)
+                outcomes.append(record)
+                continue
+            # Written to exactly the paths the MODEL declares, so the adapter
+            # cannot quietly relocate a source the worker depends on.
+            for collection, items in conversion.collections.items():
+                spec = next((v for v in w.model["sources"].values()
+                             if v["collection"] == collection), None)
+                if spec is None:
+                    continue
+                target = w.base / spec["path"]
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(
+                    json.dumps({"_note": f"converted from {path.name}",
+                                collection: items}, indent=2,
+                               ensure_ascii=False) + chr(10), encoding="utf-8")
 
         run = fleet.record_run(w, request=item.request)
         if crash_at == "after_effect":
@@ -383,15 +440,26 @@ def summary(w: fleet.Worker) -> dict:
     ensure(w)
     entries = ledger(w)
     final: dict[str, str] = {}
+    # An item that completed and was later RESENT ends on skipped_duplicate, so
+    # "did it ever complete" is a different question from "what happened last".
+    # Counting only the last state reported 0 completed for a worker that had
+    # done its job -- found by resending a workbook.
+    ever_completed: set = set()
     for entry in entries:
         final[entry["item_id"]] = entry["state"]
+        if entry["state"] in ("completed", "recovered_completed"):
+            ever_completed.add(entry["item_id"])
+
+    def _files(folder: str) -> int:
+        directory = w.directory / folder
+        return len([p for p in directory.iterdir() if p.is_file()])             if directory.is_dir() else 0
+
     return {
         "waiting": len(waiting(w)),
-        "processed": len(list((w.directory / "processed").glob("*.json"))),
-        "exceptions": len(list((w.directory / "exceptions").glob("*.json"))),
+        "processed": _files("processed"),
+        "exceptions": _files("exceptions"),
         "items_seen": len(final),
-        "completed": sum(1 for s in final.values()
-                         if s in ("completed", "recovered_completed")),
+        "completed": len(ever_completed),
         "in_flight": sum(1 for s in final.values() if s == "claimed"),
         "recovered": sum(1 for e in entries
                          if str(e["state"]).startswith("recovered_")),

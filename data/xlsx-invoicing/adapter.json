@@ -1,0 +1,4 @@
+[
+  {"sheet": "Order lines", "collection": "order_lines", "header_row": 1},
+  {"sheet": "Price list",  "collection": "price_list",  "header_row": 1}
+]

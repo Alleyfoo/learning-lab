@@ -1,0 +1,23 @@
+{
+  "_note": "converted from april-order-lines.xlsx by adapters/xlsx.py",
+  "price_list": [
+    {
+      "Article": "ART-7719",
+      "Description": "Hex bolt M8",
+      "Unit price": "0.45",
+      "VAT rate": "25.5"
+    },
+    {
+      "Article": "ART-7720",
+      "Description": "Washer M8",
+      "Unit price": "0.08",
+      "VAT rate": "25.5"
+    },
+    {
+      "Article": "ART-7802",
+      "Description": "Torque wrench 1/2\"",
+      "Unit price": "184.90",
+      "VAT rate": "25.5"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "april-invoicing",
+  "purpose": "Cost each order line: quantity times the article's unit price from the price list.",
+  "task": "enrichment",
+  "base": "fleet/workers/april-invoicing/state",
+  "trigger": "fleet/workers/april-invoicing/inbox/ (*.xlsx)",
+  "input_adapter": "xlsx",
+  "work_item_identity": "content_digest",
+  "adapter_sheets": [
+    {
+      "sheet": "Order lines",
+      "collection": "order_lines",
+      "header_row": 1
+    },
+    {
+      "sheet": "Price list",
+      "collection": "price_list",
+      "header_row": 1
+    }
+  ]
+}
