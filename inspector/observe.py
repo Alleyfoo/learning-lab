@@ -93,9 +93,23 @@ def _examples(values: list) -> list:
 def collections_in(fixtures: Path) -> dict[str, list[dict]]:
     out: dict[str, list[dict]] = {}
     for path in sorted(fixtures.glob("*.json")):
-        data = json.loads(path.read_text(encoding="utf-8"))
-        name = next(k for k in data if not k.startswith("_"))
-        out[name] = data[name]
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        # A COLLECTION is a key holding a list of objects. Anything else in the
+        # directory -- a saved model, a config, notes -- is not data and must
+        # not be measured. Taking the first non-underscore key on trust crashed
+        # the moment a model file was written beside the fixtures.
+        for key, value in data.items():
+            if key.startswith("_") or not isinstance(value, list) or not value:
+                continue
+            if not all(isinstance(row, dict) for row in value):
+                continue
+            out[key] = value
+            break
     return out
 
 

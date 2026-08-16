@@ -68,21 +68,26 @@ _w_run = _load("_w_run", LAB / "experimentW" / "harness" / "run_W.py")
 # aggregation" is NOT a rule. A one-sheet job might be "calculate margin for
 # every row", and a two-source job might aggregate after a join. Promoting
 # workbook count to task semantics would be inventing meaning from a count.
-TASKS = ("enrichment", "aggregation", "reconciliation")
+TASKS = ("enrichment", "aggregation", "reconciliation", "reservation")
 TASK = "enrichment"          # kept for callers that model enrichment directly
 
 
 def expressible(chosen) -> tuple:
     """Task shapes the selected sources could support. Eliminating, not choosing.
 
-    One collection cannot be joined or compared, so only aggregation survives.
-    Two can be either joined (enrichment) or compared (reconciliation), and
-    **structure cannot tell those apart** -- both want two collections and a
-    key. Which one is intended is a fact about the DELIVERABLE, and the only
-    place that exists is what the person asked for.
+    Structure determines which shapes are IMPOSSIBLE. Purpose chooses among
+    those that remain.
+
+    One collection cannot be joined, compared, or checked against a second
+    world, so only aggregation survives. Two or more can be joined
+    (enrichment), compared (reconciliation) or used as the world a booking is
+    checked against (reservation) -- and **structure cannot tell those apart**.
+    Which is intended is a fact about the DELIVERABLE, and the only place that
+    lives is what the person asked for. Adding "three collections means
+    reservation" would be the same count mistake in a new coat.
     """
-    return ("aggregation",) if len(chosen) < 2 else ("enrichment",
-                                                     "reconciliation")
+    return ("aggregation",) if len(chosen) < 2 else (
+        "enrichment", "reconciliation", "reservation")
 
 
 def task_for(chosen) -> str:
@@ -373,15 +378,21 @@ SHAPES = {
                        "what is in both, what is only on the left, what is only "
                        "on the right. The deliverable IS the disagreement. Rows "
                        "with no match are the answer, not an error."),
+    "reservation": ("DECIDES on one incoming request at a time, checking it "
+                    "against rules and existing state, and either accepts it -- "
+                    "changing that state -- or refuses it with a reason. The "
+                    "deliverable is a decision and its consequence, not a "
+                    "table."),
 }
 
 
 def choose_prompt(goal: str, order: tuple) -> str:
+    options = chr(10).join('{"TASK": "%s"}' % name for name in order)
     joiner = chr(10) + chr(10)
     shapes = joiner.join(f"  {name}" + chr(10) + f"      {SHAPES[name]}" for name in order)
-    return f"""A person has data and a job they want done. Two task shapes could be built
-from data of this shape, and the data cannot tell them apart -- both join two
-collections on a key. Only what the person ASKED FOR can decide.
+    return f"""A person has data and a job they want done. Several task shapes could be built
+from data of this shape, and the data cannot tell them apart. Only what the
+person ASKED FOR can decide.
 
 WHAT THEY SAID:
 {goal}
@@ -392,8 +403,7 @@ THE TWO SHAPES:
 
 Answer with ONE of these and nothing else:
 
-{{"TASK": "{order[0]}"}}
-{{"TASK": "{order[1]}"}}
+{options}
 
 If what they said genuinely does not distinguish the two -- if it could
 reasonably mean either -- do NOT guess. Return only:
@@ -539,6 +549,104 @@ PERMITTED VALUES:
 If a load-bearing binding is NOT supported, do NOT produce a model. Return ONLY:
 {json.dumps(BLOCK_SHAPE, indent=2)}"""
 
+
+RESERVATION_SKELETON = {
+    "model_version": 1, "model_id": "...", "task": "reservation",
+    "sources": {}, "rules": [{"rule": "...", "refusal": "..."}],
+    "on_accept": "append_to_reservations",
+}
+
+
+def reservation_prompt(report: list[dict], goal: str, sources: dict,
+                       resumed: bool = False) -> str:
+    """Define a reservation. The request example is EVIDENCE, not a source."""
+    names = list(sources)
+    resume = (chr(10) + "A human has since answered your questions. Those "
+              "claims are now CONFIRMED above; nothing else changed." + chr(10)
+              ) if resumed else ""
+    skeleton = json.loads(json.dumps(RESERVATION_SKELETON))
+    return f"""An inspection produced the claims below. You did not perform it and cannot
+see the data yourself.
+
+--- BEGIN INSPECTION CLAIMS ---
+{json.dumps(report, indent=2, ensure_ascii=False)}
+--- END INSPECTION CLAIMS ---
+{resume}
+THE JOB the person wants, in their words:
+{goal}
+
+THE RULE YOU MUST FOLLOW:
+{RULE}
+
+A RESERVATION DECIDES ON ONE REQUEST AT A TIME. That request is NOT part of the
+worker's permanent world. One of the collections you can see is an EXAMPLE of an
+incoming request -- it is evidence for what a request looks like, and after this
+task is established the worker receives a fresh one each run. It must NOT appear
+in `sources`.
+
+The other collections ARE the permanent world: the state a request is checked
+against.
+
+WHAT THE DETERMINISTIC RUNTIME ALREADY DOES, so do not ask about it:
+  - Rules are evaluated in the order you declare them and the FIRST failure
+    decides the refusal reported. Later rules are not evaluated.
+  - On acceptance the runtime appends to the reservations source and VERIFIES
+    the state changed. A refusal attempts no effect.
+  - Dates are compared as written; there is no calendar arithmetic.
+
+Return ONLY this JSON object:
+
+{{"REQUEST": {{"collection": "<the example request collection>",
+              "field": "<the field carrying the requested date>"}},
+ "ROLES": {{"holidays": "<which collection holds the holidays>",
+           "reservations": "<which collection holds existing bookings>"}},
+ "MODEL": {json.dumps(skeleton, indent=2)}}}
+
+PERMITTED VALUES:
+  ROLES                map each ROLE to one of {json.dumps(names)}. The task
+                       names its worlds "holidays" and "reservations"; your
+                       collections are named whatever the person named them.
+                       Leave `sources` in the MODEL empty -- it is built from
+                       ROLES.
+  rules[].rule         "date_well_formed", "not_holiday", "not_reserved"
+  rules[].refusal      "INVALID_DATE", "HOLIDAY", "ALREADY_RESERVED"
+  on_accept            "append_to_reservations"
+
+If a load-bearing binding is NOT supported, do NOT produce a model. Return ONLY:
+{json.dumps(BLOCK_SHAPE, indent=2)}"""
+
+
+def reservation_of(text: str, sources: dict):
+    """Split the answer into a model and the run-input contract.
+
+    The program removes the request collection from `sources` -- it is not
+    trusted to the definer's care. An example that survived as a declared source
+    would blur definition evidence into a runtime dependency, and the worker
+    would carry a file it must never read again.
+    """
+    payload = None
+    for obj in _w_run._objects(text):
+        if isinstance(obj, dict) and isinstance(obj.get("MODEL"), dict):
+            payload = obj
+            break
+    if payload is None:
+        return None, None
+    model = payload["MODEL"]
+    request = payload.get("REQUEST") or {}
+    example = str(request.get("collection") or "")
+    model["task"] = "reservation"
+    roles = payload.get("ROLES") or {}
+    # Role binding is the DEFINER's decision; keying the model is the program's
+    # act. Rebuilding sources from the workspace keys -- which are the person's
+    # collection names -- silently produced a model the task could not accept.
+    model["sources"] = {}
+    for role in ("holidays", "reservations"):
+        collection = str(roles.get(role) or "")
+        if collection in sources and collection != example:
+            model["sources"][role] = dict(sources[collection])
+    model["inputs"] = [str(request.get("field") or "requested_date")]
+    return model, {"collection": example, "field": model["inputs"][0]}
+
 def inspect_prompt(observed: list[dict], goal: str) -> str:
     return INSPECT_PROMPT.format(
         observed=json.dumps(observed, indent=2, ensure_ascii=False), goal=goal,
@@ -658,6 +766,7 @@ def manifest_of(text: str):
 
 
 _LAST_MANIFEST: dict = {"value": None}
+_LAST_REQUEST: dict = {"value": None}
 
 
 def define(report: list[dict], goal: str, sources: dict, ask: Ask,
@@ -669,6 +778,8 @@ def define(report: list[dict], goal: str, sources: dict, ask: Ask,
         prompt = aggregation_prompt(report, goal, sources, resumed)
     elif task == "reconciliation":
         prompt = reconciliation_prompt(report, goal, sources, resumed)
+    elif task == "reservation":
+        prompt = reservation_prompt(report, goal, sources, resumed)
     else:
         prompt = define_prompt(report, goal, sources, resumed, deferred)
     text = ask(with_manifest(prompt, obligations_list or []))
@@ -677,6 +788,12 @@ def define(report: list[dict], goal: str, sources: dict, ask: Ask,
     if block is not None:
         return None, block
     node = _node_of(text)
+    if task == "reservation":
+        model, request = reservation_of(text, sources)
+        _LAST_REQUEST["value"] = request
+        if model is not None:
+            return model, None
+        return None, _w_run.block_of(text)
     if node is not None and task in ("aggregation", "reconciliation"):
         node["sources"] = json.loads(json.dumps(sources))
         node["task"] = task
@@ -738,7 +855,7 @@ def propose(report: list[dict], goal: str, sources: dict, observed: list[dict],
         model, block = define(report, goal, sources, ask, resumed,
                               all_deferred or None, observed, task)
         if block is None:
-            if task in ("aggregation", "reconciliation"):
+            if task in ("aggregation", "reconciliation", "reservation"):
                 return model, [], all_deferred
             # The definer did not block -- but it is not the authority on
             # whether a binding is established. The program checks its own
