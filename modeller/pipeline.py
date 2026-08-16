@@ -367,6 +367,38 @@ def define(report: list[dict], goal: str, sources: dict, ask: Ask,
     return node, None
 
 
+def _operand_question(model: Optional[dict], observed: list[dict],
+                      report: Optional[list[dict]]):
+    """Turn the program's own operand refusal into one precise question."""
+    if not model:
+        return None
+    complaint = check_operands_supported(model, observed, report)
+    if not complaint or "nothing independently distinguishes" not in complaint:
+        return None
+    for out in model.get("outputs") or []:
+        compute = out.get("compute")
+        if not compute:
+            continue
+        # Ask about whichever operand is genuinely ambiguous, not a fixed side.
+        # A definer may put either operand first, and asking about `Qty` -- the
+        # only numeric field in its source -- produced a question with no
+        # candidates and the raw internal complaint as its text.
+        for side in ("right", "left"):
+            ref = compute[side]
+            siblings = [c for c in observed
+                        if c["claim"].get("source") == ref["from"]
+                        and c["claim"].get("value_kind") == "numeric_string"]
+            if len(siblings) > 1:
+                return ({"source": ref["from"], "field": ref["field"],
+                         "binding": f"which field supplies `{out['target']}`",
+                         "question": complaint},
+                        f"`{out['target']}` is computed from "
+                        f"`{ref['from']}.{ref['field']}`, and only its NAME "
+                        f"distinguishes it from the other numeric field(s) in "
+                        f"`{ref['from']}`")
+    return None
+
+
 def propose(report: list[dict], goal: str, sources: dict, observed: list[dict],
             ask: Ask, resumed: bool = False):
     """Define, then triage any block. Returns (model, questions, deferred).
@@ -381,6 +413,15 @@ def propose(report: list[dict], goal: str, sources: dict, observed: list[dict],
         model, block = define(report, goal, sources, ask, resumed,
                               all_deferred or None, observed)
         if block is None:
+            # The definer did not block -- but it is not the authority on
+            # whether a binding is established. The program checks its own
+            # measurements and, where they do not settle a load-bearing
+            # operand, raises the question the definer failed to ask. The first
+            # real workbook went straight past this: the definer picked
+            # `Unit price` by name and never blocked, so nothing asked.
+            unsupported = _operand_question(model, observed, report)
+            if unsupported:
+                return None, [unsupported], all_deferred
             return model, [], all_deferred
         asked, deferred = triage(block, observed)
         all_deferred += deferred
@@ -627,6 +668,18 @@ def questions_from(block: list, observed: list[dict]) -> list[Question]:
                     f"{r['right']} {r['left_coverage']}" for r in fit["candidates"])
                 text = (f"`{left}` matches {overlaps}. "
                         f"Which field is the intended product identifier?")
+        if not options and field:
+            # An operand-role question: offer the numeric fields it could be
+            # confused with, and say why it is being asked.
+            siblings = sorted(
+                f"{c['claim']['source']}.{c['claim']['field']}" for c in observed
+                if c["claim"].get("source") == source
+                and c["claim"].get("value_kind") == "numeric_string")
+            if len(siblings) > 1:
+                options = siblings
+                text = (f"`{source}` has {len(siblings)} numeric fields and "
+                        f"nothing in the data distinguishes them. Which one is "
+                        f"meant here?")
         out.append(Question(source, field, entry.get("binding", ""), text, options))
     return out
 

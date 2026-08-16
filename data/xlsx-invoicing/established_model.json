@@ -4,11 +4,11 @@
   "task": "enrichment",
   "sources": {
     "order_lines": {
-      "path": "sources/order_lines.json",
+      "path": "april-invoicing/order_lines.json",
       "collection": "order_lines"
     },
     "price_list": {
-      "path": "sources/price_list.json",
+      "path": "april-invoicing/price_list.json",
       "collection": "price_list"
     }
   },
