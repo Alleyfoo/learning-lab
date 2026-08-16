@@ -1,0 +1,8 @@
+{
+  "name": "rese-sf-62",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s5/fixtures/safety/rese-sf-62/state",
+  "trigger": "fleet/safety/inbox/purchases/*.xlsx",
+  "customer": "Kesko Oyj"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "rese-tr-67",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s5/fixtures/transfer/rese-tr-67/state",
+  "trigger": "fleet/transfer/inbox/purchases/*.xlsx",
+  "customer": "Fazerish Oy"
+}

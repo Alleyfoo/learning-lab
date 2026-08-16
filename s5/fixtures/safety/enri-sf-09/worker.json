@@ -1,0 +1,8 @@
+{
+  "name": "enri-sf-09",
+  "purpose": "Process records.",
+  "task": "enrichment",
+  "base": "s5/fixtures/safety/enri-sf-09/state",
+  "trigger": "fleet/safety/inbox/payroll/*.xlsx",
+  "customer": "Tulikivi Oyj"
+}

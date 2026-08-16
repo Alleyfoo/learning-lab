@@ -1,0 +1,8 @@
+{
+  "name": "reco-sf-37",
+  "purpose": "Process records.",
+  "task": "reconciliation",
+  "base": "s5/fixtures/safety/reco-sf-37/state",
+  "trigger": "fleet/safety/inbox/timesheets/*.xlsx",
+  "customer": "Fazerish Oy"
+}

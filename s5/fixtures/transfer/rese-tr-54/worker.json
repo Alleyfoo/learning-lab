@@ -1,0 +1,8 @@
+{
+  "name": "rese-tr-54",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s5/fixtures/transfer/rese-tr-54/state",
+  "trigger": "fleet/transfer/inbox/master-catalogue/*.xlsx",
+  "customer": "Acme Oy"
+}

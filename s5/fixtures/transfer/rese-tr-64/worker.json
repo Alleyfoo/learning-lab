@@ -1,0 +1,8 @@
+{
+  "name": "rese-tr-64",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s5/fixtures/transfer/rese-tr-64/state",
+  "trigger": "fleet/transfer/inbox/invoices/*.xlsx",
+  "customer": "Northwind Oy"
+}

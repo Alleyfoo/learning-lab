@@ -1,0 +1,8 @@
+{
+  "name": "aggr-sf-25",
+  "purpose": "Process records.",
+  "task": "aggregation",
+  "base": "s5/fixtures/safety/aggr-sf-25/state",
+  "trigger": "fleet/safety/inbox/timesheets/*.xlsx",
+  "customer": "Fazerish Oy"
+}

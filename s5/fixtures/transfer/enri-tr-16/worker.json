@@ -1,0 +1,8 @@
+{
+  "name": "enri-tr-16",
+  "purpose": "Process records from the shared master catalogue.",
+  "task": "enrichment",
+  "base": "s5/fixtures/transfer/enri-tr-16/state",
+  "trigger": "fleet/transfer/inbox/master-catalogue/*.xlsx",
+  "customer": "Northwind Oy"
+}

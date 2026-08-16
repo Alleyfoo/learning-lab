@@ -1,0 +1,8 @@
+{
+  "name": "rese-tr-69",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s5/fixtures/transfer/rese-tr-69/state",
+  "trigger": "fleet/transfer/inbox/invoices/*.xlsx",
+  "customer": "Tulikivi Oyj"
+}

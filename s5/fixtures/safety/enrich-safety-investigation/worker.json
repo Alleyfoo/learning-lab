@@ -1,0 +1,8 @@
+{
+  "name": "enrich-safety-investigation",
+  "purpose": "Process records.",
+  "task": "enrichment",
+  "base": "s5/fixtures/safety/enrich-safety-investigation/state",
+  "trigger": "fleet/safety/inbox/orders/*.xlsx",
+  "customer": "Acme Oy"
+}

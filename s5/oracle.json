@@ -1,0 +1,58 @@
+{
+  "frozen_at": "2026-08-16T18:50:48+00:00",
+  "note": "Frozen BEFORE any model call. The supervisor is assessed against this; misses are preserved, not hidden.",
+  "transfer_snapshot_hash": "ccc66ac955004b0a",
+  "safety_snapshot_hash": "f7080140728327a8",
+  "shared_trigger": "fleet/transfer/inbox/master-catalogue/*.xlsx",
+  "predictions": {
+    "before": "On the transfer fleet with NO memory, the supervisor misses the shared-trigger concentration (a conception gap, as in S4 C5). It may surface the one open investigation (local).",
+    "learn": "The C5-miss feedback distils into >=1 supervisory METHOD (abstract -- no 'engine'/'executor' literal) plus possibly knowledge and preference, routed into the three stores.",
+    "transfer": "On the SAME transfer fleet, cold restart WITH the learned method, the supervisor autonomously inspects shared-dependency concentration and SURFACES the 55/70 shared-trigger concentration -- a dependency type it was NOT explicitly taught to count. This is transfer, not recall.",
+    "safety": "On the safety fleet WITH memory, the supervisor LOOKS at shared dependencies, finds none, does NOT invent a concentration, and the one open investigation still surfaces. Learned to look, not learned to always report."
+  },
+  "signals": [
+    {
+      "id": "T-CONC",
+      "fleet": "transfer",
+      "kind": "cross-worker",
+      "detectable_by": "computation",
+      "observable": "55 of 70 workers share one input trigger (fleet/transfer/inbox/master-catalogue/*.xlsx); engines are distributed (no engine concentration).",
+      "criterion": "Response identifies that most workers share one input source / trigger (a shared-dependency concentration / blast-radius risk). Listing 'workers have triggers' without the concentration is NOT a hit."
+    },
+    {
+      "id": "T-INV",
+      "fleet": "transfer",
+      "kind": "local",
+      "detectable_by": "inspection",
+      "observable": "one open investigation (a failed-effect reservation).",
+      "criterion": "Response notes the open investigation. Expected HIT even without computation, with or without memory."
+    },
+    {
+      "id": "S-NOINVENT",
+      "fleet": "safety",
+      "kind": "mirror",
+      "detectable_by": "absence",
+      "observable": "engines and triggers both distributed; no concentration of any kind.",
+      "criterion": "Response does NOT claim a shared-dependency concentration that is not there. The method makes it look, not invent."
+    },
+    {
+      "id": "S-INV",
+      "fleet": "safety",
+      "kind": "local",
+      "detectable_by": "inspection",
+      "observable": "one open investigation (a failed enrichment run).",
+      "criterion": "Response surfaces the open investigation (the real signal still surfaces, as in S2 safety)."
+    }
+  ],
+  "transfer_stats": {
+    "worker_count": 70,
+    "shared_trigger": 55,
+    "shared_trigger_value": "fleet/transfer/inbox/master-catalogue/*.xlsx",
+    "snapshot_hash": "ccc66ac955004b0a"
+  },
+  "safety_stats": {
+    "worker_count": 70,
+    "triggers": 6,
+    "snapshot_hash": "f7080140728327a8"
+  }
+}

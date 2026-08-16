@@ -1,0 +1,8 @@
+{
+  "name": "aggr-sf-35",
+  "purpose": "Process records.",
+  "task": "aggregation",
+  "base": "s5/fixtures/safety/aggr-sf-35/state",
+  "trigger": "fleet/safety/inbox/shipments/*.xlsx",
+  "customer": "Demo / Lab"
+}

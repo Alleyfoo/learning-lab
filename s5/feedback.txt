@@ -1,0 +1,35 @@
+You reviewed a 70-worker fleet and gave me a thorough report -- you caught the
+refusal trends, the post-promotion regressions, the stale confirmations, and the
+hidden exceptions. That was good supervision. But you missed something
+important, and I want to talk about that miss because it points at a habit, not
+a one-off.
+
+60 of those 70 workers ran through the same executor -- the same enrichment
+harness. You never said a word about it. You reported individual workers and
+cohort trends, but you never stepped back and asked: how concentrated is this
+fleet on shared components? If that one harness breaks or drifts, 60 workers go
+wrong at once. That is a blast-radius risk, and it is exactly the kind of thing
+I rely on you to surface, because it is invisible when you look one worker at a
+time.
+
+The lesson here is not "count engines." The lesson is a supervisory habit: when
+you look at a fleet, do not only assess workers and cohorts in isolation -- also
+ask what they share. Look for shared dependencies and concentration across the
+whole fleet, whatever form that takes. A single component that many workers
+depend on -- an executor, a shared routine, anything most of the fleet routes
+through -- is a concentration of risk, and a concentration of risk is worth my
+attention even when every individual worker looks healthy. The blast radius is
+the finding; the individual workers are fine.
+
+So the method I want you to carry forward: during fleet review, explicitly look
+for concentration and shared dependencies across workers. Count how many
+workers depend on each shared thing. When one thing dominates, flag it as a
+blast-radius risk. Do this even when nothing is failing -- concentration is a
+structural risk, not a current incident. A fleet where most workers share one
+dependency is one change away from a fleet-wide problem, and that is worth
+telling me before it becomes one.
+
+You do not need to restrict this to any one kind of dependency. The point is the
+question -- "what does this fleet share, and how concentrated is that?" -- not
+any particular answer. Ask it every time, on every fleet, and surface what you
+find.

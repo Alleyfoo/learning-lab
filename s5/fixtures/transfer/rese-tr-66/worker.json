@@ -1,0 +1,8 @@
+{
+  "name": "rese-tr-66",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s5/fixtures/transfer/rese-tr-66/state",
+  "trigger": "fleet/transfer/inbox/timesheets/*.xlsx",
+  "customer": "Acme Oy"
+}

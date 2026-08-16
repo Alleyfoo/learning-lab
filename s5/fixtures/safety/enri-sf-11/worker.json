@@ -1,0 +1,8 @@
+{
+  "name": "enri-sf-11",
+  "purpose": "Process records.",
+  "task": "enrichment",
+  "base": "s5/fixtures/safety/enri-sf-11/state",
+  "trigger": "fleet/safety/inbox/shipments/*.xlsx",
+  "customer": "Demo / Lab"
+}

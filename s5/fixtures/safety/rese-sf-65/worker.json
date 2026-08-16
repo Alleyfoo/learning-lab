@@ -1,0 +1,8 @@
+{
+  "name": "rese-sf-65",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s5/fixtures/safety/rese-sf-65/state",
+  "trigger": "fleet/safety/inbox/shipments/*.xlsx",
+  "customer": "Demo / Lab"
+}

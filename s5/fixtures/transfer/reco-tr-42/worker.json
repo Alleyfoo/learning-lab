@@ -1,0 +1,8 @@
+{
+  "name": "reco-tr-42",
+  "purpose": "Process records from the shared master catalogue.",
+  "task": "reconciliation",
+  "base": "s5/fixtures/transfer/reco-tr-42/state",
+  "trigger": "fleet/transfer/inbox/master-catalogue/*.xlsx",
+  "customer": "Acme Oy"
+}

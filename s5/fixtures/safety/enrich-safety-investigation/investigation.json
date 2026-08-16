@@ -1,0 +1,18 @@
+{
+  "opened": "2026-01-26T00:00:00+00:00",
+  "from_version": 1,
+  "state": "open",
+  "failure": [
+    "field_not_in_source: price_list.Article"
+  ],
+  "difference": {
+    "price_list": {
+      "expected": "Article",
+      "observed": [
+        "Item code",
+        "VAT rate"
+      ]
+    }
+  },
+  "question": null
+}

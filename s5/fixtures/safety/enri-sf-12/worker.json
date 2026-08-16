@@ -1,0 +1,8 @@
+{
+  "name": "enri-sf-12",
+  "purpose": "Process records.",
+  "task": "enrichment",
+  "base": "s5/fixtures/safety/enri-sf-12/state",
+  "trigger": "fleet/safety/inbox/orders/*.xlsx",
+  "customer": "Acme Oy"
+}

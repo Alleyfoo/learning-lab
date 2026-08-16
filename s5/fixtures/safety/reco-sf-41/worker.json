@@ -1,0 +1,8 @@
+{
+  "name": "reco-sf-41",
+  "purpose": "Process records.",
+  "task": "reconciliation",
+  "base": "s5/fixtures/safety/reco-sf-41/state",
+  "trigger": "fleet/safety/inbox/shipments/*.xlsx",
+  "customer": "Demo / Lab"
+}

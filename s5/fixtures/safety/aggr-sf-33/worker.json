@@ -1,0 +1,8 @@
+{
+  "name": "aggr-sf-33",
+  "purpose": "Process records.",
+  "task": "aggregation",
+  "base": "s5/fixtures/safety/aggr-sf-33/state",
+  "trigger": "fleet/safety/inbox/payroll/*.xlsx",
+  "customer": "Tulikivi Oyj"
+}

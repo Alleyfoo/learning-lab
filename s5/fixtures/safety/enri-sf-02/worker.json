@@ -1,0 +1,8 @@
+{
+  "name": "enri-sf-02",
+  "purpose": "Process records.",
+  "task": "enrichment",
+  "base": "s5/fixtures/safety/enri-sf-02/state",
+  "trigger": "fleet/safety/inbox/purchases/*.xlsx",
+  "customer": "Kesko Oyj"
+}

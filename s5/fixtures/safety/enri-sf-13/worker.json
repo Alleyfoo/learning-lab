@@ -1,0 +1,8 @@
+{
+  "name": "enri-sf-13",
+  "purpose": "Process records.",
+  "task": "enrichment",
+  "base": "s5/fixtures/safety/enri-sf-13/state",
+  "trigger": "fleet/safety/inbox/timesheets/*.xlsx",
+  "customer": "Fazerish Oy"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "rese-sf-61",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s5/fixtures/safety/rese-sf-61/state",
+  "trigger": "fleet/safety/inbox/timesheets/*.xlsx",
+  "customer": "Fazerish Oy"
+}

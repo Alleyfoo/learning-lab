@@ -1,0 +1,8 @@
+{
+  "name": "reco-sf-50",
+  "purpose": "Process records.",
+  "task": "reconciliation",
+  "base": "s5/fixtures/safety/reco-sf-50/state",
+  "trigger": "fleet/safety/inbox/purchases/*.xlsx",
+  "customer": "Kesko Oyj"
+}

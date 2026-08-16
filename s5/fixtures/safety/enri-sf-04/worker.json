@@ -1,0 +1,8 @@
+{
+  "name": "enri-sf-04",
+  "purpose": "Process records.",
+  "task": "enrichment",
+  "base": "s5/fixtures/safety/enri-sf-04/state",
+  "trigger": "fleet/safety/inbox/invoices/*.xlsx",
+  "customer": "Northwind Oy"
+}

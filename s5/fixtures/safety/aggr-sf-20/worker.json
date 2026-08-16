@@ -1,0 +1,8 @@
+{
+  "name": "aggr-sf-20",
+  "purpose": "Process records.",
+  "task": "aggregation",
+  "base": "s5/fixtures/safety/aggr-sf-20/state",
+  "trigger": "fleet/safety/inbox/purchases/*.xlsx",
+  "customer": "Kesko Oyj"
+}

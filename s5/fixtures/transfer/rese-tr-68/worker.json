@@ -1,0 +1,8 @@
+{
+  "name": "rese-tr-68",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s5/fixtures/transfer/rese-tr-68/state",
+  "trigger": "fleet/transfer/inbox/payroll/*.xlsx",
+  "customer": "Kesko Oyj"
+}

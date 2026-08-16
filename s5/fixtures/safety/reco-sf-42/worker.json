@@ -1,0 +1,8 @@
+{
+  "name": "reco-sf-42",
+  "purpose": "Process records.",
+  "task": "reconciliation",
+  "base": "s5/fixtures/safety/reco-sf-42/state",
+  "trigger": "fleet/safety/inbox/orders/*.xlsx",
+  "customer": "Acme Oy"
+}

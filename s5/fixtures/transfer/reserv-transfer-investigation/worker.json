@@ -1,0 +1,8 @@
+{
+  "name": "reserv-transfer-investigation",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s5/fixtures/transfer/reserv-transfer-investigation/state",
+  "trigger": "fleet/transfer/inbox/master-catalogue/*.xlsx",
+  "customer": "Demo / Lab"
+}

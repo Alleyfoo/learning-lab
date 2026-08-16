@@ -1,0 +1,8 @@
+{
+  "name": "aggr-sf-24",
+  "purpose": "Process records.",
+  "task": "aggregation",
+  "base": "s5/fixtures/safety/aggr-sf-24/state",
+  "trigger": "fleet/safety/inbox/orders/*.xlsx",
+  "customer": "Acme Oy"
+}

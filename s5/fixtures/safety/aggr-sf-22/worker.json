@@ -1,0 +1,8 @@
+{
+  "name": "aggr-sf-22",
+  "purpose": "Process records.",
+  "task": "aggregation",
+  "base": "s5/fixtures/safety/aggr-sf-22/state",
+  "trigger": "fleet/safety/inbox/invoices/*.xlsx",
+  "customer": "Northwind Oy"
+}

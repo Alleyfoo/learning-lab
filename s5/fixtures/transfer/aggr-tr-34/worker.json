@@ -1,0 +1,8 @@
+{
+  "name": "aggr-tr-34",
+  "purpose": "Process records from the shared master catalogue.",
+  "task": "aggregation",
+  "base": "s5/fixtures/transfer/aggr-tr-34/state",
+  "trigger": "fleet/transfer/inbox/master-catalogue/*.xlsx",
+  "customer": "Northwind Oy"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "rese-sf-66",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s5/fixtures/safety/rese-sf-66/state",
+  "trigger": "fleet/safety/inbox/orders/*.xlsx",
+  "customer": "Acme Oy"
+}
