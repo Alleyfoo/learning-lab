@@ -1,0 +1,45 @@
+{
+  "feedback": "Non-committing is normal for enrichment; that isn't a concern. Ledger lines\naren't output rows, so don't compare those counts. Also, I don't need warnings\nmerely because a new healthy worker has little history or hasn't exercised every\nrefusal condition.",
+  "raw_response": "```json\n{\n  \"system_knowledge\": [\n    {\n      \"statement\": \"Enrichment workers are non-committing by design.\",\n      \"original\": \"Non-committing is normal for enrichment; that isn't a concern.\",\n      \"scope\": {\n        \"task_type\": \"enrichment\"\n      }\n    },\n    {\n      \"statement\": \"Ledger lines are not output rows and their counts should not be compared.\",\n      \"original\": \"Ledger lines aren't output rows, so don't compare those counts.\",\n      \"scope\": {\n        \"applies\": \"inbox_ledger\"\n      }\n    }\n  ],\n  \"operator_preferences\": [\n    {\n      \"statement\": \"Do not warn merely because a new healthy worker has little history or hasn't exercised every refusal condition.\",\n      \"original\": \"I don't need warnings merely because a new healthy worker has little history or hasn't exercised every refusal condition.\",\n      \"scope\": {\n        \"applies\": \"supervision\"\n      }\n    }\n  ]\n}\n```",
+  "parse_error": null,
+  "system_knowledge": [
+    {
+      "at": "2026-08-16T17:55:16+00:00",
+      "kind": "system_knowledge",
+      "basis": "operator_correction",
+      "statement": "Enrichment workers are non-committing by design.",
+      "original": "Non-committing is normal for enrichment; that isn't a concern.",
+      "scope": {
+        "task_type": "enrichment"
+      },
+      "from_run": "run-20260816T175507Z"
+    },
+    {
+      "at": "2026-08-16T17:55:16+00:00",
+      "kind": "system_knowledge",
+      "basis": "operator_correction",
+      "statement": "Ledger lines are not output rows and their counts should not be compared.",
+      "original": "Ledger lines aren't output rows, so don't compare those counts.",
+      "scope": {
+        "applies": "inbox_ledger"
+      },
+      "from_run": "run-20260816T175507Z"
+    }
+  ],
+  "operator_preferences": [
+    {
+      "at": "2026-08-16T17:55:16+00:00",
+      "kind": "operator_preference",
+      "basis": "operator_feedback",
+      "statement": "Do not warn merely because a new healthy worker has little history or hasn't exercised every refusal condition.",
+      "original": "I don't need warnings merely because a new healthy worker has little history or hasn't exercised every refusal condition.",
+      "scope": {
+        "applies": "supervision"
+      },
+      "from_run": "run-20260816T175507Z"
+    }
+  ],
+  "elapsed_seconds": 8.6,
+  "recorded_at": "2026-08-16T17:55:16+00:00",
+  "feedback_file": "s2/feedback.txt"
+}

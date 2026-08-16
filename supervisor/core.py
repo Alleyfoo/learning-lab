@@ -83,6 +83,30 @@ operator, not an action you can take.
 """
 
 
+def _memory_preamble(knowledge: Optional[list], preferences: Optional[list]) -> str:
+    """Render the loaded memory as a labelled preamble, or '' if there is none.
+
+    This is Memory v0: load every line and put it in front of the model. No
+    retrieval, no scoring. The two classes are kept distinct because system
+    knowledge (what the system means) and operator preference (what this operator
+    cares about) are different things and must not collapse into one memory.
+    """
+    parts: list[str] = []
+    if knowledge:
+        parts.append("System knowledge you have been given -- facts about how this "
+                     "system works, true for any operator. Apply them when reading "
+                     "fleet state:")
+        for entry in knowledge:
+            parts.append(f"- {entry.get('statement')}")
+    if preferences:
+        parts.append("Operator supervision preferences -- what this operator "
+                     "considers worth their attention. Respect them when deciding "
+                     "what to surface:")
+        for entry in preferences:
+            parts.append(f"- {entry.get('statement')}")
+    return "\n".join(parts) + ("\n\n" if parts else "")
+
+
 def _chat(messages: list[dict], *, model: str, endpoint: str,
           options: dict, timeout: float) -> str:
     """One round-trip to local Ollama. Returns the assistant message text."""
@@ -107,15 +131,23 @@ def review(snapshot: dict, prompt: str, *,
            max_turns: int = DEFAULT_MAX_TURNS,
            bench_timeout: float = BENCH_TIMEOUT,
            options: Optional[dict] = None,
-           request_timeout: float = 600.0) -> dict:
+           request_timeout: float = 600.0,
+           knowledge: Optional[list] = None,
+           preferences: Optional[list] = None) -> dict:
     """Run the supervisor over `snapshot`. Returns a full run record (UI-free).
 
     `prompt` is the frozen broad question -- it must NOT encode the expected
     answers. The tool protocol and authority boundaries are added here.
+
+    `knowledge` and `preferences` are the loaded Memory v0 stores. When present
+    they are injected as a labelled preamble so the supervisor can apply prior
+    system knowledge and operator preferences. When absent the run is exactly the
+    S1 baseline. The broad prompt itself never changes.
     """
     opts = options or {"temperature": 0.2}
     snapshot_json = json.dumps(snapshot, indent=2, ensure_ascii=False)
-    system = f"{prompt}\n\n{TOOL_PROTOCOL}\n\n{BOUNDARIES}"
+    system = (f"{prompt}\n\n{_memory_preamble(knowledge, preferences)}"
+              f"{TOOL_PROTOCOL}\n\n{BOUNDARIES}")
     messages: list[dict] = [
         {"role": "system", "content": system},
         {"role": "user", "content":
@@ -212,11 +244,12 @@ def _self_test() -> int:
 
     # the loop logic with a stub chat that computes then answers
     snap = {"workers": [{"name": "a", "recent_runs": [{"ok": False}]}]}
-    calls = {"n": 0}
+    calls = {"n": 0, "seen_system": None}
 
     def stub_chat(messages, *, model, endpoint, options, timeout):
         calls["n"] += 1
         if calls["n"] == 1:
+            calls["seen_system"] = messages[0]["content"]
             return "Let me count exceptions.\n```python\nprint(sum(1 for w in snapshot['workers'] for r in w['recent_runs'] if not r['ok']))\n```"
         return "There is 1 failed run worth your attention."
 
@@ -241,6 +274,39 @@ def _self_test() -> int:
     check(rec["expectation"] is None and rec["assessment"] is None,
           "expectation/assessment slots left blank for the human")
 
+    # --- memory injection: present only when knowledge/preferences given ----
+    g2 = globals()
+
+    def capture_chat(messages, *, model, endpoint, options, timeout):
+        calls["seen_system"] = messages[0]["content"]
+        return "Nothing needs attention."
+
+    g2["_chat"] = capture_chat
+    try:
+        # no memory -> preamble absent
+        calls["seen_system"] = None
+        review(snap, "You are supervising.", max_turns=1, request_timeout=10)
+        check(calls["seen_system"] is not None
+              and "System knowledge you have been given" not in calls["seen_system"]
+              and "Operator supervision preferences" not in calls["seen_system"],
+              "CANARY: with no memory, the system message has no memory preamble")
+        # memory -> preamble present, both classes, broad prompt intact
+        calls["seen_system"] = None
+        review(snap, "You are supervising this fleet.", max_turns=1,
+               request_timeout=10,
+               knowledge=[{"statement": "Enrichment is non-committing by design."}],
+               preferences=[{"statement": "Do not report thin run history."}])
+        sysmsg = calls["seen_system"] or ""
+        check("Enrichment is non-committing by design." in sysmsg
+              and "Do not report thin run history." in sysmsg
+              and "System knowledge you have been given" in sysmsg
+              and "Operator supervision preferences" in sysmsg,
+              "memory preamble injected with both classes when provided")
+        check("You are supervising this fleet." in sysmsg,
+              "the broad prompt is unchanged when memory is present")
+    finally:
+        g2["_chat"] = orig
+
     # a run that answers immediately, no python
     calls["n"] = 0
     g["_chat"] = lambda *a, **k: "Nothing needs attention."
@@ -257,7 +323,9 @@ def _self_test() -> int:
     print("SELF-TEST PASSED (python blocks extracted / the loop computes then "
           "answers with a stub model / bench output is fed back / final prose is "
           "preserved / snapshot hash and blank expectation+assessment slots "
-          "recorded / an immediate no-python answer is captured)")
+          "recorded / an immediate no-python answer is captured / memory preamble "
+          "is absent with no memory and present with both classes, broad prompt "
+          "unchanged)")
     return 0
 
 

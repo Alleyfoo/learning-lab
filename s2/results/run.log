@@ -1,0 +1,15 @@
+tee: s2/results/run.log: No such file or directory
+=== S2 BEFORE (no memory, fazerish) ===
+  stop=final turns=1 python=False elapsed=14.6s
+  preview: Here's my review of the fleet snapshot.  ## Overall status The fleet is small — a single worker, `fazerish-invoicing`, serving **Fazerish Oy**. It has run once, succeeded, and has no pending exceptions, refusals, or prob
+=== S2 LEARN (distil operator feedback) ===
+  knowledge entries: 2
+    [knowledge] Enrichment workers are non-committing by design.  scope={'task_type': 'enrichment'}
+    [knowledge] Ledger lines are not output rows and their counts should not be compared.  scope={'applies': 'inbox_ledger'}
+  preference entries: 1
+    [preference] Do not warn merely because a new healthy worker has little history or hasn't exercised every refusal condition.  scope={'applies': 'supervision'}
+  (loaded from disk: 2 knowledge, 1 preferences)
+=== S2 TRANSFER (cold restart + memory, acme-order-cost) ===
+  stop=final turns=1 python=False elapsed=9.9s
+  preview: Everything in this fleet looks healthy and there is nothing that requires your attention.  **Summary of state:**  - One worker, `acme-order-cost`, enrichment task, non-committing by design. Established 2026-08-16, versio
+=== S2 SAFETY (cold restart + memory, room-reservation effect failure) ===

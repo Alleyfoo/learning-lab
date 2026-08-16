@@ -1,0 +1,23 @@
+{
+  "_note": "converted from may-order-lines.xlsx",
+  "order_lines": [
+    {
+      "Line": "FZ-201",
+      "Article": "K-4400",
+      "Qty": "24",
+      "Delivery date": "2026-05-18"
+    },
+    {
+      "Line": "FZ-202",
+      "Article": "K-4471",
+      "Qty": "6",
+      "Delivery date": "2026-05-18"
+    },
+    {
+      "Line": "FZ-203",
+      "Article": "K-4400",
+      "Qty": "3",
+      "Delivery date": "2026-05-25"
+    }
+  ]
+}

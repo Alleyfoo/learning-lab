@@ -1,0 +1,22 @@
+{
+  "name": "acme-order-cost",
+  "purpose": "Cost each order line from the order workbook: quantity times the article's unit price from the price list.",
+  "task": "enrichment",
+  "base": "s2/fixtures/transfer/acme-order-cost/state",
+  "trigger": "s2/fixtures/transfer/acme-order-cost/inbox/ (*.xlsx)",
+  "customer": "Acme Oy",
+  "input_adapter": "xlsx",
+  "work_item_identity": "content_digest",
+  "adapter_sheets": [
+    {
+      "sheet": "Order lines",
+      "collection": "order_lines",
+      "header_row": 1
+    },
+    {
+      "sheet": "Price list",
+      "collection": "price_list",
+      "header_row": 1
+    }
+  ]
+}

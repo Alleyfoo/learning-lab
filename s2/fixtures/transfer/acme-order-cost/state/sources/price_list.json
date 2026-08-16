@@ -1,0 +1,17 @@
+{
+  "_note": "converted from may-order-lines.xlsx",
+  "price_list": [
+    {
+      "Article": "K-4400",
+      "Description": "Baking tray 60x40",
+      "Unit price": "12.50",
+      "VAT rate": "25.5"
+    },
+    {
+      "Article": "K-4471",
+      "Description": "Proofing cloth",
+      "Unit price": "7.25",
+      "VAT rate": "25.5"
+    }
+  ]
+}

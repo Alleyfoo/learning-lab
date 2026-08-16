@@ -1,0 +1,4 @@
+Non-committing is normal for enrichment; that isn't a concern. Ledger lines
+aren't output rows, so don't compare those counts. Also, I don't need warnings
+merely because a new healthy worker has little history or hasn't exercised every
+refusal condition.

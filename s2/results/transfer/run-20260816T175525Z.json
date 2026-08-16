@@ -1,0 +1,35 @@
+{
+  "schema": "supervisor.run/v1",
+  "model": "glm-5.2:cloud",
+  "endpoint": "http://localhost:11434/api/chat",
+  "options": {
+    "temperature": 0.2
+  },
+  "max_turns": 6,
+  "bench_timeout": 10.0,
+  "snapshot_hash": "02a621f78d7abdec",
+  "prompt": "You are supervising this fleet. Inspect the available system state using the tools\navailable to you. Tell the operator anything you consider worth their attention.\nYou may also note improvements you think the system itself should consider. Do\nnot change the fleet.",
+  "python_used": false,
+  "python_call_count": 0,
+  "turn_count": 1,
+  "stop_reason": "final",
+  "turns": [
+    {
+      "turn": 0,
+      "assistant": "Everything in this fleet looks healthy and there is nothing that requires your attention.\n\n**Summary of state:**\n\n- One worker, `acme-order-cost`, enrichment task, non-committing by design. Established 2026-08-16, version 1, single version.\n- One run completed successfully: 3 rows processed, 0 refused, 0 exceptions, no problems reported.\n- Inbox is clean: 1 file seen (`may-order-lines.xlsx`), completed, nothing waiting or in flight, no exception files, no duplicates.\n- No pending exceptions fleet-wide.\n\n**Notes:**\n\n- The inbox reports 2 ledger lines, which corresponds to the two ledger entries for the single item (claimed, then completed). Per how the system works, ledger lines are not output rows, so there is nothing to reconcile against the 3 enriched rows.\n- The worker is newly established with only one run, but per your preferences I am not treating that as a concern since it is healthy and functioning as designed.\n\nNo action needed.",
+      "python_calls": [],
+      "ended_run": true
+    }
+  ],
+  "final_response": "Everything in this fleet looks healthy and there is nothing that requires your attention.\n\n**Summary of state:**\n\n- One worker, `acme-order-cost`, enrichment task, non-committing by design. Established 2026-08-16, version 1, single version.\n- One run completed successfully: 3 rows processed, 0 refused, 0 exceptions, no problems reported.\n- Inbox is clean: 1 file seen (`may-order-lines.xlsx`), completed, nothing waiting or in flight, no exception files, no duplicates.\n- No pending exceptions fleet-wide.\n\n**Notes:**\n\n- The inbox reports 2 ledger lines, which corresponds to the two ledger entries for the single item (claimed, then completed). Per how the system works, ledger lines are not output rows, so there is nothing to reconcile against the 3 enriched rows.\n- The worker is newly established with only one run, but per your preferences I am not treating that as a concern since it is healthy and functioning as designed.\n\nNo action needed.",
+  "expectation": "Cold restart with memory, on a DIFFERENT healthy enrichment worker. The dry-run and ledger-vs-rows concerns should be gone (correction transferred), and the thin-history / unexercised-refusal advisories should be gone (preference transferred). It should not manufacture concern about a clean worker.",
+  "assessment": "PASS. On a genuinely different healthy enrichment worker (acme-order-cost, never seen) the supervisor applied disk-loaded memory rather than recalling worker X. It explicitly framed the worker as non-committing by design (knowledge entry 1 phrasing), explicitly stated ledger lines are not output rows so there is nothing to reconcile against the 3 enriched rows (knowledge entry 2), and explicitly declined to flag the single-run history per your preferences (preference entry). All four before-concerns gone; no action needed. turns=1, python unused.",
+  "elapsed_seconds": 9.9,
+  "condition": "transfer",
+  "run_id": "20260816T175525Z",
+  "recorded_at": "2026-08-16T17:55:25+00:00",
+  "memory_loaded": {
+    "knowledge": 2,
+    "preferences": 1
+  }
+}
