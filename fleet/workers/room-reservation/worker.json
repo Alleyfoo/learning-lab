@@ -5,5 +5,5 @@
   "base": "fleet/workers/room-reservation/state",
   "trigger": "fleet/workers/room-reservation/state/fixtures/",
   "work_item_identity": "content_digest",
-  "customer": "Acme Oy"
+  "customer": "Demo / Lab"
 }

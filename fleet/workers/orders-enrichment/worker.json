@@ -4,5 +4,5 @@
   "task": "enrichment",
   "base": "enrichment",
   "trigger": "enrichment/fixtures/",
-  "customer": "Acme Oy"
+  "customer": "Demo / Lab"
 }
