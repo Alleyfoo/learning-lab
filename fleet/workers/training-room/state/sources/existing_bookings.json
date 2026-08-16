@@ -1,0 +1,15 @@
+{
+  "existing_bookings": [
+    {
+      "date": "2026-09-02",
+      "booked_by": "Sales"
+    },
+    {
+      "date": "2026-09-21",
+      "booked_by": "HR"
+    },
+    {
+      "date": "2026-09-14"
+    }
+  ]
+}

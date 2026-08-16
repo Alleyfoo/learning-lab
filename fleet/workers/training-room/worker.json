@@ -1,0 +1,8 @@
+{
+  "name": "training-room",
+  "purpose": "Reserve the training room for a requested date unless it is a holiday or already booked.",
+  "task": "reservation",
+  "base": "fleet/workers/training-room/state",
+  "trigger": "fleet/workers/training-room/inbox/",
+  "customer": "Demo / Lab"
+}

@@ -552,7 +552,8 @@ If a load-bearing binding is NOT supported, do NOT produce a model. Return ONLY:
 
 RESERVATION_SKELETON = {
     "model_version": 1, "model_id": "...", "task": "reservation",
-    "sources": {}, "rules": [{"rule": "...", "refusal": "..."}],
+    "sources": {}, "source_fields": {"holidays": "...", "reservations": "..."},
+    "rules": [{"rule": "...", "refusal": "..."}],
     "on_accept": "append_to_reservations",
 }
 
@@ -608,6 +609,9 @@ PERMITTED VALUES:
                        collections are named whatever the person named them.
                        Leave `sources` in the MODEL empty -- it is built from
                        ROLES.
+  source_fields        when a source's items are OBJECTS, name the field
+                       holding the date. Omit a source whose items are bare
+                       date strings.
   rules[].rule         "date_well_formed", "not_holiday", "not_reserved"
   rules[].refusal      "INVALID_DATE", "HOLIDAY", "ALREADY_RESERVED"
   on_accept            "append_to_reservations"
@@ -867,6 +871,12 @@ def propose(report: list[dict], goal: str, sources: dict, observed: list[dict],
             if unsupported:
                 return None, [unsupported], all_deferred
             return model, [], all_deferred
+        if task != "enrichment":
+            # Triage's rules are about JOIN keys and numeric OPERANDS -- the two
+            # data-dependent decisions an enrichment model expresses. A
+            # reservation block is about neither, and deferring it left the
+            # person with no model AND no question: a silent dead end.
+            return None, [(e, "the definer could not establish this") for e in block], all_deferred
         asked, deferred = triage(block, observed)
         all_deferred += deferred
         if asked:

@@ -1,0 +1,16 @@
+{
+  "company_holidays": [
+    {
+      "date": "2026-09-07",
+      "name": "Company day"
+    },
+    {
+      "date": "2026-12-24",
+      "name": "Christmas Eve"
+    },
+    {
+      "date": "2026-12-25",
+      "name": "Christmas Day"
+    }
+  ]
+}

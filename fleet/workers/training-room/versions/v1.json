@@ -4,11 +4,11 @@
   "task": "reservation",
   "sources": {
     "holidays": {
-      "path": "training-room/company_holidays.json",
+      "path": "sources/company_holidays.json",
       "collection": "company_holidays"
     },
     "reservations": {
-      "path": "training-room/existing_bookings.json",
+      "path": "sources/existing_bookings.json",
       "collection": "existing_bookings"
     }
   },
