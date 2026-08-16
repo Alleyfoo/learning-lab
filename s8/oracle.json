@@ -1,0 +1,94 @@
+{
+  "frozen_at": "2026-08-17",
+  "frozen_before_any_model_call": true,
+  "note": "Predictions frozen BEFORE any S8 model call. The supervisor is assessed against this; misses and composition failures are preserved, not hidden. Fleet hashes are the S7 frozen hashes (asserted at run time). METHOD-only and MEASUREMENT-only reuse S7 Phase A / Phase D configs; their predictions echo S7 outcomes (with a one-run variance caveat). METHOD+MEASUREMENT is the new cell.",
+  "fleet_hashes": {
+    "A": "6cb2c1ffaa1d4d77",
+    "D": "14bddbb3d2678f61"
+  },
+  "dominant": {
+    "A": {"type": "engine", "identity": "enrichment/harness/execute_enrichment.py", "count": 60, "share": 0.857, "of": 70},
+    "D": null
+  },
+  "conditions": {
+    "METHOD-only": {
+      "memory": "full S5 (methods + knowledge + preferences)",
+      "measurement": false,
+      "config_note": "= S7 Phase A. The method directs attention to concentration; no measurement, so the supervisor computes group/count/share by hand."
+    },
+    "MEASUREMENT-only": {
+      "memory": "cold (none)",
+      "measurement": true,
+      "config_note": "= S7 Phase D. Measurement present; nothing tells the cold supervisor it is the answer to ask."
+    },
+    "METHOD+MEASUREMENT": {
+      "memory": "full S5 (methods + knowledge + preferences)",
+      "measurement": true,
+      "config_note": "NEW. Method as attention policy + measurement as cheap factual answer. The composition cell."
+    }
+  },
+  "predictions": {
+    "A": {
+      "METHOD-only": {
+        "asks_concentration_question": true,
+        "identifies_engine_60_of_70": true,
+        "concentration_rederivation_calls": ">=1",
+        "measurement_read_calls": 0,
+        "interpretation_with_llm": true,
+        "note": "S7 Phase A found engine 60/70 via 3 calls (1 NameError). Re-derivation expected."
+      },
+      "MEASUREMENT-only": {
+        "identifies_engine_60_of_70": true,
+        "concentration_rederivation_calls": "low (0 or 1)",
+        "measurement_read_calls": "0 or 1 (cold; may re-derive anyway, as S7 did)",
+        "interpretation_with_llm": true,
+        "note": "S7 Phase D found it in 1 call citing 85.7%. Cold may or may not lean on the measurement."
+      },
+      "METHOD+MEASUREMENT": {
+        "asks_concentration_question": true,
+        "identifies_engine_60_of_70": true,
+        "concentration_rederivation_calls": "~0 (reads the measurement)",
+        "measurement_read_calls": ">=0 (may read inline in JSON, no python needed)",
+        "complementary_calls": ">=0 (task/customer/investigation)",
+        "interpretation_with_llm": true,
+        "predicted_win": "no re-derivation; the measurement answers, the LLM interprets"
+      }
+    },
+    "D": {
+      "METHOD-only": {
+        "asks_concentration_question": true,
+        "invents_false_concentration": false,
+        "finds_reservation_cohort_or_investigation": true,
+        "concentration_rederivation_calls": ">=1 (confirms no majority concentration)",
+        "interpretation_with_llm": true,
+        "note": "S7 Phase A: 3 calls, 0 errors, no false concentration, found reservation 17/70 + open investigation."
+      },
+      "MEASUREMENT-only": {
+        "invents_false_concentration": false,
+        "concentration_rederivation_calls": "high (S7 re-derived; 9 calls, 4 NameErrors)",
+        "measurement_read_calls": "0 (S7 did not cite the measurement)",
+        "note": "S7 Phase D negative: re-derived rather than read. This is the cell METHOD+MEASUREMENT is meant to fix."
+      },
+      "METHOD+MEASUREMENT": {
+        "asks_concentration_question": true,
+        "invents_false_concentration": false,
+        "reads_mechanical_distribution_and_moves_on": true,
+        "concentration_rederivation_calls": "~0",
+        "measurement_read_calls": ">=0 (reads distribution; may be inline JSON, no python)",
+        "complementary_calls": ">=0 (reservation cohort, investigation)",
+        "total_calls_lt_measurement_only": true,
+        "predicted_win": "reads 'no majority concentration', moves on to complementary work; fewer calls than MEASUREMENT-only -- the direct fix of S7's criterion-5 mirror negative"
+      }
+    }
+  },
+  "hypothesis": "The learned method remains useful as the question/attention policy while promoted deterministic machinery replaces the repeated factual computation; interpretation stays with the LLM. On the distributed mirror, METHOD+MEASUREMENT inspects the mechanical distribution and moves on rather than re-derive it.",
+  "crux": "S5 method statement 2 says 'Count how many workers depend on each shared component' -- an instruction to count, which the measurement precomputes. If the supervisor re-derives despite the measurement, the method's wording and the machinery do not cleanly compose (a preserved failure; the method is frozen). If it reads the measurement, composition works.",
+  "success_criteria": [
+    "1. composition on A: METHOD+MEASUREMENT identifies engine concentration with ~0 re-derivation calls",
+    "2. composition on D: METHOD+MEASUREMENT reads the distribution, moves on, fewer calls than MEASUREMENT-only",
+    "3. method stays useful as attention policy in METHOD+MEASUREMENT",
+    "4. concentration_rederivation calls lower in measurement-bearing conditions than METHOD-only (esp. D)",
+    "5. interpretation stays with the LLM; the measurement/contract report facts only",
+    "6. floor frozen: concentration.py unchanged; snapshot.py/rulebook.jsonl unchanged; authority bounded"
+  ]
+}
