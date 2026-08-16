@@ -1,0 +1,23 @@
+{
+  "_note": "staff_id renamed AND duplicated as staff_code. Two complete unique candidates; nothing mechanical distinguishes them.",
+  "staff": [
+    {
+      "employee_id": "E-14",
+      "staff_code": "E-14",
+      "name": "R. Ahmed",
+      "hourly_rate": "42.50"
+    },
+    {
+      "employee_id": "E-27",
+      "staff_code": "E-27",
+      "name": "J. Laine",
+      "hourly_rate": "38.00"
+    },
+    {
+      "employee_id": "E-31",
+      "staff_code": "E-31",
+      "name": "M. Koskinen",
+      "hourly_rate": "51.75"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "_note": "staff_id renamed to employee_id. Exactly one complete unique candidate for timesheets.staff_ref, so the Y policy can settle the replacement without a human.",
+  "staff": [
+    {
+      "employee_id": "E-14",
+      "name": "R. Ahmed",
+      "hourly_rate": "42.50",
+      "team": "Survey"
+    },
+    {
+      "employee_id": "E-27",
+      "name": "J. Laine",
+      "hourly_rate": "38.00",
+      "team": "Survey"
+    },
+    {
+      "employee_id": "E-31",
+      "name": "M. Koskinen",
+      "hourly_rate": "51.75",
+      "team": "Analysis"
+    }
+  ]
+}
