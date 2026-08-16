@@ -4,7 +4,7 @@
   "source_repo": "https://github.com/Alleyfoo/Data-Task-Modelling-Lab.git",
   "source_commit": "789beae390acfbf4ffc259b2a2b67eb00c09a0d6",
   "source_tag": "pre-learning-lab-move",
-  "destination": "learning-lab/<new repo \u2014 fill in at move time>",
+  "destination": "https://github.com/Alleyfoo/learning-lab.git",
   "note": "State at the boundary before development continued under learning-lab. The SHA is the authority: the timestamp says when the move happened, the commit says exactly what state moved.",
   "history_preserved": true,
   "reading_the_boundary": [
