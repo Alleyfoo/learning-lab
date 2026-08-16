@@ -820,12 +820,19 @@ def preserve_input_row(model: dict, observed: list[dict]) -> dict:
 
 @dataclass
 class Question:
-    """One load-bearing fact the system cannot establish locally."""
+    """One load-bearing fact the system cannot establish locally.
+
+    It carries its own `obligation` id. The UI must hand that id back with the
+    answer rather than reconstructing it from the question text: if something is
+    addressable internally, the interface preserves the address instead of
+    collapsing it into prose.
+    """
     source: object
     field: Optional[str]
     binding: str
     text: str
     options: list[str] = dc_field(default_factory=list)
+    obligation: Optional[str] = None
 
     @property
     def referent(self) -> dict:
@@ -1006,7 +1013,8 @@ def questions_from(block: list, observed: list[dict]) -> list[Question]:
                 text = (f"`{source}` has {len(siblings)} numeric fields and "
                         f"nothing in the data distinguishes them. Which one is "
                         f"meant here?")
-        out.append(Question(source, field, entry.get("binding", ""), text, options))
+        out.append(Question(source, field, entry.get("binding", ""), text,
+                            options, entry.get("obligation")))
     return out
 
 
@@ -1019,10 +1027,23 @@ PENDING: list = []
 
 def pending_clear() -> None:
     PENDING.clear()
+    UNADDRESSED.clear()
 
 
 def pending_answers() -> list:
     return list(PENDING)
+
+
+UNADDRESSED: list = []
+
+
+def submit_answer(report: list[dict], question: Question, human_answer: str):
+    """THE function the UI calls. It passes the question object back, whole.
+
+    The obligation id travels on the Question, so the interface never has to
+    know one exists -- and cannot get it wrong by guessing from the text.
+    """
+    return answer(report, question, human_answer)
 
 
 def answer(report: list[dict], question: Question, human_answer: str,
@@ -1032,6 +1053,12 @@ def answer(report: list[dict], question: Question, human_answer: str,
     Confirmation resolves claims, not workflows: a second unresolved load-bearing
     claim must still stop the run, and does.
     """
+    obligation = obligation or question.obligation
+    if not obligation:
+        # NOT silently a generic confirmation. An answer with no address cannot
+        # discharge an obligation, so it is left unresolved and visible --
+        # establishment will refuse for the obligation nobody answered.
+        UNADDRESSED.append({"text": question.text, "answer": human_answer})
     if obligation:
         source = question.source
         referent = (f"{source[0] if isinstance(source, list) else source}"

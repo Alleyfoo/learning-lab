@@ -205,7 +205,8 @@ if S.get("asked"):
     if st.button("That's the one"):
         answer = (f"{q.source[0] if isinstance(q.source, list) else q.source}"
                   f".{q.field} matches {choice}") if q.options else choice
-        S["report"] = pipeline.answer(S["report"], q, answer)
+        # The whole question goes back, carrying its obligation id.
+        S["report"] = pipeline.submit_answer(S["report"], q, answer)
         with st.spinner("Resuming…"):
             S["model"], S["asked"], S["deferred"] = pipeline.propose(
                 S["report"], goal, pipeline.source_spec(ws, chosen), observed,

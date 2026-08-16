@@ -303,6 +303,60 @@ def _self_test() -> int:
         ok(as_claims(reloaded.directory, v)[0]["status"] == "CONFIRMED",
            "…with the answer still CONFIRMED")
 
+        # --- THROUGH THE UI-FACING HANDLER, end to end ----------------------
+        # Same function modeller/app.py calls. The UI hands the whole Question
+        # back; it never reconstructs an obligation id from the question text.
+        import pipeline as PL
+        PL.pending_clear()
+        block = [{"source": "purchase_invoices", "field": "Gross",
+                  "obligation": "o2", "binding": "outstanding",
+                  "question": "Are these invoices unpaid, or already paid?"}]
+        q = PL.questions_from(block, [])[0]
+        ok(q.obligation == "o2",
+           f"CANARY: the question must CARRY its obligation id: {q}")
+        PL.submit_answer([], q, "all six invoices are unpaid")
+        pending2 = [Pending(**x) for x in PL.pending_answers()]
+        ok([x.obligation for x in pending2] == ["o2"]
+           and pending2[0].referent == "purchase_invoices.Gross",
+           f"the UI handler produced an addressed pending confirmation: "
+           f"{PL.pending_answers()}")
+
+        w2 = establish(root, "w-ui", "p", "aggregation", "data", model,
+                       obs, man, pending2)
+        v2 = w2.current_version
+        del w2
+        back = _fleet.load(root / "w-ui")
+        claim = as_claims(back.directory, back.current_version)[0]
+        ok(claim["status"] == "CONFIRMED"
+           and claim["claim"]["obligation"] == "o2"
+           and claim["claim"]["referent"] == "purchase_invoices.Gross",
+           f"CANARY: after restart, CONFIRMED / o2 / purchase_invoices.Gross: "
+           f"{claim}")
+        ok(M.check(obs, man, inventory,
+                   asked=list(discharged(back.directory,
+                                         back.current_version))) == [],
+           "CANARY: and it runs without asking again")
+
+        # --- NEGATIVE: an answer with no address ---------------------------
+        PL.pending_clear()
+        anon = PL.Question("purchase_invoices", "Gross", "b",
+                           "Are these unpaid?")
+        ok(anon.obligation is None, "a question with no obligation id")
+        PL.submit_answer([], anon, "yes, unpaid")
+        ok(PL.pending_answers() == [],
+           f"CANARY: an unaddressed answer must NOT become a generic "
+           f"confirmation: {PL.pending_answers()}")
+        ok(PL.UNADDRESSED and PL.UNADDRESSED[0]["answer"] == "yes, unpaid",
+           "…it is left visible as unresolved rather than dropped")
+        try:
+            establish(root, "w-anon", "p", "aggregation", "data", model,
+                      obs, man, [Pending(**x) for x in PL.pending_answers()])
+            ok(False, "CANARY: establishment must still refuse -- the "
+                      "obligation nobody addressed is unanswered")
+        except EstablishmentFailed:
+            ok(not (root / "w-anon").exists(), "…and nothing is left behind")
+        PL.pending_clear()
+
         # --- an answer for the WRONG version does not discharge -------------
         ok(M.check(obs, man, inventory,
                    asked=list(discharged(scratch, 3))) != [],
@@ -321,7 +375,12 @@ def _self_test() -> int:
           "answer still blocks / establishment REFUSES when a required "
           "confirmation was never answered and when its write fails, rolling "
           "the worker back both times / a good establishment persists them and "
-          "reload is establishable again WITHOUT asking anyone)")
+          "reload is establishable again WITHOUT asking anyone / THROUGH THE "
+          "UI-FACING HANDLER a question carries its obligation id, the answer "
+          "persists, and after restart CONFIRMED/o2/purchase_invoices.Gross "
+          "runs without asking again / an answer with NO address never becomes "
+          "a generic confirmation -- it stays visibly unresolved and "
+          "establishment still refuses)")
     return 0
 
 
