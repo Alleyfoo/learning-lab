@@ -434,12 +434,14 @@ def choose_task(goal: str, candidates: tuple, ask: Ask):
     if forward and forward == backward:
         return forward, None
     if forward != backward and forward and backward:
-        return None, ("Do you want the statement rows enlarged with matching "
-                      "ledger data, or a report of how the two disagree? What "
-                      "you asked for could reasonably mean either.")
+        # Named from the CANDIDATE SHAPES, not from any one fixture. This text
+        # said "statement rows" and "ledger data" -- vocabulary from the
+        # reconciliation job -- and read as nonsense the moment a different job
+        # reached it.
+        return None, (f"What you asked for could reasonably mean either of "
+                      f"{list(candidates)}. Which deliverable do you want?")
     return None, (q1 or q2 or
-                  "Do you want the rows enlarged with matching data, or a "
-                  "report of how the two disagree?")
+                  f"Which of {list(candidates)} is the deliverable you want?")
 
 
 RECONCILIATION_SKELETON = {
