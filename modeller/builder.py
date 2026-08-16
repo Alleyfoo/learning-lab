@@ -101,6 +101,27 @@ TASKS: dict[str, TaskBinding] = {
 }
 
 
+# Which task bodies can report their own construct inventory. Same visible
+# coupling as TASKS, and for the same reason: only the body knows what its
+# constructs MEAN. The generic manifest layer must never learn a path rule.
+CONSTRUCTS = {"reconciliation": reconciliation_model.constructs}
+
+
+def constructs_of(task: str, raw: dict, base: Optional[Path] = None) -> tuple:
+    """The construct referents a VALIDATED model genuinely contains.
+
+    An invalid model exposes nothing: a body that does not validate has not
+    earned the right to claim it contains anything.
+    """
+    reporter = CONSTRUCTS.get(task)
+    if reporter is None:
+        return ()
+    model = task_model.parse(raw)
+    if not task_model.validate(model, base or TASKS[task].base).valid:
+        return ()
+    return tuple(reporter(model))
+
+
 def task_names() -> list[str]:
     """Task types that are BOTH registered with the floor and runnable here.
 

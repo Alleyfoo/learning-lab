@@ -288,6 +288,48 @@ TASK = register(TaskType(name="reconciliation", refusals=REFUSALS,
                          body_problem_codes=BODY_PROBLEM_CODES))
 
 
+def constructs(model: TaskModel) -> tuple[str, ...]:
+    """Executable constructs this body GENUINELY contains, as semantic referents.
+
+    Not paths. A path can name a thing that merely sounds like the requirement --
+    `classify.both_different` is a LABEL, and a manifest that accepted it as
+    discharge for "show me where the amounts differ" would pass a model with no
+    comparison in it at all. That happened, which is why this exists.
+
+    A referent appears only when the construct that delivers it is present:
+
+    ```text
+    match_binding                  a key is bound on both sides
+    peer_presence_classification   presence on one side only is reported
+    difference_classification      same/different is reported -- ONLY alongside
+                                   an actual comparison
+    compare:<field>                that field is really compared
+    ```
+
+    Removing `compare` removes every `compare:<field>` referent and the
+    difference classification with them, however the labels are named.
+    """
+    out: list[str] = []
+    match = model.body.get("match_on") or {}
+    if match.get("left_field") and match.get("right_field"):
+        out.append("match_binding")
+
+    classify = model.body.get("classify") or {}
+    if classify.get("only_left") and classify.get("only_right"):
+        out.append("peer_presence_classification")
+
+    compares = compare_of(model)
+    for spec in compares:
+        field = str(spec.get("field", ""))
+        if field:
+            out.append(f"compare:{field}")
+    # The difference classification is only real when something is compared.
+    # Labels alone do not make a model report differences.
+    if compares and classify.get("both_same") and classify.get("both_different"):
+        out.append("difference_classification")
+    return tuple(out)
+
+
 def validate(model: TaskModel, base: Path) -> Report:
     return validate_envelope(model, base)
 

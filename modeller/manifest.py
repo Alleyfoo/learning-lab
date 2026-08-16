@@ -13,14 +13,20 @@ addressable obligation. Before a model may be established, every obligation must
 be discharged in exactly one of three ways:
 
 ```text
-construct     it maps to a path that actually EXISTS in the model
+construct     it names a referent from the task's own construct INVENTORY
 question      it was put to the person, and is waiting on them
 unsupported   it cannot be expressed, and says why
 ```
 
-The teeth are in the first. A discharge claiming `compare` is checked against
-the model, so a manifest asserting a requirement was met by a construct that is
-not there fails — and an otherwise valid model becomes unestablishable.
+The teeth are in the first, and they are the TASK's teeth, not this layer's.
+**This module knows no paths and no task semantics.** It receives an inventory of
+semantic referents that a validated body reports itself as genuinely containing,
+and a discharge naming anything outside it fails.
+
+That replaces an earlier dotted-path check which was too weak to be worth much:
+a path could resolve to `classify.both_different` — a LABEL — and so discharge
+"show me where the amounts differ" for a model containing no comparison at all.
+A referent like `compare:Amount` exists only when the comparison does.
 
 ## What this does NOT do
 
@@ -36,6 +42,7 @@ from __future__ import annotations
 
 import json
 import sys
+from pathlib import Path
 from typing import Optional
 
 DISCHARGES = ("construct", "question", "unsupported")
@@ -79,9 +86,15 @@ def resolve_path(model: dict, path: str):
     return node
 
 
-def check(obligations_list: list[dict], manifest: dict, model: Optional[dict],
+def check(obligations_list: list[dict], manifest: dict,
+          inventory: Optional[tuple] = None,
           asked: Optional[list] = None) -> list[str]:
-    """Problems preventing establishment. Empty means every obligation landed."""
+    """Problems preventing establishment. Empty means every obligation landed.
+
+    `inventory` is the task's own report of what its validated body contains.
+    This function never inspects a model and knows no task vocabulary.
+    """
+    inventory = tuple(inventory or ())
     problems: list[str] = []
     manifest = manifest or {}
     for obligation in obligations_list:
@@ -96,12 +109,11 @@ def check(obligations_list: list[dict], manifest: dict, model: Optional[dict],
             problems.append(f"{oid} discharge {via!r} is not one of {DISCHARGES}")
             continue
         if via == "construct":
-            path = entry.get("path", "")
-            if model is None or resolve_path(model, path) in (None, [], {}):
+            referent = str(entry.get("construct") or entry.get("path") or "")
+            if referent not in inventory:
                 problems.append(
-                    f"{oid} claims {clause!r} is met by `{path}`, which is not "
-                    f"in the model -- the requirement was identified and then "
-                    f"dropped")
+                    f"{oid} claims {clause!r} is met by `{referent}`, which the "
+                    f"body does not contain. Available: {list(inventory)}")
         elif via == "question" and not asked:
             problems.append(f"{oid} claims {clause!r} was put to the person, "
                             f"but no question was asked")
@@ -117,56 +129,96 @@ def _self_test() -> int:
         if not cond:
             failures.append(msg)
 
+    LAB = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(LAB / "modeller"))
+    import builder
+
     obs = [{"id": "o1", "clause": "anything missing from either side"},
            {"id": "o2", "clause": "where the amounts differ"}]
-    compared = {"task": "reconciliation",
-                "match_on": {"left_field": "Invoice", "right_field": "Their ref"},
-                "compare": [{"field": "Amount", "comparison": "exact"}],
-                "classify": {"both_same": "matched",
-                             "both_different": "amount_differs",
-                             "only_left": "a", "only_right": "b"}}
-    manifest = {"o1": {"via": "construct", "path": "classify"},
-                "o2": {"via": "construct", "path": "compare"}}
-    ok(check(obs, manifest, compared) == [],
-       f"a model carrying both constructs establishes: "
-       f"{check(obs, manifest, compared)}")
+    man = {"o1": {"via": "construct", "construct": "peer_presence_classification"},
+           "o2": {"via": "construct", "construct": "compare:Amount"}}
 
-    # --- THE CANARY: remove the requested construct, keep everything else ----
-    stripped = json.loads(json.dumps(compared))
+    base = LAB / "data"
+    model = json.loads((base / "xlsx-statement" / "established_model.json")
+                       .read_text(encoding="utf-8"))
+    inventory = builder.constructs_of("reconciliation", model, base)
+    ok("compare:Amount" in inventory and "match_binding" in inventory
+       and "peer_presence_classification" in inventory,
+       f"a validated body reports its own constructs: {inventory}")
+    ok(check(obs, man, inventory) == [],
+       f"both obligations discharge against real referents: "
+       f"{check(obs, man, inventory)}")
+
+    # --- THE CANARY: strip compare, KEEP the label ------------------------
+    stripped = json.loads(json.dumps(model))
     stripped.pop("compare")
-    stripped["classify"] = {"both": "x", "only_left": "a", "only_right": "b"}
-    problems = check(obs, manifest, stripped)
-    ok(len(problems) == 1 and "o2" in problems[0] and "compare" in problems[0],
-       f"CANARY: an otherwise valid model missing the requested construct must "
-       f"be UNESTABLISHABLE: {problems}")
+    ok(stripped["classify"].get("both_different"),
+       "the canary must keep the LABEL, or it proves nothing")
+    # The INVENTORY itself, isolated from validity: the body's own report on
+    # the stripped shape. This is the claim under test -- a label surviving must
+    # not keep a referent alive.
+    import sys as _s
+    _s.path.insert(0, str(LAB / "reconciliation" / "harness"))
+    _s.path.insert(0, str(LAB / "taskmodel"))
+    import reconciliation_model as RM
+    import task_model as TM
+    direct = RM.constructs(TM.parse(stripped))
+    ok("compare:Amount" not in direct,
+       f"CANARY: removing compare must remove compare:Amount even though "
+       f"classify.both_different remains: {direct}")
+    ok("difference_classification" not in direct,
+       f"CANARY: and the difference classification with it: {direct}")
+    ok("peer_presence_classification" in direct,
+       f"…while constructs that ARE still there survive: {direct}")
+    problems = check(obs, man, direct)
+    ok(len(problems) == 1 and "o2" in problems[0],
+       f"CANARY: so exactly the differ-obligation becomes undischargeable: "
+       f"{problems}")
 
-    ok(check(obs, {"o1": manifest["o1"]}, compared),
+    # And through the builder, where validity gates it: an invalid body earns
+    # nothing, so EVERY obligation blocks.
+    left = builder.constructs_of("reconciliation", stripped, base)
+
+    # --- the task validator rejects it INDEPENDENTLY ----------------------
+    report = builder.validate_raw("reconciliation", stripped, base=base)
+    ok(not report.valid
+       and any("classify_split_mismatch" in str(p) for p in report.problems),
+       f"CANARY: the reconciliation validator must reject the malformed model "
+       f"on its own: {[str(p) for p in report.problems][:2]}")
+    ok(left == (),
+       f"an INVALID body reports no constructs at all: {left}")
+
+    # --- the generic layer knows nothing task-specific --------------------
+    source = Path(__file__).read_text(encoding="utf-8")
+    body = source[source.index("def check("):source.index("def _self_test")]
+    for word in ("classify", "match_on", "reconciliation", "compare"):
+        ok(word not in body,
+           f"CANARY: check() must contain no task vocabulary, found {word!r}")
+
+    ok(check(obs, {"o1": man["o1"]}, inventory),
        "CANARY: an obligation nobody accounts for must block")
-    ok(check(obs, {**manifest, "o2": {"via": "question"}}, compared,
-             asked=[1]) == [],
-       "an obligation waiting on a person is discharged")
-    ok(check(obs, {**manifest, "o2": {"via": "question"}}, compared, asked=[]),
+    ok(check(obs, {**man, "o2": {"via": "question"}}, inventory, asked=[1]) == [],
+       "an obligation waiting on a person discharges")
+    ok(check(obs, {**man, "o2": {"via": "question"}}, inventory, asked=[]),
        "CANARY: claiming a question was asked when none was must block")
-    ok(check(obs, {**manifest, "o2": {"via": "unsupported"}}, compared),
+    ok(check(obs, {**man, "o2": {"via": "unsupported"}}, inventory),
        "CANARY: unsupported without a reason must block")
-    ok(check(obs, {**manifest, "o2": {"via": "unsupported",
-                                      "reason": "no construct exists"}},
-             compared) == [],
-       "unsupported WITH a reason is an honest discharge")
-    ok(check(obs, {**manifest, "o2": {"via": "magic"}}, compared),
+    ok(check(obs, {**man, "o2": {"via": "unsupported", "reason": "none exists"}},
+             inventory) == [], "unsupported WITH a reason is honest")
+    ok(check(obs, {**man, "o2": {"via": "magic"}}, inventory),
        "CANARY: an invented discharge kind must block")
-    ok(resolve_path(compared, "compare.0.field") == "Amount"
-       and resolve_path(compared, "compare.0.nope") is None,
-       "paths resolve into lists and report absence")
 
     if failures:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
         return 1
-    print("SELF-TEST PASSED (both constructs present establishes / CANARY an "
-          "otherwise valid model missing the requested compare is "
-          "unestablishable / an unaccounted obligation blocks / a question "
-          "discharges only when one was asked / unsupported needs a reason / an "
-          "invented discharge kind blocks / paths resolve into lists)")
+    print("SELF-TEST PASSED (a validated body reports its own constructs and "
+          "both obligations discharge / CANARY removing compare removes "
+          "compare:Amount even though classify.both_different remains, so the "
+          "obligation becomes undischargeable / the reconciliation validator "
+          "rejects the malformed model independently with "
+          "classify_split_mismatch / an invalid body reports nothing / check() "
+          "contains no task vocabulary / unaccounted, unasked, reasonless and "
+          "invented discharges all block)")
     return 0
 
 

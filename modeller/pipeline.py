@@ -628,12 +628,16 @@ accounted for before this can be established:
 
 {obligations}
 
-{{"MANIFEST": {{"o1": {{"via": "construct", "path": "<dotted path into the model
-that satisfies this, e.g. compare or classify.both_different>"}}}}}}
+{{"MANIFEST": {{"o1": {{"via": "construct", "construct": "<one referent from the
+list below>"}}}}}}
 
 `via` is "construct", "question" or "unsupported"; "unsupported" also needs a
-`reason`. A `construct` path is CHECKED against the model you just wrote, so do
-not name one you did not include."""
+`reason`.
+
+A construct referent is CHECKED against what the task reports its body genuinely
+contains, so naming one you did not build fails. A label is not a construct:
+declaring a `both_different` classification does not by itself compare
+anything."""
 
 
 def with_manifest(prompt: str, obligations_list: list) -> str:
