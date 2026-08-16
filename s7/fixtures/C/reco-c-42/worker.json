@@ -1,0 +1,8 @@
+{
+  "name": "reco-c-42",
+  "purpose": "Process records (C).",
+  "task": "reconciliation",
+  "base": "s7/fixtures/C/reco-c-42/state",
+  "trigger": "fleet/inbox/orders/*.xlsx",
+  "customer": "Acme Oy"
+}

@@ -1,0 +1,10 @@
+{
+  "opened": "2026-03-27T00:00:00+00:00",
+  "from_version": 1,
+  "state": "open",
+  "failure": [
+    "PermissionError: append_to_reservations"
+  ],
+  "difference": {},
+  "question": null
+}

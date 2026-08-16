@@ -1,0 +1,8 @@
+{
+  "name": "enri-d-07",
+  "purpose": "Process records (D).",
+  "task": "enrichment",
+  "base": "s7/fixtures/D/enri-d-07/state",
+  "trigger": "fleet/inbox/timesheets/*.xlsx",
+  "customer": "Fazerish Oy"
+}

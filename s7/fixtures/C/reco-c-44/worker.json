@@ -1,0 +1,8 @@
+{
+  "name": "reco-c-44",
+  "purpose": "Process records (C).",
+  "task": "reconciliation",
+  "base": "s7/fixtures/C/reco-c-44/state",
+  "trigger": "fleet/inbox/purchases/*.xlsx",
+  "customer": "Kesko Oyj"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "aggr-c-38",
+  "purpose": "Process records (C).",
+  "task": "aggregation",
+  "base": "s7/fixtures/C/aggr-c-38/state",
+  "trigger": "fleet/inbox/purchases/*.xlsx",
+  "customer": "Kesko Oyj"
+}

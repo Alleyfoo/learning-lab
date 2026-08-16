@@ -1,0 +1,8 @@
+{
+  "name": "enri-a-42",
+  "purpose": "Process records (A).",
+  "task": "enrichment",
+  "base": "s7/fixtures/A/enri-a-42/state",
+  "trigger": "fleet/inbox/orders/*.xlsx",
+  "customer": "Acme Oy"
+}

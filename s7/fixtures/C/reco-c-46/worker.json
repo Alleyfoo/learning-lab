@@ -1,0 +1,8 @@
+{
+  "name": "reco-c-46",
+  "purpose": "Process records (C).",
+  "task": "reconciliation",
+  "base": "s7/fixtures/C/reco-c-46/state",
+  "trigger": "fleet/inbox/invoices/*.xlsx",
+  "customer": "Northwind Oy"
+}

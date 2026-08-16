@@ -1,0 +1,61 @@
+{
+  "model_version": 1,
+  "model_id": "fazerish_order_line_cost",
+  "task": "enrichment",
+  "sources": {
+    "order_lines": {
+      "path": "sources/order_lines.json",
+      "collection": "order_lines"
+    },
+    "price_list": {
+      "path": "sources/price_list.json",
+      "collection": "price_list"
+    }
+  },
+  "driving_source": "order_lines",
+  "lookup": {
+    "into": "price_list",
+    "match_left": "Article",
+    "match_right": "Article",
+    "on_missing": "refuse_row",
+    "on_ambiguous": "refuse_row"
+  },
+  "outputs": [
+    {
+      "target": "Article",
+      "from": "order_lines",
+      "field": "Article"
+    },
+    {
+      "target": "Delivery date",
+      "from": "order_lines",
+      "field": "Delivery date"
+    },
+    {
+      "target": "Line",
+      "from": "order_lines",
+      "field": "Line"
+    },
+    {
+      "target": "Qty",
+      "from": "order_lines",
+      "field": "Qty"
+    },
+    {
+      "target": "Cost",
+      "compute": {
+        "op": "multiply",
+        "left": {
+          "from": "order_lines",
+          "field": "Qty"
+        },
+        "right": {
+          "from": "price_list",
+          "field": "Unit price"
+        }
+      }
+    }
+  ],
+  "on_non_numeric": "refuse_row",
+  "_model_variant": "e4"
+}

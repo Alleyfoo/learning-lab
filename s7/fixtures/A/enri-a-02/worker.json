@@ -1,0 +1,8 @@
+{
+  "name": "enri-a-02",
+  "purpose": "Process records (A).",
+  "task": "enrichment",
+  "base": "s7/fixtures/A/enri-a-02/state",
+  "trigger": "fleet/inbox/purchases/*.xlsx",
+  "customer": "Kesko Oyj"
+}

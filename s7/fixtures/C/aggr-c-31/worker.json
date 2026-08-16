@@ -1,0 +1,8 @@
+{
+  "name": "aggr-c-31",
+  "purpose": "Process records (C).",
+  "task": "aggregation",
+  "base": "s7/fixtures/C/aggr-c-31/state",
+  "trigger": "fleet/inbox/timesheets/*.xlsx",
+  "customer": "Fazerish Oy"
+}

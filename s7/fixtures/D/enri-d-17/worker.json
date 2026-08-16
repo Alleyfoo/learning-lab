@@ -1,0 +1,8 @@
+{
+  "name": "enri-d-17",
+  "purpose": "Process records (D).",
+  "task": "enrichment",
+  "base": "s7/fixtures/D/enri-d-17/state",
+  "trigger": "fleet/inbox/shipments/*.xlsx",
+  "customer": "Demo / Lab"
+}

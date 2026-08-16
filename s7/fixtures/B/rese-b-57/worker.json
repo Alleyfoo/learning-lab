@@ -1,0 +1,8 @@
+{
+  "name": "rese-b-57",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s7/fixtures/B/rese-b-57/state",
+  "trigger": "fleet/B/inbox/purchases/*.xlsx",
+  "customer": "Tulikivi Oyj"
+}

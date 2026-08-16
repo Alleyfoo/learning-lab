@@ -1,0 +1,8 @@
+{
+  "name": "enri-c-00",
+  "purpose": "Process records (C).",
+  "task": "enrichment",
+  "base": "s7/fixtures/C/enri-c-00/state",
+  "trigger": "fleet/inbox/orders/*.xlsx",
+  "customer": "Acme Oy"
+}

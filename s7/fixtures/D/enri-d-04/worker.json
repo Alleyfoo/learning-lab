@@ -1,0 +1,8 @@
+{
+  "name": "enri-d-04",
+  "purpose": "Process records (D).",
+  "task": "enrichment",
+  "base": "s7/fixtures/D/enri-d-04/state",
+  "trigger": "fleet/inbox/invoices/*.xlsx",
+  "customer": "Northwind Oy"
+}

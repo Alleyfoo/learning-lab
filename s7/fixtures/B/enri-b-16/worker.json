@@ -1,0 +1,8 @@
+{
+  "name": "enri-b-16",
+  "purpose": "Process records (B).",
+  "task": "enrichment",
+  "base": "s7/fixtures/B/enri-b-16/state",
+  "trigger": "fleet/B/inbox/master-catalogue/*.xlsx",
+  "customer": "Northwind Oy"
+}

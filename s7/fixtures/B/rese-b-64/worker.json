@@ -1,0 +1,8 @@
+{
+  "name": "rese-b-64",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s7/fixtures/B/rese-b-64/state",
+  "trigger": "fleet/B/inbox/invoices/*.xlsx",
+  "customer": "Northwind Oy"
+}

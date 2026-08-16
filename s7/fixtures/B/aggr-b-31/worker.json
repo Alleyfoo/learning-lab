@@ -1,0 +1,8 @@
+{
+  "name": "aggr-b-31",
+  "purpose": "Process records (B).",
+  "task": "aggregation",
+  "base": "s7/fixtures/B/aggr-b-31/state",
+  "trigger": "fleet/B/inbox/master-catalogue/*.xlsx",
+  "customer": "Fazerish Oy"
+}

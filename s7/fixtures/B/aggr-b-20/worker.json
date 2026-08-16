@@ -1,0 +1,8 @@
+{
+  "name": "aggr-b-20",
+  "purpose": "Process records (B).",
+  "task": "aggregation",
+  "base": "s7/fixtures/B/aggr-b-20/state",
+  "trigger": "fleet/B/inbox/master-catalogue/*.xlsx",
+  "customer": "Kesko Oyj"
+}

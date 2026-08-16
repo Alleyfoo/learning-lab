@@ -1,0 +1,8 @@
+{
+  "name": "enri-a-52",
+  "purpose": "Process records (A).",
+  "task": "enrichment",
+  "base": "s7/fixtures/A/enri-a-52/state",
+  "trigger": "fleet/inbox/invoices/*.xlsx",
+  "customer": "Northwind Oy"
+}

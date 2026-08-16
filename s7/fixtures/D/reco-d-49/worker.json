@@ -1,0 +1,8 @@
+{
+  "name": "reco-d-49",
+  "purpose": "Process records (D).",
+  "task": "reconciliation",
+  "base": "s7/fixtures/D/reco-d-49/state",
+  "trigger": "fleet/inbox/timesheets/*.xlsx",
+  "customer": "Fazerish Oy"
+}

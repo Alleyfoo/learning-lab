@@ -1,0 +1,8 @@
+{
+  "name": "reco-a-65",
+  "purpose": "Process records (A).",
+  "task": "reconciliation",
+  "base": "s7/fixtures/A/reco-a-65/state",
+  "trigger": "fleet/inbox/shipments/*.xlsx",
+  "customer": "Demo / Lab"
+}

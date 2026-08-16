@@ -1,0 +1,8 @@
+{
+  "name": "rese-b-67",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s7/fixtures/B/rese-b-67/state",
+  "trigger": "fleet/B/inbox/purchases/*.xlsx",
+  "customer": "Fazerish Oy"
+}

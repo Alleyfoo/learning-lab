@@ -1,0 +1,8 @@
+{
+  "name": "enri-a-23",
+  "purpose": "Process records (A).",
+  "task": "enrichment",
+  "base": "s7/fixtures/A/enri-a-23/state",
+  "trigger": "fleet/inbox/shipments/*.xlsx",
+  "customer": "Demo / Lab"
+}

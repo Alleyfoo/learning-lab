@@ -1,0 +1,8 @@
+{
+  "name": "rese-b-inv",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s7/fixtures/B/rese-b-inv/state",
+  "trigger": "fleet/B/inbox/master-catalogue/*.xlsx",
+  "customer": "Demo / Lab"
+}

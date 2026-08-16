@@ -1,0 +1,8 @@
+{
+  "name": "aggr-d-21",
+  "purpose": "Process records (D).",
+  "task": "aggregation",
+  "base": "s7/fixtures/D/aggr-d-21/state",
+  "trigger": "fleet/inbox/payroll/*.xlsx",
+  "customer": "Tulikivi Oyj"
+}

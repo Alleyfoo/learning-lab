@@ -1,0 +1,8 @@
+{
+  "name": "enri-c-08",
+  "purpose": "Process records (C).",
+  "task": "enrichment",
+  "base": "s7/fixtures/C/enri-c-08/state",
+  "trigger": "fleet/inbox/purchases/*.xlsx",
+  "customer": "Kesko Oyj"
+}

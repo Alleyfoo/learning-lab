@@ -1,0 +1,8 @@
+{
+  "name": "rese-a-68",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s7/fixtures/A/rese-a-68/state",
+  "trigger": "fleet/inbox/purchases/*.xlsx",
+  "customer": "Kesko Oyj"
+}

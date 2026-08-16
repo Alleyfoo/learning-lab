@@ -1,0 +1,8 @@
+{
+  "name": "aggr-c-22",
+  "purpose": "Process records (C).",
+  "task": "aggregation",
+  "base": "s7/fixtures/C/aggr-c-22/state",
+  "trigger": "fleet/inbox/invoices/*.xlsx",
+  "customer": "Northwind Oy"
+}

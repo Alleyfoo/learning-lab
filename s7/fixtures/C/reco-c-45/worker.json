@@ -1,0 +1,8 @@
+{
+  "name": "reco-c-45",
+  "purpose": "Process records (C).",
+  "task": "reconciliation",
+  "base": "s7/fixtures/C/reco-c-45/state",
+  "trigger": "fleet/inbox/payroll/*.xlsx",
+  "customer": "Tulikivi Oyj"
+}

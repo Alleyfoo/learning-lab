@@ -1,0 +1,8 @@
+{
+  "name": "reco-b-40",
+  "purpose": "Process records (B).",
+  "task": "reconciliation",
+  "base": "s7/fixtures/B/reco-b-40/state",
+  "trigger": "fleet/B/inbox/master-catalogue/*.xlsx",
+  "customer": "Northwind Oy"
+}

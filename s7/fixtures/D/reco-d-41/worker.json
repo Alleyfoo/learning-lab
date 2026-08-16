@@ -1,0 +1,8 @@
+{
+  "name": "reco-d-41",
+  "purpose": "Process records (D).",
+  "task": "reconciliation",
+  "base": "s7/fixtures/D/reco-d-41/state",
+  "trigger": "fleet/inbox/shipments/*.xlsx",
+  "customer": "Demo / Lab"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "aggr-a-61",
+  "purpose": "Process records (A).",
+  "task": "aggregation",
+  "base": "s7/fixtures/A/aggr-a-61/state",
+  "trigger": "fleet/inbox/timesheets/*.xlsx",
+  "customer": "Fazerish Oy"
+}

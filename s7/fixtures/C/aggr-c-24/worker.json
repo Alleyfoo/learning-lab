@@ -1,0 +1,8 @@
+{
+  "name": "aggr-c-24",
+  "purpose": "Process records (C).",
+  "task": "aggregation",
+  "base": "s7/fixtures/C/aggr-c-24/state",
+  "trigger": "fleet/inbox/orders/*.xlsx",
+  "customer": "Acme Oy"
+}

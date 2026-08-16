@@ -1,0 +1,8 @@
+{
+  "name": "reco-b-43",
+  "purpose": "Process records (B).",
+  "task": "reconciliation",
+  "base": "s7/fixtures/B/reco-b-43/state",
+  "trigger": "fleet/B/inbox/master-catalogue/*.xlsx",
+  "customer": "Fazerish Oy"
+}

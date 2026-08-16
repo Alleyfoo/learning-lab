@@ -1,0 +1,8 @@
+{
+  "name": "aggr-d-26",
+  "purpose": "Process records (D).",
+  "task": "aggregation",
+  "base": "s7/fixtures/D/aggr-d-26/state",
+  "trigger": "fleet/inbox/purchases/*.xlsx",
+  "customer": "Kesko Oyj"
+}

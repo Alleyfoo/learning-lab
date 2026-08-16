@@ -1,0 +1,8 @@
+{
+  "name": "reco-d-40",
+  "purpose": "Process records (D).",
+  "task": "reconciliation",
+  "base": "s7/fixtures/D/reco-d-40/state",
+  "trigger": "fleet/inbox/invoices/*.xlsx",
+  "customer": "Northwind Oy"
+}

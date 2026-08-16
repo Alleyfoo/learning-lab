@@ -1,0 +1,8 @@
+{
+  "name": "enri-b-13",
+  "purpose": "Process records (B).",
+  "task": "enrichment",
+  "base": "s7/fixtures/B/enri-b-13/state",
+  "trigger": "fleet/B/inbox/master-catalogue/*.xlsx",
+  "customer": "Fazerish Oy"
+}

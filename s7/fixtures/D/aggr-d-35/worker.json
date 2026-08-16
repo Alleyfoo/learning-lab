@@ -1,0 +1,8 @@
+{
+  "name": "aggr-d-35",
+  "purpose": "Process records (D).",
+  "task": "aggregation",
+  "base": "s7/fixtures/D/aggr-d-35/state",
+  "trigger": "fleet/inbox/shipments/*.xlsx",
+  "customer": "Demo / Lab"
+}

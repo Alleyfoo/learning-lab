@@ -1,0 +1,8 @@
+{
+  "name": "aggr-b-33",
+  "purpose": "Process records (B).",
+  "task": "aggregation",
+  "base": "s7/fixtures/B/aggr-b-33/state",
+  "trigger": "fleet/B/inbox/master-catalogue/*.xlsx",
+  "customer": "Tulikivi Oyj"
+}

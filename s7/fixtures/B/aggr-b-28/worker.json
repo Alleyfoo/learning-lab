@@ -1,0 +1,8 @@
+{
+  "name": "aggr-b-28",
+  "purpose": "Process records (B).",
+  "task": "aggregation",
+  "base": "s7/fixtures/B/aggr-b-28/state",
+  "trigger": "fleet/B/inbox/master-catalogue/*.xlsx",
+  "customer": "Northwind Oy"
+}

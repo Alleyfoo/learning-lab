@@ -1,0 +1,8 @@
+{
+  "name": "reco-a-66",
+  "purpose": "Process records (A).",
+  "task": "reconciliation",
+  "base": "s7/fixtures/A/reco-a-66/state",
+  "trigger": "fleet/inbox/orders/*.xlsx",
+  "customer": "Acme Oy"
+}
