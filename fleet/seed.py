@@ -18,7 +18,9 @@ room-reservation   reservation   a different engine entirely
 from __future__ import annotations
 
 import json
+import os
 import shutil
+import stat
 import sys
 from pathlib import Path
 
@@ -72,17 +74,46 @@ def main(argv: list[str]) -> int:
     for _ in range(4):
         fleet.record_run(w2)
 
-    # --- 3. a different engine -------------------------------------------
+    # --- 3. a different engine, and the COMMITTING path -------------------
+    # This worker owns its state. Its effect writes into its own folder, not
+    # into a shared repo fixture, which is what makes "accepted reservations
+    # change worker state" a fact about the worker rather than a side effect on
+    # everyone else.
     reservation = json.loads((LAB / "reservation" / "models" /
                               "reservation_v1.json").read_text(encoding="utf-8"))
     w3 = fleet.establish(
         ROOT, "room-reservation",
         "Accept a requested date unless it is malformed, a holiday, or already "
-        "reserved.", "reservation", "reservation", reservation,
-        trigger="reservation/fixtures/")
-    for request in ("2026-03-10", "2026-12-25", "2026-03-10", "not-a-date",
+        "reserved. Accepted dates are appended to this worker's own state.",
+        "reservation", "fleet/workers/room-reservation/state", reservation,
+        trigger="fleet/workers/room-reservation/state/fixtures/")
+    state = w3.directory / "state"
+    shutil.copytree(LAB / "reservation" / "fixtures", state / "fixtures")
+    w3 = fleet.load(w3.directory)
+
+    def reservations() -> list:
+        return json.loads((state / "fixtures" / "reservations.json")
+                          .read_text(encoding="utf-8"))["reservations"]
+
+    started_with = len(reservations())
+    for request in ("2026-12-25", "2026-03-10", "not-a-date", "2026-04-02",
                     "2026-04-02"):
         fleet.record_run(w3, request=request)
+
+    # A REAL failed effect, not an injected one: the state file is made
+    # read-only for exactly one run, so the write raises and the decision
+    # cannot land. This is the case the console must not file as success.
+    target = state / "fixtures" / "reservations.json"
+    os.chmod(target, stat.S_IREAD)
+    try:
+        fleet.record_run(w3, request="2026-05-05")
+    finally:
+        os.chmod(target, stat.S_IWRITE | stat.S_IREAD)
+    fleet.record_run(w3, request="2026-05-05")
+
+    ended_with = len(reservations())
+    print(f"room-reservation state: {started_with} -> {ended_with} "
+          f"reservation(s) -- {reservations()}")
 
     for w in fleet.load_all():
         s = w.summary()

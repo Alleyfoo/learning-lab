@@ -1,0 +1,10 @@
+{
+  "_note": "Fixture reservation list as it stands before any request is processed.",
+  "reservations": [
+    "2026-03-10",
+    "2026-03-11",
+    "2026-12-06",
+    "2026-04-02",
+    "2026-05-05"
+  ]
+}

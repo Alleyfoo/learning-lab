@@ -122,14 +122,23 @@ with right:
                "not generated code.")
 
 st.header("Effect")
-if w.effect:
+if not w.effect:
+    st.write("None declared — this worker produces a result and changes nothing, "
+             "so preview and production are the same execution.")
+elif w.committing:
     st.write(f"On acceptance the model declares: `{w.effect}`")
-    st.warning("This console executes and reports; it does **not** commit that "
-               "effect. The source data is byte-identical after these runs. A "
-               "committing runtime is `calendar_job/unattended.py`, which is a "
-               "separate thing from this view.")
+    st.success(f"**Committing runtime** (`worker/runtime.py`). "
+               f"{s['effects_applied']} effect(s) applied and verified, "
+               f"{s['effects_failed']} failed, on this version.")
+    st.caption("Applied means re-read from disk and confirmed — a write that "
+               "returned is not evidence. A policy refusal attempts no effect "
+               "and is a healthy run; an accepted decision whose effect did not "
+               "land is an exception, because something downstream is entitled "
+               "to believe the decision.")
 else:
-    st.write("None declared — this worker produces a result and changes nothing.")
+    st.write(f"On acceptance the model declares: `{w.effect}`")
+    st.warning("No committing runtime for this task type, so runs here execute "
+               "and report without landing the effect.")
 
 st.header(f"Model — v{s['version']}")
 for line in fleet.readable(w):
@@ -199,6 +208,10 @@ st.dataframe([{
     "refused": r.get("refused", 0),
     "outcome": ("" if r.get("accepted") is None
                 else "accepted" if r["accepted"] else "declined"),
+    "effect": ("—" if r.get("effect_applied") is None
+               else "applied" if r["effect_applied"] else "FAILED"),
+    "state": (f"{r['state_before']}→{r['state_after']}"
+              if r.get("state_before") is not None else ""),
     "reason": ", ".join(r.get("refusals") or []) or ", ".join(r.get("problems") or []),
 } for r in recent], use_container_width=True, hide_index=True)
 
@@ -206,3 +219,6 @@ refused_total = sum(r.get("refused", 0) for r in w.runs)
 if refused_total:
     st.caption(f"{refused_total} item(s) refused across all runs, under the "
                f"worker's own declared policy. Refusals are the worker working.")
+if w.committing:
+    st.caption("`state` is the worker's own state before and after the run. A "
+               "refusal leaves it unchanged; that is the point of the column.")

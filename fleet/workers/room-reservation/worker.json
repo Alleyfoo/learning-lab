@@ -1,7 +1,7 @@
 {
   "name": "room-reservation",
-  "purpose": "Accept a requested date unless it is malformed, a holiday, or already reserved.",
+  "purpose": "Accept a requested date unless it is malformed, a holiday, or already reserved. Accepted dates are appended to this worker's own state.",
   "task": "reservation",
-  "base": "reservation",
-  "trigger": "reservation/fixtures/"
+  "base": "fleet/workers/room-reservation/state",
+  "trigger": "fleet/workers/room-reservation/state/fixtures/"
 }

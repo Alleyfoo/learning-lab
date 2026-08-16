@@ -42,9 +42,14 @@ sys.path.insert(0, str(LAB / "modeller"))
 
 import builder  # noqa: E402
 import pipeline  # noqa: E402
+import runtime  # noqa: E402
 import worker as W  # noqa: E402
 
 ROOT = HERE / "workers"
+
+# Task types with a committing runtime. Everything else produces a result and
+# changes nothing, so preview and production are the same execution.
+COMMITTING_TASKS = ("reservation",)
 
 # One engine per task type, shared by every worker of that type. This is the
 # point of the design: 100 established models over a handful of audited
@@ -117,12 +122,12 @@ class Worker:
     def committing(self) -> bool:
         """Whether a run through this console lands the declared effect.
 
-        It does not. `builder.preview` executes deterministically and reports;
-        the reservation fixture is byte-identical after five runs. For a pure
-        worker that is the whole story, but a console that showed `on_accept`
-        beside a run count without saying this would imply the effect landed.
+        True only when the worker declares an effect AND a committing runtime
+        exists for its task. Preview stays non-committing; this is the separate
+        path, and the distinction is a fact about the worker rather than a
+        caption on a page.
         """
-        return False
+        return bool(self.effect) and self.task in COMMITTING_TASKS
 
     @property
     def trigger(self) -> str:
@@ -160,6 +165,11 @@ class Worker:
             "exceptions": sum(1 for r in current if not r["ok"]),
             "rows_refused": sum(r.get("refused", 0) for r in current),
             "declined": sum(1 for r in current if r.get("accepted") is False),
+            "effects_applied": sum(1 for r in current
+                                   if r.get("effect_applied") is True),
+            "effects_failed": sum(1 for r in current
+                                  if r.get("effect_applied") is False),
+            "committing": any(r.get("committing") for r in current),
             "last_run": self.runs[-1]["at"] if self.runs else None,
             "last_status": ("never run" if not self.runs
                             else "ok" if self.runs[-1]["ok"] else "exception"),
@@ -214,7 +224,22 @@ def establish(root: Path, name: str, purpose: str, task: str, base: str,
 def record_run(w: Worker, request: Optional[str] = None) -> dict:
     """Run the worker as established, and append the outcome. No LLM here."""
     est = W.Established(w.name, w.current_version, w.model, w.base, _now())
-    if w.task == "reservation":
+    if w.committing:
+        # THE COMMITTING PATH. A refusal is healthy and attempts no effect; an
+        # acceptance whose effect did not land is an exception, because
+        # something downstream is entitled to believe the decision.
+        result = runtime.commit(w.model, w.base, request)
+        record = {"at": _now(), "version": w.current_version, "ok": result.ok,
+                  "request": request, "committing": True,
+                  "decision": result.decision, "reason": result.reason,
+                  "effect": result.effect, "effect_applied": result.effect_applied,
+                  "accepted": result.decision == "accepted",
+                  "refused": 0 if result.decision == "accepted" else 1,
+                  "refusals": [result.reason] if result.reason else [],
+                  "state_before": result.state_before,
+                  "state_after": result.state_after,
+                  "problems": [result.error] if result.error else []}
+    elif w.task == "reservation":
         preview = builder.preview(w.task, w.model, request=request, base=w.base)
         ok = preview.ok
         # A run that COMPLETED is not a run that accepted. A refused
@@ -223,7 +248,7 @@ def record_run(w: Worker, request: Optional[str] = None) -> dict:
         row = preview.rows[0] if ok and preview.rows else None
         accepted = bool(row[1]) if row else None
         record = {"at": _now(), "version": w.current_version, "ok": ok,
-                  "request": request, "detail": row,
+                  "request": request, "detail": row, "committing": False,
                   "accepted": accepted,
                   "refused": 0 if accepted or accepted is None else 1,
                   "refusals": [] if accepted or not row else [row[2]],
