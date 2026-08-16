@@ -1,22 +1,22 @@
 {
-  "_note": "converted from june-order-lines.xlsx",
+  "_note": "converted from july-insufficient.xlsx",
   "price_list": [
     {
-      "Item code": "ART-7719",
+      "Ref": "ART-7719",
       "Description": "Hex bolt M8",
       "Unit price": "0.45",
       "VAT rate": "25.5"
     },
     {
-      "Item code": "ART-7720",
+      "Ref": "ART-7720",
       "Description": "Washer M8",
       "Unit price": "0.08",
       "VAT rate": "25.5"
     },
     {
-      "Item code": "ART-7802",
-      "Description": "Torque wrench 1/2\"",
-      "Unit price": "184.90",
+      "Ref": "ART-9999",
+      "Description": "Obsolete",
+      "Unit price": "1.00",
       "VAT rate": "25.5"
     }
   ]

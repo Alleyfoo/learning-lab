@@ -1,9 +1,9 @@
 {
   "worker": "april-invoicing",
-  "version": 1,
-  "model_digest": "b384b18d5ad9f1d312cdf23337497ff57b77bdd9f6531378190fa3d88c71ec66",
+  "version": 2,
+  "model_digest": "9e23ca4e17901d2af04dd8c806b2bb5e7e10cd163da86f23ad47c53ac44e31e0",
   "failure": [
-    "field_not_in_source@order_line_cost:lookup.match_right: Article"
+    "field_not_in_source@order_line_cost:lookup.match_right: Item code"
   ],
   "expected_fields": {
     "order_lines": [
@@ -13,7 +13,7 @@
       "Qty"
     ],
     "price_list": [
-      "Article",
+      "Item code",
       "Unit price"
     ]
   },
@@ -26,7 +26,7 @@
     ],
     "price_list": [
       "Description",
-      "Item code",
+      "Ref",
       "Unit price",
       "VAT rate"
     ]
@@ -34,11 +34,11 @@
   "difference": {
     "price_list": {
       "declared_but_absent": [
-        "Article"
+        "Item code"
       ],
       "present_and_undeclared": [
         "Description",
-        "Item code",
+        "Ref",
         "VAT rate"
       ]
     }
@@ -46,15 +46,15 @@
   "measured_relationships": [
     {
       "left": "order_lines.Article",
-      "right": "price_list.Item code",
-      "left_coverage": "2/2",
+      "right": "price_list.Ref",
+      "left_coverage": "3/4",
       "right_unique": true
     },
     {
-      "left": "price_list.Item code",
+      "left": "price_list.Ref",
       "right": "order_lines.Article",
       "left_coverage": "2/3",
-      "right_unique": true
+      "right_unique": false
     }
   ],
   "history": {

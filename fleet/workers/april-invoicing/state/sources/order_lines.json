@@ -1,17 +1,29 @@
 {
-  "_note": "converted from june-order-lines.xlsx",
+  "_note": "converted from july-insufficient.xlsx",
   "order_lines": [
     {
-      "Line": "OL-5510",
-      "Article": "ART-7802",
-      "Qty": "2",
-      "Delivery date": "2026-05-04"
+      "Line": "OL-7001",
+      "Article": "ART-7719",
+      "Qty": "10",
+      "Delivery date": "2026-07-06"
     },
     {
-      "Line": "OL-5511",
+      "Line": "OL-7002",
       "Article": "ART-7720",
-      "Qty": "250",
-      "Delivery date": "2026-05-11"
+      "Qty": "5",
+      "Delivery date": "2026-07-06"
+    },
+    {
+      "Line": "OL-7003",
+      "Article": "ART-7719",
+      "Qty": "2",
+      "Delivery date": "2026-07-13"
+    },
+    {
+      "Line": "OL-7004",
+      "Article": "ART-7802",
+      "Qty": "1",
+      "Delivery date": "2026-07-13"
     }
   ]
 }

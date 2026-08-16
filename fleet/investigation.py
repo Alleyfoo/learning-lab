@@ -267,6 +267,26 @@ def _self_test() -> int:
               f"become a proposal: {w.investigation}")
         check(w.current_version == 1, "…and the worker is unchanged")
 
+        # --- CANARY: a declared refusal is NOT an exception ----------------
+        # An unmatched row under a still-valid binding is the worker applying
+        # its own on_missing policy. If that woke an investigator, every
+        # ordinary bad row in a real customer's data would summon a model and
+        # an operator, and the fleet would be unusable.
+        orders = json.loads((LAB / "enrichment" / "models" /
+                             "enrichment_v1.json").read_text(encoding="utf-8"))
+        ow = fleet.establish(root, "refusals", "Enrich orders.", "enrichment",
+                             "enrichment", orders)
+        record = fleet.record_run(ow)
+        ow = fleet.load(ow.directory)
+        check(record["ok"] and record["refused"] > 0,
+              f"the run must COMPLETE with refused rows: {record}")
+        check("MISSING_PRODUCT" in (record.get("refusals") or []),
+              f"…including an unmatched row: {record.get('refusals')}")
+        check(not needs_investigation(ow),
+              "CANARY: a declared refusal must NOT wake an investigator")
+        check(packet_of(ow) is None,
+              "CANARY: and must produce no exception packet at all")
+
         # --- retry_queued moves queued work under the new version ---------
         res = json.loads((LAB / "reservation" / "models" / "reservation_v1.json")
                          .read_text(encoding="utf-8"))
@@ -301,8 +321,9 @@ def _self_test() -> int:
           "v1 keeps its runs / an ambiguous world becomes a QUESTION offering "
           "both sufficient candidates, and one human answer becomes a proposal "
           "/ a proposal the measurements do not support is refused by the gate "
-          "and leaves the worker unchanged / queued work is retried under the "
-          "current version and the queue drains)")
+          "and leaves the worker unchanged / a declared refusal completes, "
+          "wakes no investigator and produces no packet / queued work is "
+          "retried under the current version and the queue drains)")
     return 0
 
 
