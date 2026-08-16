@@ -450,13 +450,31 @@ RECONCILIATION_SKELETON = {
     "on_duplicate_key": "refuse_run",
 }
 
+# The same skeleton when the person asked to see WHERE VALUES DIFFER. The
+# construct is not new -- `compare` and the four-way classification already
+# exist in the reconciliation language. What was missing was the modeller
+# producing them when the request asked for them, so a stated "or where the
+# amounts differ" quietly became a plain matched/missing report.
+RECONCILIATION_COMPARED_SKELETON = {
+    "model_version": 1, "model_id": "...", "task": "reconciliation",
+    "sources": {}, "left": "...", "right": "...",
+    "match_on": {"left_field": "...", "right_field": "..."},
+    "compare": [{"field": "...", "comparison": "exact"}],
+    "classify": {"both_same": "...", "both_different": "...",
+                 "only_left": "...", "only_right": "..."},
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_run",
+}
+
 
 def reconciliation_prompt(report: list[dict], goal: str, sources: dict,
                           resumed: bool = False) -> str:
     skeleton = json.loads(json.dumps(RECONCILIATION_SKELETON))
-    skeleton["sources"] = sources
+    compared = json.loads(json.dumps(RECONCILIATION_COMPARED_SKELETON))
     names = list(sources)
-    skeleton["left"], skeleton["right"] = (names + ["...", "..."])[:2]
+    for shape in (skeleton, compared):
+        shape["sources"] = sources
+        shape["left"], shape["right"] = (names + ["...", "..."])[:2]
     resume = (chr(10) + "A human has since answered your questions. Those "
               "claims are now CONFIRMED above; nothing else changed." + chr(10)
               ) if resumed else ""
@@ -485,14 +503,34 @@ WHAT THE DETERMINISTIC EXECUTOR ALREADY DOES, so do not ask about it:
 INCOMPLETE OVERLAP IS NOT A PROBLEM HERE. A key present on one side and not the
 other is precisely what this task reports, so do not block on coverage.
 
-If every load-bearing binding is supported, return ONLY the model definition:
+MATCHING ON A KEY IS NOT THE WHOLE DELIVERABLE. Read what they asked for. If
+they asked to see where VALUES DIFFER between the two sides -- "where the
+amounts differ", "which totals disagree" -- then a key that appears on both
+sides with different values must be reported as different, and reporting it as
+merely matched would drop half of what they asked for.
+
+If they asked ONLY what is missing from either side, do NOT declare `compare`.
+Numeric columns being present is not a reason to compare them; the request is.
+
+If they asked to see differing values, return this shape:
+{json.dumps(compared, indent=2)}
+
+Otherwise return this one:
 {json.dumps(skeleton, indent=2)}
 
 PERMITTED VALUES:
   left, right          one of {json.dumps(names)}
   match_on             a field on each side; they may be named differently
-  classify             your labels for both / only_left / only_right
-  output_order         "left_then_right" or "sorted"
+  compare[].field      ONE field name, present on BOTH sides with the same
+                       name. A field named differently on each side cannot be
+                       compared by this construct.
+  compare[].comparison "exact", "trim", "casefold", "trim_casefold", or
+                       "within" (numeric, and then `tolerance` is required and
+                       `on_non_numeric` must be "refuse_run" or "refuse_key")
+  classify             WITHOUT compare: both / only_left / only_right
+                       WITH compare:    both_same / both_different /
+                                        only_left / only_right
+  output_order         "left_then_right" or "sorted_by_key"
   on_duplicate_key     "refuse_run" or "refuse_key"
 
 If a load-bearing binding is NOT supported, do NOT produce a model. Return ONLY:

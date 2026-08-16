@@ -1,6 +1,6 @@
 {
   "model_version": 1,
-  "model_id": "kesko_reconciliation_invoice",
+  "model_id": "reconciliation_purchase_ledger_supplier_statement",
   "task": "reconciliation",
   "sources": {
     "purchase_ledger": {
@@ -18,8 +18,15 @@
     "left_field": "Invoice",
     "right_field": "Their ref"
   },
+  "compare": [
+    {
+      "field": "Amount",
+      "comparison": "exact"
+    }
+  ],
   "classify": {
-    "both": "matched",
+    "both_same": "matched",
+    "both_different": "amount_differs",
     "only_left": "missing_from_supplier_statement",
     "only_right": "missing_from_purchase_ledger"
   },
