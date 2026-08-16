@@ -59,7 +59,17 @@ def _load(name: str, path: Path):
 boundary = _load("_w_boundary", LAB / "experimentW" / "harness" / "boundary.py")
 _w_run = _load("_w_run", LAB / "experimentW" / "harness" / "run_W.py")
 
-TASK = "enrichment"
+# Task types the modeller can build. Which one a job needs is decided by
+# STRUCTURE, not by the goal sentence: enrichment requires two collections to
+# join, aggregation requires one to group. A purchase-invoice workbook has one
+# collection, so enrichment is not merely unlikely -- it is inexpressible.
+TASKS = ("enrichment", "aggregation")
+TASK = "enrichment"          # kept for callers that model enrichment directly
+
+
+def task_for(chosen) -> str:
+    """The only task type the selected sources can support."""
+    return "aggregation" if len(chosen) < 2 else "enrichment"
 
 
 # ---------------------------------------------------------------------------
@@ -264,6 +274,72 @@ BLOCK_SHAPE = {"CANNOT_ESTABLISH": [
      "question": "<the question a human must answer>"}]}
 
 
+
+AGGREGATION_SKELETON = {
+    "model_version": 1, "model_id": "...", "task": "aggregation",
+    "sources": {}, "driving_source": "...",
+    "group_by": ["... one or more fields to group by ..."],
+    "group_order": "first_appearance",
+    "aggregates": [{"target": "...", "op": "count"},
+                   {"target": "...", "op": "sum", "field": "..."}],
+    "select": [{"field": "...", "op": "starts_with", "value": "..."}],
+    "on_non_numeric": "refuse_row",
+}
+
+AGGREGATION_RULES = """PERMITTED VALUES:
+  driving_source        the single collection
+  group_by              one or more of its fields
+  group_order           "first_appearance" or "sorted"
+  aggregates[].op       "count" or "sum"; `sum` also needs `field`
+  select[].op           "equals" or "starts_with"
+  on_non_numeric        "refuse_row" or "refuse_run"
+
+ROW SELECTION IS PART OF THE MODEL. If the person asked for a period -- "this
+month", "June" -- declare it in `select`. `starts_with` on an ISO date is how a
+month is expressed; there is no date arithmetic. If they asked for no period,
+omit `select` entirely rather than inventing one. Never assume the file has
+already been narrowed for you: a total over rows nobody declared is a total
+nobody can check."""
+
+
+def aggregation_prompt(report: list[dict], goal: str, sources: dict,
+                       resumed: bool = False) -> str:
+    skeleton = json.loads(json.dumps(AGGREGATION_SKELETON))
+    skeleton["sources"] = sources
+    skeleton["driving_source"] = next(iter(sources), "...")
+    resume = (chr(10) + "A human has since answered your questions. Those "
+              "claims are now CONFIRMED above; nothing else changed." + chr(10)
+              ) if resumed else ""
+
+    return f"""An inspection produced the claims below. You did not perform it and cannot
+see the data yourself.
+
+--- BEGIN INSPECTION CLAIMS ---
+{json.dumps(report, indent=2, ensure_ascii=False)}
+--- END INSPECTION CLAIMS ---
+{resume}
+THE JOB the person wants, in their words:
+{goal}
+
+THE RULE YOU MUST FOLLOW:
+{RULE}
+
+Only claims the job's decisions depend on are load-bearing. Judge which.
+
+WHAT THE DETERMINISTIC EXECUTOR ALREADY DOES, so do not ask about it:
+  - Arithmetic is exact decimal. Values are emitted as the source wrote them.
+  - Group order is declared, never incidental.
+  - A value that must be numeric and is not is refused under `on_non_numeric`.
+  - Rows excluded by `select` are counted and reported, never dropped silently.
+
+If every load-bearing binding is supported, return ONLY the model definition:
+{json.dumps(skeleton, indent=2)}
+
+{AGGREGATION_RULES}
+
+If a load-bearing binding is NOT supported, do NOT produce a model. Return ONLY:
+{json.dumps(BLOCK_SHAPE, indent=2)}"""
+
 def inspect_prompt(observed: list[dict], goal: str) -> str:
     return INSPECT_PROMPT.format(
         observed=json.dumps(observed, indent=2, ensure_ascii=False), goal=goal,
@@ -349,13 +425,19 @@ def interpret(observed: list[dict], goal: str, ask: Ask) -> tuple[list[dict], di
 
 def define(report: list[dict], goal: str, sources: dict, ask: Ask,
            resumed: bool = False, deferred: Optional[list] = None,
-           observed: Optional[list[dict]] = None
+           observed: Optional[list[dict]] = None, task: str = "enrichment"
            ) -> tuple[Optional[dict], Optional[list]]:
-    text = ask(define_prompt(report, goal, sources, resumed, deferred))
+    prompt = (aggregation_prompt(report, goal, sources, resumed) if task == "aggregation"
+              else define_prompt(report, goal, sources, resumed, deferred))
+    text = ask(prompt)
     block = _w_run.block_of(text)
     if block is not None:
         return None, block
     node = _node_of(text)
+    if node is not None and task == "aggregation":
+        node["sources"] = json.loads(json.dumps(sources))
+        node["task"] = "aggregation"
+        return node, None
     if node is not None:
         # The person SELECTED these files. Restating them is not a modelling
         # decision, and asking the definer to copy them unchanged produced
@@ -400,7 +482,7 @@ def _operand_question(model: Optional[dict], observed: list[dict],
 
 
 def propose(report: list[dict], goal: str, sources: dict, observed: list[dict],
-            ask: Ask, resumed: bool = False):
+            ask: Ask, resumed: bool = False, task: str = "enrichment"):
     """Define, then triage any block. Returns (model, questions, deferred).
 
     A block made entirely of non-load-bearing questions is not put to the
@@ -411,8 +493,10 @@ def propose(report: list[dict], goal: str, sources: dict, observed: list[dict],
     all_deferred: list = []
     for attempt in (1, 2):
         model, block = define(report, goal, sources, ask, resumed,
-                              all_deferred or None, observed)
+                              all_deferred or None, observed, task)
         if block is None:
+            if task == "aggregation":
+                return model, [], all_deferred
             # The definer did not block -- but it is not the authority on
             # whether a binding is established. The program checks its own
             # measurements and, where they do not settle a load-bearing
@@ -433,7 +517,8 @@ def propose(report: list[dict], goal: str, sources: dict, observed: list[dict],
 
 
 def _node_of(text: str):
-    keys = ("lookup", "outputs", "driving_source", "task", "model_version")
+    keys = ("lookup", "outputs", "driving_source", "task", "model_version",
+            "group_by", "aggregates")
     found = None
     for obj in _w_run._objects(text):
         if isinstance(obj, dict) and sum(k in obj for k in keys) >= 3:
@@ -877,7 +962,7 @@ def check_join_supported(model: dict, observed: list[dict],
 
 def build(ws: Workspace, model: dict):
     """Validate and run through the existing deterministic components."""
-    return builder.preview(TASK, model, base=ws.base)
+    return builder.preview(str(model.get("task") or TASK), model, base=ws.base)
 
 
 def readable(model: dict) -> list[str]:

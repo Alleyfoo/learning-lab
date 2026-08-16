@@ -36,6 +36,7 @@ sys.path.insert(0, str(LAB / "taskmodel"))
 
 import aggregation_model  # noqa: E402  (registers the task type)
 from aggregation_model import (  # noqa: E402
+    selections, selects,  # noqa: E402
     aggregates_of, driving_source, group_by, group_order, on_non_numeric, validate,
 )
 from task_model import TaskModel as Model, assert_refusal, load_collection, load_model  # noqa: E402
@@ -55,10 +56,16 @@ class Aggregation:
     rows: list[list[Any]] = dc_field(default_factory=list)
     refused: list[dict] = dc_field(default_factory=list)
     run_refused: Optional[str] = None
+    # Rows the DECLARED selection excluded. Reported, never silent: a total
+    # over a subset must say it was a subset, or nobody downstream can tell the
+    # difference between "no invoices" and "filtered them all out".
+    not_selected: int = 0
+    selection: list = dc_field(default_factory=list)
 
     def as_dict(self) -> dict:
         return {"columns": self.columns, "rows": self.rows,
-                "refused": self.refused, "run_refused": self.run_refused}
+                "refused": self.refused, "run_refused": self.run_refused,
+                "not_selected": self.not_selected, "selection": self.selection}
 
 
 def _to_number(text: Any) -> Optional[Decimal]:
@@ -100,8 +107,18 @@ def execute(model: Model, base: Path,
 
     new_accumulator = accumulator_factory or dict
     rows = load_collection(model, base, driving_source(model))
-
     out = Aggregation(columns=list(keys) + [a.target for a in aggregates])
+
+    # DECLARED row selection, applied before grouping. Excluded rows are
+    # counted and the clauses are reported, so a total over a subset says it
+    # was a subset -- nothing is scoped outside the model.
+    clauses = selections(model)
+    if clauses:
+        kept = [r for r in rows if isinstance(r, dict) and selects(r, clauses)]
+        out.not_selected = len(rows) - len(kept)
+        out.selection = [f"{c.field} {c.op} {c.value!r}" for c in clauses]
+        rows = kept
+
     groups: dict[tuple, dict] = {}
     first_seen: list[tuple] = []
 

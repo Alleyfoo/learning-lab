@@ -29,6 +29,9 @@ from task_model import (  # noqa: E402
 )
 
 OPS = ("count", "sum")
+# Row selection, kept as small as the job needs. `starts_with` on an ISO date
+# expresses "this month" with no date arithmetic and no calendar knowledge.
+SELECT_OPS = ("equals", "starts_with")
 GROUP_ORDERS = ("first_appearance", "sorted_by_key")
 POLICIES = ("refuse_row", "refuse_run")
 REFUSALS = ("NON_NUMERIC_OPERAND",)
@@ -48,6 +51,8 @@ BODY_PROBLEM_CODES = (
     "duplicate_target",
     "no_group_by",
     "no_aggregates",
+    "unknown_select_op",
+    "select_missing_key",
     "op_field_mismatch",
     "field_not_in_source",
     "malformed_data_file",
@@ -63,6 +68,41 @@ class Aggregate:
 
 def driving_source(model: TaskModel) -> str:
     return str(model.body.get("driving_source", ""))
+
+
+@dataclass(frozen=True)
+class Selection:
+    """One declared row-selection clause.
+
+    Selection is part of the MODEL, never something a caller does to the data
+    on the way in. A run that quietly received a pre-filtered file would report
+    a total over rows nobody declared, and nothing downstream could tell.
+    """
+    field: str
+    op: str
+    value: str
+
+
+def selections(model: TaskModel) -> tuple["Selection", ...]:
+    return tuple(Selection(field=str(c.get("field", "")),
+                           op=str(c.get("op", "")),
+                           value=str(c.get("value", "")))
+                 for c in (model.body.get("select") or ())
+                 if isinstance(c, dict))
+
+
+def selects(row: dict, clauses: tuple) -> bool:
+    """Every clause must hold. A missing field never matches."""
+    for clause in clauses:
+        value = row.get(clause.field)
+        if value is None:
+            return False
+        text = str(value)
+        if clause.op == "equals" and text != clause.value:
+            return False
+        if clause.op == "starts_with" and not text.startswith(clause.value):
+            return False
+    return True
 
 
 def group_by(model: TaskModel) -> tuple[str, ...]:
@@ -123,6 +163,17 @@ def validate_body(model: TaskModel, base: Path) -> list[Problem]:
         if driving in columns and key not in columns[driving]:
             problems.append(Problem("field_not_in_source", f"{where}:group_by",
                                     f"{driving}.{key}"))
+
+    for index, clause in enumerate(selections(model)):
+        cwhere = f"{where}:select[{index}]"
+        if not clause.field or not clause.op or clause.value == "":
+            problems.append(Problem("select_missing_key", cwhere,
+                                    "field, op and value are all required"))
+        if clause.op and clause.op not in SELECT_OPS:
+            problems.append(Problem("unknown_select_op", cwhere, clause.op))
+        if clause.field and driving in columns and clause.field not in columns[driving]:
+            problems.append(Problem("field_not_in_source", cwhere,
+                                    f"{driving}.{clause.field}"))
 
     aggregates = aggregates_of(model)
     if not aggregates:
@@ -231,6 +282,45 @@ def _self_test() -> int:
         r2 = validate(m, Path(td))
         seen |= r2.codes()
         check("malformed_data_file" in r2.codes(), f"element shape: {sorted(r2.codes())}")
+
+    # --- declared row selection --------------------------------------------
+    def _with_select(clauses):
+        m = task_model.parse({**raw, "select": clauses})
+        return validate(m, base).codes()
+
+    ok = _with_select([{"field": "region", "op": "equals", "value": "north"}])
+    seen |= ok
+    check(not (ok & {"unknown_select_op", "select_missing_key"}),
+          f"a fully declared clause is valid: {sorted(ok)}")
+
+    codes = _with_select([{"field": "region", "op": "matches", "value": "n.*"}])
+    seen |= codes
+    check("unknown_select_op" in codes,
+          f"CANARY: an unimplemented select op must be refused, not ignored -- "
+          f"silently dropping a clause would widen the data behind the "
+          f"declaration: {sorted(codes)}")
+
+    for partial in ({"field": "region", "op": "equals"},
+                    {"op": "equals", "value": "north"},
+                    {"field": "region", "value": "north"}):
+        codes = _with_select([partial])
+        seen |= codes
+        check("select_missing_key" in codes,
+              f"CANARY: a half-declared clause must be refused: {partial}")
+
+    codes = _with_select([{"field": "nope", "op": "equals", "value": "x"}])
+    seen |= codes
+    check("field_not_in_source" in codes,
+          f"a clause on a field that is not there must be caught: {sorted(codes)}")
+
+    # selects() itself: every clause must hold, a missing field never matches
+    from aggregation_model import Selection as _S
+    clauses = (_S("date", "starts_with", "2026-06"), _S("region", "equals", "n"))
+    check(selects({"date": "2026-06-04", "region": "n"}, clauses), "both hold")
+    check(not selects({"date": "2026-07-04", "region": "n"}, clauses),
+          "CANARY: one failing clause excludes the row")
+    check(not selects({"region": "n"}, clauses),
+          "CANARY: a missing field must never match")
 
     untested = sorted(set(BODY_PROBLEM_CODES) - seen)
     check(not untested, f"declared but unexercised body problem codes: {untested}")
