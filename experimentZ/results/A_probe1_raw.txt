@@ -1,0 +1,9 @@
+{
+  "REPLACEMENTS": [
+    {
+      "source": "staff",
+      "from": "staff_id",
+      "to": "employee_id"
+    }
+  ]
+}

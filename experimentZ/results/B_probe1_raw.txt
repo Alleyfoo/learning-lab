@@ -1,0 +1,10 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "staff",
+      "field": "staff_id",
+      "binding": "join key matching timesheets.staff_ref",
+      "question": "Both staff.employee_id and staff.staff_code are mechanically sufficient join keys against timesheets.staff_ref (4/4 coverage, unique right keys). Which one is the correct replacement for staff_id?"
+    }
+  ]
+}

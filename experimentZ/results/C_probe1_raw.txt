@@ -1,0 +1,10 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "staff",
+      "field": "staff_id",
+      "binding": "lookup.match_right: staff_id -> record",
+      "question": "Is the new `record` field in `staff` the same unique staff identifier previously supplied by `staff_id`, with complete coverage and unique values on every row?"
+    }
+  ]
+}

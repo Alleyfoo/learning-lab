@@ -1,0 +1,231 @@
+{
+  "A": {
+    "condition": "A",
+    "healthy_runs": 4,
+    "detected": true,
+    "failure": [
+      "field_not_in_source@timesheet_cost_with_name:lookup.match_right: staff_id"
+    ],
+    "difference": {
+      "staff": {
+        "declared_but_absent": [
+          "staff_id"
+        ],
+        "present_and_undeclared": [
+          "employee_id",
+          "team"
+        ]
+      }
+    },
+    "measured": [
+      {
+        "left": "staff.employee_id",
+        "right": "timesheets.staff_ref",
+        "left_coverage": "3/3",
+        "right_unique": false
+      },
+      {
+        "left": "timesheets.staff_ref",
+        "right": "staff.employee_id",
+        "left_coverage": "4/4",
+        "right_unique": true
+      }
+    ],
+    "probes": [
+      {
+        "probe": 1,
+        "proposed": [
+          {
+            "source": "staff",
+            "from": "staff_id",
+            "to": "employee_id"
+          }
+        ],
+        "blocked": false,
+        "block_question": null,
+        "gate_refusal": null,
+        "applied": true,
+        "v2_ok": true,
+        "v2_rows": [
+          "318.750",
+          "1520.00",
+          "633.9375",
+          "1615.00"
+        ],
+        "v2_matches_oracle": true,
+        "v2_runs": 1,
+        "v1_runs_after": 5,
+        "v1_version": 1,
+        "untouched_outputs": true
+      },
+      {
+        "probe": 2,
+        "proposed": [
+          {
+            "source": "staff",
+            "from": "staff_id",
+            "to": "employee_id"
+          }
+        ],
+        "blocked": false,
+        "block_question": null,
+        "gate_refusal": null,
+        "applied": true,
+        "v2_ok": true,
+        "v2_rows": [
+          "318.750",
+          "1520.00",
+          "633.9375",
+          "1615.00"
+        ],
+        "v2_matches_oracle": true,
+        "v2_runs": 1,
+        "v1_runs_after": 5,
+        "v1_version": 1,
+        "untouched_outputs": true
+      },
+      {
+        "probe": 3,
+        "proposed": [
+          {
+            "source": "staff",
+            "from": "staff_id",
+            "to": "employee_id"
+          }
+        ],
+        "blocked": false,
+        "block_question": null,
+        "gate_refusal": null,
+        "applied": true,
+        "v2_ok": true,
+        "v2_rows": [
+          "318.750",
+          "1520.00",
+          "633.9375",
+          "1615.00"
+        ],
+        "v2_matches_oracle": true,
+        "v2_runs": 1,
+        "v1_runs_after": 5,
+        "v1_version": 1,
+        "untouched_outputs": true
+      }
+    ]
+  },
+  "B": {
+    "condition": "B",
+    "healthy_runs": 4,
+    "detected": true,
+    "failure": [
+      "field_not_in_source@timesheet_cost_with_name:lookup.match_right: staff_id"
+    ],
+    "difference": {
+      "staff": {
+        "declared_but_absent": [
+          "staff_id"
+        ],
+        "present_and_undeclared": [
+          "employee_id",
+          "staff_code"
+        ]
+      }
+    },
+    "measured": [
+      {
+        "left": "staff.employee_id",
+        "right": "timesheets.staff_ref",
+        "left_coverage": "3/3",
+        "right_unique": false
+      },
+      {
+        "left": "staff.staff_code",
+        "right": "timesheets.staff_ref",
+        "left_coverage": "3/3",
+        "right_unique": false
+      },
+      {
+        "left": "timesheets.staff_ref",
+        "right": "staff.employee_id",
+        "left_coverage": "4/4",
+        "right_unique": true
+      },
+      {
+        "left": "timesheets.staff_ref",
+        "right": "staff.staff_code",
+        "left_coverage": "4/4",
+        "right_unique": true
+      }
+    ],
+    "probes": [
+      {
+        "probe": 1,
+        "proposed": null,
+        "blocked": true,
+        "block_question": "Both staff.employee_id and staff.staff_code are mechanically sufficient join keys against timesheets.staff_ref (4/4 coverage, unique right keys). Which one is the correct replacement for staff_id?",
+        "gate_refusal": null,
+        "applied": false
+      },
+      {
+        "probe": 2,
+        "proposed": null,
+        "blocked": true,
+        "block_question": "Both staff.employee_id and staff.staff_code are mechanically sufficient replacements for staff.staff_id; which one is the correct identifier to match timesheets.staff_ref?",
+        "gate_refusal": null,
+        "applied": false
+      },
+      {
+        "probe": 3,
+        "proposed": null,
+        "blocked": true,
+        "block_question": "staff_id is gone; both employee_id and staff_code in staff are complete, unique join keys for timesheets.staff_ref. Which one is the correct replacement for staff_id?",
+        "gate_refusal": null,
+        "applied": false
+      }
+    ]
+  },
+  "C": {
+    "condition": "C",
+    "healthy_runs": 4,
+    "detected": true,
+    "failure": [
+      "field_not_in_source@timesheet_cost_with_name:lookup.match_right: staff_id"
+    ],
+    "difference": {
+      "staff": {
+        "declared_but_absent": [
+          "staff_id"
+        ],
+        "present_and_undeclared": [
+          "record"
+        ]
+      }
+    },
+    "measured": [],
+    "probes": [
+      {
+        "probe": 1,
+        "proposed": null,
+        "blocked": true,
+        "block_question": "Is the new `record` field in `staff` the same unique staff identifier previously supplied by `staff_id`, with complete coverage and unique values on every row?",
+        "gate_refusal": null,
+        "applied": false
+      },
+      {
+        "probe": 2,
+        "proposed": null,
+        "blocked": true,
+        "block_question": "Is `staff.record` the unique staff identifier that matches `timesheets.staff_ref` with complete coverage, or should another field replace `staff_id`?",
+        "gate_refusal": null,
+        "applied": false
+      },
+      {
+        "probe": 3,
+        "proposed": null,
+        "blocked": true,
+        "block_question": "The staff source no longer contains staff_id; it now contains a field named record. Is record the unique identifier for staff rows, and does it match the timesheets.staff_ref values on a one-to-one basis?",
+        "gate_refusal": null,
+        "applied": false
+      }
+    ]
+  }
+}

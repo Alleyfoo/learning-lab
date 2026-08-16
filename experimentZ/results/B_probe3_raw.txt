@@ -1,0 +1,10 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "staff",
+      "field": "staff_id",
+      "binding": "lookup match key for timesheets.staff_ref",
+      "question": "staff_id is gone; both employee_id and staff_code in staff are complete, unique join keys for timesheets.staff_ref. Which one is the correct replacement for staff_id?"
+    }
+  ]
+}

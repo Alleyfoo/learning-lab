@@ -1,0 +1,64 @@
+{
+  "worker": "timesheet-cost",
+  "version": 1,
+  "model_digest": "510beb56bcf0cab58c98bbee5a1be29cd909763e751c32a862e3ebabd3cf1bbe",
+  "failure": [
+    "field_not_in_source@timesheet_cost_with_name:lookup.match_right: staff_id"
+  ],
+  "expected_fields": {
+    "staff": [
+      "hourly_rate",
+      "name",
+      "staff_id"
+    ],
+    "timesheets": [
+      "entry",
+      "hours",
+      "staff_ref",
+      "week"
+    ]
+  },
+  "observed_fields": {
+    "staff": [
+      "employee_id",
+      "hourly_rate",
+      "name",
+      "team"
+    ],
+    "timesheets": [
+      "entry",
+      "hours",
+      "staff_ref",
+      "week"
+    ]
+  },
+  "difference": {
+    "staff": {
+      "declared_but_absent": [
+        "staff_id"
+      ],
+      "present_and_undeclared": [
+        "employee_id",
+        "team"
+      ]
+    }
+  },
+  "measured_relationships": [
+    {
+      "left": "staff.employee_id",
+      "right": "timesheets.staff_ref",
+      "left_coverage": "3/3",
+      "right_unique": false
+    },
+    {
+      "left": "timesheets.staff_ref",
+      "right": "staff.employee_id",
+      "left_coverage": "4/4",
+      "right_unique": true
+    }
+  ],
+  "history": {
+    "runs": 5,
+    "successes": 4
+  }
+}

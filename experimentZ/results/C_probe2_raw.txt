@@ -1,0 +1,10 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "staff",
+      "field": "staff_id",
+      "binding": "right-side join key for timesheets.staff_ref",
+      "question": "Is `staff.record` the unique staff identifier that matches `timesheets.staff_ref` with complete coverage, or should another field replace `staff_id`?"
+    }
+  ]
+}

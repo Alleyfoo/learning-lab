@@ -1,0 +1,10 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "staff",
+      "field": "staff_id",
+      "binding": "lookup join key matched against timesheets.staff_ref",
+      "question": "Both staff.employee_id and staff.staff_code are mechanically sufficient replacements for staff.staff_id; which one is the correct identifier to match timesheets.staff_ref?"
+    }
+  ]
+}

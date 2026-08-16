@@ -1,0 +1,10 @@
+{
+  "CANNOT_ESTABLISH": [
+    {
+      "source": "staff",
+      "field": "staff_id",
+      "binding": "the replacement for the absent join key staff_id",
+      "question": "The staff source no longer contains staff_id; it now contains a field named record. Is record the unique identifier for staff rows, and does it match the timesheets.staff_ref values on a one-to-one basis?"
+    }
+  ]
+}
