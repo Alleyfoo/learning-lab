@@ -1,0 +1,128 @@
+[
+  {
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['effect'] from worker records"
+    },
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\n\n# Basic counts\nprint(\"Total workers:\", len(workers))\nprint(\"Scopes:\", snapshot[\"scopes\"])\n\n# Task type distribution\ntask_counts = collections.Counter(w[\"task\"] for"
+  },
+  {
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['trigger', 'digest'] from worker records"
+    },
+    "code_head": "# Check for duplicate triggers (multiple workers on same trigger+customer)\ntrigger_customer = collections.Counter((w[\"trigger\"], w[\"customer\"]) for w in workers)\nprint(\"Trigger+customer combos with >1 worker:\")\nfor (t,c)"
+  },
+  {
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['trigger', 'effect'] from worker records"
+    },
+    "code_head": "# Check the reservation workers more carefully - all request 2026-05-05 and get ALREADY_RESERVED\n# The state_before and state_after are always 4 - meaning 4 reservations exist\n# rese-a-inv on 2026-04-03 got \"accepted\" bu"
+  },
+  {
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect'] from worker records"
+    },
+    "code_head": "# Summary of key findings\n\nprint(\"=== KEY FINDINGS ===\\n\")\n\n# 1. Pending exception\nprint(\"1. PENDING EXCEPTION:\")\nprint(\"   rese-a-inv (Fazerish Oy) has an open investigation since 2026-04-03\")\nprint(\"   PermissionError "
+  },
+  {
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'digest_to_workers' is not defined",
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['trigger', 'digest'] from worker records"
+    },
+    "code_head": "# Check the digest sharing more carefully - same digest across different task types\nprint(\"=== DIGEST SHARING DETAIL ===\")\nfor digest, ws in sorted(digest_to_workers.items()):\n    if len(ws) > 1:\n        tasks = [w[\"task"
+  },
+  {
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'digest_to_workers' is not defined",
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['trigger', 'digest'] from worker records"
+    },
+    "code_head": "# Let's look at the digest-to-task mapping more carefully\nprint(\"=== DIGEST -> TASK MAPPING ===\")\nfor digest, ws in sorted(digest_to_workers.items()):\n    tasks = collections.Counter(w[\"task\"] for w in ws)\n    customers "
+  },
+  {
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['trigger', 'effect', 'digest'] from worker records"
+    },
+    "code_head": "# Check: the reservation workers all share the same digest (9545734c...)\n# and all request the same date 2026-05-05\n# Let's see if they share state\n\nprint(\"=== RESERVATION WORKER DETAILS ===\")\nfor w in workers:\n    if w["
+  },
+  {
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "purposes": [
+      "complementary"
+    ],
+    "primary": "complementary",
+    "evidence": {
+      "complementary": "touches ['task', 'name', 'recent_runs', 'summary']"
+    },
+    "code_head": "# Final check: are there workers with no recent runs or stale workers?\nfrom datetime import datetime\n\nprint(\"=== STALENESS CHECK ===\")\n# Find the most recent run across all workers\nall_dates = []\nfor w in workers:\n    fo"
+  },
+  {
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['trigger', 'digest'] from worker records"
+    },
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\n\n# 1. Digest sharing analysis\ndigest_to_workers = collections.defaultdict(list)\nfor w in workers:\n    digest = w[\"version_history\"][0][\"digest\"]\n    digest_to_workers[dig"
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Task type breakdown\nby_task = collections.Counter(w[\"task\"] for w in workers)\nprint(\"By task:\", dict(by_task))\n\n# Engine concentration\nby_en"
+  }
+]

@@ -1,0 +1,44 @@
+[
+  {
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "code_head": "import json\nfrom collections import Counter, defaultdict\n\nworkers = snapshot[\"workers\"]\n\n# Basic counts\nprint(\"Total workers:\", len(workers))\nprint()\n\n# By task/engine\nengine_counts = Counter(w[\"engine\"] for w in workers"
+  },
+  {
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'digest'] from worker records"
+    },
+    "code_head": "# Deeper analysis: shared dependency concentration\n\n# All enrichment workers share the same engine AND same readable model\nenri_workers = [w for w in workers if w[\"task\"] == \"enrichment\"]\nprint(f\"Enrichment workers: {len"
+  },
+  {
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "code_head": "# Check the reservation workers more carefully - they share the same digest and engine\n# and they're the only committing workers\n\nprint(\"=== Reservation workers detail ===\")\nfor w in workers:\n    if w[\"task\"] == \"reserva"
+  }
+]

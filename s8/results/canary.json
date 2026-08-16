@@ -1,0 +1,16 @@
+{
+  "harness_self_test": true,
+  "concentration_self_test": true,
+  "concentration_py_normalized_hash": "c78b0dab1c2032c6",
+  "concentration_py_unchanged": true,
+  "contract_no_interpretation_word": true,
+  "contract_bad_word": null,
+  "envelope_no_interpretation_word": true,
+  "envelope_bad_word": null,
+  "measure_pure_snapshot_unchanged": true,
+  "floor_hashes_before": {
+    "C:\\Users\\pertt\\learning-lab\\supervisor\\snapshot.py": "df37d914a8b8b12d",
+    "C:\\Users\\pertt\\learning-lab\\supervisor\\rulebook.jsonl": "7949cde4e8724f1b",
+    "C:\\Users\\pertt\\learning-lab\\supervisor\\concentration.py": "8a4d8d4cdbaec2a8"
+  }
+}

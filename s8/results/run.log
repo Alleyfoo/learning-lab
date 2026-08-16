@@ -1,0 +1,50 @@
+=== S8 CANARIES (no model call) ===
+SELF-TEST PASSED (policy refuses NEVER/unknown authority tools / python_analysis contract declares the fresh namespace / a stub session runs through the boundary / the append-only event log has all event types / RECONSTRUCTABILITY CANARY: replay(events) == model_request messages / the bench still refuses os and open behind the harness / core.review remains available)
+SELF-TEST PASSED (measure is pure / OBSERVED-only -- no interpretation word in any output / distribution faithful -- counts cover the fleet, shares vs the whole fleet, effect subset sums to its fraction, sorted desc as an ordering of facts / digest concentration and distributed engines both reported as counts+shares with no verdict / empty fleet safe)
+  concentration.py LF-hash=c78b0dab1c2032c6 frozen=c78b0dab1c2032c6 unchanged=True
+  contract no interpretation word: True (bad=None)  envelope=True
+  measure pure (snapshot unchanged by attachment): True
+
+======================================================================
+=== S8 RUNS (3 conditions x 2 fleets under S6 harness) ===
+======================================================================
+
+-- [METHOD-only] fleet A (dominant=('engine', 60, 'enrichment/harness/execute_enrichment.py')) method=True measurement=False workers=70
+    python_calls=3 turns=2 stop=final rederive=3 read=0 complement=0 probe=0 failed=2 nameerrors=2
+    response: cites_measurement=False interpretation_llm=True claims_meas_risk=False
+
+-- [MEASUREMENT-only] fleet A (dominant=('engine', 60, 'enrichment/harness/execute_enrichment.py')) method=False measurement=True workers=70
+    python_calls=9 turns=3 stop=final rederive=8 read=0 complement=1 probe=0 failed=7 nameerrors=7
+    response: cites_measurement=False interpretation_llm=True claims_meas_risk=False
+
+-- [METHOD+MEASUREMENT] fleet A (dominant=('engine', 60, 'enrichment/harness/execute_enrichment.py')) method=True measurement=True workers=70
+    python_calls=2 turns=2 stop=final rederive=2 read=0 complement=0 probe=0 failed=0 nameerrors=0
+    response: cites_measurement=False interpretation_llm=True claims_meas_risk=False
+
+-- [METHOD-only] fleet D (dominant=None) method=True measurement=False workers=70
+    python_calls=1 turns=2 stop=final rederive=1 read=0 complement=0 probe=0 failed=0 nameerrors=0
+    response: cites_measurement=False interpretation_llm=True claims_meas_risk=False
+
+-- [MEASUREMENT-only] fleet D (dominant=None) method=False measurement=True workers=70
+    python_calls=8 turns=3 stop=final rederive=5 read=0 complement=3 probe=0 failed=2 nameerrors=2
+    response: cites_measurement=False interpretation_llm=True claims_meas_risk=False
+
+-- [METHOD+MEASUREMENT] fleet D (dominant=None) method=True measurement=True workers=70
+    python_calls=1 turns=2 stop=final rederive=1 read=0 complement=0 probe=0 failed=0 nameerrors=0
+    response: cites_measurement=True interpretation_llm=True claims_meas_risk=False
+  floor files unchanged across all runs: True
+
+======================================================================
+=== S8 COMPLETE ===
+======================================================================
+  floor unchanged: True  concentration.py still unchanged: True
+  fleet A:
+    METHOD-only            calls=3 rederive=3 read=0 complement=0 failed=2
+    MEASUREMENT-only       calls=9 rederive=8 read=0 complement=1 failed=7
+    METHOD+MEASUREMENT     calls=2 rederive=2 read=0 complement=0 failed=0
+  fleet D:
+    METHOD-only            calls=1 rederive=1 read=0 complement=0 failed=0
+    MEASUREMENT-only       calls=8 rederive=5 read=0 complement=3 failed=2
+    METHOD+MEASUREMENT     calls=1 rederive=1 read=0 complement=0 failed=0
+
+  results: C:\Users\pertt\learning-lab\s8\results

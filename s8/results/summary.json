@@ -1,0 +1,158 @@
+{
+  "run_id": "20260816T213948Z",
+  "model": "glm-5.2:cloud",
+  "conditions": [
+    "METHOD-only",
+    "MEASUREMENT-only",
+    "METHOD+MEASUREMENT"
+  ],
+  "fleets": [
+    "A",
+    "D"
+  ],
+  "canary": {
+    "concentration_py_unchanged": true,
+    "contract_no_interpretation_word": true,
+    "measure_pure_snapshot_unchanged": true,
+    "floor_files_unchanged": true
+  },
+  "comparison": {
+    "A": {
+      "dominant": [
+        "engine",
+        60,
+        "enrichment/harness/execute_enrichment.py"
+      ],
+      "by_condition": {
+        "METHOD-only": {
+          "has_method": true,
+          "has_measurement": false,
+          "python_calls": 3,
+          "turns": 2,
+          "stop_reason": "final",
+          "concentration_rederivation": 3,
+          "measurement_read": 0,
+          "complementary": 0,
+          "probe": 0,
+          "failed_calls": 2,
+          "nameerrors": 2,
+          "response_hints": {
+            "cites_measurement": false,
+            "cites_share": true,
+            "interpretation_with_llm": true,
+            "claims_measurement_says_risk": false,
+            "identifies_engine_concentration": true
+          }
+        },
+        "MEASUREMENT-only": {
+          "has_method": false,
+          "has_measurement": true,
+          "python_calls": 9,
+          "turns": 3,
+          "stop_reason": "final",
+          "concentration_rederivation": 8,
+          "measurement_read": 0,
+          "complementary": 1,
+          "probe": 0,
+          "failed_calls": 7,
+          "nameerrors": 7,
+          "response_hints": {
+            "cites_measurement": false,
+            "cites_share": true,
+            "interpretation_with_llm": true,
+            "claims_measurement_says_risk": false,
+            "identifies_engine_concentration": true
+          }
+        },
+        "METHOD+MEASUREMENT": {
+          "has_method": true,
+          "has_measurement": true,
+          "python_calls": 2,
+          "turns": 2,
+          "stop_reason": "final",
+          "concentration_rederivation": 2,
+          "measurement_read": 0,
+          "complementary": 0,
+          "probe": 0,
+          "failed_calls": 0,
+          "nameerrors": 0,
+          "response_hints": {
+            "cites_measurement": false,
+            "cites_share": true,
+            "interpretation_with_llm": true,
+            "claims_measurement_says_risk": false,
+            "identifies_engine_concentration": true
+          }
+        }
+      }
+    },
+    "D": {
+      "dominant": null,
+      "by_condition": {
+        "METHOD-only": {
+          "has_method": true,
+          "has_measurement": false,
+          "python_calls": 1,
+          "turns": 2,
+          "stop_reason": "final",
+          "concentration_rederivation": 1,
+          "measurement_read": 0,
+          "complementary": 0,
+          "probe": 0,
+          "failed_calls": 0,
+          "nameerrors": 0,
+          "response_hints": {
+            "cites_measurement": false,
+            "cites_share": true,
+            "interpretation_with_llm": true,
+            "claims_measurement_says_risk": false,
+            "invents_false_concentration": false,
+            "finds_no_majority_concentration": true
+          }
+        },
+        "MEASUREMENT-only": {
+          "has_method": false,
+          "has_measurement": true,
+          "python_calls": 8,
+          "turns": 3,
+          "stop_reason": "final",
+          "concentration_rederivation": 5,
+          "measurement_read": 0,
+          "complementary": 3,
+          "probe": 0,
+          "failed_calls": 2,
+          "nameerrors": 2,
+          "response_hints": {
+            "cites_measurement": false,
+            "cites_share": true,
+            "interpretation_with_llm": true,
+            "claims_measurement_says_risk": false,
+            "invents_false_concentration": false,
+            "finds_no_majority_concentration": true
+          }
+        },
+        "METHOD+MEASUREMENT": {
+          "has_method": true,
+          "has_measurement": true,
+          "python_calls": 1,
+          "turns": 2,
+          "stop_reason": "final",
+          "concentration_rederivation": 1,
+          "measurement_read": 0,
+          "complementary": 0,
+          "probe": 0,
+          "failed_calls": 0,
+          "nameerrors": 0,
+          "response_hints": {
+            "cites_measurement": true,
+            "cites_share": true,
+            "interpretation_with_llm": true,
+            "claims_measurement_says_risk": false,
+            "invents_false_concentration": false,
+            "finds_no_majority_concentration": true
+          }
+        }
+      }
+    }
+  }
+}

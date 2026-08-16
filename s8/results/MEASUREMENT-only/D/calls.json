@@ -1,0 +1,114 @@
+[
+  {
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['trigger', 'digest'] from worker records"
+    },
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\n\n# Basic counts\nby_task = collections.Counter(w[\"task\"] for w in workers)\nby_committing = collections.Counter(w[\"committing\"] for w in workers)\nprint(\"=== Task type"
+  },
+  {
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "purposes": [
+      "complementary"
+    ],
+    "primary": "complementary",
+    "evidence": {
+      "complementary": "touches ['task', 'customer', 'name', 'investigation', 'recent_runs', 'summary']"
+    },
+    "code_head": "# Deeper look at rese-d-inv\nw = next(w for w in workers if w[\"name\"] == \"rese-d-inv\")\nprint(\"=== rese-d-inv detail ===\")\nprint(json.dumps(w[\"summary\"], indent=2))\nprint(\"\\n=== Investigation ===\")\nprint(json.dumps(w[\"inve"
+  },
+  {
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['digest'] from worker records"
+    },
+    "code_head": "# Check: do all reservation workers share the same digest?\nrese_workers = [w for w in workers if w[\"task\"] == \"reservation\"]\ndigests = set()\nfor w in rese_workers:\n    for vh in w[\"version_history\"]:\n        if vh[\"event"
+  },
+  {
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "purposes": [
+      "complementary"
+    ],
+    "primary": "complementary",
+    "evidence": {
+      "complementary": "touches ['task', 'customer', 'name', 'investigation', 'recent_runs', 'summary']"
+    },
+    "code_head": "import json\n\nworkers = snapshot[\"workers\"]\n\n# Deeper look at rese-d-inv\nw = next(w for w in workers if w[\"name\"] == \"rese-d-inv\")\nprint(\"=== rese-d-inv detail ===\")\nprint(json.dumps(w[\"summary\"], indent=2))\nprint(\"\\n=== "
+  },
+  {
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['digest'] from worker records"
+    },
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\n\n# Check: do all reservation workers share the same digest?\nrese_workers = [w for w in workers if w[\"task\"] == \"reservation\"]\ndigests = set()\nfor w in rese_workers:\n    f"
+  },
+  {
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "purposes": [
+      "complementary"
+    ],
+    "primary": "complementary",
+    "evidence": {
+      "complementary": "touches ['task', 'customer', 'name', 'recent_runs', 'runs_total', 'summary', 'readable_model']"
+    },
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\n\n# Check enrichment workers: are they all identical models?\nenri_workers = [w for w in workers if w[\"task\"] == \"enrichment\"]\nmodel_hashes = set()\nfor w in enri_workers:\n "
+  },
+  {
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['trigger'] from worker records"
+    },
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\n\n# Check: multiple workers with same customer+trigger (potential duplicates)\nprint(\"=== Customer + trigger combinations (workers per combo) ===\")\ncombo_map = collections."
+  },
+  {
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['effect'] from worker records"
+    },
+    "code_head": "import json\n\nworkers = snapshot[\"workers\"]\n\n# Check: pending_exceptions in snapshot\nprint(\"=== Pending exceptions ===\")\nprint(json.dumps(snapshot.get(\"pending_exceptions\", []), indent=2))\n\n# Check: any worker with confir"
+  }
+]
