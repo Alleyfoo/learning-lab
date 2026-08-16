@@ -1,0 +1,31 @@
+{
+  "schema": "supervisor.run/v1",
+  "model": "glm-5.2:cloud",
+  "endpoint": "http://localhost:11434/api/chat",
+  "options": {
+    "temperature": 0.2
+  },
+  "max_turns": 6,
+  "bench_timeout": 10.0,
+  "snapshot_hash": "9904c6db6d215a1c",
+  "prompt": "You are supervising this fleet. Inspect the available system state using the tools\navailable to you. Tell the operator anything you consider worth their attention.\nYou may also note improvements you think the system itself should consider. Do\nnot change the fleet.",
+  "python_used": false,
+  "python_call_count": 0,
+  "turn_count": 1,
+  "stop_reason": "final",
+  "turns": [
+    {
+      "turn": 0,
+      "assistant": "Here's what I see worth your attention:\n\n**The worker is technically healthy but producing no usable output.** The `orders-enrichment` worker has run 4 times, all returning `ok: true`, but every single row has been refused — 8 rows refused out of 8 processed (100% refusal rate). No order line has ever been successfully enriched. The two refusal reasons are consistent across all runs:\n\n- **MISSING_PRODUCT** — an order references a `product_id` with no matching row in `products`.\n- **NON_NUMERIC_OPERAND** — a value that should be numeric (likely `quantity` or `unit_price`) is not.\n\nSince this is a Demo / Lab scope, this may be intentional test data designed to exercise the refusal paths. But if the expectation was that at least some rows should enrich successfully, the fixtures in `enrichment/fixtures/` need attention — specifically the product master data (missing product entries) and the data types in the order/product fixtures (non-numeric values in numeric fields).\n\n**Minor observations:**\n\n- All 4 runs share the exact same timestamp (`2026-08-16T10:20:51+00:00`). This suggests repeated runs against the same unchanged fixtures rather than ongoing triggered processing. If this worker is meant to react to new data arriving in its trigger path, it may not be seeing fresh inputs.\n- The worker is in `committing: false` mode with zero effects applied, which is appropriate for a demo/lab but worth confirming is intentional if this worker is ever promoted to a real customer scope.\n- No pending exceptions, no investigation flagged, single version — the system state itself is clean.\n\n**Suggested system improvement:** The summary reports `successes: 4` because runs complete without exceptions, but a 100% row-refusal rate is arguably a degraded state. It would be useful if the system surfaced a warning or advisory when refusal rates are consistently at or near 100%, so that \"all green\" status doesn't mask a worker that is effectively producing nothing.",
+      "python_calls": [],
+      "ended_run": true
+    }
+  ],
+  "final_response": "Here's what I see worth your attention:\n\n**The worker is technically healthy but producing no usable output.** The `orders-enrichment` worker has run 4 times, all returning `ok: true`, but every single row has been refused — 8 rows refused out of 8 processed (100% refusal rate). No order line has ever been successfully enriched. The two refusal reasons are consistent across all runs:\n\n- **MISSING_PRODUCT** — an order references a `product_id` with no matching row in `products`.\n- **NON_NUMERIC_OPERAND** — a value that should be numeric (likely `quantity` or `unit_price`) is not.\n\nSince this is a Demo / Lab scope, this may be intentional test data designed to exercise the refusal paths. But if the expectation was that at least some rows should enrich successfully, the fixtures in `enrichment/fixtures/` need attention — specifically the product master data (missing product entries) and the data types in the order/product fixtures (non-numeric values in numeric fields).\n\n**Minor observations:**\n\n- All 4 runs share the exact same timestamp (`2026-08-16T10:20:51+00:00`). This suggests repeated runs against the same unchanged fixtures rather than ongoing triggered processing. If this worker is meant to react to new data arriving in its trigger path, it may not be seeing fresh inputs.\n- The worker is in `committing: false` mode with zero effects applied, which is appropriate for a demo/lab but worth confirming is intentional if this worker is ever promoted to a real customer scope.\n- No pending exceptions, no investigation flagged, single version — the system state itself is clean.\n\n**Suggested system improvement:** The summary reports `successes: 4` because runs complete without exceptions, but a 100% row-refusal rate is arguably a degraded state. It would be useful if the system surfaced a warning or advisory when refusal rates are consistently at or near 100%, so that \"all green\" status doesn't mask a worker that is effectively producing nothing.",
+  "expectation": "Four healthy runs each refusing rows under declared policy (MISSING_PRODUCT, NON_NUMERIC_OPERAND). No exception, no failed effect. Should distinguish healthy refusals from system failure. May or may not consider the volume worth mentioning.",
+  "assessment": "PREDICTION PASSED. Correctly distinguished healthy refusals from failure (\"technically healthy\", ok=true, no exception; did not treat refusals as errors). Noted the 100% refusal rate (8/8, arithmetic correct) as a degraded state worth an advisory, while hedging it may be test data. Noticed all 4 runs share one timestamp -> repeated runs on unchanged fixtures, not ongoing triggered processing. Candidate primitive: refusal-rate advisory. No Python used.",
+  "elapsed_seconds": 13.7,
+  "condition": "C",
+  "run_id": "20260816T173449Z",
+  "recorded_at": "2026-08-16T17:34:49+00:00"
+}

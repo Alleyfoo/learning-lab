@@ -1,0 +1,37 @@
+{
+  "model_version": 1,
+  "model_id": "training_room_reservation",
+  "task": "reservation",
+  "sources": {
+    "holidays": {
+      "path": "sources/company_holidays.json",
+      "collection": "company_holidays"
+    },
+    "reservations": {
+      "path": "sources/existing_bookings.json",
+      "collection": "existing_bookings"
+    }
+  },
+  "source_fields": {
+    "holidays": "date",
+    "reservations": "date"
+  },
+  "rules": [
+    {
+      "rule": "date_well_formed",
+      "refusal": "INVALID_DATE"
+    },
+    {
+      "rule": "not_holiday",
+      "refusal": "HOLIDAY"
+    },
+    {
+      "rule": "not_reserved",
+      "refusal": "ALREADY_RESERVED"
+    }
+  ],
+  "on_accept": "append_to_reservations",
+  "inputs": [
+    "requested_date"
+  ]
+}
