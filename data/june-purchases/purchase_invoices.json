@@ -1,0 +1,59 @@
+{
+  "_note": "converted from june-purchase-invoices.xlsx",
+  "purchase_invoices": [
+    {
+      "Invoice": "PI-3301",
+      "Supplier": "Kesko Oyj",
+      "Invoice date": "2026-06-02",
+      "Due date": "2026-07-02",
+      "Net": "412.90",
+      "VAT": "105.29",
+      "Gross": "518.19"
+    },
+    {
+      "Invoice": "PI-3302",
+      "Supplier": "Tulikivi Oyj",
+      "Invoice date": "2026-06-05",
+      "Due date": "2026-07-05",
+      "Net": "1290.00",
+      "VAT": "328.95",
+      "Gross": "1618.95"
+    },
+    {
+      "Invoice": "PI-3303",
+      "Supplier": "Kesko Oyj",
+      "Invoice date": "2026-06-11",
+      "Due date": "2026-07-11",
+      "Net": "88.40",
+      "VAT": "22.54",
+      "Gross": "110.94"
+    },
+    {
+      "Invoice": "PI-3304",
+      "Supplier": "Fastems Oy",
+      "Invoice date": "2026-06-17",
+      "Due date": "2026-07-17",
+      "Net": "5400.00",
+      "VAT": "1377.00",
+      "Gross": "6777.00"
+    },
+    {
+      "Invoice": "PI-3305",
+      "Supplier": "Kesko Oyj",
+      "Invoice date": "2026-06-23",
+      "Due date": "2026-07-23",
+      "Net": "215.00",
+      "VAT": "54.83",
+      "Gross": "269.83"
+    },
+    {
+      "Invoice": "PI-3306",
+      "Supplier": "Tulikivi Oyj",
+      "Invoice date": "2026-06-29",
+      "Due date": "2026-07-29",
+      "Net": "76.10",
+      "VAT": "19.41",
+      "Gross": "95.51"
+    }
+  ]
+}
