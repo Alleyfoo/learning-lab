@@ -83,13 +83,15 @@ operator, not an action you can take.
 """
 
 
-def _memory_preamble(knowledge: Optional[list], preferences: Optional[list]) -> str:
+def _memory_preamble(knowledge: Optional[list], preferences: Optional[list],
+                     methods: Optional[list] = None) -> str:
     """Render the loaded memory as a labelled preamble, or '' if there is none.
 
     This is Memory v0: load every line and put it in front of the model. No
-    retrieval, no scoring. The two classes are kept distinct because system
-    knowledge (what the system means) and operator preference (what this operator
-    cares about) are different things and must not collapse into one memory.
+    retrieval, no scoring. The classes are kept distinct because system knowledge
+    (what the system means), operator preference (what this operator cares about)
+    and supervisory method (how to supervise well) are different things and must
+    not collapse into one memory. Methods are the S5 addition; absent in S1/S2.
     """
     parts: list[str] = []
     if knowledge:
@@ -103,6 +105,12 @@ def _memory_preamble(knowledge: Optional[list], preferences: Optional[list]) -> 
                      "considers worth their attention. Respect them when deciding "
                      "what to surface:")
         for entry in preferences:
+            parts.append(f"- {entry.get('statement')}")
+    if methods:
+        parts.append("Supervisory methods you have found effective -- lessons about "
+                     "how to investigate and what to check. Apply them when "
+                     "reviewing the fleet:")
+        for entry in methods:
             parts.append(f"- {entry.get('statement')}")
     return "\n".join(parts) + ("\n\n" if parts else "")
 
@@ -133,20 +141,22 @@ def review(snapshot: dict, prompt: str, *,
            options: Optional[dict] = None,
            request_timeout: float = 600.0,
            knowledge: Optional[list] = None,
-           preferences: Optional[list] = None) -> dict:
+           preferences: Optional[list] = None,
+           methods: Optional[list] = None) -> dict:
     """Run the supervisor over `snapshot`. Returns a full run record (UI-free).
 
     `prompt` is the frozen broad question -- it must NOT encode the expected
     answers. The tool protocol and authority boundaries are added here.
 
-    `knowledge` and `preferences` are the loaded Memory v0 stores. When present
-    they are injected as a labelled preamble so the supervisor can apply prior
-    system knowledge and operator preferences. When absent the run is exactly the
-    S1 baseline. The broad prompt itself never changes.
+    `knowledge` and `preferences` are the loaded Memory v0 stores (S2).
+    `methods` are the supervisory-method store (S5). When present they are
+    injected as a labelled preamble so the supervisor can apply prior system
+    knowledge, operator preferences and supervisory methods. When all absent the
+    run is exactly the S1 baseline. The broad prompt itself never changes.
     """
     opts = options or {"temperature": 0.2}
     snapshot_json = json.dumps(snapshot, indent=2, ensure_ascii=False)
-    system = (f"{prompt}\n\n{_memory_preamble(knowledge, preferences)}"
+    system = (f"{prompt}\n\n{_memory_preamble(knowledge, preferences, methods)}"
               f"{TOOL_PROTOCOL}\n\n{BOUNDARIES}")
     messages: list[dict] = [
         {"role": "system", "content": system},

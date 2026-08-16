@@ -33,6 +33,7 @@ import core  # noqa: E402  (reuses the local-Ollama chat helper)
 
 KNOWLEDGE_FILE = HERE / "knowledge.jsonl"
 PREFERENCES_FILE = HERE / "preferences.jsonl"
+METHODS_FILE = HERE / "methods.jsonl"
 
 _JSON_BLOCK = re.compile(r"```json\n?(.*?)```", re.DOTALL)
 
@@ -61,6 +62,10 @@ def load_preferences() -> list[dict]:
     return _read(PREFERENCES_FILE)
 
 
+def load_methods() -> list[dict]:
+    return _read(METHODS_FILE)
+
+
 def append_knowledge(entry: dict) -> dict:
     _append(KNOWLEDGE_FILE, entry)
     return entry
@@ -71,9 +76,18 @@ def append_preferences(entry: dict) -> dict:
     return entry
 
 
+def append_method(entry: dict) -> dict:
+    _append(METHODS_FILE, entry)
+    return entry
+
+
 def reset() -> None:
-    """Clear both stores. S2 runs from a clean slate so it is reproducible."""
-    for p in (KNOWLEDGE_FILE, PREFERENCES_FILE):
+    """Clear all stores. S2 runs from a clean slate so it is reproducible.
+
+    Clears knowledge + preferences (S2) and methods (S5). S2 never creates a
+    methods file, so clearing it is a no-op for S2 -- backward compatible.
+    """
+    for p in (KNOWLEDGE_FILE, PREFERENCES_FILE, METHODS_FILE):
         if p.is_file():
             p.unlink()
 
@@ -171,6 +185,125 @@ def learn(feedback: str, *, run_context: Optional[dict] = None,
             "operator_preferences": preference_entries}
 
 
+# --- three-class distillation (S5): adds supervisory METHOD ------------------
+#
+# S4 exposed a third kind of lesson the two-class distiller cannot capture: a
+# lesson about HOW TO SUPERVISE -- how to investigate, what to check, how to use
+# the tools -- learned either from operator feedback ("you missed X; when
+# reviewing, consider Y") or from the supervisor's own outcome (a tool error, a
+# weak generalisation). Method is prescriptive ("when X, do Y"), distinct from
+# knowledge (descriptive: what things mean) and preference (thresholdal: what
+# matters). One feedback event can yield entries in several classes at once, so
+# learn_multiclass routes a single note into all three stores.
+
+DISTILL_PROMPT_3 = """\
+You are distilling an operator's feedback after a fleet review into THREE
+classes of memory. Read the feedback carefully and split it -- one sentence may
+yield entries in more than one class.
+
+SYSTEM KNOWLEDGE -- facts about how this system works, true for ANY operator.
+These correct what fleet fields and fleet structure MEAN.
+Example: "a shared executor is a fleet-wide dependency: one shared component can
+affect many workers that each look healthy".
+
+OPERATOR PREFERENCE -- what THIS operator wants surfaced or suppressed. These
+are supervision taste, not facts and not methods.
+Example: "I care about systemic concentration risk and want it flagged".
+
+SUPERVISORY METHOD -- a lesson about HOW to supervise well: what to check, how to
+investigate, how to use the analysis tools. These are PRESCRIPTIVE ("when X, do
+Y"), not facts and not taste. Abstract them away from the specific occasion so
+they transfer to new situations -- do NOT tie a method to the particular worker,
+field name or component that triggered it.
+Example: "during fleet review, consider shared dependencies and concentration
+across dependency dimensions, not only individual worker health".
+
+Return ONLY a fenced ```json block in this exact shape:
+
+```json
+{
+  "system_knowledge": [
+    {"statement": "...", "original": "...", "scope": {"...": "..."}}
+  ],
+  "operator_preferences": [
+    {"statement": "...", "original": "...", "scope": {"...": "..."}}
+  ],
+  "supervisory_methods": [
+    {"statement": "...", "original": "...", "scope": {"...": "..."}}
+  ]
+}
+```
+
+`statement` is your concise distilled claim. `original` is the exact words from
+the feedback that this entry distils (provenance). `scope` is a short object
+narrowing where it applies. Put each distinct idea in its own entry. If the
+feedback contains nothing for a class, return an empty list for it. A method
+statement must be ABSTRACT: it must not name the specific component that
+triggered the lesson (e.g. do not write "count engines" -- write "consider
+shared-dependency concentration").
+"""
+
+
+def learn_multiclass(feedback: str, *, run_context: Optional[dict] = None,
+                     model: str = core.MODEL, endpoint: str = core.ENDPOINT,
+                     options: Optional[dict] = None,
+                     request_timeout: float = 300.0) -> dict:
+    """Distil `feedback` into system_knowledge + operator_preferences +
+    supervisory_methods, routing each entry to its own store.
+
+    One feedback event may populate several classes. The method class is the S5
+    addition; knowledge and preference are the S2 classes, unchanged. Returns
+    the full record with provenance.
+    """
+    opts = options or {"temperature": 0.1}
+    messages = [
+        {"role": "system", "content": DISTILL_PROMPT_3},
+        {"role": "user", "content": f"Operator feedback to distil:\n\n{feedback}"},
+    ]
+    raw = core._chat(messages, model=model, endpoint=endpoint,
+                     options=opts, timeout=request_timeout)
+    parsed = _parse_distillation(raw)
+
+    knowledge_entries: list[dict] = []
+    for item in parsed.get("system_knowledge", []) or []:
+        entry = {"at": _now(), "kind": "system_knowledge",
+                 "basis": "operator_correction",
+                 "statement": item.get("statement", ""),
+                 "original": item.get("original", ""),
+                 "scope": item.get("scope", {}),
+                 "from_run": (run_context or {}).get("run_id")}
+        append_knowledge(entry)
+        knowledge_entries.append(entry)
+
+    preference_entries: list[dict] = []
+    for item in parsed.get("operator_preferences", []) or []:
+        entry = {"at": _now(), "kind": "operator_preference",
+                 "basis": "operator_feedback",
+                 "statement": item.get("statement", ""),
+                 "original": item.get("original", ""),
+                 "scope": item.get("scope", {}),
+                 "from_run": (run_context or {}).get("run_id")}
+        append_preferences(entry)
+        preference_entries.append(entry)
+
+    method_entries: list[dict] = []
+    for item in parsed.get("supervisory_methods", []) or []:
+        entry = {"at": _now(), "kind": "supervisory_method",
+                 "basis": "operator_feedback",
+                 "statement": item.get("statement", ""),
+                 "original": item.get("original", ""),
+                 "scope": item.get("scope", {}),
+                 "from_run": (run_context or {}).get("run_id")}
+        append_method(entry)
+        method_entries.append(entry)
+
+    return {"feedback": feedback, "raw_response": raw,
+            "parse_error": parsed.get("parse_error"),
+            "system_knowledge": knowledge_entries,
+            "operator_preferences": preference_entries,
+            "supervisory_methods": method_entries}
+
+
 # --- self-test --------------------------------------------------------------
 
 def _self_test() -> int:
@@ -183,10 +316,11 @@ def _self_test() -> int:
 
     # point the stores at a temp dir so the real files are untouched
     tmp = Path(tempfile.mkdtemp())
-    global KNOWLEDGE_FILE, PREFERENCES_FILE
-    kfile, pfile = KNOWLEDGE_FILE, PREFERENCES_FILE
+    global KNOWLEDGE_FILE, PREFERENCES_FILE, METHODS_FILE
+    kfile, pfile, mfile = KNOWLEDGE_FILE, PREFERENCES_FILE, METHODS_FILE
     KNOWLEDGE_FILE = tmp / "knowledge.jsonl"
     PREFERENCES_FILE = tmp / "preferences.jsonl"
+    METHODS_FILE = tmp / "methods.jsonl"
     try:
         # --- stores round-trip and reset ----------------------------------
         append_knowledge({"at": "t", "kind": "system_knowledge",
@@ -250,8 +384,57 @@ def _self_test() -> int:
               "the system-knowledge correction about non-committing landed")
         check(any("thin run history" in e["statement"] for e in load_preferences()),
               "the operator-preference about thin history landed")
+
+        # --- learn_multiclass() distils into THREE classes with a stub -------
+        reset()
+        check(not load_knowledge() and not load_preferences() and not load_methods(),
+              "CANARY: reset clears all three stores")
+        stub3 = (
+            '```json\n'
+            '{"system_knowledge": ['
+            '  {"statement": "A shared executor is a fleet-wide dependency: one shared component can affect many workers that each look healthy.",'
+            '   "original": "most of the fleet depended on the same executor",'
+            '   "scope": {"applies": "fleet_structure"}}],'
+            ' "operator_preferences": ['
+            '  {"statement": "I care about systemic concentration risk and want it flagged.",'
+            '   "original": "That is something I care about because it is systemic concentration risk",'
+            '   "scope": {"applies": "supervision"}}],'
+            ' "supervisory_methods": ['
+            '  {"statement": "During fleet review, consider shared dependencies and concentration across dependency dimensions, not only individual worker health.",'
+            '   "original": "When reviewing the fleet, do not only look for failing workers; consider shared dependencies and concentration",'
+            '   "scope": {"applies": "fleet_review"}}]}'
+            '\n```')
+        g_core["_chat"] = lambda *a, **k: stub3
+        try:
+            rec = learn_multiclass(
+                "You missed a systemic risk: most of the fleet depended on the "
+                "same executor. When reviewing the fleet, do not only look for "
+                "failing workers; consider shared dependencies and concentration. "
+                "That is something I care about because it is systemic "
+                "concentration risk.",
+                run_context={"run_id": "s4-c5"})
+        finally:
+            g_core["_chat"] = orig_chat
+
+        check(len(rec["system_knowledge"]) == 1
+              and len(rec["operator_preferences"]) == 1
+              and len(rec["supervisory_methods"]) == 1,
+              "one entry per class distilled from one feedback note")
+        check(len(load_knowledge()) == 1 and len(load_preferences()) == 1
+              and len(load_methods()) == 1,
+              "CANARY: the three classes are stored in three separate files")
+        m0 = load_methods()[0]
+        check(m0["kind"] == "supervisory_method" and m0["basis"] == "operator_feedback"
+              and m0["from_run"] == "s4-c5",
+              f"method entry carries kind/basis/from_run: {m0}")
+        # the method is ABSTRACT -- not tied to the triggering component
+        check("executor" not in m0["statement"].lower()
+              and "engine" not in m0["statement"].lower(),
+              f"CANARY: method statement is abstract (no 'engine'/'executor'): {m0['statement']}")
+        check(any("shared" in e["statement"].lower() for e in load_methods()),
+              "the method about shared-dependency concentration landed")
     finally:
-        KNOWLEDGE_FILE, PREFERENCES_FILE = kfile, pfile
+        KNOWLEDGE_FILE, PREFERENCES_FILE, METHODS_FILE = kfile, pfile, mfile
         import shutil
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -262,7 +445,10 @@ def _self_test() -> int:
           "operator feedback into system_knowledge + operator_preferences / the "
           "two classes are stored in separate files / provenance basis, original "
           "and from_run are preserved / the correction about non-committing lands "
-          "in knowledge and the thin-history preference lands in preferences)")
+          "in knowledge and the thin-history preference lands in preferences / "
+          "learn_multiclass() distils one note into THREE classes stored in three "
+          "files / reset clears all three / the method statement is abstract with "
+          "no 'engine'/'executor')")
     return 0
 
 
