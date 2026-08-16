@@ -1,0 +1,28 @@
+{
+  "model_version": 1,
+  "model_id": "kesko_reconciliation_invoice",
+  "task": "reconciliation",
+  "sources": {
+    "purchase_ledger": {
+      "path": "kesko-reconciliation/purchase_ledger.json",
+      "collection": "purchase_ledger"
+    },
+    "supplier_statement": {
+      "path": "kesko-reconciliation/supplier_statement.json",
+      "collection": "supplier_statement"
+    }
+  },
+  "left": "purchase_ledger",
+  "right": "supplier_statement",
+  "match_on": {
+    "left_field": "Invoice",
+    "right_field": "Their ref"
+  },
+  "classify": {
+    "both": "matched",
+    "only_left": "missing_from_supplier_statement",
+    "only_right": "missing_from_purchase_ledger"
+  },
+  "output_order": "left_then_right",
+  "on_duplicate_key": "refuse_run"
+}

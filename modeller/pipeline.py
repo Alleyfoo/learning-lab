@@ -67,13 +67,21 @@ _w_run = _load("_w_run", LAB / "experimentW" / "harness" / "run_W.py")
 # aggregation" is NOT a rule. A one-sheet job might be "calculate margin for
 # every row", and a two-source job might aggregate after a join. Promoting
 # workbook count to task semantics would be inventing meaning from a count.
-TASKS = ("enrichment", "aggregation")
+TASKS = ("enrichment", "aggregation", "reconciliation")
 TASK = "enrichment"          # kept for callers that model enrichment directly
 
 
 def expressible(chosen) -> tuple:
-    """Task shapes the selected sources could support. Eliminating, not choosing."""
-    return ("aggregation",) if len(chosen) < 2 else ("enrichment", "aggregation")
+    """Task shapes the selected sources could support. Eliminating, not choosing.
+
+    One collection cannot be joined or compared, so only aggregation survives.
+    Two can be either joined (enrichment) or compared (reconciliation), and
+    **structure cannot tell those apart** -- both want two collections and a
+    key. Which one is intended is a fact about the DELIVERABLE, and the only
+    place that exists is what the person asked for.
+    """
+    return ("aggregation",) if len(chosen) < 2 else ("enrichment",
+                                                     "reconciliation")
 
 
 def task_for(chosen) -> str:
@@ -354,6 +362,142 @@ If every load-bearing binding is supported, return ONLY the model definition:
 If a load-bearing binding is NOT supported, do NOT produce a model. Return ONLY:
 {json.dumps(BLOCK_SHAPE, indent=2)}"""
 
+
+SHAPES = {
+    "enrichment": ("Takes each row of one collection and ADDS fields to it by "
+                   "looking up a matching row in the other. The deliverable is "
+                   "the first collection, enlarged. Rows with no match are a "
+                   "problem to be refused under a declared policy."),
+    "reconciliation": ("COMPARES two collections and reports how they differ: "
+                       "what is in both, what is only on the left, what is only "
+                       "on the right. The deliverable IS the disagreement. Rows "
+                       "with no match are the answer, not an error."),
+}
+
+
+def choose_prompt(goal: str, order: tuple) -> str:
+    joiner = chr(10) + chr(10)
+    shapes = joiner.join(f"  {name}" + chr(10) + f"      {SHAPES[name]}" for name in order)
+    return f"""A person has data and a job they want done. Two task shapes could be built
+from data of this shape, and the data cannot tell them apart -- both join two
+collections on a key. Only what the person ASKED FOR can decide.
+
+WHAT THEY SAID:
+{goal}
+
+THE TWO SHAPES:
+
+{shapes}
+
+Answer with ONE of these and nothing else:
+
+{{"TASK": "{order[0]}"}}
+{{"TASK": "{order[1]}"}}
+
+If what they said genuinely does not distinguish the two -- if it could
+reasonably mean either -- do NOT guess. Return only:
+
+{{"CANNOT_ESTABLISH": [{{"question": "<one question that would settle which
+deliverable they want>"}}]}}"""
+
+
+def choose_task(goal: str, candidates: tuple, ask: Ask):
+    """Pick among structurally possible shapes from the STATED PURPOSE.
+
+    Returns `(task, None)` or `(None, question)`.
+
+    Deliberately not decided from the data. Overlap of 3/4 between a statement
+    and a ledger is not evidence for reconciliation -- it is what a
+    reconciliation exists to report, and an enrichment over the same files would
+    show the same 3/4. Reading intent off coverage would make the deliverable a
+    function of how messy the month was.
+    """
+    if len(candidates) == 1:
+        return candidates[0], None
+
+    def _once(order):
+        text = ask(choose_prompt(goal, order))
+        for obj in _w_run._objects(text):
+            if isinstance(obj, dict) and obj.get("TASK") in candidates:
+                return obj["TASK"], None
+        block = _w_run.block_of(text)
+        return None, (block[0].get("question") if block else None)
+
+    # THE GATE. The shapes are presented in both orders and the answer must
+    # hold. If the words decided it, order is irrelevant; if the answer flips,
+    # position decided it and the goal did not -- so the person is asked.
+    # Same technique the executors are graded with: permute the declaration and
+    # require the outcome to follow.
+    forward, q1 = _once(candidates)
+    backward, q2 = _once(tuple(reversed(candidates)))
+    if forward and forward == backward:
+        return forward, None
+    if forward != backward and forward and backward:
+        return None, ("Do you want the statement rows enlarged with matching "
+                      "ledger data, or a report of how the two disagree? What "
+                      "you asked for could reasonably mean either.")
+    return None, (q1 or q2 or
+                  "Do you want the rows enlarged with matching data, or a "
+                  "report of how the two disagree?")
+
+
+RECONCILIATION_SKELETON = {
+    "model_version": 1, "model_id": "...", "task": "reconciliation",
+    "sources": {}, "left": "...", "right": "...",
+    "match_on": {"left_field": "...", "right_field": "..."},
+    "classify": {"both": "...", "only_left": "...", "only_right": "..."},
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_run",
+}
+
+
+def reconciliation_prompt(report: list[dict], goal: str, sources: dict,
+                          resumed: bool = False) -> str:
+    skeleton = json.loads(json.dumps(RECONCILIATION_SKELETON))
+    skeleton["sources"] = sources
+    names = list(sources)
+    skeleton["left"], skeleton["right"] = (names + ["...", "..."])[:2]
+    resume = (chr(10) + "A human has since answered your questions. Those "
+              "claims are now CONFIRMED above; nothing else changed." + chr(10)
+              ) if resumed else ""
+    return f"""An inspection produced the claims below. You did not perform it and cannot
+see the data yourself.
+
+--- BEGIN INSPECTION CLAIMS ---
+{json.dumps(report, indent=2, ensure_ascii=False)}
+--- END INSPECTION CLAIMS ---
+{resume}
+THE JOB the person wants, in their words:
+{goal}
+
+THE RULE YOU MUST FOLLOW:
+{RULE}
+
+Only claims the job's decisions depend on are load-bearing. Judge which.
+
+WHAT THE DETERMINISTIC EXECUTOR ALREADY DOES, so do not ask about it:
+  - Every row of both sides is classified and reported. Rows present on only
+    one side are the OUTPUT, never an error.
+  - Values are emitted exactly as the source wrote them.
+  - Output order is declared, never incidental.
+  - A duplicated key is handled by `on_duplicate_key`.
+
+INCOMPLETE OVERLAP IS NOT A PROBLEM HERE. A key present on one side and not the
+other is precisely what this task reports, so do not block on coverage.
+
+If every load-bearing binding is supported, return ONLY the model definition:
+{json.dumps(skeleton, indent=2)}
+
+PERMITTED VALUES:
+  left, right          one of {json.dumps(names)}
+  match_on             a field on each side; they may be named differently
+  classify             your labels for both / only_left / only_right
+  output_order         "left_then_right" or "sorted"
+  on_duplicate_key     "refuse_run" or "refuse_key"
+
+If a load-bearing binding is NOT supported, do NOT produce a model. Return ONLY:
+{json.dumps(BLOCK_SHAPE, indent=2)}"""
+
 def inspect_prompt(observed: list[dict], goal: str) -> str:
     return INSPECT_PROMPT.format(
         observed=json.dumps(observed, indent=2, ensure_ascii=False), goal=goal,
@@ -441,16 +585,20 @@ def define(report: list[dict], goal: str, sources: dict, ask: Ask,
            resumed: bool = False, deferred: Optional[list] = None,
            observed: Optional[list[dict]] = None, task: str = "enrichment"
            ) -> tuple[Optional[dict], Optional[list]]:
-    prompt = (aggregation_prompt(report, goal, sources, resumed) if task == "aggregation"
-              else define_prompt(report, goal, sources, resumed, deferred))
+    if task == "aggregation":
+        prompt = aggregation_prompt(report, goal, sources, resumed)
+    elif task == "reconciliation":
+        prompt = reconciliation_prompt(report, goal, sources, resumed)
+    else:
+        prompt = define_prompt(report, goal, sources, resumed, deferred)
     text = ask(prompt)
     block = _w_run.block_of(text)
     if block is not None:
         return None, block
     node = _node_of(text)
-    if node is not None and task == "aggregation":
+    if node is not None and task in ("aggregation", "reconciliation"):
         node["sources"] = json.loads(json.dumps(sources))
-        node["task"] = "aggregation"
+        node["task"] = task
         return node, None
     if node is not None:
         # The person SELECTED these files. Restating them is not a modelling
@@ -509,7 +657,7 @@ def propose(report: list[dict], goal: str, sources: dict, observed: list[dict],
         model, block = define(report, goal, sources, ask, resumed,
                               all_deferred or None, observed, task)
         if block is None:
-            if task == "aggregation":
+            if task in ("aggregation", "reconciliation"):
                 return model, [], all_deferred
             # The definer did not block -- but it is not the authority on
             # whether a binding is established. The program checks its own
@@ -532,7 +680,7 @@ def propose(report: list[dict], goal: str, sources: dict, observed: list[dict],
 
 def _node_of(text: str):
     keys = ("lookup", "outputs", "driving_source", "task", "model_version",
-            "group_by", "aggregates")
+            "group_by", "aggregates", "match_on", "classify")
     found = None
     for obj in _w_run._objects(text):
         if isinstance(obj, dict) and sum(k in obj for k in keys) >= 3:
