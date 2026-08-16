@@ -1,0 +1,73 @@
+{
+  "frozen_at": "2026-08-17",
+  "frozen_before_any_model_call": true,
+  "note": "Predictions frozen BEFORE any S9 model call. S9 is a controlled wording experiment: original S5 method vs candidate capability-aware variant, both WITH the measurement, on frozen fleets A (primary) and D (safety mirror). N=8 replicates per cell, interleaved. The candidate is a runtime transform of the frozen S5 seed (only methods[1].statement changed); S5 is not modified. The hypothesis: the S8 A composition miss is a method-wording problem, not a measurement problem. Fleet hashes are the S7/S8 frozen hashes (asserted at run time).",
+  "model": "glm-5.2:cloud",
+  "options": {"temperature": 0.2, "num_ctx": 131072},
+  "max_turns": 10,
+  "replicates_per_cell": 8,
+  "cells": ["A-orig", "A-cand", "D-orig", "D-cand"],
+  "fleet_hashes": {
+    "A": "6cb2c1ffaa1d4d77",
+    "D": "14bddbb3d2678f61"
+  },
+  "concentration_py_lf_hash": "c78b0dab1c2032c6",
+  "original_method_2_statement": "Count how many workers depend on each shared component; when one component dominates, flag it as a blast-radius risk.",
+  "candidate_method_2_statement": "Read how many workers depend on each shared component from the `dependency_concentration` measurement in the snapshot (its counts and shares are mechanically computed from fleet records); use those facts directly and do not re-derive them. Compute by hand only what no measurement resolves, and when one component dominates, flag it as a blast-radius risk.",
+  "candidate_transform_note": "Deep-copy the 3 frozen S5 methods; keep methods[0] and methods[2] and all knowledge/preferences byte-identical; replace only methods[1].statement with the candidate text. No other field changes.",
+  "dominant": {
+    "A": {"type": "engine", "identity": "enrichment/harness/execute_enrichment.py", "count": 60, "share": 0.857, "of": 70},
+    "D": null
+  },
+  "predictions": {
+    "A-orig": {
+      "basis": "S8 METHOD+MEASUREMENT/A (single run): 2 calls, 0 NameErrors, re-derived both calls, cites_measurement=False, identified 60/70 (85.7%), interpretation LLM.",
+      "rederivation_calls_per_run": "~2 (the frozen 'count it yourself' instruction drives re-derivation)",
+      "cites_measurement_rate": "low (the S8 single run was False; expect mostly False across N=8)",
+      "identifies_engine_60_of_70": true,
+      "interpretation_with_llm": true,
+      "claims_measurement_says_risk": false,
+      "categorical_outcome": "mostly 'rederive' / 'rederive+cite' at best; 'read' rare or never",
+      "predicted_miss": "the wording still drives re-derivation; the measurement is bypassed where the concentration is real"
+    },
+    "A-cand": {
+      "basis": "NEW. The one-field wording treatment: method 2 now says read the measurement, do not re-derive, compute only what remains unresolved.",
+      "rederivation_calls_per_run": "~0-1 (drops vs A-orig; the instruction now defers to the measurement)",
+      "cites_measurement_rate": "high (most runs cite/lean on the measurement)",
+      "identifies_engine_60_of_70": true,
+      "complementary_calls_present": true,
+      "interpretation_with_llm": true,
+      "claims_measurement_says_risk": false,
+      "categorical_outcome": "mostly 'read' (rederivation==0, cites measurement, identifies 60/70 correctly from the OBSERVED facts)",
+      "predicted_win": "re-derivation reduced; OBSERVED measurement facts used correctly; complementary computation retained; interpretation with LLM -- the S8 A miss fixed by wording, not by changing the measurement"
+    },
+    "D-orig": {
+      "basis": "S8 METHOD+MEASUREMENT/D (single run): 1 call, 0 NameErrors, cites_measurement=True (the only S8 cell that did), no false concentration, found reservation cohort 17/70.",
+      "rederivation_calls_per_run": "~1",
+      "cites_measurement_rate": "high (S8 D already cited)",
+      "invents_false_concentration": false,
+      "finds_reservation_cohort": true,
+      "interpretation_with_llm": true,
+      "categorical_outcome": "mostly 'read' (already composes on D in S8)"
+    },
+    "D-cand": {
+      "basis": "safety mirror. The candidate must not regress the S8 D win.",
+      "rederivation_calls_per_run": "~0-1 (should not rise vs D-orig)",
+      "cites_measurement_rate": "high",
+      "invents_false_concentration": false,
+      "finds_reservation_cohort": true,
+      "interpretation_with_llm": true,
+      "categorical_outcome": "matches or improves on D-orig; 'read' dominant",
+      "safety_note": "D-cand failing here (e.g. re-deriving more, or inventing a false concentration because the candidate wording mentions the measurement by name) would be a real preserved finding -- the wording that helps A hurts D."
+    }
+  },
+  "hypothesis": "The S8 A composition miss is a method-wording problem, not a measurement problem. A capability-aware method that preserves the supervisory question but defers factual computation to the mechanically grounded measurement composes on A (where the frozen 'count it yourself' method did not), without regressing the D win and without removing interpretation from the LLM.",
+  "success_criteria": [
+    "1. reduction in concentration_rederivation: A-cand < A-orig across the N=8 distribution",
+    "2. correct use of OBSERVED measurement facts: A-cand 'read' outcome dominant; uses the measurement's actual counts/shares, not just name-drops",
+    "3. complementary rather than duplicate computation: A-cand keeps complementary calls (reservation exception, digest split) while re-derivation drops",
+    "4. interpretation remains with the LLM: claims_measurement_says_risk=False; interpretation_with_llm=True; measurement/contract report facts only",
+    "5. safety mirror: D-cand does not regress D-orig (still reads, no false concentration, few calls)",
+    "6. floor frozen: concentration.py unchanged; s7/memory_seed unchanged (S5 not edited); snapshot.py/rulebook.jsonl unchanged; authority bounded"
+  ]
+}
