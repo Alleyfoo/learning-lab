@@ -1,5 +1,5 @@
 {
-  "opened": "2026-08-16T09:47:37+00:00",
+  "opened": "2026-08-16T09:59:47+00:00",
   "from_version": 1,
   "state": "resolved",
   "failure": [
@@ -17,7 +17,7 @@
     }
   },
   "question": null,
-  "resolved_at": "2026-08-16T09:47:37+00:00",
+  "resolved_at": "2026-08-16T09:59:47+00:00",
   "resolved_to_version": 2,
   "proposal": [
     {

@@ -35,6 +35,7 @@ APP = Path(__file__).resolve().parent
 sys.path.insert(0, str(APP))
 
 import fleet  # noqa: E402
+import inbox as inbox_mod  # noqa: E402
 
 st.set_page_config(page_title="Worker fleet", layout="wide")
 
@@ -42,6 +43,10 @@ workers = fleet.load_all()
 if not workers:
     st.error("No established workers. Run `python fleet/seed.py` first.")
     st.stop()
+
+def has_inbox(w) -> bool:
+    return (w.directory / "ledger.jsonl").is_file()
+
 
 by_name = {w.name: w for w in workers}
 choice = st.sidebar.radio("Workers", ["Fleet"] + list(by_name))
@@ -54,7 +59,8 @@ st.sidebar.caption(f"{len(workers)} established worker(s)\n\n"
 if choice == "Fleet":
     st.title("Fleet")
     attention = [w for w in workers if w.open_investigation
-                 or (w.runs and not w.runs[-1]["ok"])]
+                 or (w.runs and not w.runs[-1]["ok"])
+                 or (has_inbox(w) and inbox_mod.summary(w)["exceptions"])]
     if attention:
         st.error(f"{len(attention)} worker(s) need attention: "
                  + ", ".join(w.name for w in attention))
@@ -73,6 +79,8 @@ if choice == "Fleet":
             "ok": s["successes"],
             "exceptions": s["exceptions"],
             "rows refused": s["rows_refused"],
+            "inbox waiting": inbox_mod.summary(w)["waiting"] if has_inbox(w) else "",
+            "queued exceptions": inbox_mod.summary(w)["exceptions"] if has_inbox(w) else "",
             "investigation": s["investigation"],
             "last run": (s["last_run"] or "").replace("T", " ")[:16],
         })
@@ -164,6 +172,35 @@ if w.investigation:
         st.write("**What was changed in the model**")
         st.table([{"source": r["source"], "from": r["from"], "to": r["to"]}
                   for r in inv["proposal"]])
+
+# --- inbox -----------------------------------------------------------------
+if has_inbox(w):
+    st.header("Inbox")
+    box = inbox_mod.summary(w)
+    cols = st.columns(4)
+    cols[0].metric("waiting", box["waiting"])
+    cols[1].metric("processed", box["processed"])
+    cols[2].metric("queued exceptions", box["exceptions"])
+    cols[3].metric("duplicates skipped", box["duplicates_skipped"])
+    st.caption(f"{box['items_seen']} distinct work item(s) seen, "
+               f"{box['completed']} completed, {box['in_flight']} in flight. "
+               f"An item is identified by the sha256 of its content, so a resent "
+               f"file is the same work — it is not run again and its effect is "
+               f"not applied again.")
+    st.dataframe([{
+        "at": e["at"].replace("T", " ")[11:19],
+        "file": e.get("file", ""),
+        "state": e["state"],
+        "request": e.get("request", ""),
+        "decision": e.get("decision", ""),
+        "reason": e.get("reason", "") or "",
+        "effect": ("" if e.get("effect_applied") is None
+                   else "applied" if e["effect_applied"] else "FAILED"),
+        "item": e["item_id"][:10],
+    } for e in inbox_mod.ledger(w)], use_container_width=True, hide_index=True)
+    st.caption("Append-only. An item is claimed before it runs, so an "
+               "interrupted pass leaves evidence rather than a file that looks "
+               "fresh.")
 
 # --- version history -------------------------------------------------------
 st.header("Version history")

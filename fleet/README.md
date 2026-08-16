@@ -65,3 +65,31 @@ applied.
 
 `room-reservation` owns its state under `fleet/workers/room-reservation/state/`,
 so its effect changes that worker and not a shared repo fixture.
+
+## Inbox trigger
+
+`fleet/inbox.py`. A file landing in a worker's `inbox/` is the trigger. No LLM
+is reachable from any of it, and there is no clock logic — `poll()` is one
+deterministic pass in sorted filename order.
+
+```text
+<worker>/
+  inbox/        a file landing here is the trigger
+  processed/    the run completed -- accepted, or refused by policy
+  exceptions/   the run failed, or an accepted decision's effect did not land
+  ledger.jsonl  append-only work-item state. This is the twice-protection.
+```
+
+**A file's location is a consequence, not a record.** If a process dies between
+applying an effect and moving the file, the file is still in `inbox/` and a
+naive poller reruns it — a duplicate booking, not a retry. So an item is
+**claimed in the ledger before it runs**, and the ledger is what the next poll
+consults.
+
+**Item identity is content.** `item_id` is the sha256 of the file's bytes.
+Renaming does not make it new work; re-dropping the same content is recognised
+as the same item and is neither re-run nor re-applied.
+
+`retry()` moves one exception back to the inbox. That is a person's decision,
+not something the poller does on a timer. An item whose effect never landed
+applies it on retry; one that completed is caught by the ledger.

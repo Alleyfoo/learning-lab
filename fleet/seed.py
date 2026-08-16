@@ -30,6 +30,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(LAB / "worker"))
 
 import fleet  # noqa: E402
+import inbox  # noqa: E402
 import worker as W  # noqa: E402
 
 ROOT = fleet.ROOT
@@ -96,22 +97,51 @@ def main(argv: list[str]) -> int:
                           .read_text(encoding="utf-8"))["reservations"]
 
     started_with = len(reservations())
-    for request in ("2026-12-25", "2026-03-10", "not-a-date", "2026-04-02",
-                    "2026-04-02"):
-        fleet.record_run(w3, request=request)
-
-    # A REAL failed effect, not an injected one: the state file is made
-    # read-only for exactly one run, so the write raises and the decision
-    # cannot land. This is the case the console must not file as success.
     target = state / "fixtures" / "reservations.json"
+
+    # Everything below arrives as a FILE in the inbox. Nothing calls the worker
+    # directly, and no LLM is reachable from any of it.
+    inbox.ensure(w3)
+
+    def drop(name: str, request: str) -> None:
+        (w3.directory / "inbox" / name).write_text(
+            json.dumps({"request": request}, indent=2) + chr(10), encoding="utf-8")
+
+
+    for name, request in (("req-001.json", "2026-12-25"),
+                          ("req-002.json", "2026-03-10"),
+                          ("req-003.json", "not-a-date"),
+                          ("req-004.json", "2026-04-02")):
+        drop(name, request)
+    inbox.poll(w3)
+    w3 = fleet.load(w3.directory)
+
+    # The same request again, under a different filename. Identical bytes, so
+    # the ledger recognises the same work item and the booking is not repeated.
+    drop("req-004-resend.json", "2026-04-02")
+    inbox.poll(w3)
+    w3 = fleet.load(w3.directory)
+    after_duplicate = len(reservations())
+
+    # A REAL failed effect: the state file is read-only for exactly one pass,
+    # so an accepted decision cannot land. Into the exception queue.
+    drop("req-005.json", "2026-05-05")
     os.chmod(target, stat.S_IREAD)
     try:
-        fleet.record_run(w3, request="2026-05-05")
+        inbox.poll(w3)
     finally:
         os.chmod(target, stat.S_IWRITE | stat.S_IREAD)
-    fleet.record_run(w3, request="2026-05-05")
+    w3 = fleet.load(w3.directory)
+
+    # A person retries it. Now it applies -- exactly once.
+    inbox.retry(w3, "req-005.json")
+    inbox.poll(w3)
+    w3 = fleet.load(w3.directory)
 
     ended_with = len(reservations())
+    print(f"inbox: duplicate resend left state at {after_duplicate}, "
+          f"retry applied once")
+    print("inbox summary:", json.dumps(inbox.summary(w3)))
     print(f"room-reservation state: {started_with} -> {ended_with} "
           f"reservation(s) -- {reservations()}")
 
