@@ -1,0 +1,3 @@
+{"version": 1, "at": "2026-02-01T00:00:00+00:00", "event": "established", "digest": "4eb12a13ec0baac64263fab8d11c8237e7415ceb768dc729d7d21a047b9fdb86", "why": "first established"}
+{"version": 2, "at": "2026-02-21T00:00:00+00:00", "event": "promoted", "digest": "fc1350ae11de61a6f83adf237350863712aacdc3f0ea466287435c36b5184898", "supersedes": 1, "why": "first refinement", "replacements": []}
+{"version": 3, "at": "2026-03-08T00:00:00+00:00", "event": "promoted", "digest": "979071426b1c390fcd91dfb23b0959a95a73c1cfdc10e5eab3790d6d79e0c181", "supersedes": 2, "why": "second refinement", "replacements": []}

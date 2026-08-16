@@ -1,0 +1,8 @@
+{
+  "name": "promo-triple-depth",
+  "purpose": "Enrich order lines; promoted twice.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/promo-triple-depth/state",
+  "trigger": "s4/fixtures/fleet/promo-triple-depth/state",
+  "customer": "Demo / Lab"
+}

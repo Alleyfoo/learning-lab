@@ -1,0 +1,8 @@
+{
+  "name": "reserv-bg-33",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s4/fixtures/fleet/reserv-bg-33/state",
+  "trigger": "s4/fixtures/fleet/reserv-bg-33/inbox/ (*.xlsx)",
+  "customer": "Demo / Lab"
+}

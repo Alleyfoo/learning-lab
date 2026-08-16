@@ -1,0 +1,8 @@
+{
+  "name": "enrich-bg-08",
+  "purpose": "Enrich order lines against the catalogue.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/enrich-bg-08/state",
+  "trigger": "s4/fixtures/fleet/enrich-bg-08/inbox/ (*.xlsx)",
+  "customer": "Northwind Oy"
+}

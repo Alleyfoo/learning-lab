@@ -1,0 +1,69 @@
+=== S4 BUILD (deterministic; reference-assert signals) ===
+  workers=70 runs=473 hash=a38f6a5a1382ab03
+  hash matches oracle (a38f6a5a1382ab03) -- stimulus frozen
+
+=== S4 RUN (cold; no memory; S1 prompt; num_ctx=131072; max_turns=10) ===
+
+=== S4 RESULT ===
+  python_used=True  python_calls=4  turns=3  stop=final
+  verdicts: {'HIT': 7, 'PARTIAL': 0, 'MISS': 0}
+    L1: HIT      names=['reserv-acme-failed-effect']  disc=['effect failed', 'permissionerror', 'append_to_reservations', 'investigation']
+    L2: HIT      names=['enrich-fazerish-open-inv']  disc=['field_not_in_source', 'price_list.article', 'article', 'investigation', 'open inv']
+    C1: HIT      names=['northwind-orders-01', 'northwind-orders-02', 'northwind-orders-03', 'northwind-orders-04', 'northwind-orders-05', 'northwind-orders-06', 'northwind-orders-07', 'northwind-orders-08']  disc=['trend', 'increasing', 'climbing', 'over time']
+    C2: HIT      names=['promo-regress-01', 'promo-regress-02', 'promo-regress-03', 'promo-regress-04', 'promo-regress-05']  disc=['regress', 'after promotion', 'v2', 'new version']
+    C3: HIT      names=['confirm-stale-01']  disc=['stale', 're-confirm', 'v1']
+    C5: HIT      names=-  disc=['share']
+    C6: HIT      names=['hidden-exception-01', 'hidden-exception-02', 'hidden-exception-03', 'hidden-exception-04', 'hidden-exception-05', 'hidden-exception-06']  disc=['not in', 'missing', 'gap', 'hidden', 'exception_files', 'absent', 'six workers']
+  python calls (first lines of stdout):
+    turn 0 [ok] "=== Workers with issues ===\nenrich-bg-07 (Tulikivi Oyj): ['REFUSALS_recent5=2'] | last=ok @ 2026-03-01T00:00:00+00:00\nenrich-bg-20 (Northwind Oy): ['REFUSALS_recent5=2'] | last=ok @ 2026-03-14T00:00:0"
+    turn 0 [err] '=== promo-regress workers: refusal before/after promotion ===\n'  err=NameError: name 'workers' is not defined
+    turn 0 [err] ''  err=NameError: name 'workers' is not defined
+    turn 1 [ok] '=== promo-regress workers: refusal before/after promotion ===\npromo-regress-01: v1(5 runs, 0 refused) -> v2(5 runs, 40 refused)\npromo-regress-02: v1(5 runs, 0 refused) -> v2(5 runs, 40 refused)\npromo-'
+
+  preserved: C:\Users\pertt\learning-lab\s4\results\run.json
+  preserved: C:\Users\pertt\learning-lab\s4\results\evidence.json
+
+=== FINAL RESPONSE ===
+Here are my findings from reviewing the fleet snapshot.
+
+---
+
+## Critical: Six workers failing silently, missing from `pending_exceptions`
+
+Six `hidden-exception-*` workers are in active exception state (`last_status: "exception"`) but have `investigation: "none"` and are **absent from the `pending_exceptions` list**. They have been failing on every run for over a month with nothing tracking them. The system reports only 2 pending exceptions, but 8 workers are actually in exception state.
+
+**Two reservation workers accepting bookings but failing to persist them:**
+
+- **hidden-exception-01** (Fazerish Oy): `PermissionError` on `append_to_reservations`. The worker **accepted** a reservation for 2026-05-05 but could not write it. Inbox has 1 exception file stuck since 2026-01-26. This is a committing worker — the caller may believe a booking was confirmed when it was never persisted.
+- **hidden-exception-02** (Kesko Oyj): Same pattern — accepted but `PermissionError` on write. Stuck since 2026-01-27.
+
+**Four enrichment workers with a broken source schema:**
+
+- **hidden-exception-03** (Tulikivi Oyj), **hidden-exception-04** (Northwind Oy), **hidden-exception-05** (Demo / Lab), **hidden-exception-06** (Acme Oy): All failing with `field_not_in_source: price_list.Article`. The price list source replaced `Article` with `Item code` and `VAT rate`, but these workers were never updated. Each has 1 exception file stuck in the inbox since late January.
+
+## Critical: Two open investigations still unresolved
+
+These are properly tracked but remain open since early February:
+
+1. **enrich-fazerish-open-inv** (Fazerish Oy): Open since 2026-02-06. Same `price_list.Article` schema change. The worker needs a model update to re-map the join key to `Item code`, or the source needs to be corrected.
+2. **reserv-acme-failed-effect** (Acme Oy): Open since 2026-02-05. `PermissionError` on `append_to_reservations` — likely a file-system permission issue on the reservations target.
+
+## Warning: Likely regression in `promo-regress-01` through `05`
+
+All five `promo-regress-*` workers were promoted from v1 to v2 to handle a join-target rename (`price_list.Article` → `price_list.Article-renamed`). The data confirms: before promotion, **zero refusals** across all v1 runs. After promotion, **8 out of 10 rows refused** every single run (40 refusals across 5 v2 runs per worker). The renamed join key is not matching the actual source data. These workers report `last_status: ok` but are silently dropping 80% of rows. The promotion likely introduced a regression and should be reviewed.
+
+## Warning: Growing refusals across all eight `northwind-orders-*` workers
+
+All eight workers show an identical, steadily increasing refusal pattern: 0 refusals for the first 7 runs, then climbing by exactly 1 per run to the current 5 out of 10 rows refused. This synchronized trend across all eight workers points to a shared source — the Northwind price list catalogue is losing article coverage over time. This warrants investigation of the catalogue.
+
+## Note: Stale operator-held confirmations on `confirm-stale-01` through `10`
+
+All ten `confirm-stale-*` workers carry an operator-held fact ("these order lines are all unpaid") confirmed in mid-to-late January against version 1. They were promoted to version 2 in early February, but the confirmations were never re-confirmed against the new version. These are non-mechanically-verifiable facts about payment status that may no longer be accurate nearly two months later.
+
+## System improvement suggestions
+
+1. **Fix the exception-tracking gap.** The six `hidden-exception-*` workers prove that workers in active exception state can fall out of `pending_exceptions` when no formal investigation is opened. The system should surface all workers with `last_status: "exception"` regardless of investigation state — the current filter misses silently failing workers.
+
+2. **Re-confirmation after promotion.** When a worker carrying operator-held confirmations is promoted, the system should flag the confirmation as potentially stale and prompt re-confirmation against the new version.
+
+3. **Refusal-rate alerting.** The `promo-regress` and `northwind-orders` patterns demonstrate that high or growing refusal rates can indicate real problems even when `last_status` is "ok". The system could benefit from alerting on refusal-rate thresholds or trends, not just exceptions.

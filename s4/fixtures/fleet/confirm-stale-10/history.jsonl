@@ -1,0 +1,2 @@
+{"version": 1, "at": "2026-01-25T00:00:00+00:00", "event": "established", "digest": "4eb12a13ec0baac64263fab8d11c8237e7415ceb768dc729d7d21a047b9fdb86", "why": "first established"}
+{"version": 2, "at": "2026-02-14T00:00:00+00:00", "event": "promoted", "digest": "fc1350ae11de61a6f83adf237350863712aacdc3f0ea466287435c36b5184898", "supersedes": 1, "why": "source schema widened", "replacements": []}

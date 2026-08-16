@@ -1,0 +1,8 @@
+{
+  "name": "enrich-bg-00",
+  "purpose": "Enrich order lines against the catalogue.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/enrich-bg-00/state",
+  "trigger": "s4/fixtures/fleet/enrich-bg-00/inbox/ (*.xlsx)",
+  "customer": "Kesko Oyj"
+}

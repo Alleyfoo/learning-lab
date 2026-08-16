@@ -1,0 +1,8 @@
+{
+  "name": "hidden-exception-05",
+  "purpose": "Enrich order lines.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/hidden-exception-05/state",
+  "trigger": "s4/fixtures/fleet/hidden-exception-05/inbox/ (*.xlsx)",
+  "customer": "Demo / Lab"
+}

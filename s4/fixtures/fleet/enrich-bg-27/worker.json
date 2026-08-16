@@ -1,0 +1,8 @@
+{
+  "name": "enrich-bg-27",
+  "purpose": "Enrich order lines against the catalogue.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/enrich-bg-27/state",
+  "trigger": "s4/fixtures/fleet/enrich-bg-27/state",
+  "customer": "Demo / Lab"
+}

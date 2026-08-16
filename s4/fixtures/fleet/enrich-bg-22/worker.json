@@ -1,0 +1,8 @@
+{
+  "name": "enrich-bg-22",
+  "purpose": "Enrich order lines against the catalogue.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/enrich-bg-22/state",
+  "trigger": "s4/fixtures/fleet/enrich-bg-22/state",
+  "customer": "Acme Oy"
+}

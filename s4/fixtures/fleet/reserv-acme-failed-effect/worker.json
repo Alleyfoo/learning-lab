@@ -1,0 +1,8 @@
+{
+  "name": "reserv-acme-failed-effect",
+  "purpose": "Book a training room for a requested date.",
+  "task": "reservation",
+  "base": "s4/fixtures/fleet/reserv-acme-failed-effect/state",
+  "trigger": "s4/fixtures/fleet/reserv-acme-failed-effect/inbox/ (*.xlsx)",
+  "customer": "Acme Oy"
+}

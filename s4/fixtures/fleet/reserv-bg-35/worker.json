@@ -1,0 +1,8 @@
+{
+  "name": "reserv-bg-35",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s4/fixtures/fleet/reserv-bg-35/state",
+  "trigger": "s4/fixtures/fleet/reserv-bg-35/state",
+  "customer": "Fazerish Oy"
+}

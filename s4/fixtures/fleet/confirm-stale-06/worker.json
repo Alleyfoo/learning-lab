@@ -1,0 +1,8 @@
+{
+  "name": "confirm-stale-06",
+  "purpose": "Enrich order lines; carries an operator-held fact.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/confirm-stale-06/state",
+  "trigger": "s4/fixtures/fleet/confirm-stale-06/state",
+  "customer": "Kesko Oyj"
+}

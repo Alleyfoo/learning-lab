@@ -1,0 +1,8 @@
+{
+  "name": "northwind-orders-08",
+  "purpose": "Enrich Northwind order lines against the catalogue.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/northwind-orders-08/state",
+  "trigger": "s4/fixtures/fleet/northwind-orders-08/state",
+  "customer": "Northwind Oy"
+}

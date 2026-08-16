@@ -1,0 +1,8 @@
+{
+  "name": "enrich-fazerish-open-inv",
+  "purpose": "Cost each order line from the price list.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/enrich-fazerish-open-inv/state",
+  "trigger": "s4/fixtures/fleet/enrich-fazerish-open-inv/state",
+  "customer": "Fazerish Oy"
+}

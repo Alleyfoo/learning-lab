@@ -1,0 +1,8 @@
+{
+  "name": "reserv-bg-36",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s4/fixtures/fleet/reserv-bg-36/state",
+  "trigger": "s4/fixtures/fleet/reserv-bg-36/state",
+  "customer": "Kesko Oyj"
+}

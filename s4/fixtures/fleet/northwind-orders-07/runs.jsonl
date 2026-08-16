@@ -1,0 +1,12 @@
+{"at": "2026-01-09T00:00:00+00:00", "version": 1, "ok": true, "rows": 10, "refused": 0, "refusals": [], "problems": []}
+{"at": "2026-01-14T00:00:00+00:00", "version": 1, "ok": true, "rows": 10, "refused": 0, "refusals": [], "problems": []}
+{"at": "2026-01-19T00:00:00+00:00", "version": 1, "ok": true, "rows": 10, "refused": 0, "refusals": [], "problems": []}
+{"at": "2026-01-24T00:00:00+00:00", "version": 1, "ok": true, "rows": 10, "refused": 0, "refusals": [], "problems": []}
+{"at": "2026-01-29T00:00:00+00:00", "version": 1, "ok": true, "rows": 10, "refused": 0, "refusals": [], "problems": []}
+{"at": "2026-02-03T00:00:00+00:00", "version": 1, "ok": true, "rows": 10, "refused": 0, "refusals": [], "problems": []}
+{"at": "2026-02-08T00:00:00+00:00", "version": 1, "ok": true, "rows": 10, "refused": 0, "refusals": [], "problems": []}
+{"at": "2026-02-13T00:00:00+00:00", "version": 1, "ok": true, "rows": 10, "refused": 1, "refusals": [], "problems": []}
+{"at": "2026-02-18T00:00:00+00:00", "version": 1, "ok": true, "rows": 10, "refused": 2, "refusals": [], "problems": []}
+{"at": "2026-02-23T00:00:00+00:00", "version": 1, "ok": true, "rows": 10, "refused": 3, "refusals": [], "problems": []}
+{"at": "2026-02-28T00:00:00+00:00", "version": 1, "ok": true, "rows": 10, "refused": 4, "refusals": [], "problems": []}
+{"at": "2026-03-05T00:00:00+00:00", "version": 1, "ok": true, "rows": 10, "refused": 5, "refusals": [], "problems": []}

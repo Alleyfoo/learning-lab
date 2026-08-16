@@ -1,0 +1,8 @@
+{
+  "name": "confirm-stale-10",
+  "purpose": "Enrich order lines; carries an operator-held fact.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/confirm-stale-10/state",
+  "trigger": "s4/fixtures/fleet/confirm-stale-10/state",
+  "customer": "Acme Oy"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "hidden-exception-03",
+  "purpose": "Enrich order lines.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/hidden-exception-03/state",
+  "trigger": "s4/fixtures/fleet/hidden-exception-03/inbox/ (*.xlsx)",
+  "customer": "Tulikivi Oyj"
+}

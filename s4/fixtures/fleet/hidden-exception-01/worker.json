@@ -1,0 +1,8 @@
+{
+  "name": "hidden-exception-01",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s4/fixtures/fleet/hidden-exception-01/state",
+  "trigger": "s4/fixtures/fleet/hidden-exception-01/inbox/ (*.xlsx)",
+  "customer": "Fazerish Oy"
+}

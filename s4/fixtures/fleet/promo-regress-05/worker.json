@@ -1,0 +1,8 @@
+{
+  "name": "promo-regress-05",
+  "purpose": "Enrich order lines; was promoted after a source rename.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/promo-regress-05/state",
+  "trigger": "s4/fixtures/fleet/promo-regress-05/state",
+  "customer": "Kesko Oyj"
+}

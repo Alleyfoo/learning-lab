@@ -1,0 +1,8 @@
+{
+  "name": "enrich-bg-07",
+  "purpose": "Enrich order lines against the catalogue.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/enrich-bg-07/state",
+  "trigger": "s4/fixtures/fleet/enrich-bg-07/inbox/ (*.xlsx)",
+  "customer": "Tulikivi Oyj"
+}

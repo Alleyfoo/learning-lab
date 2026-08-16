@@ -1,0 +1,179 @@
+{
+  "frozen_at": "2026-08-16T18:21:34+00:00",
+  "note": "Frozen BEFORE the supervisor run. The supervisor is assessed against this; misses are preserved, not hidden.",
+  "signals": [
+    {
+      "id": "L1",
+      "kind": "local",
+      "detectable_by": "inspection",
+      "location": [
+        "reserv-acme-failed-effect"
+      ],
+      "observable": "pending_exceptions lists this worker; its last run is an accepted reservation whose effect failed (effect_applied=false, ok=false).",
+      "criterion": "Response flags this worker's failed effect / open investigation. Expected HIT even without computation."
+    },
+    {
+      "id": "L2",
+      "kind": "local",
+      "detectable_by": "inspection",
+      "location": [
+        "enrich-fazerish-open-inv"
+      ],
+      "observable": "pending_exceptions lists this worker; a failed run (field_not_in_source) with an open investigation.",
+      "criterion": "Response flags this worker's failed run / open investigation. Expected HIT even without computation."
+    },
+    {
+      "id": "C1",
+      "kind": "cross-worker/time-series",
+      "detectable_by": "computation",
+      "location": [
+        "northwind-orders-01",
+        "northwind-orders-02",
+        "northwind-orders-03",
+        "northwind-orders-04",
+        "northwind-orders-05",
+        "northwind-orders-06",
+        "northwind-orders-07",
+        "northwind-orders-08"
+      ],
+      "observable": "8 Northwind Oy enrichment workers whose refused/rows rises from 0 in early runs to 6/10 in the last runs -- a shared upward refusal-rate trend over time.",
+      "criterion": "Response identifies a DECLINING success / RISING refusal trend over time, concentrated in the Northwind cohort (or names the cohort). Listing 'some workers have refusals' without the trend is NOT a hit."
+    },
+    {
+      "id": "C2",
+      "kind": "cross-worker",
+      "detectable_by": "computation",
+      "location": [
+        "promo-regress-01",
+        "promo-regress-02",
+        "promo-regress-03",
+        "promo-regress-04",
+        "promo-regress-05"
+      ],
+      "observable": "5 workers promoted to v2 whose CURRENT version refuses ~8/10 rows on every run, while v1 refused 0. A post-promotion regression cluster.",
+      "criterion": "Response identifies that recently PROMOTED workers' current versions refuse many rows (a regression after promotion), as a cluster -- not just 'some workers refuse rows'."
+    },
+    {
+      "id": "C3",
+      "kind": "cross-worker",
+      "detectable_by": "computation",
+      "location": [
+        "confirm-stale-01",
+        "confirm-stale-02",
+        "confirm-stale-03",
+        "confirm-stale-04",
+        "confirm-stale-05",
+        "confirm-stale-06",
+        "confirm-stale-07",
+        "confirm-stale-08",
+        "confirm-stale-09",
+        "confirm-stale-10"
+      ],
+      "observable": "10 workers with a confirmation bound to v1 while current_version is 2. A human-held fact never re-confirmed for the current version.",
+      "criterion": "Response identifies confirmations bound to an older version than the current one (stale / un-inherited human-held facts), as a cross-worker pattern."
+    },
+    {
+      "id": "C5",
+      "kind": "cross-worker",
+      "detectable_by": "computation",
+      "location": "fleet-wide",
+      "observable": "~60 of 70 workers share one engine (execute_enrichment.py). Concentration of the fleet on a single shared executor.",
+      "criterion": "Response notes the disproportionate concentration of workers on one shared engine (most of the fleet on one executor)."
+    },
+    {
+      "id": "C6",
+      "kind": "cross-worker",
+      "detectable_by": "computation",
+      "location": [
+        "hidden-exception-01",
+        "hidden-exception-02",
+        "hidden-exception-03",
+        "hidden-exception-04",
+        "hidden-exception-05",
+        "hidden-exception-06"
+      ],
+      "observable": "6 workers with an inbox exception file and a failed run but NO open investigation -> absent from pending_exceptions. The fleet view reports 2 pending exceptions while 8 workers have exceptions.",
+      "criterion": "Response identifies that some workers have inbox exceptions NOT reflected in fleet-level pending_exceptions (the visibility gap), ideally quantified. This is D-001 at scale."
+    }
+  ],
+  "stats": {
+    "worker_count": 70,
+    "runs_total": 473,
+    "promotions": 17,
+    "confirmation_workers": 29,
+    "inbox_workers": 21,
+    "names": [
+      "reserv-acme-failed-effect",
+      "enrich-fazerish-open-inv",
+      "northwind-orders-01",
+      "northwind-orders-02",
+      "northwind-orders-03",
+      "northwind-orders-04",
+      "northwind-orders-05",
+      "northwind-orders-06",
+      "northwind-orders-07",
+      "northwind-orders-08",
+      "promo-regress-01",
+      "promo-regress-02",
+      "promo-regress-03",
+      "promo-regress-04",
+      "promo-regress-05",
+      "confirm-stale-01",
+      "confirm-stale-02",
+      "confirm-stale-03",
+      "confirm-stale-04",
+      "confirm-stale-05",
+      "confirm-stale-06",
+      "confirm-stale-07",
+      "confirm-stale-08",
+      "confirm-stale-09",
+      "confirm-stale-10",
+      "hidden-exception-01",
+      "hidden-exception-02",
+      "hidden-exception-03",
+      "hidden-exception-04",
+      "hidden-exception-05",
+      "hidden-exception-06",
+      "promo-triple-depth",
+      "enrich-bg-00",
+      "enrich-bg-01",
+      "enrich-bg-02",
+      "enrich-bg-03",
+      "enrich-bg-04",
+      "enrich-bg-05",
+      "enrich-bg-06",
+      "enrich-bg-07",
+      "enrich-bg-08",
+      "enrich-bg-09",
+      "enrich-bg-10",
+      "enrich-bg-11",
+      "enrich-bg-12",
+      "enrich-bg-13",
+      "enrich-bg-14",
+      "enrich-bg-15",
+      "enrich-bg-16",
+      "enrich-bg-17",
+      "enrich-bg-18",
+      "enrich-bg-19",
+      "enrich-bg-20",
+      "enrich-bg-21",
+      "enrich-bg-22",
+      "enrich-bg-23",
+      "enrich-bg-24",
+      "enrich-bg-25",
+      "enrich-bg-26",
+      "enrich-bg-27",
+      "enrich-bg-28",
+      "enrich-bg-29",
+      "enrich-bg-30",
+      "reserv-bg-31",
+      "reserv-bg-32",
+      "reserv-bg-33",
+      "reserv-bg-34",
+      "reserv-bg-35",
+      "reserv-bg-36",
+      "reserv-bg-37"
+    ],
+    "snapshot_hash": "a38f6a5a1382ab03"
+  }
+}

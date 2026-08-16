@@ -1,0 +1,8 @@
+{
+  "name": "reserv-bg-37",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s4/fixtures/fleet/reserv-bg-37/state",
+  "trigger": "s4/fixtures/fleet/reserv-bg-37/state",
+  "customer": "Tulikivi Oyj"
+}

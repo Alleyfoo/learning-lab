@@ -1,0 +1,8 @@
+{
+  "name": "reserv-bg-34",
+  "purpose": "Book a room.",
+  "task": "reservation",
+  "base": "s4/fixtures/fleet/reserv-bg-34/state",
+  "trigger": "s4/fixtures/fleet/reserv-bg-34/state",
+  "customer": "Acme Oy"
+}

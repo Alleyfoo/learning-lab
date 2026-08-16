@@ -1,0 +1,1 @@
+{"at": "2026-01-16T00:00:00+00:00", "version": 1, "obligation": "o_outstanding", "clause": "operator-held", "referent": "order_lines.Gross", "answer": "these order lines are all unpaid", "status": "CONFIRMED", "confirmed_by": "human", "mechanically_verifiable": false}

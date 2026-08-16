@@ -1,0 +1,8 @@
+{
+  "name": "confirm-stale-08",
+  "purpose": "Enrich order lines; carries an operator-held fact.",
+  "task": "enrichment",
+  "base": "s4/fixtures/fleet/confirm-stale-08/state",
+  "trigger": "s4/fixtures/fleet/confirm-stale-08/state",
+  "customer": "Northwind Oy"
+}

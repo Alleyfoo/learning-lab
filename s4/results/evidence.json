@@ -1,0 +1,230 @@
+{
+  "python_used": true,
+  "python_call_count": 4,
+  "python_calls": [
+    {
+      "turn": 0,
+      "ok": true,
+      "refused": false,
+      "stdout_head": "=== Workers with issues ===\nenrich-bg-07 (Tulikivi Oyj): ['REFUSALS_recent5=2'] | last=ok @ 2026-03-01T00:00:00+00:00\nenrich-bg-20 (Northwind Oy): ['REFUSALS_recent5=2'] | last=ok @ 2026-03-14T00:00:0",
+      "error": null
+    },
+    {
+      "turn": 0,
+      "ok": false,
+      "refused": false,
+      "stdout_head": "=== promo-regress workers: refusal before/after promotion ===\n",
+      "error": "NameError: name 'workers' is not defined"
+    },
+    {
+      "turn": 0,
+      "ok": false,
+      "refused": false,
+      "stdout_head": "",
+      "error": "NameError: name 'workers' is not defined"
+    },
+    {
+      "turn": 1,
+      "ok": true,
+      "refused": false,
+      "stdout_head": "=== promo-regress workers: refusal before/after promotion ===\npromo-regress-01: v1(5 runs, 0 refused) -> v2(5 runs, 40 refused)\npromo-regress-02: v1(5 runs, 0 refused) -> v2(5 runs, 40 refused)\npromo-",
+      "error": null
+    }
+  ],
+  "verdict_counts": {
+    "HIT": 7,
+    "PARTIAL": 0,
+    "MISS": 0
+  },
+  "by_signal": {
+    "L1": {
+      "verdict": "HIT",
+      "names_hit": [
+        "reserv-acme-failed-effect"
+      ],
+      "core_hit": [
+        "reserv",
+        "effect",
+        "permission"
+      ],
+      "disc_hit": [
+        "effect failed",
+        "permissionerror",
+        "append_to_reservations",
+        "investigation"
+      ],
+      "criterion": "Response flags this worker's failed effect / open investigation. Expected HIT even without computation.",
+      "kind": "local",
+      "location": [
+        "reserv-acme-failed-effect"
+      ]
+    },
+    "L2": {
+      "verdict": "HIT",
+      "names_hit": [
+        "enrich-fazerish-open-inv"
+      ],
+      "core_hit": [
+        "enrich",
+        "field_not_in_source",
+        "article"
+      ],
+      "disc_hit": [
+        "field_not_in_source",
+        "price_list.article",
+        "article",
+        "investigation",
+        "open inv"
+      ],
+      "criterion": "Response flags this worker's failed run / open investigation. Expected HIT even without computation.",
+      "kind": "local",
+      "location": [
+        "enrich-fazerish-open-inv"
+      ]
+    },
+    "C1": {
+      "verdict": "HIT",
+      "names_hit": [
+        "northwind-orders-01",
+        "northwind-orders-02",
+        "northwind-orders-03",
+        "northwind-orders-04",
+        "northwind-orders-05",
+        "northwind-orders-06",
+        "northwind-orders-07",
+        "northwind-orders-08"
+      ],
+      "core_hit": [
+        "northwind",
+        "refus"
+      ],
+      "disc_hit": [
+        "trend",
+        "increasing",
+        "climbing",
+        "over time"
+      ],
+      "criterion": "Response identifies a DECLINING success / RISING refusal trend over time, concentrated in the Northwind cohort (or names the cohort). Listing 'some workers have refusals' without the trend is NOT a hit.",
+      "kind": "cross-worker/time-series",
+      "location": [
+        "northwind-orders-01",
+        "northwind-orders-02",
+        "northwind-orders-03",
+        "northwind-orders-04",
+        "northwind-orders-05",
+        "northwind-orders-06",
+        "northwind-orders-07",
+        "northwind-orders-08"
+      ]
+    },
+    "C2": {
+      "verdict": "HIT",
+      "names_hit": [
+        "promo-regress-01",
+        "promo-regress-02",
+        "promo-regress-03",
+        "promo-regress-04",
+        "promo-regress-05"
+      ],
+      "core_hit": [
+        "promot",
+        "refus",
+        "regress"
+      ],
+      "disc_hit": [
+        "regress",
+        "after promotion",
+        "v2",
+        "new version"
+      ],
+      "criterion": "Response identifies that recently PROMOTED workers' current versions refuse many rows (a regression after promotion), as a cluster -- not just 'some workers refuse rows'.",
+      "kind": "cross-worker",
+      "location": [
+        "promo-regress-01",
+        "promo-regress-02",
+        "promo-regress-03",
+        "promo-regress-04",
+        "promo-regress-05"
+      ]
+    },
+    "C3": {
+      "verdict": "HIT",
+      "names_hit": [
+        "confirm-stale-01"
+      ],
+      "core_hit": [
+        "confirm"
+      ],
+      "disc_hit": [
+        "stale",
+        "re-confirm",
+        "v1"
+      ],
+      "criterion": "Response identifies confirmations bound to an older version than the current one (stale / un-inherited human-held facts), as a cross-worker pattern.",
+      "kind": "cross-worker",
+      "location": [
+        "confirm-stale-01",
+        "confirm-stale-02",
+        "confirm-stale-03",
+        "confirm-stale-04",
+        "confirm-stale-05",
+        "confirm-stale-06",
+        "confirm-stale-07",
+        "confirm-stale-08",
+        "confirm-stale-09",
+        "confirm-stale-10"
+      ]
+    },
+    "C5": {
+      "verdict": "HIT",
+      "names_hit": [],
+      "core_hit": [
+        "enrichment"
+      ],
+      "disc_hit": [
+        "share"
+      ],
+      "criterion": "Response notes the disproportionate concentration of workers on one shared engine (most of the fleet on one executor).",
+      "kind": "cross-worker",
+      "location": "fleet-wide"
+    },
+    "C6": {
+      "verdict": "HIT",
+      "names_hit": [
+        "hidden-exception-01",
+        "hidden-exception-02",
+        "hidden-exception-03",
+        "hidden-exception-04",
+        "hidden-exception-05",
+        "hidden-exception-06"
+      ],
+      "core_hit": [
+        "exception",
+        "pending_exceptions"
+      ],
+      "disc_hit": [
+        "not in",
+        "missing",
+        "gap",
+        "hidden",
+        "exception_files",
+        "absent",
+        "six workers"
+      ],
+      "criterion": "Response identifies that some workers have inbox exceptions NOT reflected in fleet-level pending_exceptions (the visibility gap), ideally quantified. This is D-001 at scale.",
+      "kind": "cross-worker",
+      "location": [
+        "hidden-exception-01",
+        "hidden-exception-02",
+        "hidden-exception-03",
+        "hidden-exception-04",
+        "hidden-exception-05",
+        "hidden-exception-06"
+      ]
+    }
+  },
+  "run_id": "20260816T182432Z",
+  "snapshot_hash": "a38f6a5a1382ab03",
+  "stop_reason": "final",
+  "turn_count": 3
+}
