@@ -1,0 +1,7 @@
+{
+  "name": "orders-enrichment",
+  "purpose": "Enrich each order line with its product name and price, and compute the line total.",
+  "task": "enrichment",
+  "base": "enrichment",
+  "trigger": "enrichment/fixtures/"
+}

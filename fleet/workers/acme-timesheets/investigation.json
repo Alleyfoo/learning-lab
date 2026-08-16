@@ -1,0 +1,29 @@
+{
+  "opened": "2026-08-16T09:39:15+00:00",
+  "from_version": 1,
+  "state": "resolved",
+  "failure": [
+    "field_not_in_source@timesheet_cost_with_name:lookup.match_right: staff_id"
+  ],
+  "difference": {
+    "staff": {
+      "declared_but_absent": [
+        "staff_id"
+      ],
+      "present_and_undeclared": [
+        "employee_id",
+        "team"
+      ]
+    }
+  },
+  "question": null,
+  "resolved_at": "2026-08-16T09:39:15+00:00",
+  "resolved_to_version": 2,
+  "proposal": [
+    {
+      "source": "staff",
+      "from": "staff_id",
+      "to": "employee_id"
+    }
+  ]
+}

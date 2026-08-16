@@ -1,0 +1,5 @@
+{"at": "2026-08-16T09:39:16+00:00", "version": 1, "ok": true, "request": "2026-03-10", "detail": ["2026-03-10", false, "ALREADY_RESERVED"], "accepted": false, "refused": 1, "refusals": ["ALREADY_RESERVED"], "problems": []}
+{"at": "2026-08-16T09:39:16+00:00", "version": 1, "ok": true, "request": "2026-12-25", "detail": ["2026-12-25", false, "HOLIDAY"], "accepted": false, "refused": 1, "refusals": ["HOLIDAY"], "problems": []}
+{"at": "2026-08-16T09:39:16+00:00", "version": 1, "ok": true, "request": "2026-03-10", "detail": ["2026-03-10", false, "ALREADY_RESERVED"], "accepted": false, "refused": 1, "refusals": ["ALREADY_RESERVED"], "problems": []}
+{"at": "2026-08-16T09:39:16+00:00", "version": 1, "ok": true, "request": "not-a-date", "detail": ["not-a-date", false, "INVALID_DATE"], "accepted": false, "refused": 1, "refusals": ["INVALID_DATE"], "problems": []}
+{"at": "2026-08-16T09:39:16+00:00", "version": 1, "ok": true, "request": "2026-04-02", "detail": ["2026-04-02", true, ""], "accepted": true, "refused": 0, "refusals": [], "problems": []}

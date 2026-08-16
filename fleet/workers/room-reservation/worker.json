@@ -1,0 +1,7 @@
+{
+  "name": "room-reservation",
+  "purpose": "Accept a requested date unless it is malformed, a holiday, or already reserved.",
+  "task": "reservation",
+  "base": "reservation",
+  "trigger": "reservation/fixtures/"
+}

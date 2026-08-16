@@ -1,0 +1,65 @@
+{
+  "model_version": 1,
+  "model_id": "timesheet_cost_with_name",
+  "task": "enrichment",
+  "sources": {
+    "staff": {
+      "path": "timesheets/staff.json",
+      "collection": "staff"
+    },
+    "timesheets": {
+      "path": "timesheets/timesheets.json",
+      "collection": "timesheets"
+    }
+  },
+  "driving_source": "timesheets",
+  "lookup": {
+    "into": "staff",
+    "match_left": "staff_ref",
+    "match_right": "staff_id",
+    "on_missing": "refuse_row",
+    "on_ambiguous": "refuse_row"
+  },
+  "outputs": [
+    {
+      "target": "entry",
+      "from": "timesheets",
+      "field": "entry"
+    },
+    {
+      "target": "hours",
+      "from": "timesheets",
+      "field": "hours"
+    },
+    {
+      "target": "staff_ref",
+      "from": "timesheets",
+      "field": "staff_ref"
+    },
+    {
+      "target": "week",
+      "from": "timesheets",
+      "field": "week"
+    },
+    {
+      "target": "name",
+      "from": "staff",
+      "field": "name"
+    },
+    {
+      "target": "cost",
+      "compute": {
+        "op": "multiply",
+        "left": {
+          "from": "timesheets",
+          "field": "hours"
+        },
+        "right": {
+          "from": "staff",
+          "field": "hourly_rate"
+        }
+      }
+    }
+  ],
+  "on_non_numeric": "refuse_row"
+}

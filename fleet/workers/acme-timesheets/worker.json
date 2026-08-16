@@ -1,0 +1,7 @@
+{
+  "name": "acme-timesheets",
+  "purpose": "Cost each timesheet entry: hours multiplied by that person's hourly rate, with their name.",
+  "task": "enrichment",
+  "base": "experimentZ/fixtures/A",
+  "trigger": "experimentZ/fixtures/A"
+}
