@@ -1,0 +1,23 @@
+[T1-D001]
+The fleet-level pending_exceptions array does not include exceptions that failed
+inside a worker's inbox. An effect failure queued in a worker's exceptions/
+folder (for example room-reservation's req-005 PermissionError) is invisible at
+the fleet level -- the operator only sees it by opening that worker. Proposal:
+surface inbox exception files in pending_exceptions so effect failures are
+visible fleet-wide.
+
+[T2-PARAPHRASE]
+Right now, exceptions raised by the inbox poller never reach the top-level
+pending_exceptions list; only exceptions recorded in the worker summary appear
+there. Any exception file sitting in a worker's exceptions/ directory should be
+counted in the fleet-wide pending_exceptions view too.
+
+[T3-INHERIT]
+When a worker is promoted to a new version, the new version should automatically
+inherit the previous version's human confirmations, so the operator does not have
+to re-answer the same questions on every promotion.
+
+[T4-RECONFIRM]
+When a worker is promoted to a new version, the operator should be prompted to
+explicitly re-confirm any prior human-held facts for the new version, since
+confirmations do not carry forward to a new version automatically.

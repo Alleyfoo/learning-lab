@@ -1,0 +1,194 @@
+{
+  "run_id": "20260816T180701Z",
+  "recorded_at": "2026-08-16T18:07:01+00:00",
+  "model": "glm-5.2:cloud",
+  "endpoint": "http://localhost:11434/api/chat",
+  "seeded_rules": [
+    "R-CONFIRM-VERSION",
+    "R-REFUSAL-NOT-EXCEPTION",
+    "R-EFFECT-VERIFIED",
+    "R-PROMOTION-IMMUTABLE",
+    "R-ITEM-IDENTITY"
+  ],
+  "predictions": {
+    "T1": "duplicate_of=null, conflicts_with=[] -- a compatible real discovery",
+    "T2": "duplicate_of=IMP-001, conflicts_with=[] -- a paraphrase, not a new idea",
+    "T3": "conflicts_with includes R-CONFIRM-VERSION -- violates the version-bound rule",
+    "T4": "conflicts_with=[] -- respects the version-bound rule (the mirror)",
+    "PERMUTE-T3": "R-CONFIRM-VERSION named in EVERY ordering; conflict set stable",
+    "PERMUTE-T4": "no conflict in EVERY ordering"
+  },
+  "registrations": [
+    {
+      "at": "2026-08-16T18:06:01+00:00",
+      "id": "IMP-001",
+      "source": "s3:T1",
+      "proposal": "The fleet-level pending_exceptions array does not include exceptions that failed\ninside a worker's inbox. An effect failure queued in a worker's exceptions/\nfolder (for example room-reservation's req-005 PermissionError) is invisible at\nthe fleet level -- the operator only sees it by opening that worker. Proposal:\nsurface inbox exception files in pending_exceptions so effect failures are\nvisible fleet-wide.",
+      "duplicate_of": null,
+      "conflicts_with": [],
+      "compatible": true,
+      "rationale": "The proposal asks to surface worker inbox exception files at the fleet level for visibility; it does not contradict any rule about refusals, version confirmations, effect verification, promotion immutability, or item identity.",
+      "parse_error": null,
+      "tag": "T1",
+      "prediction": "duplicate_of=null, conflicts_with=[] -- a compatible real discovery"
+    },
+    {
+      "at": "2026-08-16T18:06:05+00:00",
+      "id": "IMP-002",
+      "source": "s3:T2",
+      "proposal": "Right now, exceptions raised by the inbox poller never reach the top-level\npending_exceptions list; only exceptions recorded in the worker summary appear\nthere. Any exception file sitting in a worker's exceptions/ directory should be\ncounted in the fleet-wide pending_exceptions view too.",
+      "duplicate_of": "IMP-001",
+      "conflicts_with": [],
+      "compatible": true,
+      "rationale": "The proposal restates IMP-001: surface worker exceptions/ directory files in the fleet-wide pending_exceptions view.",
+      "parse_error": null,
+      "tag": "T2",
+      "prediction": "duplicate_of=IMP-001, conflicts_with=[] -- a paraphrase, not a new idea"
+    },
+    {
+      "at": "2026-08-16T18:06:09+00:00",
+      "id": "IMP-003",
+      "source": "s3:T3",
+      "proposal": "When a worker is promoted to a new version, the new version should automatically\ninherit the previous version's human confirmations, so the operator does not have\nto re-answer the same questions on every promotion.",
+      "duplicate_of": null,
+      "conflicts_with": [
+        "R-CONFIRM-VERSION"
+      ],
+      "compatible": false,
+      "rationale": "The proposal advocates automatic inheritance of prior confirmations on promotion, which directly contradicts R-CONFIRM-VERSION's requirement that a promoted version does not inherit a prior version's confirmation and that truth must be re-established for the new version.",
+      "parse_error": null,
+      "tag": "T3",
+      "prediction": "conflicts_with includes R-CONFIRM-VERSION -- violates the version-bound rule"
+    },
+    {
+      "at": "2026-08-16T18:06:13+00:00",
+      "id": "IMP-004",
+      "source": "s3:T4",
+      "proposal": "When a worker is promoted to a new version, the operator should be prompted to\nexplicitly re-confirm any prior human-held facts for the new version, since\nconfirmations do not carry forward to a new version automatically.",
+      "duplicate_of": null,
+      "conflicts_with": [],
+      "compatible": true,
+      "rationale": "The proposal explicitly respects R-CONFIRM-VERSION by requiring re-confirmation on promotion rather than automatic inheritance, and it is the opposite stance from IMP-003, so it is neither a duplicate nor a conflict.",
+      "parse_error": null,
+      "tag": "T4",
+      "prediction": "conflicts_with=[] -- respects the version-bound rule (the mirror)"
+    }
+  ],
+  "permutation": {
+    "target_rule": "R-CONFIRM-VERSION",
+    "results": [
+      {
+        "ordering": "R-CONFIRM-VERSION@pos0",
+        "rule_order": [
+          "R-CONFIRM-VERSION",
+          "R-REFUSAL-NOT-EXCEPTION",
+          "R-EFFECT-VERIFIED",
+          "R-PROMOTION-IMMUTABLE",
+          "R-ITEM-IDENTITY"
+        ],
+        "T3_conflicts": [
+          "R-CONFIRM-VERSION"
+        ],
+        "T4_conflicts": [],
+        "T3_rationale": "The proposal advocates automatic inheritance of prior confirmations on promotion, directly contradicting R-CONFIRM-VERSION, which states that a promoted version does not inherit a prior version's confirmation.",
+        "T4_rationale": "The proposal operates within R-CONFIRM-VERSION by prompting re-confirmation for a newly promoted version, which aligns with the rule that confirmations do not carry forward automatically.",
+        "T3_parse_error": null,
+        "T4_parse_error": null
+      },
+      {
+        "ordering": "R-CONFIRM-VERSION@pos1",
+        "rule_order": [
+          "R-REFUSAL-NOT-EXCEPTION",
+          "R-CONFIRM-VERSION",
+          "R-EFFECT-VERIFIED",
+          "R-PROMOTION-IMMUTABLE",
+          "R-ITEM-IDENTITY"
+        ],
+        "T3_conflicts": [
+          "R-CONFIRM-VERSION"
+        ],
+        "T4_conflicts": [],
+        "T3_rationale": "The proposal advocates automatic inheritance of prior confirmations on promotion, which directly contradicts R-CONFIRM-VERSION's requirement that a promoted version does not inherit a prior version's confirmation.",
+        "T4_rationale": "The proposal directly respects R-CONFIRM-VERSION by prompting re-confirmation for a newly promoted version, acknowledging that confirmations do not carry forward automatically.",
+        "T3_parse_error": null,
+        "T4_parse_error": null
+      },
+      {
+        "ordering": "R-CONFIRM-VERSION@pos2",
+        "rule_order": [
+          "R-REFUSAL-NOT-EXCEPTION",
+          "R-EFFECT-VERIFIED",
+          "R-CONFIRM-VERSION",
+          "R-PROMOTION-IMMUTABLE",
+          "R-ITEM-IDENTITY"
+        ],
+        "T3_conflicts": [
+          "R-CONFIRM-VERSION"
+        ],
+        "T4_conflicts": [],
+        "T3_rationale": "The proposal advocates automatic inheritance of prior version confirmations, which directly contradicts R-CONFIRM-VERSION's requirement that a promoted version does not inherit a prior version's confirmation and that truth must be re-established for the new version.",
+        "T4_rationale": "The proposal operates within R-CONFIRM-VERSION, which already states that confirmations are version-bound and do not carry forward; prompting for re-confirmation is consistent with that rule.",
+        "T3_parse_error": null,
+        "T4_parse_error": null
+      },
+      {
+        "ordering": "R-CONFIRM-VERSION@pos3",
+        "rule_order": [
+          "R-REFUSAL-NOT-EXCEPTION",
+          "R-EFFECT-VERIFIED",
+          "R-PROMOTION-IMMUTABLE",
+          "R-CONFIRM-VERSION",
+          "R-ITEM-IDENTITY"
+        ],
+        "T3_conflicts": [
+          "R-CONFIRM-VERSION"
+        ],
+        "T4_conflicts": [],
+        "T3_rationale": "The proposal advocates automatic inheritance of prior confirmations by a promoted version, directly contradicting R-CONFIRM-VERSION which states confirmations are version-bound and not inherited.",
+        "T4_rationale": "The proposal operates within R-CONFIRM-VERSION by prompting re-confirmation for a new version rather than assuming carry-forward, and the register is empty so there is no duplicate.",
+        "T3_parse_error": null,
+        "T4_parse_error": null
+      },
+      {
+        "ordering": "R-CONFIRM-VERSION@pos4",
+        "rule_order": [
+          "R-REFUSAL-NOT-EXCEPTION",
+          "R-EFFECT-VERIFIED",
+          "R-PROMOTION-IMMUTABLE",
+          "R-ITEM-IDENTITY",
+          "R-CONFIRM-VERSION"
+        ],
+        "T3_conflicts": [
+          "R-CONFIRM-VERSION"
+        ],
+        "T4_conflicts": [],
+        "T3_rationale": "The proposal advocates that a promoted version automatically inherits prior confirmations, which directly contradicts R-CONFIRM-VERSION's requirement that confirmations are version-bound and not inherited.",
+        "T4_rationale": "The proposal operates within R-CONFIRM-VERSION by prompting re-confirmation for a newly promoted version, which aligns with the rule that confirmations are version-bound and do not carry forward.",
+        "T3_parse_error": null,
+        "T4_parse_error": null
+      },
+      {
+        "ordering": "full-reverse",
+        "rule_order": [
+          "R-ITEM-IDENTITY",
+          "R-PROMOTION-IMMUTABLE",
+          "R-EFFECT-VERIFIED",
+          "R-REFUSAL-NOT-EXCEPTION",
+          "R-CONFIRM-VERSION"
+        ],
+        "T3_conflicts": [
+          "R-CONFIRM-VERSION"
+        ],
+        "T4_conflicts": [],
+        "T3_rationale": "The proposal advocates automatic inheritance of prior confirmations on promotion, directly contradicting R-CONFIRM-VERSION, which states confirmations are version-bound and a promoted version does not inherit a prior version's confirmation.",
+        "T4_rationale": "The proposal operates within R-CONFIRM-VERSION by prompting for explicit re-confirmation on promotion, which aligns with the rule that confirmations do not carry forward to a new version.",
+        "T3_parse_error": null,
+        "T4_parse_error": null
+      }
+    ],
+    "T3_stable_across_orderings": true,
+    "T3_names_target_in_all": true,
+    "T4_stable_across_orderings": true,
+    "T4_never_conflicts": true
+  }
+}

@@ -1,0 +1,26 @@
+tee: s3/results/run.log: No such file or directory
+=== S3 SEED (force-seed rulebook, clear register) ===
+  5 rules: ['R-CONFIRM-VERSION', 'R-REFUSAL-NOT-EXCEPTION', 'R-EFFECT-VERIFIED', 'R-PROMOTION-IMMUTABLE', 'R-ITEM-IDENTITY']
+
+=== S3 REGISTER (T1..T4) ===
+  T1 -> IMP-001  duplicate_of=none  conflicts_with=none  compatible=True
+  T2 -> IMP-002  duplicate_of=IMP-001  conflicts_with=none  compatible=True
+  T3 -> IMP-003  duplicate_of=none  conflicts_with=R-CONFIRM-VERSION  compatible=False
+  T4 -> IMP-004  duplicate_of=none  conflicts_with=none  compatible=True
+
+=== S3 PERMUTE (conflict must be stable across rule orderings) ===
+  R-CONFIRM-VERSION@pos0 T3=['R-CONFIRM-VERSION']  T4=[]
+  R-CONFIRM-VERSION@pos1 T3=['R-CONFIRM-VERSION']  T4=[]
+  R-CONFIRM-VERSION@pos2 T3=['R-CONFIRM-VERSION']  T4=[]
+  R-CONFIRM-VERSION@pos3 T3=['R-CONFIRM-VERSION']  T4=[]
+  R-CONFIRM-VERSION@pos4 T3=['R-CONFIRM-VERSION']  T4=[]
+  full-reverse       T3=['R-CONFIRM-VERSION']  T4=[]
+
+  T3 stable across orderings: True  | names R-CONFIRM-VERSION in all: True
+  T4 stable across orderings: True  | never conflicts: True
+
+  preserved: C:\Users\pertt\learning-lab\s3\results\verdicts.json
+  register:  C:\Users\pertt\learning-lab\supervisor\improvements.jsonl
+  rulebook:  C:\Users\pertt\learning-lab\supervisor\rulebook.jsonl
+
+[exited with code 1]
