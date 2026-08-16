@@ -1,7 +1,6 @@
 {
-  "opened": "2026-08-16T10:08:12+00:00",
+  "opened": "2026-08-16T10:21:54+00:00",
   "from_version": 1,
-  "state": "resolved",
   "failure": [
     "field_not_in_source@timesheet_cost_with_name:lookup.match_right: staff_id"
   ],
@@ -16,14 +15,29 @@
       ]
     }
   },
-  "question": null,
-  "resolved_at": "2026-08-16T10:08:12+00:00",
-  "resolved_to_version": 2,
+  "measured": [
+    {
+      "left": "staff.employee_id",
+      "right": "timesheets.staff_ref",
+      "left_coverage": "3/3",
+      "right_unique": false
+    },
+    {
+      "left": "timesheets.staff_ref",
+      "right": "staff.employee_id",
+      "left_coverage": "4/4",
+      "right_unique": true
+    }
+  ],
+  "state": "resolved",
   "proposal": [
     {
       "source": "staff",
       "from": "staff_id",
       "to": "employee_id"
     }
-  ]
+  ],
+  "why": "the replacement is the sole candidate with complete coverage and unique right-side keys",
+  "resolved_at": "2026-08-16T10:22:02+00:00",
+  "resolved_to_version": 2
 }

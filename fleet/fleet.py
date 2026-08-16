@@ -171,8 +171,14 @@ class Worker:
                                   if r.get("effect_applied") is False),
             "committing": any(r.get("committing") for r in current),
             "last_run": self.runs[-1]["at"] if self.runs else None,
-            "last_status": ("never run" if not self.runs
-                            else "ok" if self.runs[-1]["ok"] else "exception"),
+            # Scoped to the CURRENT version. After a promotion the all-time last
+            # run belongs to the version that was replaced, so reading it made a
+            # freshly repaired worker look broken -- found by repairing one.
+            "last_status": ("not yet run on this version" if not current
+                            else "ok" if current[-1]["ok"] else "exception"),
+            "last_status_all_time": ("never run" if not self.runs
+                                     else "ok" if self.runs[-1]["ok"]
+                                     else "exception"),
             "investigation": (self.investigation or {}).get("state", "none"),
             "all_time_exceptions": len(exceptions),
         }

@@ -135,3 +135,35 @@ worker in `work_item_identity`. An unknown or absent policy is refused, not
 defaulted. `payload_digest` is recorded separately on every ledger line — it is
 a fact about the bytes, whereas identity is a policy, and they coincide for this
 worker only.
+
+## Investigation, wired to the exception queue
+
+`fleet/investigation.py`. The two halves were built separately; this joins them.
+
+```text
+work -> deterministic worker -> EXCEPTION -> packet        (no LLM)
+                                              |
+                                    operator opens it
+                                              v
+        packet -> LLM -> Experiment Y sufficiency gate     (experimentZ)
+                    |
+        sufficient  |  ambiguous
+                    v          v
+              PROPOSAL     QUESTION -> one human answer -> PROPOSAL
+                    |                                          |
+                    +----> operator applies -> v2 -------------+
+                                              |
+                                  queued work retried under v2
+```
+
+**Nothing wakes a model on its own.** An exception sits in the queue until an
+operator clicks *Investigate*. That is the only model call in the console.
+
+**A sufficient repair is proposed, not applied.** Experiment Y settled the
+*epistemic* question — whether the evidence establishes a replacement. It does
+not settle the *operational* one, whether a live worker should change now. Those
+are different axes, the same way an input contract is not a source
+interpretation. The operator clicks once.
+
+The gate still refuses a proposal the measurements do not support, and such a
+refusal becomes a question rather than a change.

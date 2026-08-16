@@ -52,17 +52,11 @@ def main(argv: list[str]) -> int:
     for _ in range(6):
         fleet.record_run(w)
 
-    w = fleet.rebase(w, "experimentZ/fixtures/A")          # the world changes
+    # The world changes and the worker refuses. It STOPS HERE, with a packet
+    # and no investigation: an operator has to open it. Nothing wakes a model on
+    # its own, which is the architecture's central claim.
+    w = fleet.rebase(w, "experimentZ/fixtures/A")
     fleet.record_run(w)
-    packet = json.loads((w.directory / "last_packet.json").read_text(encoding="utf-8"))
-    fleet.open_investigation(w, packet, None)
-    replacements = [{"source": "staff", "from": "staff_id", "to": "employee_id"}]
-    w = fleet.promote(w, W.apply_replacements(timesheet, replacements),
-                      "join target renamed in the source; the replacement was "
-                      "the sole candidate with complete coverage and unique keys",
-                      replacements)
-    for _ in range(3):
-        fleet.record_run(w)
 
     # --- 2. same engine, different model, rows refused --------------------
     orders = json.loads((LAB / "enrichment" / "models" /

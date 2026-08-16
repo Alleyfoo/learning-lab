@@ -29,6 +29,8 @@ import json
 import sys
 from pathlib import Path
 
+import urllib.request
+
 import streamlit as st
 
 APP = Path(__file__).resolve().parent
@@ -36,8 +38,22 @@ sys.path.insert(0, str(APP))
 
 import fleet  # noqa: E402
 import inbox as inbox_mod  # noqa: E402
+import investigation as inv_mod  # noqa: E402
 
 st.set_page_config(page_title="Worker fleet", layout="wide")
+
+MODEL = "glm-5.2:cloud"
+ENDPOINT = "http://localhost:11434/api/generate"
+
+
+def ask(prompt: str) -> str:
+    """The ONLY model call in the console, and only when an operator asks."""
+    payload = json.dumps({"model": MODEL, "prompt": prompt,
+                          "stream": False}).encode("utf-8")
+    request = urllib.request.Request(
+        ENDPOINT, data=payload, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(request, timeout=900) as response:
+        return json.loads(response.read())["response"]
 
 workers = fleet.load_all()
 if not workers:
@@ -59,6 +75,7 @@ st.sidebar.caption(f"{len(workers)} established worker(s)\n\n"
 if choice == "Fleet":
     st.title("Fleet")
     attention = [w for w in workers if w.open_investigation
+                 or inv_mod.needs_investigation(w)
                  or (w.runs and not w.runs[-1]["ok"])
                  or (has_inbox(w) and (inbox_mod.summary(w)["exceptions"]
                                        or inbox_mod.summary(w)["in_flight"]))]
@@ -156,12 +173,53 @@ with st.expander("Advanced · model JSON"):
     st.json(w.model)
 
 # --- investigation ---------------------------------------------------------
+if inv_mod.needs_investigation(w):
+    st.header("Exception")
+    packet = inv_mod.packet_of(w)
+    st.error("The established model no longer fits the source.")
+    for problem in packet["failure"]:
+        st.code(problem)
+    for source, diff in (packet.get("difference") or {}).items():
+        st.write(f"**{source}** — expected `"
+                 + "`, `".join(diff["declared_but_absent"]) + "`; observed `"
+                 + "`, `".join(diff["present_and_undeclared"]) + "`")
+    st.table([{"left": r["left"], "right": r["right"],
+               "coverage": r["left_coverage"], "unique right key": r["right_unique"]}
+              for r in packet.get("measured_relationships", [])])
+    st.caption("Measured by the program. Nothing has interpreted them yet — a "
+               "model is woken only when you ask.")
+    if st.button("Investigate", type="primary"):
+        with st.spinner("Investigating…"):
+            inv_mod.investigate(w, ask)
+        st.rerun()
+    st.stop()
+
 if w.investigation:
     st.header("Investigation")
     inv = w.investigation
+    if inv["state"] == "proposed":
+        st.info("A repair is proposed. It has not been applied — a live worker "
+                "changes when you say so.")
+        st.write(f"**Why:** {inv.get('why', '')}")
+        st.table([{"source": r["source"], "from": r["from"], "to": r["to"]}
+                  for r in inv["proposal"]])
+        if st.button(f"Establish v{w.current_version + 1}", type="primary"):
+            w2 = inv_mod.apply_proposal(w)
+            retried = inv_mod.retry_queued(w2)
+            st.success(f"v{w2.current_version} established; "
+                       f"{len(retried)} queued item(s) retried.")
+            st.rerun()
+        st.stop()
     if inv["state"] == "open":
         st.warning(inv.get("question") or "Awaiting a human answer.")
-    else:
+        options = inv.get("options") or []
+        if options:
+            choice = st.radio("Which replaces it?", options, key="inv_choice")
+            if st.button("That's the one"):
+                inv_mod.answer(w, choice)
+                st.rerun()
+        st.stop()
+    if inv.get("resolved_to_version"):
         st.success(f"Resolved — promoted to v{inv['resolved_to_version']}")
     st.write("**What failed**")
     for problem in inv["failure"]:
