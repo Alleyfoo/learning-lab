@@ -136,7 +136,65 @@ def observed_claims(fixtures: Path) -> list[dict]:
                         "status": "OBSERVED", "basis": "value_containment"})
 
     claims += _candidate_computations(collections, claims)
+    claims += _within_source_sums(collections)
     return claims
+
+
+def _within_source_sums(collections: dict) -> list[dict]:
+    """Which additions hold WITHIN one collection: `a + b == c`, on N of M rows.
+
+    Counting, exactly like the cross-join products. It exists because a
+    single-collection job has no join, so the cross-source measurement can
+    never fire -- a purchase-invoice sheet where `Net + VAT == Gross` on every
+    row reported zero evidence, and the one fact that could settle what `Gross`
+    is was invisible.
+
+    ## What this establishes, and what it deliberately does NOT
+
+    `Net + VAT == Gross` is evidence that **Gross is the invoice gross value**,
+    derived from the other two. It is NOT evidence that Gross is an OUTSTANDING
+    balance: an invoice that has been paid in full still satisfies the identity.
+    Nothing in a single sheet of invoice lines can settle whether the money is
+    still owed, so that question stays open until an independent source fact or
+    a human settles it.
+
+    A measurement is only evidence for what it actually measures. Letting this
+    one close the outstanding-balance question would be the same over-reach as
+    letting a field NAME settle an operand.
+    """
+    out: list[dict] = []
+    for name, items in collections.items():
+        fields = _numeric_fields(items)
+        for target in fields:
+            for left in fields:
+                for right in fields:
+                    if left >= right or target in (left, right):
+                        continue
+                    holds = 0
+                    for row in items:
+                        if not all(f in row for f in (left, right, target)):
+                            continue
+                        try:
+                            if (Decimal(str(row[left])) + Decimal(str(row[right]))
+                                    == Decimal(str(row[target]))):
+                                holds += 1
+                        except (InvalidOperation, ValueError, ArithmeticError):
+                            pass
+                    if not holds:
+                        continue
+                    out.append({"claim": {"candidate_computation": {
+                        "left": f"{name}.{left}", "op": "add",
+                        "right": f"{name}.{right}",
+                        "equals": f"{name}.{target}",
+                        "holds": f"{holds}/{len(items)}",
+                        "within": name,
+                        "establishes": (f"{target} is derived from {left} and "
+                                        f"{right}"),
+                        "does_not_establish": (f"what {target} MEANS beyond that "
+                                               f"derivation")}},
+                        "status": "OBSERVED",
+                        "basis": "arithmetic_reconciliation"})
+    return out
 
 
 def _numeric_fields(items: list[dict]) -> list[str]:
@@ -264,6 +322,31 @@ def _self_test() -> int:
               f"complete coverage must be reported as such: {sku}")
         check(code["left_coverage"] == "2/3" and code["right_unique"],
               f"partial coverage must be reported as such: {code}")
+
+        # --- single-collection addition, and its LIMIT ---------------------
+        (base / "invoices.json").write_text(json.dumps({"invoices": [
+            {"ref": "A", "net": "412.90", "vat": "105.29", "gross": "518.19"},
+            {"ref": "B", "net": "88.40", "vat": "22.54", "gross": "110.94"}]}),
+            encoding="utf-8")
+        sums = [c["claim"]["candidate_computation"]
+                for c in observed_claims(base)
+                if c["claim"].get("candidate_computation", {}).get("op") == "add"]
+        check(len(sums) == 1 and sums[0]["holds"] == "2/2"
+              and sums[0]["equals"] == "invoices.gross",
+              f"net + vat == gross must be MEASURED within one collection, "
+              f"where no join exists to carry it: {sums}")
+        check(sums[0]["establishes"].startswith("gross is derived"),
+              f"…and must say what it establishes: {sums[0]['establishes']}")
+        check("MEANS" in sums[0]["does_not_establish"],
+              f"CANARY: the claim must state its own LIMIT. A paid invoice "
+              f"satisfies this identity too, so it is evidence that gross is "
+              f"the gross value -- never that the money is still owed: "
+              f"{sums[0]['does_not_establish']}")
+        text = json.dumps(sums)
+        for forbidden in ("outstanding", "owed", "unpaid", "balance"):
+            check(forbidden not in text.lower(),
+                  f"CANARY: the measurement must not reach for {forbidden!r}")
+        (base / "invoices.json").unlink()
 
         # --- THE LINE THE PROGRAM MUST NOT CROSS ---------------------------
         text = json.dumps(claims)
