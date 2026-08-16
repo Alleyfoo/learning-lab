@@ -37,7 +37,8 @@ sys.path.insert(0, str(LAB / "taskmodel"))
 
 import enrichment_model  # noqa: E402  (registers the task type)
 from enrichment_model import (  # noqa: E402
-    driving_source, load_rows, lookup_of, on_non_numeric, outputs_of, validate,
+    ROUNDING, driving_source, load_rows, lookup_of, on_non_numeric, outputs_of,
+    validate,
 )
 from task_model import TaskModel as Model, assert_refusal, load_model  # noqa: E402
 
@@ -81,6 +82,25 @@ def _apply(op: str, left: Decimal, right: Decimal) -> Decimal:
     if op == "multiply":
         return left * right
     raise UnhonourableModel(f"op {op!r} is declared but not implemented")
+
+
+def _represent(value: Decimal, representation) -> Decimal:
+    """Apply a DECLARED representation. Absent one, nothing happens.
+
+    This is the only place a computed value's scale changes, and it changes only
+    because the model said so. `318.750` becomes `318.75` when two places are
+    declared, and stays `318.750` when they are not -- the executor never
+    decides that a number looks untidy.
+
+    The rounding mode is named by the model and looked up here. Nothing falls
+    back to the language default, because `ROUND_HALF_EVEN` and `ROUND_HALF_UP`
+    genuinely disagree and a silent choice between them is a silent choice about
+    somebody's money.
+    """
+    if representation is None:
+        return value
+    exponent = Decimal(1).scaleb(-representation.decimal_places)
+    return value.quantize(exponent, rounding=ROUNDING[representation.rounding])
 
 
 def _format(value: Decimal) -> str:
@@ -135,6 +155,11 @@ def execute(model: Model, base: Path,
     for policy in (lookup.on_missing, lookup.on_ambiguous, on_non_numeric(model)):
         if policy not in SUPPORTED_POLICIES:
             raise UnhonourableModel(f"policy {policy!r} declared, not implemented")
+    for out in outputs:
+        rep = out.representation
+        if rep is not None and rep.rounding not in ROUNDING:
+            raise UnhonourableModel(
+                f"rounding {rep.rounding!r} declared, not implemented")
 
     driving_rows = load_rows(model, base, driving)
     reference = load_rows(model, base, lookup.into)
@@ -181,6 +206,8 @@ def execute(model: Model, base: Path,
                     break
                 product = (multiply(left, right) if multiply
                            else _apply(spec.compute.op, left, right))
+                if isinstance(product, Decimal):
+                    product = _represent(product, spec.representation)
                 values.append(_format(product) if isinstance(product, Decimal)
                               else product)
                 continue

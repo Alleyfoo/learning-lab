@@ -26,6 +26,13 @@ from task_model import (  # noqa: E402
 )
 
 OPS = ("multiply",)
+# Rounding is NAMED, never inherited from whatever the language defaults to.
+# `half_up` and `half_even` disagree on exact halves, which is the point of
+# making the model say which one it means.
+ROUNDING = {"half_up": "ROUND_HALF_UP", "half_even": "ROUND_HALF_EVEN",
+            "down": "ROUND_DOWN", "up": "ROUND_UP", "floor": "ROUND_FLOOR",
+            "ceiling": "ROUND_CEILING"}
+MAX_DECIMAL_PLACES = 12
 POLICIES = ("refuse_row", "refuse_run")
 REFUSALS = ("MISSING_PRODUCT", "AMBIGUOUS_PRODUCT", "NON_NUMERIC_OPERAND")
 TYPES = (None, "string", "number")
@@ -46,6 +53,10 @@ BODY_PROBLEM_CODES = (
     "output_has_both_field_and_compute",
     "malformed_data_file",
     "field_not_in_source",
+    "representation_on_passthrough",
+    "unknown_rounding",
+    "invalid_decimal_places",
+    "representation_missing_key",
 )
 
 
@@ -67,11 +78,27 @@ class Compute:
 
 
 @dataclass(frozen=True)
+class Representation:
+    """How a COMPUTED value is written out. Declared, or it does not happen.
+
+    A computed value has no source text -- it is whatever the arithmetic
+    produced -- so the model may say how to present it. A passthrough copies
+    somebody else's data and may NOT, which is why `representation` on a
+    passthrough is a validation error rather than a silent no-op. That is
+    PRO-2 instance 9 kept closed: nothing reformats a value on the way past
+    because it looked nicer.
+    """
+    decimal_places: int
+    rounding: str
+
+
+@dataclass(frozen=True)
 class Output:
     target: str
     ref: Optional[Ref] = None
     compute: Optional[Compute] = None
     type: Optional[str] = None
+    representation: Optional[Representation] = None
 
 
 @dataclass(frozen=True)
@@ -97,8 +124,15 @@ def outputs_of(model: TaskModel) -> tuple[Output, ...]:
                               left=_ref(comp_raw.get("left") or {}),
                               right=_ref(comp_raw.get("right") or {}))
         ref = _ref(o) if ("from" in o or "field" in o) else None
+        rep_raw = o.get("representation")
+        representation = None
+        if isinstance(rep_raw, dict):
+            representation = Representation(
+                decimal_places=rep_raw.get("decimal_places"),
+                rounding=str(rep_raw.get("rounding", "")))
         out.append(Output(target=str(o.get("target", "")), ref=ref,
-                          compute=compute, type=o.get("type")))
+                          compute=compute, type=o.get("type"),
+                          representation=representation))
     return tuple(out)
 
 
@@ -208,6 +242,27 @@ def validate_body(model: TaskModel, base: Path) -> list[Problem]:
         if out.compute is not None and out.compute.op not in OPS:
             problems.append(Problem("unknown_op", owhere, out.compute.op))
 
+        rep = out.representation
+        if rep is not None:
+            if out.compute is None:
+                # A passthrough emits somebody else's text. Declaring how to
+                # round it would be an undeclared rewrite of their data.
+                problems.append(Problem("representation_on_passthrough",
+                                        owhere, out.target))
+            if rep.decimal_places is None or rep.rounding == "":
+                problems.append(Problem("representation_missing_key", owhere,
+                                        "decimal_places and rounding are both "
+                                        "required"))
+            if rep.rounding and rep.rounding not in ROUNDING:
+                problems.append(Problem("unknown_rounding", owhere, rep.rounding))
+            places = rep.decimal_places
+            if places is not None and (not isinstance(places, int)
+                                       or isinstance(places, bool)
+                                       or places < 0
+                                       or places > MAX_DECIMAL_PLACES):
+                problems.append(Problem("invalid_decimal_places", owhere,
+                                        repr(places)))
+
     return problems
 
 
@@ -288,6 +343,57 @@ def _self_test() -> int:
         seen |= r2.codes()
         check("malformed_data_file" in r2.codes(),
               f"non-object elements must be caught by the BODY: {sorted(r2.codes())}")
+
+    # --- declared representation: only on a computed value, fully named ----
+    def _with_outputs(outputs):
+        m = task_model.parse({**raw, "outputs": outputs})
+        r = validate(m, base)
+        return r.codes()
+
+    computed = {"target": "line_total", "compute": {
+        "op": "multiply",
+        "left": {"from": "orders", "field": "quantity"},
+        "right": {"from": "products", "field": "unit_price"}}}
+
+    good = _with_outputs([{**computed,
+                           "representation": {"decimal_places": 2,
+                                              "rounding": "half_up"}}])
+    seen |= good
+    check(not (good & {"representation_on_passthrough", "unknown_rounding",
+                       "invalid_decimal_places", "representation_missing_key"}),
+          f"a fully declared representation on a COMPUTED output is valid: {good}")
+
+    # A passthrough copies somebody else's text and may not be reformatted.
+    codes = _with_outputs([{"target": "unit_price", "from": "products",
+                            "field": "unit_price",
+                            "representation": {"decimal_places": 2,
+                                               "rounding": "half_up"}}])
+    seen |= codes
+    check("representation_on_passthrough" in codes,
+          f"CANARY: representation on a passthrough must be refused -- that is "
+          f"rewriting someone else's data: {sorted(codes)}")
+
+    codes = _with_outputs([{**computed, "representation": {
+        "decimal_places": 2, "rounding": "bankers"}}])
+    seen |= codes
+    check("unknown_rounding" in codes,
+          f"CANARY: an unnamed rounding mode must be refused, never defaulted: "
+          f"{sorted(codes)}")
+
+    for places in (-1, 99, 2.5, True, "2"):
+        codes = _with_outputs([{**computed, "representation": {
+            "decimal_places": places, "rounding": "half_up"}}])
+        seen |= codes
+        check("invalid_decimal_places" in codes,
+              f"CANARY: decimal_places={places!r} must be refused: "
+              f"{sorted(codes)}")
+
+    codes = _with_outputs([{**computed,
+                            "representation": {"decimal_places": 2}}])
+    seen |= codes
+    check("representation_missing_key" in codes,
+          f"CANARY: a half-declared representation must be refused: "
+          f"{sorted(codes)}")
 
     untested = sorted(set(BODY_PROBLEM_CODES) - seen)
     check(not untested, f"declared but unexercised body problem codes: {untested}")

@@ -35,7 +35,7 @@ sys.path.insert(0, str(LAB / "taskmodel"))
 
 import enrichment_model  # noqa: E402
 import task_model  # noqa: E402
-from enrichment_model import validate  # noqa: E402
+from enrichment_model import ROUNDING, validate  # noqa: E402
 from execute_enrichment import (  # noqa: E402
     SUPPORTED_OPS, SUPPORTED_POLICIES, UnhonourableModel, execute,
 )
@@ -128,6 +128,81 @@ def run_all() -> dict:
                "output; an executor multiplying a hardcoded unit_price would not "
                "move")
 
+        # --- declared numeric representation: A, B, C ------------------------
+        # A real timesheet job produced 318.750 and 633.9375 for money. The task
+        # language could not say what a person means by "cost", so nothing could
+        # be asked and nothing could be fixed. Now a COMPUTED output may declare
+        # how it is written, and only a computed one -- a passthrough copies
+        # somebody else's text and is refused at validation.
+        def represent(places, mode):
+            def mutate(raw: dict) -> None:
+                raw["outputs"][4]["representation"] = {
+                    "decimal_places": places, "rounding": mode}
+            return mutate
+
+        # C: nothing declared -> today's exact behaviour, byte for byte.
+        record("C_undeclared_is_unchanged", base_result.rows == BASELINE_ROWS,
+               f"{[r[-1] for r in base_result.rows]}",
+               "a model that declares no representation must behave exactly as "
+               "before; the executor never tidies a number on its own")
+
+        # A: the exact result already fits -> representation changes nothing.
+        a = execute(_model(represent(2, "half_up")), BASE)
+        a_totals = [r[-1] for r in a.rows]
+        record("A_exact_already_fits", a_totals == ["59.97", "0.70"],
+               f"{a_totals}",
+               "19.99 x 3 and 0.10 x 7 already have two places, so declaring two "
+               "places must not alter the value -- 0.70 in particular must not "
+               "become 0.7")
+
+        # B: the result has more places -> the DECLARED rule decides.
+        b = execute(_model(represent(1, "half_up")), BASE)
+        b_totals = [r[-1] for r in b.rows]
+        record("B_declared_rule_decides", b_totals == ["60.0", "0.7"],
+               f"{b_totals}",
+               "declaring one place must round 59.97 to 60.0; the same model "
+               "with no declaration produced 59.97, so the declaration is what "
+               "moved it")
+
+        # The rounding MODE must be the model's, not the language's default.
+        # 0.125 is the case where half_up and half_even genuinely disagree, and
+        # Python's own default for quantize is half_even.
+        modes = {}
+        for mode, want in (("half_up", "0.13"), ("half_even", "0.12"),
+                           ("down", "0.12"), ("up", "0.13")):
+            got = str(Decimal("0.125").quantize(
+                Decimal("0.01"), rounding=ROUNDING[mode]))
+            modes[mode] = got
+        record("rounding_mode_is_the_models",
+               modes == {"half_up": "0.13", "half_even": "0.12",
+                         "down": "0.12", "up": "0.13"},
+               f"0.125 to 2 places -> {modes}",
+               "half_up and half_even disagree on an exact half, so a silent "
+               "default would be a silent choice about somebody's money")
+
+        # And the disagreement must reach the actual OUTPUT, not just a helper.
+        # The baseline totals (59.97, 0.70) sit on no exact half, so every mode
+        # agrees on them and a check against those numbers proves nothing --
+        # this canary failed first time round for exactly that reason. Swapping
+        # the operand to `weight` gives 7 x 1.50 = 10.50, which at zero places
+        # is a genuine half: half_up says 11, half_even says 10.
+        def half_case(mode):
+            def mutate(raw: dict) -> None:
+                raw["outputs"][4]["compute"]["right"]["field"] = "weight"
+                raw["outputs"][4]["representation"] = {"decimal_places": 0,
+                                                       "rounding": mode}
+            return mutate
+
+        halves = {}
+        for mode in ("half_up", "half_even"):
+            halves[mode] = [r[-1] for r in execute(_model(half_case(mode)),
+                                                   BASE).rows]
+        record("mode_reaches_the_output",
+               halves == {"half_up": ["1", "11"], "half_even": ["1", "10"]},
+               f"7 x 1.50 = 10.50 at 0 places -> {halves}",
+               "CANARY: if both modes produced the same table the executor would "
+               "not be reading the declared mode at all")
+
         # --- permutation 2: the relationship's declared policy ---------------
         policy_detail = {}
         policy_ok = True
@@ -202,10 +277,12 @@ def run_all() -> dict:
         "outcome": outcome,
         "stated_limitation": (
             "three products, four order lines, one model, one operation. No "
-            "multi-key joins, many-to-many, nested lookups, currency, units or "
-            "rounding policy. Says the SHAPE works -- a declared relationship "
-            "and a declared computation are both followed -- not that the model "
-            "is complete."),
+            "multi-key joins, many-to-many, nested lookups, currency or units. "
+            "Representation covers a COMPUTED output only: decimal places and a "
+            "named rounding mode, nothing about money types or localisation. "
+            "Says the SHAPE works -- a declared relationship, a declared "
+            "computation and a declared representation are all followed -- not "
+            "that the model is complete."),
     }
 
 
