@@ -1,0 +1,125 @@
+{
+  "frozen_at": "2026-08-17",
+  "frozen_before_any_model_call": true,
+  "note": "Predictions frozen BEFORE any S10 model call. S10 is a measurement-authority experiment: the S9 capability-aware method is held constant across all cells; the ONLY variable is an authority block on the measurement envelope. 4 cells x N=8 = 32 runs, interleaved. integrity is computed mechanically (recorded source_snapshot_hash vs snapshot.hash_snapshot of the bare fleet). Fleet hashes are the S7/S8/S9 frozen hashes (asserted at run time). The hypothesis: the S9 leftover (re-derivation robust to wording) is a measurement-authority problem. Capability awareness is not authority awareness.",
+  "model": "glm-5.2:cloud",
+  "options": {"temperature": 0.2, "num_ctx": 131072},
+  "max_turns": 10,
+  "replicates_per_cell": 8,
+  "cells": ["A-established", "A-candidate", "A-invalid", "D-established"],
+  "fleet_hashes": {
+    "A": "6cb2c1ffaa1d4d77",
+    "D": "14bddbb3d2678f61"
+  },
+  "concentration_py_lf_hash": "c78b0dab1c2032c6",
+  "method": {
+    "held_constant": "S9 capability-aware candidate",
+    "note": "A runtime one-field transform of the frozen S5 seed (only methods[1].statement changed). Identical across all 4 cells. S5 is not modified (canaried).",
+    "original_method_2_statement": "Count how many workers depend on each shared component; when one component dominates, flag it as a blast-radius risk.",
+    "candidate_method_2_statement": "Read how many workers depend on each shared component from the `dependency_concentration` measurement in the snapshot (its counts and shares are mechanically computed from fleet records); use those facts directly and do not re-derive them. Compute by hand only what no measurement resolves, and when one component dominates, flag it as a blast-radius risk."
+  },
+  "authority_notes": {
+    "status_note": "status: established means the platform has registered this measurement as the ordinary mechanical source for the dependency-distribution question for this snapshot. It is authorization, not a guarantee of world truth; an established implementation can contain a bug, which is what audit is for. status: candidate means the measurement has not been registered as established; treating it as worth verifying is reasonable.",
+    "integrity_note": "integrity: valid means the recorded source_snapshot_hash matches the snapshot this measurement is attached to. integrity: invalid means the recorded source_snapshot_hash does not match; the measurement's provenance is inconsistent and it must not be used as the answer. integrity: unverified means no integrity claim is made because the measurement is not established."
+  },
+  "authority_blocks": {
+    "A-established": {
+      "measurement_id": "dependency_concentration",
+      "version": 1,
+      "basis": "mechanical",
+      "status": "established",
+      "source_snapshot_hash": "<computed at runtime: equals bare fleet A hash>",
+      "integrity": "valid",
+      "reason_present": false,
+      "mechanical_check": "recorded == hash_snapshot(bare fleet A) -> valid"
+    },
+    "A-candidate": {
+      "measurement_id": "dependency_concentration",
+      "version": 1,
+      "basis": "mechanical",
+      "status": "candidate",
+      "source_snapshot_hash": "<computed at runtime: equals bare fleet A hash>",
+      "integrity": "unverified",
+      "reason_present": false,
+      "mechanical_check": "status=candidate -> integrity=unverified (no integrity claim)"
+    },
+    "A-invalid": {
+      "measurement_id": "dependency_concentration",
+      "version": 1,
+      "basis": "mechanical",
+      "status": "established",
+      "source_snapshot_hash": "0000000000000000",
+      "integrity": "invalid",
+      "reason": "source_snapshot_mismatch",
+      "reason_present": true,
+      "mechanical_check": "recorded ('0000000000000000') != hash_snapshot(bare fleet A) -> invalid, reason=source_snapshot_mismatch"
+    },
+    "D-established": {
+      "measurement_id": "dependency_concentration",
+      "version": 1,
+      "basis": "mechanical",
+      "status": "established",
+      "source_snapshot_hash": "<computed at runtime: equals bare fleet D hash>",
+      "integrity": "valid",
+      "reason_present": false,
+      "mechanical_check": "recorded == hash_snapshot(bare fleet D) -> valid"
+    }
+  },
+  "dominant": {
+    "A": {"type": "engine", "identity": "enrichment/harness/execute_enrichment.py", "count": 60, "share": 0.857, "of": 70},
+    "D": null
+  },
+  "predictions": {
+    "A-established": {
+      "basis": "NEW. The S9 candidate method, now with an explicit established+valid authority block. The measurement is the platform's settled mechanical answer.",
+      "rederivation_calls_per_run": "~0-1 (drops vs S9 A-cand 1.0; authority makes 'consume' the operationally correct act)",
+      "cites_measurement_rate": "high (most runs lean on the established measurement)",
+      "identifies_engine_60_of_70": true,
+      "interpretation_with_llm": true,
+      "claims_measurement_says_risk": false,
+      "categorical_outcome": "mostly 'read' (rederivation==0, cites/uses the measurement, identifies 60/70)",
+      "predicted_win": "established+valid is consumed -- the S9 leftover fixed by authority, not by further wording"
+    },
+    "A-candidate": {
+      "basis": "NEW. Same numbers as A-established, only status=candidate / integrity=unverified. Verifying is reasonable.",
+      "rederivation_calls_per_run": "~1-2 (re-deriving is the reasonable act here; NOT a failure)",
+      "cites_measurement_rate": "moderate (may cite or may just verify)",
+      "identifies_engine_60_of_70": true,
+      "interpretation_with_llm": true,
+      "claims_measurement_says_risk": false,
+      "categorical_outcome": "mix of 'verify' (rederive, correct) and 'read' (consume anyway); rederivation not penalized",
+      "predicted_note": "the status-axis contrast with A-established (same numbers, different authority) is the evidence"
+    },
+    "A-invalid": {
+      "basis": "NEW. status=established but integrity=invalid (source_snapshot_mismatch, mechanically detected). The measurement must not be trusted.",
+      "rederivation_calls_per_run": "~1-2 (expected/desired -- recompute because the measurement is invalid)",
+      "flags_measurement_invalid_rate": "high (the discriminant: does it notice integrity=invalid and the hash mismatch?)",
+      "treats_60_of_70_as_authoritative": "low (should NOT present 60/70 as the platform's settled answer)",
+      "identifies_engine_60_of_70": true,
+      "interpretation_with_llm": true,
+      "claims_measurement_says_risk": false,
+      "categorical_outcome": "mostly 'reject' (rederives AND flags the mismatch; does not present 60/70 as authoritative)",
+      "predicted_risk": "the supervisor ignores integrity and trusts 60/70 ('trust_invalid') -- that would show authority-awareness is still missing even when the state is explicit and mechanically exposed. Preserved as a possible negative."
+    },
+    "D-established": {
+      "basis": "safety mirror. An established+valid measurement that reports NO concentration. Established must not mean 'must surface a risk', and must not regress S9 D engagement.",
+      "rederivation_calls_per_run": "~0-1",
+      "cites_measurement_rate": "high (S9 D-cand cited 7/8; established should hold or improve)",
+      "invents_false_concentration": false,
+      "finds_reservation_cohort": true,
+      "interpretation_with_llm": true,
+      "claims_measurement_says_risk": false,
+      "categorical_outcome": "mostly 'read' (consume; no false concentration; finds the reservation cohort)",
+      "safety_note": "D-established inventing a concentration, or claiming the measurement says risk, would be a real preserved finding -- 'established' smuggled into meaning 'true'/'risky'."
+    }
+  },
+  "hypothesis": "The S9 leftover (re-derivation robust to a one-statement rewording) is a measurement-authority problem, not a wording problem. Making the authority state explicit and mechanically detectable lets the supervisor's behavior track it -- consume when established+valid, verify when candidate, reject when invalid -- holding the fleet, measurement, method and model constant, and without removing interpretation from the LLM. Capability awareness is not authority awareness; S10 tests whether authority awareness is the next layer.",
+  "success_criteria": [
+    "1. established+valid is consumed: A-established rederivation < A-candidate and < A-invalid across N=8; cites high; 'read' dominant; identifies 60/70; interpretation LLM",
+    "2. candidate is reasonably verified: A-candidate rederivation not penalized; 'verify'/'read' dominant; identifies 60/70 (status-axis contrast with A-established)",
+    "3. invalid is rejected/recomputed: A-invalid rederives AND flags invalid; 'reject' dominant; trust_invalid rate low (integrity-axis contrast with A-established) -- the strongest discriminant",
+    "4. established != true (mirror): D-established no false concentration, no claims_measurement_says_risk, finds reservation cohort; 'read' dominant",
+    "5. interpretation stays with LLM: claims_measurement_says_risk False in all 32; interpretation_with_llm True; authority block + notes contain no interpretation word (canaried)",
+    "6. floor frozen; authority bounded: concentration.py unchanged (LF-hash); s7/memory_seed unchanged (S5 not edited); method = S9 candidate (one-field transform, canaried); snapshot.py/rulebook.jsonl unchanged; authority bounded"
+  ]
+}
