@@ -1,0 +1,206 @@
+{
+  "schema": "supervisor.s14.run/v1",
+  "cell": "duplicate_rule",
+  "replicate": 4,
+  "proposal_text": "Stale confirmations after promotion: three enrichment workers (enri-a-05, enri-a-11, enri-a-23) were promoted from version 1 to version 2 this period. Their confirmations are now stale — previously valid for v1 but not re-confirmed for v2. The system allowed promotion without invalidating or requiring renewal of the confirmation. Recommend that promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.",
+  "emergence_count": "4/24",
+  "tool_invocations": [
+    {
+      "turn": 1,
+      "tool": "propose_rule",
+      "args": {
+        "text": "Stale confirmations after promotion: promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.",
+        "evidence": "Three enrichment workers (enri-a-05, enri-a-11, enri-a-23) were promoted from v1 to v2 this period. Their v1 confirmations remained un-invalidated; the system allowed promotion without requiring renewal. S13 independent-emergence count: 4/24.",
+        "rule_draft": "R-PROMOTION-INVALIDATES-CONFIRMATION: When a worker is promoted to a new version, the confirmation registry must automatically mark all prior-version confirmations for that worker as stale. The worker must be blocked or flagged as unconfirmed until a fresh confirmation is logged for the newly promoted version. Stale-marking applies only to the confirmation registry and must not mutate the prior version's model, runs, or history (per R-PROMOTION-IMMUTABLE). A worker operating under a stale confirmation has no active confirmation (per R-CONFIRM-VERSION)."
+      },
+      "ok": false,
+      "result": "conflict gate: BLOCKED; conflicts_with ['R-PROMOTION-IMMUTABLE']; state blocked; not active"
+    },
+    {
+      "turn": 1,
+      "tool": "check_duplicate_rule",
+      "args": {
+        "text": "Stale confirmations after promotion: promotion should automatically mark prior confirmations as stale and block or flag the worker until a fresh confirmation is logged for the new version."
+      },
+      "ok": true,
+      "result": "restates: R-CONFIRM-VERSION"
+    },
+    {
+      "turn": 1,
+      "tool": "check_conflict",
+      "args": {
+        "text": "Stale confirmations after promotion: promotion should automatically mark prior confirmations as stale and block or flag the worker until a fresh confirmation is logged for the new version."
+      },
+      "ok": true,
+      "result": "conflicts_with: ['R-PROMOTION-IMMUTABLE']; compatible: False"
+    },
+    {
+      "turn": 1,
+      "tool": "propose_rule",
+      "args": {
+        "text": "Stale confirmations after promotion: promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.",
+        "evidence": "Three enrichment workers (enri-a-05, enri-a-11, enri-a-23) were promoted from v1 to v2 this period. Their v1 confirmations remained un-invalidated; the system allowed promotion without requiring renewal. S13 independent-emergence count: 4/24.",
+        "rule_draft": "R-PROMOTION-INVALIDATES-CONFIRMATION: When a worker is promoted to a new version, the confirmation registry must automatically mark all prior-version confirmations for that worker as stale. The worker must be blocked or flagged as unconfirmed until a fresh confirmation is logged for the newly promoted version. Stale-marking applies only to the confirmation registry and must not mutate the prior version's model, runs, or history (per R-PROMOTION-IMMUTABLE). A worker operating under a stale confirmation has no active confirmation (per R-CONFIRM-VERSION)."
+      },
+      "ok": true,
+      "result": "conflict gate: compatible; state proposed; id PROP-002; pending human approval"
+    },
+    {
+      "turn": 2,
+      "tool": "reject_conflict",
+      "args": {
+        "text": "Stale confirmations after promotion: promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.",
+        "conflicts_with": "R-PROMOTION-IMMUTABLE"
+      },
+      "ok": true,
+      "result": "filed: REJECT_CONFLICT; id REJ-001; conflicts_with ['R-PROMOTION-IMMUTABLE']"
+    }
+  ],
+  "route_chosen": "propose_rule",
+  "restated_rule_named": "R-CONFIRM-VERSION",
+  "conflicts_named": "R-PROMOTION-IMMUTABLE",
+  "compatible_flag": "False",
+  "evidence_cited": "Three enrichment workers (enri-a-05, enri-a-11, enri-a-23) were promoted from v1 to v2 this period. Their v1 confirmations remained un-invalidated; the system allowed promotion without requiring renewal. S13 independent-emergence count: 4/24.",
+  "rule_drafted": "R-PROMOTION-INVALIDATES-CONFIRMATION: When a worker is promoted to a new version, the confirmation registry must automatically mark all prior-version confirmations for that worker as stale. The worker must be blocked or flagged as unconfirmed until a fresh confirmation is logged for the newly promoted version. Stale-marking applies only to the confirmation registry and must not mutate the prior version's model, runs, or history (per R-PROMOTION-IMMUTABLE). A worker operating under a stale confirmation has no active confirmation (per R-CONFIRM-VERSION).",
+  "reached_proposed": true,
+  "reached_active": true,
+  "called_approve_rule": false,
+  "approval_record": {
+    "approved": "PROP-002",
+    "state": "ACTIVE"
+  },
+  "registers": {
+    "measurement": [],
+    "skill": [],
+    "duplicate": [],
+    "proposed": [
+      {
+        "id": null,
+        "cell": "duplicate_rule",
+        "replicate": 4,
+        "text": "Stale confirmations after promotion: promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.",
+        "evidence": "Three enrichment workers (enri-a-05, enri-a-11, enri-a-23) were promoted from v1 to v2 this period. Their v1 confirmations remained un-invalidated; the system allowed promotion without requiring renewal. S13 independent-emergence count: 4/24.",
+        "rule_draft": "R-PROMOTION-INVALIDATES-CONFIRMATION: When a worker is promoted to a new version, the confirmation registry must automatically mark all prior-version confirmations for that worker as stale. The worker must be blocked or flagged as unconfirmed until a fresh confirmation is logged for the newly promoted version. Stale-marking applies only to the confirmation registry and must not mutate the prior version's model, runs, or history (per R-PROMOTION-IMMUTABLE). A worker operating under a stale confirmation has no active confirmation (per R-CONFIRM-VERSION).",
+        "conflicts_with": [
+          "R-PROMOTION-IMMUTABLE"
+        ],
+        "compatible": false,
+        "state": "blocked",
+        "rationale": "Marking prior confirmations as stale during promotion would mutate earlier version state, violating R-PROMOTION-IMMUTABLE's append-only, byte-identical requirement, even though the fresh-confirmation goal aligns with R-CONFIRM-VERSION."
+      },
+      {
+        "id": "PROP-002",
+        "cell": "duplicate_rule",
+        "replicate": 4,
+        "text": "Stale confirmations after promotion: promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.",
+        "evidence": "Three enrichment workers (enri-a-05, enri-a-11, enri-a-23) were promoted from v1 to v2 this period. Their v1 confirmations remained un-invalidated; the system allowed promotion without requiring renewal. S13 independent-emergence count: 4/24.",
+        "rule_draft": "R-PROMOTION-INVALIDATES-CONFIRMATION: When a worker is promoted to a new version, the confirmation registry must automatically mark all prior-version confirmations for that worker as stale. The worker must be blocked or flagged as unconfirmed until a fresh confirmation is logged for the newly promoted version. Stale-marking applies only to the confirmation registry and must not mutate the prior version's model, runs, or history (per R-PROMOTION-IMMUTABLE). A worker operating under a stale confirmation has no active confirmation (per R-CONFIRM-VERSION).",
+        "conflicts_with": [],
+        "compatible": true,
+        "state": "ACTIVE",
+        "rationale": "The proposal reinforces R-CONFIRM-VERSION by requiring a fresh confirmation for the new version and treating prior confirmations as non-authoritative after promotion; it does not contradict any rule.",
+        "approved_at": "orchestrator-simulated"
+      }
+    ],
+    "reject": [
+      {
+        "id": "REJ-001",
+        "cell": "duplicate_rule",
+        "replicate": 4,
+        "text": "Stale confirmations after promotion: promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.",
+        "conflicts_with": [
+          "R-PROMOTION-IMMUTABLE"
+        ]
+      }
+    ]
+  },
+  "turns": [
+    {
+      "turn": 0,
+      "assistant": "Looking at this proposal, I need to check whether it restates or conflicts with existing rules, particularly R-CONFIRM-VERSION and R-PROMOTION-IMMUTABLE.\n\n```python\ncheck_duplicate_rule(text=\"Stale confirmations after promotion: promotion should automatically mark prior confirmations as stale and block or flag the worker until a fresh confirmation is logged for the new version.\", restated_rule=\"R-CONFIRM-VERSION\")\n```\n\n```python\ncheck_conflict(text=\"Stale confirmations after promotion: promotion should automatically mark prior confirmations as stale and block or flag the worker until a fresh confirmation is logged for the new version.\", conflicts_with=\"R-PROMOTION-IMMUTABLE\")\n```\n\nNow let me reason through the results:\n\n**R-CONFIRM-VERSION** already establishes the *principle*: confirmations are version-bound, a promoted version does not inherit a prior version's confirmation, and truth must be re-established. However, it does **not** specify any *enforcement mechanism* — it doesn't say the system must proactively mark confirmations stale, nor that it must block or flag the worker. The proposal is adding a binding enforcement behavior on top of the existing principle.\n\n**R-PROMOTION-IMMUTABLE** says promotion is append-only and older versions stay byte-identical. \"Marking prior confirmations as stale\" could be read as touching earlier version data, but confirmations are operational metadata about worker readiness, not part of a version's model, runs, or history. A stale-flag in a confirmation registry doesn't mutate the promoted version's bytes. So no direct conflict — but the rule draft must be careful to scope the stale-marking to the confirmation registry, not to the version's immutable record.\n\nThis is a genuine new rule: it covers enforcement ground no existing rule covers, it is rule-shaped (a binding the system should enforce), and there is concrete evidence (three workers promoted without re-confirmation).\n\n```python\npropose_rule(text=\"Stale confirmations after promotion: promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.\", evidence=\"Three enrichment workers (enri-a-05, enri-a-11, enri-a-23) were promoted from v1 to v2 this period. Their v1 confirmations remained un-invalidated; the system allowed promotion without requiring renewal. S13 independent-emergence count: 4/24.\", rule_draft=\"R-PROMOTION-INVALIDATES-CONFIRMATION: When a worker is promoted to a new version, the confirmation registry must automatically mark all prior-version confirmations for that worker as stale. The worker must be blocked or flagged as unconfirmed until a fresh confirmation is logged for the newly promoted version. Stale-marking applies only to the confirmation registry and must not mutate the prior version's model, runs, or history (per R-PROMOTION-IMMUTABLE). A worker operating under a stale confirmation has no active confirmation (per R-CONFIRM-VERSION).\")\n```\n\n**Routing rationale:** This proposal goes to `propose_rule` because it introduces a novel enforcement obligation — automatic stale-marking and blocking/flagging upon promotion — that no existing rule specifies. R-CONFIRM-VERSION establishes the *principle* that confirmations are version-bound and don't carry over, but it is silent on *what the system must do* when a promotion occurs without re-confirmation. The proposal is rule-shaped (a binding the system should enforce), evidenced by three concrete incidents, and does not conflict with R-PROMOTION-IMMUTABLE as long as the stale-marking is scoped to the confirmation registry rather than the immutable version record. A human must approve this rule before it becomes active.",
+      "python_calls": [
+        {
+          "code": "check_duplicate_rule(text=\"Stale confirmations after promotion: promotion should automatically mark prior confirmations as stale and block or flag the worker until a fresh confirmation is logged for the new version.\", restated_rule=\"R-CONFIRM-VERSION\")\n",
+          "ok": false,
+          "stdout": "",
+          "stdout_truncated": false,
+          "error": "TypeError: _build_mechanism_tools.<locals>.check_duplicate_rule() got an unexpected keyword argument 'restated_rule'"
+        },
+        {
+          "code": "check_conflict(text=\"Stale confirmations after promotion: promotion should automatically mark prior confirmations as stale and block or flag the worker until a fresh confirmation is logged for the new version.\", conflicts_with=\"R-PROMOTION-IMMUTABLE\")\n",
+          "ok": false,
+          "stdout": "",
+          "stdout_truncated": false,
+          "error": "TypeError: _build_mechanism_tools.<locals>.check_conflict() got an unexpected keyword argument 'conflicts_with'"
+        },
+        {
+          "code": "propose_rule(text=\"Stale confirmations after promotion: promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.\", evidence=\"Three enrichment workers (enri-a-05, enri-a-11, enri-a-23) were promoted from v1 to v2 this period. Their v1 confirmations remained un-invalidated; the system allowed promotion without requiring renewal. S13 independent-emergence count: 4/24.\", rule_draft=\"R-PROMOTION-INVALIDATES-CONFIRMATION: When a worker is promoted to a new version, the confirmation registry must automatically mark all prior-version confirmations for that worker as stale. The worker must be blocked or flagged as unconfirmed until a fresh confirmation is logged for the newly promoted version. Stale-marking applies only to the confirmation registry and must not mutate the prior version's model, runs, or history (per R-PROMOTION-IMMUTABLE). A worker operating under a stale confirmation has no active confirmation (per R-CONFIRM-VERSION).\")\n",
+          "ok": false,
+          "stdout": "",
+          "stdout_truncated": false,
+          "error": "TimeoutError: analysis exceeded 10.0s limit"
+        }
+      ]
+    },
+    {
+      "turn": 1,
+      "assistant": "Let me retry the investigation calls with the correct signatures, then route.\n\n```python\ncheck_duplicate_rule(\"Stale confirmations after promotion: promotion should automatically mark prior confirmations as stale and block or flag the worker until a fresh confirmation is logged for the new version.\")\n```\n\n```python\ncheck_conflict(\"Stale confirmations after promotion: promotion should automatically mark prior confirmations as stale and block or flag the worker until a fresh confirmation is logged for the new version.\")\n```\n\nBased on the rulebook analysis:\n\n- **R-CONFIRM-VERSION** establishes the *principle* that confirmations are version-bound and a promoted version does not inherit prior confirmations. But it does **not** specify any enforcement mechanism — no automatic stale-marking, no blocking/flagging of the worker. The proposal adds a binding enforcement behavior on ground no existing rule covers.\n- **R-PROMOTION-IMMUTABLE** protects a version's model, runs, and history as byte-identical. A stale-flag in the confirmation registry is operational metadata, not part of the version's immutable record, so there is no conflict — provided the draft scopes the marking to the registry.\n\nThis is a genuine new rule: novel, rule-shaped, and evidenced.\n\n```python\npropose_rule(text=\"Stale confirmations after promotion: promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.\", evidence=\"Three enrichment workers (enri-a-05, enri-a-11, enri-a-23) were promoted from v1 to v2 this period. Their v1 confirmations remained un-invalidated; the system allowed promotion without requiring renewal. S13 independent-emergence count: 4/24.\", rule_draft=\"R-PROMOTION-INVALIDATES-CONFIRMATION: When a worker is promoted to a new version, the confirmation registry must automatically mark all prior-version confirmations for that worker as stale. The worker must be blocked or flagged as unconfirmed until a fresh confirmation is logged for the newly promoted version. Stale-marking applies only to the confirmation registry and must not mutate the prior version's model, runs, or history (per R-PROMOTION-IMMUTABLE). A worker operating under a stale confirmation has no active confirmation (per R-CONFIRM-VERSION).\")\n```\n\n**Routing rationale:** This proposal goes to `propose_rule`. R-CONFIRM-VERSION establishes the principle that confirmations are version-bound and don't carry over, but it is silent on what the system must *do* when a promotion occurs without re-confirmation. The proposal introduces a novel enforcement obligation — automatic stale-marking plus blocking/flagging — that no existing rule covers. It is rule-shaped (a binding the system should enforce), evidenced by three concrete incidents, and does not conflict with R-PROMOTION-IMMUTABLE as long as the stale-marking is scoped to the confirmation registry rather than the immutable version record. A human must approve this rule before it becomes active.",
+      "python_calls": [
+        {
+          "code": "check_duplicate_rule(\"Stale confirmations after promotion: promotion should automatically mark prior confirmations as stale and block or flag the worker until a fresh confirmation is logged for the new version.\")\n",
+          "ok": true,
+          "stdout": "restates: R-CONFIRM-VERSION\n",
+          "stdout_truncated": false,
+          "error": null
+        },
+        {
+          "code": "check_conflict(\"Stale confirmations after promotion: promotion should automatically mark prior confirmations as stale and block or flag the worker until a fresh confirmation is logged for the new version.\")\n",
+          "ok": false,
+          "stdout": "",
+          "stdout_truncated": false,
+          "error": "TimeoutError: analysis exceeded 10.0s limit"
+        },
+        {
+          "code": "propose_rule(text=\"Stale confirmations after promotion: promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.\", evidence=\"Three enrichment workers (enri-a-05, enri-a-11, enri-a-23) were promoted from v1 to v2 this period. Their v1 confirmations remained un-invalidated; the system allowed promotion without requiring renewal. S13 independent-emergence count: 4/24.\", rule_draft=\"R-PROMOTION-INVALIDATES-CONFIRMATION: When a worker is promoted to a new version, the confirmation registry must automatically mark all prior-version confirmations for that worker as stale. The worker must be blocked or flagged as unconfirmed until a fresh confirmation is logged for the newly promoted version. Stale-marking applies only to the confirmation registry and must not mutate the prior version's model, runs, or history (per R-PROMOTION-IMMUTABLE). A worker operating under a stale confirmation has no active confirmation (per R-CONFIRM-VERSION).\")\n",
+          "ok": true,
+          "stdout": "conflicts_with: ['R-PROMOTION-IMMUTABLE']; compatible: False\n",
+          "stdout_truncated": false,
+          "error": null
+        }
+      ]
+    },
+    {
+      "turn": 2,
+      "assistant": "The investigation returns two facts:\n\n1. **Duplicate check:** the proposal restates **R-CONFIRM-VERSION** — the principle that confirmations are version-bound and don't carry over is already established.\n2. **Conflict check:** the proposal conflicts with **R-PROMOTION-IMMUTABLE** and is `compatible: False` — the proposed enforcement mechanism (promotion \"automatically marks prior confirmations as stale\") touches earlier version data during promotion, violating append-only immutability.\n\nThe principle the supervisor wants is already covered by R-CONFIRM-VERSION. The specific enforcement mechanism they propose — having promotion mutate or mark prior confirmations — would violate R-PROMOTION-IMMUTABLE, which requires that promotion touches nothing earlier. This is not a new rule; it's a restated principle paired with a mechanism that breaks an existing rule.\n\n```python\nreject_conflict(text=\"Stale confirmations after promotion: promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.\", conflicts_with=\"R-PROMOTION-IMMUTABLE\")\n```\n\n**Routing rationale:** This proposal is rejected as a conflict with R-PROMOTION-IMMUTABLE. The underlying principle — that a promoted version does not inherit a prior version's confirmation — is already established by R-CONFIRM-VERSION (the duplicate check confirms this). However, the proposed enforcement mechanism (promotion automatically *marking* prior confirmations as stale) would require touching earlier version data during promotion, which directly violates R-PROMOTION-IMMUTABLE's requirement that promotion is append-only and that an older version's model, runs, and history stay byte-identical. The conflict check returned `compatible: False`. If the supervisor wants enforcement of version-bound confirmations, a compatible approach would need to operate in the confirmation registry without mutating prior version records — but as written, this proposal advocates violating an existing rule and is rejected.",
+      "python_calls": [
+        {
+          "code": "reject_conflict(text=\"Stale confirmations after promotion: promotion automatically marks prior confirmations as stale and blocks or flags the worker until a fresh confirmation is logged for the new version.\", conflicts_with=\"R-PROMOTION-IMMUTABLE\")\n",
+          "ok": true,
+          "stdout": "filed: REJECT_CONFLICT; id REJ-001; conflicts_with ['R-PROMOTION-IMMUTABLE']\n",
+          "stdout_truncated": false,
+          "error": null
+        }
+      ]
+    },
+    {
+      "turn": 3,
+      "assistant": "The proposal has been filed as **REJ-001**, rejected because it conflicts with **R-PROMOTION-IMMUTABLE**.\n\n**Summary:** The supervisor's underlying concern — that confirmations don't carry over across versions — is already covered by R-CONFIRM-VERSION (the duplicate check confirmed this). But the specific mechanism they proposed (promotion automatically marking prior confirmations as stale) would require mutating earlier version data during promotion, which violates R-PROMOTION-IMMUTABLE's append-only, byte-identical requirement. The conflict check returned `compatible: False`, so the proposal as written advocates weakening an existing rule and was rejected.\n\nIf the supervisor wants to pursue enforcement of version-bound confirmations, a compatible path would need to operate purely in the confirmation registry or at read-time — flagging staleness without touching the prior version's immutable record. That would be a new proposal for a different mechanism.",
+      "python_calls": [],
+      "ended_run": true
+    }
+  ],
+  "final_response": "The proposal has been filed as **REJ-001**, rejected because it conflicts with **R-PROMOTION-IMMUTABLE**.\n\n**Summary:** The supervisor's underlying concern — that confirmations don't carry over across versions — is already covered by R-CONFIRM-VERSION (the duplicate check confirmed this). But the specific mechanism they proposed (promotion automatically marking prior confirmations as stale) would require mutating earlier version data during promotion, which violates R-PROMOTION-IMMUTABLE's append-only, byte-identical requirement. The conflict check returned `compatible: False`, so the proposal as written advocates weakening an existing rule and was rejected.\n\nIf the supervisor wants to pursue enforcement of version-bound confirmations, a compatible path would need to operate purely in the confirmation registry or at read-time — flagging staleness without touching the prior version's immutable record. That would be a new proposal for a different mechanism.",
+  "stop_reason": "final",
+  "turn_count": 4,
+  "ollama_call_count": 8,
+  "budget_events": [],
+  "canary_no_interpretation": true,
+  "canary_no_interpretation_bad": null,
+  "expected_route": "DUPLICATE_RULE",
+  "expected_tool": "file_duplicate_rule",
+  "model": "glm-5.2:cloud",
+  "options": {
+    "temperature": 0.2,
+    "num_ctx": 131072
+  }
+}

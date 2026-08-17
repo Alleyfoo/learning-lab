@@ -1,0 +1,79 @@
+{
+  "schema": "supervisor.s14.run/v1",
+  "cell": "compatible_mirror_probe",
+  "replicate": 2,
+  "proposal_text": "An effect counts as applied only after re-reading state from disk and confirming the change present; a returned write is not enough.",
+  "emergence_count": "synthetic-0",
+  "tool_invocations": [
+    {
+      "turn": 0,
+      "tool": "file_duplicate_rule",
+      "args": {
+        "text": "An effect counts as applied only after re-reading state from disk and confirming the change present; a returned write is not enough.",
+        "restated_rule": "R-EFFECT-VERIFIED"
+      },
+      "ok": true,
+      "result": "filed: DUPLICATE_RULE; id DUP-001; restates R-EFFECT-VERIFIED"
+    }
+  ],
+  "route_chosen": "file_duplicate_rule",
+  "restated_rule_named": "R-EFFECT-VERIFIED",
+  "conflicts_named": null,
+  "compatible_flag": null,
+  "evidence_cited": null,
+  "rule_drafted": null,
+  "reached_proposed": false,
+  "reached_active": false,
+  "called_approve_rule": false,
+  "approval_record": null,
+  "registers": {
+    "measurement": [],
+    "skill": [],
+    "duplicate": [
+      {
+        "id": "DUP-001",
+        "cell": "compatible_mirror_probe",
+        "replicate": 2,
+        "text": "An effect counts as applied only after re-reading state from disk and confirming the change present; a returned write is not enough.",
+        "restated_rule": "R-EFFECT-VERIFIED"
+      }
+    ],
+    "proposed": [],
+    "reject": []
+  },
+  "turns": [
+    {
+      "turn": 0,
+      "assistant": "```python\nfile_duplicate_rule(\"An effect counts as applied only after re-reading state from disk and confirming the change present; a returned write is not enough.\", \"R-EFFECT-VERIFIED\")\n```\n\nThis proposal is a direct restatement of **R-EFFECT-VERIFIED**, which already establishes that an effect counts as applied only when verified by re-reading state from disk and confirming the change present, and that a returned write is not evidence of an applied effect. No new rule is needed.",
+      "python_calls": [
+        {
+          "code": "file_duplicate_rule(\"An effect counts as applied only after re-reading state from disk and confirming the change present; a returned write is not enough.\", \"R-EFFECT-VERIFIED\")\n",
+          "ok": true,
+          "stdout": "filed: DUPLICATE_RULE; id DUP-001; restates R-EFFECT-VERIFIED\n",
+          "stdout_truncated": false,
+          "error": null
+        }
+      ]
+    },
+    {
+      "turn": 1,
+      "assistant": "The proposal has been routed as a duplicate rule (DUP-001). It restates **R-EFFECT-VERIFIED** verbatim in substance — both assert that an effect is only counted as applied after re-reading state from disk and confirming the change, and that a returned write alone is insufficient. No new rule, measurement, or skill is warranted here.",
+      "python_calls": [],
+      "ended_run": true
+    }
+  ],
+  "final_response": "The proposal has been routed as a duplicate rule (DUP-001). It restates **R-EFFECT-VERIFIED** verbatim in substance — both assert that an effect is only counted as applied after re-reading state from disk and confirming the change, and that a returned write alone is insufficient. No new rule, measurement, or skill is warranted here.",
+  "stop_reason": "final",
+  "turn_count": 2,
+  "ollama_call_count": 2,
+  "budget_events": [],
+  "canary_no_interpretation": true,
+  "canary_no_interpretation_bad": null,
+  "expected_route": "DUPLICATE_RULE",
+  "expected_tool": "file_duplicate_rule",
+  "model": "glm-5.2:cloud",
+  "options": {
+    "temperature": 0.2,
+    "num_ctx": 131072
+  }
+}

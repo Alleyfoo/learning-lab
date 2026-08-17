@@ -1,0 +1,43 @@
+{
+  "floor_lf_hashes_after": {
+    "harness.py": "d5ae27b0be396c7f",
+    "concentration.py": "c78b0dab1c2032c6",
+    "snapshot.py": "df37d914a8b8b12d",
+    "bench.py": "04e60f4b45d1c7d0",
+    "rulebook.py": "248612f17a963c3a",
+    "core.py": "338bfa5bd0fd11f4",
+    "rulebook.jsonl": "292aa890213107d3",
+    "improvements.jsonl": "ac361095e2d18f60",
+    "build_fleet.py": "18c800c3f7b55a1b"
+  },
+  "floor_unchanged": {
+    "harness.py": true,
+    "concentration.py": true,
+    "snapshot.py": true,
+    "bench.py": true,
+    "rulebook.py": true,
+    "core.py": true,
+    "rulebook.jsonl": true,
+    "improvements.jsonl": true,
+    "build_fleet.py": true
+  },
+  "fleet_a_hash_after": "6cb2c1ffaa1d4d77",
+  "fleet_a_unchanged": true,
+  "s13_ro_lf_hashes_after": {
+    "s13_spec_md_lf": "f5f21e88c1fc0e43",
+    "s13_oracle_json_lf": "59b6d351fc0a8e40",
+    "s13_slow_drift_01_run_json_lf": "0f927eb217c47028",
+    "s13_mixed_office_03_run_json_lf": "b1d49a82bd61740e",
+    "s13_messy_tuesday_01_run_json_lf": "f0beb399cd8e806e",
+    "s13_mixed_office_02_run_json_lf": "31604293cd60cbfb"
+  },
+  "s13_ro_unchanged": {
+    "s13_spec_md_lf": true,
+    "s13_oracle_json_lf": true,
+    "s13_slow_drift_01_run_json_lf": true,
+    "s13_mixed_office_03_run_json_lf": true,
+    "s13_messy_tuesday_01_run_json_lf": true,
+    "s13_mixed_office_02_run_json_lf": true
+  },
+  "canaries_ok": true
+}
