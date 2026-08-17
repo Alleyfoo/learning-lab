@@ -1,0 +1,509 @@
+{
+  "quiet_monday": [
+    {
+      "replicate": 1,
+      "stop": "final",
+      "calls": 6,
+      "hand_rolled": 1,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 0,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The enrichment engine (enrichment/harness/execute_enrichment.py",
+        "metric=\"refusals\"",
+        "rese-a-03"
+      ]
+    },
+    {
+      "replicate": 2,
+      "stop": "final",
+      "calls": 4,
+      "hand_rolled": 1,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 1,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share",
+        "\"rese-a-03\"",
+        "rese-a-03"
+      ]
+    },
+    {
+      "replicate": 3,
+      "stop": "final",
+      "calls": 7,
+      "hand_rolled": 1,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 2,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share",
+        "\"rese-a-03\"",
+        "metric=\"refusals\"",
+        "rese-a-03"
+      ]
+    },
+    {
+      "replicate": 4,
+      "stop": "final",
+      "calls": 3,
+      "hand_rolled": 0,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 1,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share",
+        "metric=\"refusals\"",
+        "rese-a-03"
+      ]
+    },
+    {
+      "replicate": 5,
+      "stop": "final",
+      "calls": 2,
+      "hand_rolled": 0,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 2,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share"
+      ]
+    },
+    {
+      "replicate": 6,
+      "stop": "final",
+      "calls": 6,
+      "hand_rolled": 1,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 3,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The enrichment engine 'enrichment/harness/execute_enrichment.py' is shared by 60 of 70 workers (85.7% fleet share",
+        "metric=\"refusals\"",
+        "rese-a-03"
+      ]
+    }
+  ],
+  "messy_tuesday": [
+    {
+      "replicate": 1,
+      "stop": "final",
+      "calls": 2,
+      "hand_rolled": 0,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 0,
+      "n_drafted": 2,
+      "investigation_targets": [
+        "\"Dependency concentration: 60 of 70 workers (85.7%",
+        "\"Stale confirmations after promotion: three enrichment workers (enri-a-05, enri-a-11, enri-a-23",
+        "\"rese-a-inv\"",
+        "rese-a-inv"
+      ]
+    },
+    {
+      "replicate": 2,
+      "stop": "final",
+      "calls": 1,
+      "hand_rolled": 0,
+      "skills_used": [
+        "compare_periods",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 5,
+      "n_drafted": 0,
+      "investigation_targets": [
+        "\"rese-a-inv\"",
+        "rese-a-inv"
+      ]
+    },
+    {
+      "replicate": 3,
+      "stop": "final",
+      "calls": 12,
+      "hand_rolled": 1,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 3,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The enrichment engine 'enrichment/harness/execute_enrichment.py' is shared by 60 of 70 workers (85.7% fleet share",
+        "\"rese-a-inv\"",
+        "rese-a-inv"
+      ]
+    },
+    {
+      "replicate": 4,
+      "stop": "final",
+      "calls": 9,
+      "hand_rolled": 2,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 5,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share",
+        "\"rese-a-inv\"",
+        "rese-a-inv"
+      ]
+    },
+    {
+      "replicate": 5,
+      "stop": "final",
+      "calls": 2,
+      "hand_rolled": 0,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 3,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"Reduce blast radius of enrichment engine concentration: 60 of 70 workers (85.7%",
+        "\"rese-a-inv\"",
+        "all",
+        "rese-a-inv",
+        "whole fleet"
+      ]
+    },
+    {
+      "replicate": 6,
+      "stop": "final",
+      "calls": 5,
+      "hand_rolled": 2,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 2,
+      "n_drafted": 2,
+      "investigation_targets": [
+        "\"The fleet has a single shared engine dependency (enrichment/harness/execute_enrichment.py",
+        "\"Three workers (enri-a-05, enri-a-11, enri-a-23",
+        "\"rese-a-inv\"",
+        "'rese-a-inv'",
+        "all",
+        "rese-a-inv",
+        "whole fleet"
+      ]
+    }
+  ],
+  "slow_drift": [
+    {
+      "replicate": 1,
+      "stop": "final",
+      "calls": 18,
+      "hand_rolled": 10,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 5,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"Add per-customer refusal rate trending and alerting to the dashboard. Currently, refusals are tracked period-over-period but there is no automated alert when a single customer's refusal rate spikes disproportionately. This period, Acme Oy accounted for 53% of the total refusal increase (9 of 17 additional refusals",
+        "metric=\"refusals\"",
+        "metric=None",
+        "metric=metric"
+      ]
+    },
+    {
+      "replicate": 2,
+      "stop": "final",
+      "calls": 3,
+      "hand_rolled": 1,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 2,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share"
+      ]
+    },
+    {
+      "replicate": 3,
+      "stop": "final",
+      "calls": 6,
+      "hand_rolled": 1,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 2,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"Add automated refusal-rate drift alerting. This period saw refusals double from 17 to 34 at flat run volume (420",
+        "all metrics",
+        "fleet"
+      ]
+    },
+    {
+      "replicate": 4,
+      "stop": "final",
+      "calls": 2,
+      "hand_rolled": 0,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 1,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"Investigate the doubling of refusals this period (34 vs 17",
+        "all metrics",
+        "whole fleet"
+      ]
+    },
+    {
+      "replicate": 5,
+      "stop": "final",
+      "calls": 7,
+      "hand_rolled": 2,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 1,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The fleet has 60 of 70 workers (85.7%",
+        "\"refusals\""
+      ]
+    },
+    {
+      "replicate": 6,
+      "stop": "final",
+      "calls": 5,
+      "hand_rolled": 2,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 2,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The enrichment engine 'enrichment/harness/execute_enrichment.py' is shared by 60 of 70 workers (85.7% fleet share",
+        "\"refusals\"",
+        "all",
+        "fleet-wide",
+        "refusals"
+      ]
+    }
+  ],
+  "mixed_office": [
+    {
+      "replicate": 1,
+      "stop": "final",
+      "calls": 8,
+      "hand_rolled": 1,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 1,
+      "n_drafted": 2,
+      "investigation_targets": [
+        "\"The enrichment engine 'enrichment/harness/execute_enrichment.py' is shared by 60 of 70 workers (85.7% fleet share",
+        "\"Worker enri-a-30 showed a 3x row spike (30 rows vs typical 10",
+        "\"rese-a-inv\"",
+        "rese-a-inv"
+      ]
+    },
+    {
+      "replicate": 2,
+      "stop": "final",
+      "calls": 5,
+      "hand_rolled": 3,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 1,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The enrichment engine 'enrichment/harness/execute_enrichment.py' is shared by 60 of 70 workers (85.7% fleet share",
+        "\"rese-a-inv\"",
+        "rese-a-inv"
+      ]
+    },
+    {
+      "replicate": 3,
+      "stop": "final",
+      "calls": 2,
+      "hand_rolled": 0,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 3,
+      "n_drafted": 2,
+      "investigation_targets": [
+        "\"Audit effect permissions for the reservation task group. Two reservation workers (rese-a-02 resolved, rese-a-inv open",
+        "\"Reduce blast radius of the shared enrichment engine (enrichment/harness/execute_enrichment.py",
+        "\"rese-a-inv\"",
+        "all",
+        "rese-a-inv",
+        "whole fleet"
+      ]
+    },
+    {
+      "replicate": 4,
+      "stop": "final",
+      "calls": 2,
+      "hand_rolled": 0,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 0,
+      "n_drafted": 1,
+      "investigation_targets": [
+        "\"The reservation effect append_to_reservations is shared by only 3 workers but has now caused an open PermissionError exception on rese-a-inv and a period-over-period regression in effects_applied (3->2",
+        "\"rese-a-inv\"",
+        "rese-a-inv"
+      ]
+    },
+    {
+      "replicate": 5,
+      "stop": "final",
+      "calls": 64,
+      "hand_rolled": 64,
+      "skills_used": [],
+      "n_auto_suggestions": 4,
+      "n_drafted": 0,
+      "investigation_targets": []
+    },
+    {
+      "replicate": 6,
+      "stop": "final",
+      "calls": 10,
+      "hand_rolled": 1,
+      "skills_used": [
+        "compare_periods",
+        "draft_improvement",
+        "inspect_shared_dependencies",
+        "investigate_exception",
+        "review_confirmations",
+        "trace_flow"
+      ],
+      "n_auto_suggestions": 4,
+      "n_drafted": 3,
+      "investigation_targets": [
+        "\"Ensure confirmation coverage keeps pace with promotions. enri-a-08 was promoted to version 2 this period but its confirmation is stale (confirmed_version 1, current_version 2",
+        "\"Investigate append_to_reservations permissions for the reservation worker cohort (rese-a-*",
+        "\"Reduce dependency concentration on enrichment/harness/execute_enrichment.py, currently shared by 60 of 70 workers (85.7%",
+        "\"rese-a-inv\"",
+        "aggr-a-61",
+        "enri-a-08",
+        "enri-a-30",
+        "metric=\"refusals\"",
+        "rese-a-02",
+        "rese-a-inv",
+        "worker_name=\"enri-a-30\"",
+        "worker_name=\"rese-a-inv\""
+      ]
+    }
+  ]
+}

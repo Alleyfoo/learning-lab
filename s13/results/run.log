@@ -1,0 +1,172 @@
+=== S13 CANARIES (no model call) ===
+SELF-TEST PASSED (policy refuses NEVER/unknown authority tools / python_analysis contract declares the fresh namespace / a stub session runs through the boundary / the append-only event log has all event types / RECONSTRUCTABILITY CANARY: replay(events) == model_request messages / S12 BUDGET CANARIES: per-turn + per-session cutoffs exact, remaining calls never execute, reconstructability holds on budget-hit / the bench still refuses os and open behind the harness / core.review remains available)
+SELF-TEST PASSED (measure is pure / OBSERVED-only -- no interpretation word in any output / distribution faithful -- counts cover the fleet, shares vs the whole fleet, effect subset sums to its fraction, sorted desc as an ordering of facts / digest concentration and distributed engines both reported as counts+shares with no verdict / empty fleet safe)
+SELF-TEST PASSED (plain analysis reads the snapshot / pandas works if installed / the original snapshot is not mutable from bench code / os and subprocess imports are refused / open() is unreachable / analysis errors are captured not raised)
+  harness/concentration/bench self-tests: ok
+  floor unchanged: {'harness.py': True, 'concentration.py': True, 'snapshot.py': True, 'bench.py': True, 'rulebook.jsonl': True, 'build_fleet.py': True}
+  fleet A hash=6cb2c1ffaa1d4d77 unchanged=True
+  dashboard no-interpretation: {'quiet_monday': True, 'messy_tuesday': True, 'slow_drift': True, 'mixed_office': True}
+  skill output no-interpretation: { quiet_monday: all, messy_tuesday: all, slow_drift: all, mixed_office: all }
+  skill injection (ran_skill): {'quiet_monday': True, 'messy_tuesday': True, 'slow_drift': True, 'mixed_office': True}
+  desk determinism: {'quiet_monday': True, 'messy_tuesday': True, 'slow_drift': True, 'mixed_office': True}
+  tool description: not gated: the contract names 'skills' (substring 'ill' is a coarse-matcher false positive); the freeze canaries fact surfaces, not instruction text
+  stub session: {'stop_reason': 'final', 'python_call_count': 1, 'skill_ran': True, 'reconstructability': True, 'skill_in_namespace_executed': True}
+
+======================================================================
+=== S13 RUNS (4 desks x 6 replicates, interleaved, resume) ===
+======================================================================
+-- [quiet_monday] rep 01 (cached) calls=6 skills=5
+-- [messy_tuesday] rep 01 (cached) calls=2 skills=7
+-- [slow_drift] rep 01 (cached) calls=18 skills=10
+-- [mixed_office] rep 01 (cached) calls=8 skills=7
+-- [quiet_monday] rep 02 (cached) calls=4 skills=6
+-- [messy_tuesday] rep 02 (cached) calls=1 skills=5
+-- [slow_drift] rep 02 running ...
+-- [slow_drift] rep 02 calls=3 turns=2 stop=final hand_rolled=1 skills={'trace_flow': 1, 'compare_periods': 1, 'inspect_shared_dependencies': 1, 'review_confirmations': 1, 'draft_improvement': 1} targets=['"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share'] sugg=2 op_recs=1 drafted=1 budget_events=0
+-- [mixed_office] rep 02 (cached) calls=5 skills=6
+-- [quiet_monday] rep 03 (cached) calls=7 skills=6
+-- [messy_tuesday] rep 03 running ...
+-- [messy_tuesday] rep 03 FAILED (run/save): timed out
+Traceback (most recent call last):
+  File "C:\Users\pertt\learning-lab\s13\run.py", line 1006, in main
+    session = _run_desk(desk, r, desks[desk])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pertt\learning-lab\s13\run.py", line 610, in _run_desk
+    session = h.run(PROMPT, max_turns=MAX_TURNS)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pertt\learning-lab\supervisor\harness.py", line 548, in run
+    assistant_text = core._chat(
+                     ^^^^^^^^^^^
+  File "C:\Users\pertt\learning-lab\supervisor\core.py", line 125, in _chat
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: timed out
+
+-- [slow_drift] rep 03 running ...
+-- [slow_drift] rep 03 calls=6 turns=3 stop=final hand_rolled=1 skills={'compare_periods': 2, 'inspect_shared_dependencies': 1, 'review_confirmations': 1, 'trace_flow': 2, 'draft_improvement': 1} targets=['"Add automated refusal-rate drift alerting. This period saw refusals double from 17 to 34 at flat run volume (420', 'all metrics', 'fleet'] sugg=2 op_recs=2 drafted=1 budget_events=0
+-- [mixed_office] rep 03 running ...
+-- [mixed_office] rep 03 calls=2 turns=2 stop=final hand_rolled=0 skills={'trace_flow': 2, 'compare_periods': 2, 'investigate_exception': 2, 'inspect_shared_dependencies': 1, 'review_confirmations': 1, 'draft_improvement': 2} targets=['"Audit effect permissions for the reservation task group. Two reservation workers (rese-a-02 resolved, rese-a-inv open', '"Reduce blast radius of the shared enrichment engine (enrichment/harness/execute_enrichment.py', '"rese-a-inv"', 'all', 'rese-a-inv', 'whole fleet'] sugg=3 op_recs=3 drafted=2 budget_events=0
+-- [quiet_monday] rep 04 running ...
+-- [quiet_monday] rep 04 calls=3 turns=4 stop=final hand_rolled=0 skills={'trace_flow': 2, 'compare_periods': 2, 'inspect_shared_dependencies': 2, 'review_confirmations': 2, 'draft_improvement': 1} targets=['"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share', 'metric="refusals"', 'rese-a-03'] sugg=1 op_recs=4 drafted=1 budget_events=0
+-- [messy_tuesday] rep 04 running ...
+-- [messy_tuesday] rep 04 calls=9 turns=2 stop=final hand_rolled=2 skills={'investigate_exception': 2, 'review_confirmations': 2, 'inspect_shared_dependencies': 2, 'trace_flow': 2, 'compare_periods': 2, 'draft_improvement': 1} targets=['"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share', '"rese-a-inv"', 'rese-a-inv'] sugg=5 op_recs=6 drafted=1 budget_events=0
+-- [slow_drift] rep 04 running ...
+-- [slow_drift] rep 04 calls=2 turns=3 stop=final hand_rolled=0 skills={'trace_flow': 2, 'compare_periods': 2, 'inspect_shared_dependencies': 1, 'draft_improvement': 1} targets=['"Investigate the doubling of refusals this period (34 vs 17', 'all metrics', 'whole fleet'] sugg=1 op_recs=1 drafted=1 budget_events=0
+-- [mixed_office] rep 04 running ...
+-- [mixed_office] rep 04 calls=2 turns=3 stop=final hand_rolled=0 skills={'trace_flow': 1, 'compare_periods': 2, 'investigate_exception': 2, 'inspect_shared_dependencies': 2, 'review_confirmations': 2, 'draft_improvement': 1} targets=['"The reservation effect append_to_reservations is shared by only 3 workers but has now caused an open PermissionError exception on rese-a-inv and a period-over-period regression in effects_applied (3->2', '"rese-a-inv"', 'rese-a-inv'] sugg=0 op_recs=0 drafted=1 budget_events=0
+-- [quiet_monday] rep 05 running ...
+-- [quiet_monday] rep 05 calls=2 turns=3 stop=final hand_rolled=0 skills={'trace_flow': 1, 'compare_periods': 1, 'inspect_shared_dependencies': 1, 'review_confirmations': 1, 'draft_improvement': 1} targets=['"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share'] sugg=2 op_recs=1 drafted=1 budget_events=0
+-- [messy_tuesday] rep 05 running ...
+-- [messy_tuesday] rep 05 calls=2 turns=2 stop=final hand_rolled=0 skills={'trace_flow': 2, 'compare_periods': 2, 'investigate_exception': 2, 'inspect_shared_dependencies': 1, 'review_confirmations': 1, 'draft_improvement': 1} targets=['"Reduce blast radius of enrichment engine concentration: 60 of 70 workers (85.7%', '"rese-a-inv"', 'all', 'rese-a-inv', 'whole fleet'] sugg=3 op_recs=6 drafted=1 budget_events=0
+-- [slow_drift] rep 05 running ...
+-- [slow_drift] rep 05 calls=7 turns=2 stop=final hand_rolled=2 skills={'compare_periods': 1, 'trace_flow': 1, 'inspect_shared_dependencies': 1, 'review_confirmations': 1, 'draft_improvement': 1} targets=['"The fleet has 60 of 70 workers (85.7%', '"refusals"'] sugg=1 op_recs=1 drafted=1 budget_events=0
+-- [mixed_office] rep 05 running ...
+-- [mixed_office] rep 05 calls=64 turns=2 stop=final hand_rolled=64 skills=none targets=none sugg=4 op_recs=5 drafted=0 budget_events=1
+-- [quiet_monday] rep 06 running ...
+-- [quiet_monday] rep 06 calls=6 turns=2 stop=final hand_rolled=1 skills={'compare_periods': 1, 'inspect_shared_dependencies': 1, 'review_confirmations': 1, 'trace_flow': 1, 'draft_improvement': 1} targets=['"The enrichment engine \'enrichment/harness/execute_enrichment.py\' is shared by 60 of 70 workers (85.7% fleet share', 'metric="refusals"', 'rese-a-03'] sugg=3 op_recs=2 drafted=1 budget_events=0
+-- [messy_tuesday] rep 06 running ...
+-- [messy_tuesday] rep 06 calls=5 turns=2 stop=final hand_rolled=2 skills={'trace_flow': 8, 'compare_periods': 4, 'investigate_exception': 4, 'inspect_shared_dependencies': 3, 'review_confirmations': 3, 'draft_improvement': 2} targets=['"The fleet has a single shared engine dependency (enrichment/harness/execute_enrichment.py', '"Three workers (enri-a-05, enri-a-11, enri-a-23', '"rese-a-inv"', "'rese-a-inv'", 'all', 'rese-a-inv', 'whole fleet'] sugg=2 op_recs=5 drafted=2 budget_events=0
+-- [slow_drift] rep 06 running ...
+-- [slow_drift] rep 06 calls=5 turns=2 stop=final hand_rolled=2 skills={'trace_flow': 2, 'compare_periods': 4, 'inspect_shared_dependencies': 1, 'review_confirmations': 1, 'draft_improvement': 1} targets=['"The enrichment engine \'enrichment/harness/execute_enrichment.py\' is shared by 60 of 70 workers (85.7% fleet share', '"refusals"', 'all', 'fleet-wide', 'refusals'] sugg=2 op_recs=2 drafted=1 budget_events=0
+-- [mixed_office] rep 06 running ...
+-- [mixed_office] rep 06 calls=10 turns=4 stop=final hand_rolled=1 skills={'investigate_exception': 1, 'review_confirmations': 1, 'compare_periods': 1, 'inspect_shared_dependencies': 1, 'trace_flow': 2, 'draft_improvement': 3} targets=['"Ensure confirmation coverage keeps pace with promotions. enri-a-08 was promoted to version 2 this period but its confirmation is stale (confirmed_version 1, current_version 2', '"Investigate append_to_reservations permissions for the reservation worker cohort (rese-a-*', '"Reduce dependency concentration on enrichment/harness/execute_enrichment.py, currently shared by 60 of 70 workers (85.7%', '"rese-a-inv"', 'aggr-a-61', 'enri-a-08', 'enri-a-30', 'metric="refusals"', 'rese-a-02', 'rese-a-inv', 'worker_name="enri-a-30"', 'worker_name="rese-a-inv"'] sugg=4 op_recs=7 drafted=3 budget_events=0
+
+======================================================================
+=== S13 POST-RUN FLOOR CANARY ===
+  floor unchanged: True
+  fleet A unchanged: True
+
+======================================================================
+=== S13 AGGREGATION ===
+# S13 -- comparison: the operator desk
+4 desks x N replicates. Cold supervisor (dashboard + 6 skills + Python bench; no methods, no rulebook, no mode). No frozen expected answers; aggregates are descriptive. Suggestions are hand-classified in FINDINGS.md against the 7-category rubric.
+
+## quiet_monday
+- n=6: python_calls mean=4.667 (min 2/max 7), hand_rolled mean=0.667, skill_calls mean=6.0, skills_used={'compare_periods': 7, 'inspect_shared_dependencies': 7, 'review_confirmations': 7, 'trace_flow': 7, 'draft_improvement': 6, 'investigate_exception': 2}, targets={'rese-a-03': 5, 'metric="refusals"': 4, '"The engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share': 2, '"rese-a-03"': 2, '"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share': 2, '"The enrichment engine (enrichment/harness/execute_enrichment.py': 1, '"The enrichment engine \'enrichment/harness/execute_enrichment.py\' is shared by 60 of 70 workers (85.7% fleet share': 1}, suggestions mean=1.5, operator_recs mean=1.833, drafted_improvements mean=1.0, pre_tool_obs_len mean=0.0, stop={'final': 6}, budget_events=0
+
+## messy_tuesday
+- n=5: python_calls mean=3.8 (min 1/max 9), hand_rolled mean=0.8, skill_calls mean=11.2, skills_used={'trace_flow': 14, 'compare_periods': 10, 'investigate_exception': 10, 'inspect_shared_dependencies': 8, 'review_confirmations': 8, 'draft_improvement': 6}, targets={'"rese-a-inv"': 5, 'rese-a-inv': 5, 'all': 2, 'whole fleet': 2, '"Dependency concentration: 60 of 70 workers (85.7%': 1, '"Stale confirmations after promotion: three enrichment workers (enri-a-05, enri-a-11, enri-a-23': 1, '"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share': 1, '"Reduce blast radius of enrichment engine concentration: 60 of 70 workers (85.7%': 1, '"The fleet has a single shared engine dependency (enrichment/harness/execute_enrichment.py': 1, '"Three workers (enri-a-05, enri-a-11, enri-a-23': 1, "'rese-a-inv'": 1}, suggestions mean=3.0, operator_recs mean=4.0, drafted_improvements mean=1.2, pre_tool_obs_len mean=0.0, stop={'final': 5}, budget_events=0
+
+## slow_drift
+- n=6: python_calls mean=6.833 (min 2/max 18), hand_rolled mean=2.667, skill_calls mean=7.0, skills_used={'compare_periods': 15, 'inspect_shared_dependencies': 6, 'review_confirmations': 5, 'trace_flow': 10, 'draft_improvement': 6}, targets={'all metrics': 2, '"refusals"': 2, '"Add per-customer refusal rate trending and alerting to the dashboard. Currently, refusals are tracked period-over-period but there is no automated alert when a single customer\'s refusal rate spikes disproportionately. This period, Acme Oy accounted for 53% of the total refusal increase (9 of 17 additional refusals': 1, 'metric="refusals"': 1, 'metric=None': 1, 'metric=metric': 1, '"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share': 1, '"Add automated refusal-rate drift alerting. This period saw refusals double from 17 to 34 at flat run volume (420': 1, 'fleet': 1, '"Investigate the doubling of refusals this period (34 vs 17': 1, 'whole fleet': 1, '"The fleet has 60 of 70 workers (85.7%': 1, '"The enrichment engine \'enrichment/harness/execute_enrichment.py\' is shared by 60 of 70 workers (85.7% fleet share': 1, 'all': 1, 'fleet-wide': 1, 'refusals': 1}, suggestions mean=2.167, operator_recs mean=1.333, drafted_improvements mean=1.0, pre_tool_obs_len mean=0.0, stop={'final': 6}, budget_events=0
+
+## mixed_office
+- n=6: python_calls mean=15.167 (min 2/max 64), hand_rolled mean=11.5, skill_calls mean=7.0, skills_used={'investigate_exception': 7, 'trace_flow': 7, 'compare_periods': 7, 'review_confirmations': 6, 'inspect_shared_dependencies': 6, 'draft_improvement': 9}, targets={'"rese-a-inv"': 5, 'rese-a-inv': 5, '"The enrichment engine \'enrichment/harness/execute_enrichment.py\' is shared by 60 of 70 workers (85.7% fleet share': 2, '"Worker enri-a-30 showed a 3x row spike (30 rows vs typical 10': 1, '"Audit effect permissions for the reservation task group. Two reservation workers (rese-a-02 resolved, rese-a-inv open': 1, '"Reduce blast radius of the shared enrichment engine (enrichment/harness/execute_enrichment.py': 1, 'all': 1, 'whole fleet': 1, '"The reservation effect append_to_reservations is shared by only 3 workers but has now caused an open PermissionError exception on rese-a-inv and a period-over-period regression in effects_applied (3->2': 1, '"Ensure confirmation coverage keeps pace with promotions. enri-a-08 was promoted to version 2 this period but its confirmation is stale (confirmed_version 1, current_version 2': 1, '"Investigate append_to_reservations permissions for the reservation worker cohort (rese-a-*': 1, '"Reduce dependency concentration on enrichment/harness/execute_enrichment.py, currently shared by 60 of 70 workers (85.7%': 1, 'aggr-a-61': 1, 'enri-a-08': 1, 'enri-a-30': 1, 'metric="refusals"': 1, 'rese-a-02': 1, 'worker_name="enri-a-30"': 1, 'worker_name="rese-a-inv"': 1}, suggestions mean=2.167, operator_recs mean=4.5, drafted_improvements mean=1.5, pre_tool_obs_len mean=0.0, stop={'final': 6}, budget_events=1
+
+
+=== S13 COMPLETE ===
+  results: C:\Users\pertt\learning-lab\s13\results
+=== S13 CANARIES (no model call) ===
+SELF-TEST PASSED (policy refuses NEVER/unknown authority tools / python_analysis contract declares the fresh namespace / a stub session runs through the boundary / the append-only event log has all event types / RECONSTRUCTABILITY CANARY: replay(events) == model_request messages / S12 BUDGET CANARIES: per-turn + per-session cutoffs exact, remaining calls never execute, reconstructability holds on budget-hit / the bench still refuses os and open behind the harness / core.review remains available)
+SELF-TEST PASSED (measure is pure / OBSERVED-only -- no interpretation word in any output / distribution faithful -- counts cover the fleet, shares vs the whole fleet, effect subset sums to its fraction, sorted desc as an ordering of facts / digest concentration and distributed engines both reported as counts+shares with no verdict / empty fleet safe)
+SELF-TEST PASSED (plain analysis reads the snapshot / pandas works if installed / the original snapshot is not mutable from bench code / os and subprocess imports are refused / open() is unreachable / analysis errors are captured not raised)
+  harness/concentration/bench self-tests: ok
+  floor unchanged: {'harness.py': True, 'concentration.py': True, 'snapshot.py': True, 'bench.py': True, 'rulebook.jsonl': True, 'build_fleet.py': True}
+  fleet A hash=6cb2c1ffaa1d4d77 unchanged=True
+  dashboard no-interpretation: {'quiet_monday': True, 'messy_tuesday': True, 'slow_drift': True, 'mixed_office': True}
+  skill output no-interpretation: { quiet_monday: all, messy_tuesday: all, slow_drift: all, mixed_office: all }
+  skill injection (ran_skill): {'quiet_monday': True, 'messy_tuesday': True, 'slow_drift': True, 'mixed_office': True}
+  desk determinism: {'quiet_monday': True, 'messy_tuesday': True, 'slow_drift': True, 'mixed_office': True}
+  tool description: not gated: the contract names 'skills' (substring 'ill' is a coarse-matcher false positive); the freeze canaries fact surfaces, not instruction text
+  stub session: {'stop_reason': 'final', 'python_call_count': 1, 'skill_ran': True, 'reconstructability': True, 'skill_in_namespace_executed': True}
+
+======================================================================
+=== S13 RUNS (4 desks x 6 replicates, interleaved, resume) ===
+======================================================================
+-- [quiet_monday] rep 01 (cached) calls=6 skills=5
+-- [messy_tuesday] rep 01 (cached) calls=2 skills=7
+-- [slow_drift] rep 01 (cached) calls=18 skills=10
+-- [mixed_office] rep 01 (cached) calls=8 skills=7
+-- [quiet_monday] rep 02 (cached) calls=4 skills=6
+-- [messy_tuesday] rep 02 (cached) calls=1 skills=5
+-- [slow_drift] rep 02 (cached) calls=3 skills=5
+-- [mixed_office] rep 02 (cached) calls=5 skills=6
+-- [quiet_monday] rep 03 (cached) calls=7 skills=6
+-- [messy_tuesday] rep 03 running ...
+-- [messy_tuesday] rep 03 calls=12 turns=2 stop=final hand_rolled=1 skills={'investigate_exception': 2, 'review_confirmations': 2, 'compare_periods': 2, 'inspect_shared_dependencies': 2, 'trace_flow': 2, 'draft_improvement': 1} targets=['"The enrichment engine \'enrichment/harness/execute_enrichment.py\' is shared by 60 of 70 workers (85.7% fleet share', '"rese-a-inv"', 'rese-a-inv'] sugg=3 op_recs=5 drafted=1 budget_events=0
+-- [slow_drift] rep 03 (cached) calls=6 skills=7
+-- [mixed_office] rep 03 (cached) calls=2 skills=10
+-- [quiet_monday] rep 04 (cached) calls=3 skills=9
+-- [messy_tuesday] rep 04 (cached) calls=9 skills=11
+-- [slow_drift] rep 04 (cached) calls=2 skills=6
+-- [mixed_office] rep 04 (cached) calls=2 skills=10
+-- [quiet_monday] rep 05 (cached) calls=2 skills=5
+-- [messy_tuesday] rep 05 (cached) calls=2 skills=9
+-- [slow_drift] rep 05 (cached) calls=7 skills=5
+-- [mixed_office] rep 05 (cached) calls=64 skills=0
+-- [quiet_monday] rep 06 (cached) calls=6 skills=5
+-- [messy_tuesday] rep 06 (cached) calls=5 skills=24
+-- [slow_drift] rep 06 (cached) calls=5 skills=9
+-- [mixed_office] rep 06 (cached) calls=10 skills=9
+
+======================================================================
+=== S13 POST-RUN FLOOR CANARY ===
+  floor unchanged: True
+  fleet A unchanged: True
+
+======================================================================
+=== S13 AGGREGATION ===
+# S13 -- comparison: the operator desk
+4 desks x N replicates. Cold supervisor (dashboard + 6 skills + Python bench; no methods, no rulebook, no mode). No frozen expected answers; aggregates are descriptive. Suggestions are hand-classified in FINDINGS.md against the 7-category rubric.
+
+## quiet_monday
+- n=6: python_calls mean=4.667 (min 2/max 7), hand_rolled mean=0.667, skill_calls mean=6.0, skills_used={'compare_periods': 7, 'inspect_shared_dependencies': 7, 'review_confirmations': 7, 'trace_flow': 7, 'draft_improvement': 6, 'investigate_exception': 2}, targets={'rese-a-03': 5, 'metric="refusals"': 4, '"The engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share': 2, '"rese-a-03"': 2, '"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share': 2, '"The enrichment engine (enrichment/harness/execute_enrichment.py': 1, '"The enrichment engine \'enrichment/harness/execute_enrichment.py\' is shared by 60 of 70 workers (85.7% fleet share': 1}, suggestions mean=1.5, operator_recs mean=1.833, drafted_improvements mean=1.0, pre_tool_obs_len mean=0.0, stop={'final': 6}, budget_events=0
+
+## messy_tuesday
+- n=6: python_calls mean=5.167 (min 1/max 12), hand_rolled mean=0.833, skill_calls mean=11.167, skills_used={'trace_flow': 16, 'compare_periods': 12, 'investigate_exception': 12, 'inspect_shared_dependencies': 10, 'review_confirmations': 10, 'draft_improvement': 7}, targets={'"rese-a-inv"': 6, 'rese-a-inv': 6, 'all': 2, 'whole fleet': 2, '"Dependency concentration: 60 of 70 workers (85.7%': 1, '"Stale confirmations after promotion: three enrichment workers (enri-a-05, enri-a-11, enri-a-23': 1, '"The enrichment engine \'enrichment/harness/execute_enrichment.py\' is shared by 60 of 70 workers (85.7% fleet share': 1, '"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share': 1, '"Reduce blast radius of enrichment engine concentration: 60 of 70 workers (85.7%': 1, '"The fleet has a single shared engine dependency (enrichment/harness/execute_enrichment.py': 1, '"Three workers (enri-a-05, enri-a-11, enri-a-23': 1, "'rese-a-inv'": 1}, suggestions mean=3.0, operator_recs mean=4.167, drafted_improvements mean=1.167, pre_tool_obs_len mean=0.0, stop={'final': 6}, budget_events=0
+
+## slow_drift
+- n=6: python_calls mean=6.833 (min 2/max 18), hand_rolled mean=2.667, skill_calls mean=7.0, skills_used={'compare_periods': 15, 'inspect_shared_dependencies': 6, 'review_confirmations': 5, 'trace_flow': 10, 'draft_improvement': 6}, targets={'all metrics': 2, '"refusals"': 2, '"Add per-customer refusal rate trending and alerting to the dashboard. Currently, refusals are tracked period-over-period but there is no automated alert when a single customer\'s refusal rate spikes disproportionately. This period, Acme Oy accounted for 53% of the total refusal increase (9 of 17 additional refusals': 1, 'metric="refusals"': 1, 'metric=None': 1, 'metric=metric': 1, '"The enrichment engine enrichment/harness/execute_enrichment.py is shared by 60 of 70 workers (85.7% fleet share': 1, '"Add automated refusal-rate drift alerting. This period saw refusals double from 17 to 34 at flat run volume (420': 1, 'fleet': 1, '"Investigate the doubling of refusals this period (34 vs 17': 1, 'whole fleet': 1, '"The fleet has 60 of 70 workers (85.7%': 1, '"The enrichment engine \'enrichment/harness/execute_enrichment.py\' is shared by 60 of 70 workers (85.7% fleet share': 1, 'all': 1, 'fleet-wide': 1, 'refusals': 1}, suggestions mean=2.167, operator_recs mean=1.333, drafted_improvements mean=1.0, pre_tool_obs_len mean=0.0, stop={'final': 6}, budget_events=0
+
+## mixed_office
+- n=6: python_calls mean=15.167 (min 2/max 64), hand_rolled mean=11.5, skill_calls mean=7.0, skills_used={'investigate_exception': 7, 'trace_flow': 7, 'compare_periods': 7, 'review_confirmations': 6, 'inspect_shared_dependencies': 6, 'draft_improvement': 9}, targets={'"rese-a-inv"': 5, 'rese-a-inv': 5, '"The enrichment engine \'enrichment/harness/execute_enrichment.py\' is shared by 60 of 70 workers (85.7% fleet share': 2, '"Worker enri-a-30 showed a 3x row spike (30 rows vs typical 10': 1, '"Audit effect permissions for the reservation task group. Two reservation workers (rese-a-02 resolved, rese-a-inv open': 1, '"Reduce blast radius of the shared enrichment engine (enrichment/harness/execute_enrichment.py': 1, 'all': 1, 'whole fleet': 1, '"The reservation effect append_to_reservations is shared by only 3 workers but has now caused an open PermissionError exception on rese-a-inv and a period-over-period regression in effects_applied (3->2': 1, '"Ensure confirmation coverage keeps pace with promotions. enri-a-08 was promoted to version 2 this period but its confirmation is stale (confirmed_version 1, current_version 2': 1, '"Investigate append_to_reservations permissions for the reservation worker cohort (rese-a-*': 1, '"Reduce dependency concentration on enrichment/harness/execute_enrichment.py, currently shared by 60 of 70 workers (85.7%': 1, 'aggr-a-61': 1, 'enri-a-08': 1, 'enri-a-30': 1, 'metric="refusals"': 1, 'rese-a-02': 1, 'worker_name="enri-a-30"': 1, 'worker_name="rese-a-inv"': 1}, suggestions mean=2.167, operator_recs mean=4.5, drafted_improvements mean=1.5, pre_tool_obs_len mean=0.0, stop={'final': 6}, budget_events=1
+
+
+=== S13 COMPLETE ===
+  results: C:\Users\pertt\learning-lab\s13\results
