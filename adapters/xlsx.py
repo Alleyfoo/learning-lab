@@ -212,8 +212,17 @@ def convert(path: Path, specs: list[SheetSpec]) -> Conversion:
             items = []
             for number, row in enumerate(rows[spec.header_row:],
                                          start=spec.header_row + 1):
-                if all(v is None for v in row):
-                    continue               # a wholly blank row is not a record
+                # A row that is all None under data_only=True is either genuinely
+                # blank or a row of uncalculated formulas (data_only=True returns
+                # None for a formula with no cached value). The all-None check
+                # below would skip the latter silently, so only skip when none of
+                # the None cells is a formula coordinate; otherwise fall through
+                # to the per-cell loop, which records an uncalculated_formula
+                # problem for each.
+                if all(v is None for v in row) and not any(
+                        v is None and (number, i + 1) in sheet_formulas
+                        for i, v in enumerate(row)):
+                    continue               # a wholly blank row (no formulas) is not a record
                 item = {}
                 for index, (header, value) in enumerate(zip(headers, row)):
                     if not header:
@@ -411,6 +420,33 @@ def _self_test() -> int:
         except UnreadableWorkbook:
             pass
 
+        # --- a row of ONLY uncalculated formulas ---------------------------
+        # data_only=True reads a whole row of uncalculated formulas back as
+        # (None, None, ...), identical to a genuinely blank row. The blank-row
+        # short-circuit must not swallow it: it must be refused, not silently
+        # dropped. (The canary above escapes this only because its formula row
+        # also carries the literal "PI-100"; this one is the pure case.)
+        allf = Workbook()
+        af = allf.active
+        af.title = "Calc"
+        af.append(["A", "B", "C"])            # header row 1
+        af.append(["=1+1", "=2+2", "=3+3"])   # row 2: all uncalculated formulas
+        af.append(["x", "y", "z"])            # row 3: clean literals
+        allf_path = Path(tmp) / "all_formula.xlsx"
+        allf.save(allf_path)
+        allf_result = convert(allf_path, [SheetSpec("Calc", "calc")])
+        check(not allf_result.ok,
+              f"CANARY: a row of only uncalculated formulas must refuse, not be "
+              f"silently dropped as a blank row (was ok={allf_result.ok}): "
+              f"{allf_result.problems}")
+        check(any("uncalculated_formula" in p and "row 2" in p
+                  for p in allf_result.problems),
+              f"CANARY: the all-formula row refusal must name row 2: "
+              f"{allf_result.problems}")
+        check(any(r.get("A") == "x" for r in allf_result.collections.get("calc", [])),
+              f"CANARY: the clean row below an all-formula row must still convert: "
+              f"{allf_result.collections}")
+
         # --- writing produces the shape everything else consumes -----------
         out_dir = Path(tmp) / "out"
         written = write_collections(convert(path, spec), out_dir, note="from xlsx")
@@ -437,8 +473,9 @@ def _self_test() -> int:
           "sheets are refused / an uncalculated formula in a REAL workbook is "
           "refused at the convert() boundary (cross-referenced against the "
           "formula view, not just the cell_value string guard) and named to its "
-          "sheet!field row, and the clean row beside it still converts / a "
-          "refused conversion is never written)")
+          "sheet!field row, and the clean row beside it still converts / a row "
+          "of ONLY uncalculated formulas is refused too, not silently dropped "
+          "as a blank row / a refused conversion is never written)")
     return 0
 
 
