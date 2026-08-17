@@ -1,0 +1,16 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'digest', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\n\n# Break down the dominant engine (enrichment) by customer and trigger\nenrichment_workers = [w for w in workers if w[\"engine\"] == \"enrichment/harness/execute_enrichment.py\"]\n\nfrom collection"
+  }
+]

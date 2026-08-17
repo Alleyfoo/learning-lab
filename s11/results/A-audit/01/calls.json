@@ -1,0 +1,58 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import Counter\n\nsnapshot = json.loads(json.dumps(snapshot))  # work on a copy\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentr"
+  },
+  {
+    "purposes": [
+      "complementary"
+    ],
+    "primary": "complementary",
+    "evidence": {
+      "complementary": "reads complementary fields ['task', 'customer', 'name', 'pending_exceptions']"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Check the pending exception and reservation workers\nfor w in workers:\n    if w[\"task\"] == \"reservation\":\n        s = w[\"summary\"]\n        print(f\"{w['name']}: customer={w['customer']}, last_status={s['last_status']}, \""
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let's see which workers share the enrichment engine and what digests they have\nenrichment_workers = [w for w in workers if w[\"engine\"] == \"enrichment/harness/execute_enrichment.py\"]\nprint(f\"Enrichment workers: {len(enr"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'digest', 'task'] over workers"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import Counter\n\nworkers = snapshot[\"workers\"]\n\n# Check the pending exception and reservation workers\nfor w in workers:\n    if w[\"task\"] == \"reservation\":\n        s = w[\"summary\"]\n        prin"
+  }
+]

@@ -1,0 +1,88 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentration\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"\\n="
+  },
+  {
+    "purposes": [
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'engine_counts' is not defined",
+    "code_head": "# Now compare with the established measurement\nmeas = snapshot[\"dependency_concentration\"][\"measurement\"]\nprint(\"=== ESTABLISHED MEASUREMENT ===\")\nprint(f\"worker_count: {meas['worker_count']}\")\n\nfor dtype in [\"engine\", \""
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['task'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Additional analysis: worker health and notable patterns\nprint(\"=== WORKER HEALTH SUMMARY ===\")\nexceptions = []\ninvestigations = []\nfor w in workers:\n    s = w[\"summary\"]\n    if s[\"last_status\"] != \"ok\":\n        excepti"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['digest', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Check the rese-a-inv exception details\nprint(\"=== rese-a-inv EXCEPTION DETAIL ===\")\nfor w in workers:\n    if w[\"name\"] == \"rese-a-inv\":\n        print(f\"  last_run: {w['summary']['last_run']}\")\n        print(f\"  last_st"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest', 'task'] over workers"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Recompute all concentrations\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\ntrigger_counts = collections.Counter(w[\"trigger\"] f"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['task'] over workers"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "# Worker health and reservation detail\nimport collections\n\nworkers = snapshot[\"workers\"]\n\nprint(\"=== WORKER HEALTH SUMMARY ===\")\nexceptions = []\ninvestigations = []\nfor w in workers:\n    s = w[\"summary\"]\n    if s[\"last_s"
+  }
+]

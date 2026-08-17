@@ -1,0 +1,46 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import Counter\n\nsnapshot = json.loads(json.dumps(snapshot))  # work on a copy\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentr"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'effect', 'digest', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "# Let me also check the pending exception and worker health details\nsnapshot = json.loads(json.dumps(snapshot))\nworkers = snapshot[\"workers\"]\n\n# Check for any workers with exceptions or non-ok status\nprint(\"=== WORKERS W"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'digest', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "# Let me also check the enrichment engine concentration more carefully\n# 60 out of 70 workers use the same engine - that's the key finding\nsnapshot = json.loads(json.dumps(snapshot))\nworkers = snapshot[\"workers\"]\n\n# Brea"
+  }
+]

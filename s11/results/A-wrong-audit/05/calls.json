@@ -1,0 +1,106 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import Counter\n\nsnapshot = json.loads(json.dumps(snapshot))  # work on a copy\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentra"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['effect', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let me also check the pending exception and worker-level details\nprint(\"=== PENDING EXCEPTIONS ===\")\nfor pe in snapshot.get(\"pending_exceptions\", []):\n    print(f\"  Worker: {pe['worker']}, State: {pe['state']}, Failure"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Detailed look at the reservation workers and the exception\nprint(\"=== RESERVATION WORKERS DETAIL ===\")\nfor w in workers:\n    if w[\"task\"] == \"reservation\":\n        s = w[\"summary\"]\n        print(f\"\\n  {w['name']} (cust"
+  },
+  {
+    "purposes": [
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'engine_counts' is not defined",
+    "code_head": "# Let me verify the exact comparison between recomputed and established\nmeas = snapshot[\"dependency_concentration\"][\"measurement\"]\n\nprint(\"=== AUDIT COMPARISON ===\\n\")\n\n# Engine\nprint(\"ENGINE:\")\nrecomputed = dict(engine_"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest', 'task'] over workers"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import Counter\n\nsnapshot_copy = json.loads(json.dumps(snapshot))\nworkers = snapshot_copy[\"workers\"]\ntotal = len(workers)\n\n# Recompute all dependency types\nengine_counts = Counter(w[\"engine\"] "
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'effect', 'digest', 'task'] over workers"
+    },
+    "turn": 1,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'Counter' is not defined",
+    "code_head": "# Let me also check the pending exception and reservation workers in this same namespace\nworkers = snapshot[\"workers\"]\n\nprint(\"=== PENDING EXCEPTIONS ===\")\nfor pe in snapshot.get(\"pending_exceptions\", []):\n    print(f\"  "
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "# Final verification: let me also check fleet_share values precisely\nmeas = snapshot[\"dependency_concentration\"][\"measurement\"]\ntotal = len(snapshot[\"workers\"])\n\nprint(\"=== FLEET SHARE VERIFICATION ===\")\nfor dtype, entri"
+  }
+]

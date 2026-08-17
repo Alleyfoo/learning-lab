@@ -1,0 +1,60 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import Counter\n\nsnapshot = json.loads(json.dumps(snapshot))  # work on a copy\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentra"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'digest', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "# Let's also look at the pending exception and the reservation workers more closely\n# And check what the concentration means for blast radius\n\nworkers = snapshot[\"workers\"]\n\n# Engine breakdown by task type\nfrom collectio"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'digest', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "# Let's also check: are the 59 enrichment workers all using the same engine AND same readable_model?\n# And what about the digest sharing - do the enrichment workers share digests across different customers?\n\nworkers = sn"
+  },
+  {
+    "purposes": [
+      "complementary"
+    ],
+    "primary": "complementary",
+    "evidence": {
+      "complementary": "reads complementary fields ['task', 'customer', 'name', 'pending_exceptions']"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "# Final check: the reservation workers share the same digest (9545734c...) - let's verify\n# and also check the pending exception details\n\nworkers = snapshot[\"workers\"]\nprint(\"=== Pending exceptions ===\")\nfor pe in snapsh"
+  }
+]

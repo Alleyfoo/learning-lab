@@ -1,0 +1,418 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+    "code_head": "import json, collections\n\nsnapshot = json.loads('''SNAPSHOT_PLACEHOLDER''')  # will use the actual snapshot\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentr"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentration\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"\\n=== ENG"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentration\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"\\n=== ENG"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentration\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"\\n=== ENG"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentration\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"\\n=== ENG"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentration\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"\\n=== ENG"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentration\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"\\n=== ENG"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Engine\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"ENGINE recomputed:\")\nfor ident, cnt in engine_counts.most_common()"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Engine\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"ENGINE recomputed:\")\nfor ident, cnt in engine_counts.most_common()"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Engine\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"ENGINE recomputed:\")\nfor ident, cnt in engine_counts.most_common()"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Engine\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"ENGINE recomputed:\")\nfor ident, cnt in engine_counts.most_common()"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Engine\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"ENGINE recomputed:\")\nfor ident, cnt in engine_counts.most_common()"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\nw = snapshot[\"workers\"]\nt = len(w)\nprint(\"total\", t)\nec = collections.Counter(x[\"engine\"] for x in w)\nprint(\"engine\", dict(ec))\ntc = collections.Counter(x[\"trigger\"] for x in w)\nprint(\"trigger\", dict(t"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\nw = snapshot[\"workers\"]\nt = len(w)\nprint(\"total\", t)\nec = collections.Counter(x[\"engine\"] for x in w)\nprint(\"engine\", dict(ec))\ntc = collections.Counter(x[\"trigger\"] for x in w)\nprint(\"trigger\", dict(t"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\nw = snapshot[\"workers\"]\nt = len(w)\nprint(\"total\", t)\nec = collections.Counter(x[\"engine\"] for x in w)\nprint(\"engine\", dict(ec))\ntc = collections.Counter(x[\"trigger\"] for x in w)\nprint(\"trigger\", dict(t"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\nw = snapshot[\"workers\"]\nt = len(w)\nprint(\"total\", t)\nec = collections.Counter(x[\"engine\"] for x in w)\nprint(\"engine\", dict(ec))\ntc = collections.Counter(x[\"trigger\"] for x in w)\nprint(\"trigger\", dict(t"
+  },
+  {
+    "purposes": [
+      "probe"
+    ],
+    "primary": "probe",
+    "evidence": {
+      "probe": "no recognized purpose"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "print(len(snapshot[\"workers\"]))\n"
+  },
+  {
+    "purposes": [
+      "probe"
+    ],
+    "primary": "probe",
+    "evidence": {
+      "probe": "no recognized purpose"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "print(len(snapshot[\"workers\"]))\n"
+  },
+  {
+    "purposes": [
+      "probe"
+    ],
+    "primary": "probe",
+    "evidence": {
+      "probe": "no recognized purpose"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "print(len(snapshot[\"workers\"]))\n"
+  },
+  {
+    "purposes": [
+      "probe"
+    ],
+    "primary": "probe",
+    "evidence": {
+      "probe": "no recognized purpose"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "print(len(snapshot[\"workers\"]))\n"
+  },
+  {
+    "purposes": [
+      "probe"
+    ],
+    "primary": "probe",
+    "evidence": {
+      "probe": "no recognized purpose"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "print(len(snapshot[\"workers\"]))\n"
+  },
+  {
+    "purposes": [
+      "probe"
+    ],
+    "primary": "probe",
+    "evidence": {
+      "probe": "no recognized purpose"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "print(len(snapshot[\"workers\"]))\n"
+  },
+  {
+    "purposes": [
+      "probe"
+    ],
+    "primary": "probe",
+    "evidence": {
+      "probe": "no recognized purpose"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "print(len(snapshot[\"workers\"]))\n"
+  },
+  {
+    "purposes": [
+      "probe"
+    ],
+    "primary": "probe",
+    "evidence": {
+      "probe": "no recognized purpose"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "print(len(snapshot[\"workers\"]))\n"
+  },
+  {
+    "purposes": [
+      "probe"
+    ],
+    "primary": "probe",
+    "evidence": {
+      "probe": "no recognized purpose"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "print(len(snapshot[\"workers\"]))\n"
+  },
+  {
+    "purposes": [
+      "probe"
+    ],
+    "primary": "probe",
+    "evidence": {
+      "probe": "no recognized purpose"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "print(len(snapshot[\"workers\"]))\n"
+  },
+  {
+    "purposes": [
+      "probe"
+    ],
+    "primary": "probe",
+    "evidence": {
+      "probe": "no recognized purpose"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "print(len(snapshot[\"workers\"]))\n"
+  },
+  {
+    "purposes": [
+      "probe"
+    ],
+    "primary": "probe",
+    "evidence": {
+      "probe": "no recognized purpose"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "print(len(snapshot[\"workers\"]))\n"
+  }
+]

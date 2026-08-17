@@ -1,0 +1,16 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'digest', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\n\n# Customer distribution\nfrom collections import Counter\ncust = Counter(w[\"customer\"] for w in workers)\nprint(\"=== Customer distribution ===\")\nfor c, n in cust.most_common():\n    print(f\"  {"
+  }
+]

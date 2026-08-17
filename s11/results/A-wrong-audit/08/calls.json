@@ -1,0 +1,78 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'dir' is not defined",
+    "code_head": "import json\nfrom collections import Counter\n\nsnapshot = json.loads(json_text) if 'json_text' in dir() else None\n\n# The snapshot is already available as `snapshot`\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint("
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import Counter\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentration\nengine_counts = Counter(w[\"engine\"] for w in workers)\npri"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "from collections import Counter\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Recompute all four dependency types\nresults = {}\nfor dtype, field in [(\"engine\", \"engine\"), (\"trigger\", \"trigger\"), (\"effect\", \"effec"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "from collections import Counter\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Task type distribution\ntask_counts = Counter(w[\"task\"] for w in workers)\nprint(\"=== Task types ===\")\nfor t, c in task_counts.most_com"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'digest', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "from collections import Counter\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Check digest sharing across different task types\nprint(\"=== Digest -> task types sharing each digest ===\")\ndigest_tasks = {}\nfor w in"
+  }
+]

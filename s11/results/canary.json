@@ -1,0 +1,153 @@
+{
+  "harness_self_test": true,
+  "concentration_self_test": true,
+  "concentration_py_normalized_hash": "c78b0dab1c2032c6",
+  "concentration_py_unchanged": true,
+  "harness_py_normalized_hash": "00f5469a6a1d1e9f",
+  "harness_py_unchanged": true,
+  "contract_no_interpretation_word": true,
+  "contract_bad_word": null,
+  "authority_block_no_interpretation_word": true,
+  "authority_block_bad_word": null,
+  "mode_text_no_interpretation_word": {
+    "SUPERVISION_preamble": true,
+    "SUPERVISION_refusal": true,
+    "SUPERVISION_tool_suffix": true,
+    "AUDIT_preamble": true,
+    "AUDIT_tool_suffix": true,
+    "status_note": true,
+    "integrity_note": true
+  },
+  "mode_text_bad_word": {
+    "SUPERVISION_preamble": null,
+    "SUPERVISION_refusal": null,
+    "SUPERVISION_tool_suffix": null,
+    "AUDIT_preamble": null,
+    "AUDIT_tool_suffix": null,
+    "status_note": null,
+    "integrity_note": null
+  },
+  "envelope_no_interpretation_word": {
+    "A-supervision": true,
+    "A-audit": true,
+    "A-wrong-audit": true
+  },
+  "envelope_bad_word": {
+    "A-supervision": null,
+    "A-audit": null,
+    "A-wrong-audit": null
+  },
+  "measure_pure_snapshot_unchanged": true,
+  "wrong_fixture": {
+    "real_measure_engine_top": 60,
+    "wrong_fixture_engine_top": 59,
+    "wrong_fixture_is_59": true,
+    "real_measure_is_60": true,
+    "source_hash_matches_fleet": true,
+    "integrity_valid": true,
+    "concentration_py_not_modified": true,
+    "fixture_marker_audit_only": "wrong_measurement_audit_only"
+  },
+  "detector_battery": {
+    "counter_engine": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "counter_engine_get": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "counter_effect": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "groupby_engine_size": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "value_counts_engine": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "len_filter_engine": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "sum_engine": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "customer_breakdown": {
+      "expected_refused": false,
+      "got_refused": false,
+      "pass": true
+    },
+    "engine_customer_joint": {
+      "expected_refused": false,
+      "got_refused": false,
+      "pass": true
+    },
+    "affected_workers_filter": {
+      "expected_refused": false,
+      "got_refused": false,
+      "pass": true
+    },
+    "exception_history": {
+      "expected_refused": false,
+      "got_refused": false,
+      "pass": true
+    },
+    "read_measurement": {
+      "expected_refused": false,
+      "got_refused": false,
+      "pass": true
+    },
+    "task_grouping_leak": {
+      "expected_refused": false,
+      "got_refused": false,
+      "pass": true
+    },
+    "_all_pass": true
+  },
+  "mechanical_mode": {
+    "SUPERVISION_refuses_duplicate": true,
+    "AUDIT_executes_duplicate": true,
+    "supervision_outcome": {
+      "ok": false,
+      "refused": true,
+      "error": "DUPLICATE_ESTABLISHED_MEASUREMENT"
+    },
+    "audit_outcome": {
+      "ok": true,
+      "refused": false
+    }
+  },
+  "seed_lf_hashes_before": {
+    "methods.jsonl": "d12a1fb057684c9d",
+    "knowledge.jsonl": "6f4bc110a53548df",
+    "preferences.jsonl": "0128fe3320a61647"
+  },
+  "candidate_method_count": 3,
+  "candidate_method0_unchanged": true,
+  "candidate_method2_unchanged": true,
+  "candidate_method1_diff_keys": [
+    "statement"
+  ],
+  "candidate_method1_only_statement_changed": true,
+  "candidate_method1_statement_is_oracle": true,
+  "original_method2_statement_is_oracle": true,
+  "floor_hashes_before": {
+    "snapshot.py": "df37d914a8b8b12d",
+    "rulebook.jsonl": "7949cde4e8724f1b",
+    "concentration.py": "8a4d8d4cdbaec2a8",
+    "harness.py": "00f5469a6a1d1e9f"
+  },
+  "canaries_ok": true
+}
