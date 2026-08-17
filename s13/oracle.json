@@ -71,7 +71,7 @@
     },
     "compare_periods": {
       "signature": "compare_periods(metric=None)",
-      "metric_values": ["runs", "refusals", "effect_failures", "exceptions", "promotions", "confirmations", null],
+      "metric_values": ["runs", "refusals", "effects_not_applied", "exceptions", "promotions", "confirmations", null],
       "returns": "recent-period vs previous-period counts per metric + a per-customer refusal breakdown (where drift is visible)",
       "fact_only": true
     },

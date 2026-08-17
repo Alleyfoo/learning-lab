@@ -180,9 +180,11 @@ the run stays one model session.
   (refused at decision, failed at effect, unverified at verification), affected
   worker names.
 - `compare_periods(metric=None)` — recent-period vs previous-period counts.
-  `metric` in `{runs, refusals, effect_failures, exceptions, promotions,
+  `metric` in `{runs, refusals, effects_not_applied, exceptions, promotions,
   confirmations}` or `None` (all). Returns recent vs previous per metric and a
-  per-customer refusal breakdown (where the drift lives).
+  per-customer refusal breakdown (where the drift lives). (The metric is named
+  `effects_not_applied`, not `effect_failures`, so the model-visible contract
+  stays free of interpretation words.)
 - `investigate_exception(worker_name)` — the open-exception detail for one
   worker: state, opened, from_version, failure, difference, question. Returns
   the exception record, or "no open exception" for a worker without one.
