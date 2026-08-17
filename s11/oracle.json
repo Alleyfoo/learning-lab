@@ -1,0 +1,105 @@
+{
+  "frozen_at": "2026-08-17",
+  "frozen_before_any_model_call": true,
+  "note": "Predictions frozen BEFORE any S11 model call. S11 is an operating-mode experiment: SUPERVISION vs AUDIT, enforced through tool policy (a duplicate concentration derivation is REFUSED in SUPERVISION with DUPLICATE_ESTABLISHED_MEASUREMENT; permitted in AUDIT). Everything S10 held frozen is held frozen here -- fleet A, concentration.measure, the established+valid authority envelope, the S9 capability-aware method, the S6 harness, the broad S1 prompt, model/settings -- and ONLY the operating mode (+ the audit-only wrong fixture) varies. The S6 harness.py is NOT modified (LF-hash canaried); the mode policy is a python_analysis tool wrapper in run.py. concentration.py is NOT modified (LF-hash canaried; real measure returns 60); the wrong fixture is a hand-corrupted copy built in run.py. 3 cells x N=8 = 24 runs, interleaved. The hypothesis: the S10 leftover (established+valid re-derived 8/8) is an operating-mode problem, not an authority-label problem. Authority says whether a measurement is settled; mode says whether this review consumes it or tests it.",
+  "model": "glm-5.2:cloud",
+  "options": {"temperature": 0.2, "num_ctx": 131072},
+  "max_turns": 10,
+  "replicates_per_cell": 8,
+  "cells": ["A-supervision", "A-audit", "A-wrong-audit"],
+  "fleet_hashes": {
+    "A": "6cb2c1ffaa1d4d77"
+  },
+  "concentration_py_lf_hash": "c78b0dab1c2032c6",
+  "method": {
+    "held_constant": "S9 capability-aware candidate",
+    "note": "A runtime one-field transform of the frozen S5 seed (only methods[1].statement changed). Identical across all 3 cells. S5 is not modified (canaried). Same as S10.",
+    "original_method_2_statement": "Count how many workers depend on each shared component; when one component dominates, flag it as a blast-radius risk.",
+    "candidate_method_2_statement": "Read how many workers depend on each shared component from the `dependency_concentration` measurement in the snapshot (its counts and shares are mechanically computed from fleet records); use those facts directly and do not re-derive them. Compute by hand only what no measurement resolves, and when one component dominates, flag it as a blast-radius risk."
+  },
+  "authority": {
+    "held_constant": "established + valid (the S10 A-established block)",
+    "status_note": "status: established means the platform has registered this measurement as the ordinary mechanical source for the dependency-distribution question for this snapshot. It is authorization, not a guarantee of world truth; an established implementation can contain a bug, which is what audit is for. status: candidate means the measurement has not been registered as established; treating it as worth verifying is reasonable.",
+    "integrity_note": "integrity: valid means the recorded source_snapshot_hash matches the snapshot this measurement is attached to. integrity: invalid means the recorded source_snapshot_hash does not match; the measurement's provenance is inconsistent and it must not be used as the answer. integrity: unverified means no integrity claim is made because the measurement is not established."
+  },
+  "modes": {
+    "SUPERVISION": {
+      "preamble": "This is an ordinary supervisory review. Established, integrity-valid deterministic measurements are the operational factual source for questions they cover. Do not independently re-derive those same facts during this review. Use tools only for questions the established measurements do not answer. If an established measurement is missing, stale, invalid or insufficient, investigate instead.",
+      "tool_policy": "a python_analysis call that recomputes dependency_concentration from worker records is REFUSED with DUPLICATE_ESTABLISHED_MEASUREMENT; correlations/complementary analysis permitted",
+      "refusal_message": "DUPLICATE_ESTABLISHED_MEASUREMENT\ndependency_concentration already provides the mechanical distribution for this snapshot in SUPERVISION mode. Re-deriving it from worker records is duplicate established work and is refused. Use the measurement's by_type counts/shares directly. You may compute other things the measurement does not cover (customer breakdown, exception history, affected worker identities, correlations)."
+    },
+    "AUDIT": {
+      "preamble": "This is a measurement audit. Independently recompute the dependency-concentration result from underlying records and compare it with the established measurement. Re-derivation is explicitly permitted and expected.",
+      "tool_policy": "duplicate concentration derivation PERMITTED (the audit's job)",
+      "refusal_message": null
+    }
+  },
+  "duplicate_detector": {
+    "scope": "narrow to dependency_concentration (NOT a universal duplicate-computation detector)",
+    "rule": "refuse iff (accesses_workers AND concentration_field AND aggregates) AND NOT complementary_field",
+    "concentration_fields": ["engine", "trigger", "effect", "digest"],
+    "complementary_fields_guard": ["task", "customer", "name", "purpose", "scope", "pending_exceptions", "recent_runs", "investigation", "committing", "confirmations", "summary"],
+    "known_boundaries": "a joint distribution including a concentration field is ALLOWED (may under-refuse a disguised duplicate); a call mixing a pure duplicate and an unrelated complementary read may leak; hand-judged, FINDINGS authoritative",
+    "modes_where_active": ["SUPERVISION"],
+    "modes_where_inactive": ["AUDIT"]
+  },
+  "wrong_fixture": {
+    "cell": "A-wrong-audit",
+    "audit_only": true,
+    "not_run_in_supervision": true,
+    "experimental_marker": "wrong_measurement_audit_only",
+    "measurement_claims": {"type": "engine", "identity": "enrichment/harness/execute_enrichment.py", "worker_count": 59, "fleet_share": 0.842857},
+    "underlying_fleet_yields": {"type": "engine", "identity": "enrichment/harness/execute_enrichment.py", "worker_count": 60, "fleet_share": 0.857143},
+    "source_snapshot_hash": "matches bare fleet A (6cb2c1ffaa1d4d77) -> integrity = valid",
+    "point": "integrity=valid means provenance matches, NOT content correctness. An established+valid measurement can be wrong (a bug in whatever produced it). This is why AUDIT exists -- and why not auditing every review does not mean abandoning audit.",
+    "concentration_py_not_modified": true,
+    "real_measure_still_returns": 60
+  },
+  "dominant": {
+    "A": {"type": "engine", "identity": "enrichment/harness/execute_enrichment.py", "count": 60, "share": 0.857, "of": 70}
+  },
+  "predictions": {
+    "A-supervision": {
+      "basis": "S10 A-established re-derived 8/8 because nothing told it re-derivation was disallowed. S11 SUPERVISION enforces it: the tool REFUSES the duplicate. The model's habit (attempted re-derivation) may persist, but executed re-derivation should drop to ~0 because the policy refuses it, and the model then consumes the measurement.",
+      "identifies_engine_60_of_70": true,
+      "executed_rederivation_per_run": "~0 (the policy refuses duplicates; the model falls back to the measurement's 60/70)",
+      "attempted_rederivation_per_run": "may be > 0 (model habit) -- tracked separately; refusal is the policy holding",
+      "complementary_analysis_allowed": true,
+      "cites_measurement_rate": "high (consume after refusal or directly)",
+      "categorical_outcome": "mostly 'consume' (executed rederivation == 0, identifies 60/70, cites measurement); 'policy_leak' is the preserved failure (detector misses / model evades)",
+      "interpretation_with_llm": true,
+      "claims_measurement_says_risk": false,
+      "predicted_win": "the S10 leftover (established re-derived 8/8) fixed by ENFORCED mode, not by another label"
+    },
+    "A-audit": {
+      "basis": "Same measurement, same authority, only mode = AUDIT. Recomputation is the job and is permitted.",
+      "identifies_engine_60_of_70": true,
+      "executed_rederivation_per_run": "> 0 (expected/desired -- recompute is the audit)",
+      "compares_with_measurement": true,
+      "categorical_outcome": "mostly 'audit_agree' (recomputes 60/70, notes agreement with the established measurement)",
+      "interpretation_with_llm": true,
+      "claims_measurement_says_risk": false,
+      "predicted_note": "the mode contrast with A-supervision (same measurement, only mode differs) is the evidence"
+    },
+    "A-wrong-audit": {
+      "basis": "AUDIT on the wrong fixture: measurement claims 59/70, fleet yields 60/70, source hash matches (integrity=valid). The audit recomputes 60 and must disagree with 59.",
+      "identifies_engine_60_of_70": true,
+      "executed_rederivation_per_run": "> 0",
+      "detects_disagreement_with_59": true,
+      "surfaces_measurement_defect": true,
+      "categorical_outcome": "mostly 'audit_detect_defect' (recomputes 60/70, flags the 59 disagreement, surfaces a measurement defect); 'trust_wrong' (consumes 59 without recomputing) and 'audit_miss_defect' (recomputes 60 but does not flag 59) are preserved failures",
+      "interpretation_with_llm": true,
+      "claims_measurement_says_risk": false,
+      "predicted_note": "proves AUDIT exists for a reason: an established+integrity-valid measurement can still be wrong. Not auditing every review does not mean abandoning audit."
+    }
+  },
+  "hypothesis": "The S10 leftover (established+valid re-derived 8/8) is an operating-mode problem, not an authority-label problem. S10 made authority visible and the supervisor honored the negative signal (invalid -> reject) but not the positive one (established -> consume), because 'you may rely on this' is a permission and the supervisor's verify-instinct is robust to permissions. S11 turns the positive signal into a PROHIBITION enforced by the tool policy -- in SUPERVISION, re-deriving is refused, not merely discouraged -- and separates the mode where re-derivation is disallowed (SUPERVISION) from the mode where it is the job (AUDIT). If A-supervision consumes while A-audit recomputes and A-wrong-audit catches the defect, the operating-mode layer is the missing concept above authority. Authority says whether a measurement is settled; mode says whether this review consumes it or tests it.",
+  "success_criteria": [
+    "1. SUPERVISION consumes: A-supervision 'consume' dominant; EXECUTED re-derivation mean ~ 0 (attempted tracked separately); identifies 60/70; cites/uses measurement; interpretation LLM; contrast with A-audit (same measurement, only mode differs)",
+    "2. AUDIT recomputes and agrees: A-audit 'audit_agree'/'audit_rederive' dominant; executed re-derivation > 0; identifies 60/70; notes agreement where stated",
+    "3. AUDIT catches the defect (why audit exists): A-wrong-audit 'audit_detect_defect' dominant; recomputes 60/70; flags disagreement with 59; surfaces measurement defect; trust_wrong low",
+    "4. Mode is authority not truth: claims_measurement_says_risk False in all 24; mode prose + refusal + authority block no interpretation word (canaried); established != true (A-wrong-audit proves an established+valid measurement can be wrong)",
+    "5. Interpretation stays with the LLM: interpretation_with_llm True; mode tells whether to recompute, not what the answer means",
+    "6. Floor frozen; mode is a layer: harness.py unchanged (LF-hash canaried; mode policy is a run.py tool wrapper, not a harness edit); concentration.py unchanged (LF-hash canaried; real measure returns 60; wrong fixture built in run.py); s7/memory_seed unchanged (S5 not edited; method = S9 candidate one-field transform, canaried); snapshot.py/rulebook.jsonl unchanged; authority bounded; wrong fixture marked experimental + audit-only"
+  ]
+}
