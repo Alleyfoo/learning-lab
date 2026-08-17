@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """Workspace v0.2 -- the Supervisor Streamlit surface, recentred on the System Map.
 
-The organizing concept is no longer "what the supervisor thinks right now" (the v0.1
-Dashboard). It is the **company's actual flow**: Company -> Incoming Data ->
-Understanding -> Modelled Work -> Output. The Fleet System Map already renders exactly
-that flow, so it is back as the **primary visual model**. To its left is a new
-**incoming-file/workbook/sheet browser** showing the company's actual incoming data --
-the `data/` library (including data not yet turned into a worker) and each worker's
-inbox/processed/exceptions files. The supervisor's **current assessment sits on top**
-of this company context, so its verdict is visibly attached to the flows it describes.
+The organizing concept is the **company's actual flow**: Company -> Incoming Data ->
+Understanding -> Modelled Work -> Output. The Fleet System Map is back as the **primary
+visual model**: it renders the *modelled-work* half of that flow (company/scope ->
+declared inputs/sources -> modelled workers -> outputs, with exception/investigator
+side paths) and begins after modelling. The raw "Incoming Data" the map does not yet
+draw is supplied by a new **incoming-file/workbook/sheet browser** to its left -- the
+`data/` library (including data not yet modelled into a worker) and each worker's
+inbox/processed/exceptions. "Understanding"/modelling still happens on a separate
+surface (PRODUCT.md priority #4 -- the next milestone, not yet done). The supervisor's
+**current assessment sits on top** of this company context, so its verdict is visibly
+attached to the flows it describes.
 
   System Map (primary)   incoming browser (left) + the Fleet System Map (centre) +
                          the supervisor's current assessment (on top). The Review-fleet
@@ -307,9 +310,11 @@ map_tab, dashboard, improvements, rules_tab, fleet_tab = st.tabs(
 
 with map_tab:
     st.subheader("System Map")
-    st.caption("The company's flow: Company -> Incoming Data -> Understanding -> "
-               "Modelled Work -> Output. The map is derived entirely from fleet state; "
-               "the supervisor's assessment sits on top of it. Task nodes are clickable.")
+    st.caption("The map renders the modelled-work half of the company's flow "
+               "(Company -> Modelled Work -> Output); the incoming-data browser to the "
+               "left supplies the not-yet-modelled side. The map is derived entirely "
+               "from fleet state; the supervisor's assessment sits on top of it. "
+               "Task nodes are clickable.")
 
     # --- action row: Review + secondary counters ----------------------------
     c_act, c_w, c_e, c_s = st.columns([2, 1, 1, 1])
