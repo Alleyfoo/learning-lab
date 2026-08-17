@@ -164,7 +164,8 @@ def get(imp_id: str) -> Optional[dict]:
 # --- the raise_proposal harness tool ---------------------------------------
 
 def raise_proposal_tool(run_id: str, snapshot_hash: str, fleet_shape: str, *,
-                         bench_timeout: float = 10.0) -> "harness.Tool":
+                         bench_timeout: float = 10.0,
+                         extra_inject: Optional[dict] = None) -> "harness.Tool":
     """A `harness.Tool` named `python_analysis` (the name the harness dispatches
     every fenced ```python block to) that runs the model's analysis code against
     a COPY of the snapshot AND exposes `raise_proposal(text, evidence)` to file
@@ -175,6 +176,12 @@ def raise_proposal_tool(run_id: str, snapshot_hash: str, fleet_shape: str, *,
     `raise_proposal` closure, then runs the code via `bench._exec_timed`. The
     authority class is `write_improvement_proposals` -- the new power granted
     (analysis-over-a-copy remains bench-enforced as read-only).
+
+    `extra_inject` (optional) adds further callables to the same bench namespace
+    alongside `raise_proposal` -- used by Workspace v0.1 to expose
+    `file_assessment(findings, priorities, normal_context)` so the supervisor
+    can file its current assessment during the run. The injected names are also
+    mentioned in the tool description so the model knows they exist.
     """
     def raise_proposal(text: str, evidence: str = "") -> str:
         imp_id = next_id()
@@ -192,6 +199,8 @@ def raise_proposal_tool(run_id: str, snapshot_hash: str, fleet_shape: str, *,
         snap = state.get("snapshot", {})
         ns = bench._build_namespace(copy.deepcopy(snap))
         ns["raise_proposal"] = raise_proposal
+        if extra_inject:
+            ns.update(extra_inject)
         stdout, _v, error = bench._exec_timed(code, ns, bench_timeout)
         return {
             "ok": error is None,
@@ -220,7 +229,10 @@ def raise_proposal_tool(run_id: str, snapshot_hash: str, fleet_shape: str, *,
             "`evidence` is what you observed that supports it. Each call appends "
             "one proposal to the durable backlog with its provenance; it returns "
             "`raised: IMP-NNN`. Use it once per distinct improvement you want to "
-            "raise. Proposals are routed and activated later by the operator.\n\n"
+            "raise. Proposals are routed and activated later by the operator."
+            + ((" You may also call " + ", ".join(f"`{k}`" for k in extra_inject)
+                + " from this same namespace.") if extra_inject else "")
+            + "\n\n"
             "To use it, emit a fenced ```python block containing your code. "
             "When you are ready to tell the operator your findings, write plain "
             "prose with NO ```python block -- that ends the session."
@@ -292,6 +304,27 @@ def _self_test() -> int:
                             {"snapshot": {"worker_count": 3}})
         check(out2["ok"] and out2["stdout"].strip() == "3",
               f"the tool still runs plain analysis against the snapshot copy: {out2}")
+
+        # --- extra_inject adds callables to the same namespace ---------------
+        cap: dict = {}
+        def fake_assess(findings, priorities, normal_context=""):
+            cap["findings"] = list(findings)
+            cap["priorities"] = list(priorities)
+            cap["normal_context"] = normal_context
+            print("filed")
+            return "filed"
+        tool2 = raise_proposal_tool("run-test-002", "cafe", "1w-0exc",
+                                     bench_timeout=5,
+                                     extra_inject={"file_assessment": fake_assess})
+        check(tool2.name == "python_analysis",
+              "extra_inject does not change the dispatch name")
+        out3 = tool2.execute(
+            {"code": "file_assessment(['a finding'], ['p1'], 'all clear')"},
+            {"snapshot": {"worker_count": 1}})
+        check(out3["ok"] and "filed" in out3["stdout"],
+              f"extra_inject lands file_assessment in the namespace: {out3}")
+        check(cap["findings"] == ["a finding"] and cap["normal_context"] == "all clear",
+              f"the injected file_assessment ran and wrote the capture: {cap}")
 
         # --- fold: raise -> routed -> activatable -> active state machine ----
         # raise a second proposal, then route it as a MEASUREMENT

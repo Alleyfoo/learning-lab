@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
-"""Workspace v0 -- the Supervisor Streamlit surface.
+"""Workspace v0.1 -- the Supervisor Streamlit surface.
 
-The S1 vertical slice (one button -> core.review) is replaced by a four-tab
-tool whose purpose is to USE the supervisor and collect real behavior:
+The primary surface is the **Supervisor Dashboard**: the supervisor's
+human-facing *current assessment* of the fleet -- findings, priorities,
+normal/no-action context, and suggestions -- produced by each completed run and
+persisted to `current_assessment.json` so it is visible the moment the app opens.
 
-  Current       the read-only fleet snapshot the supervisor sees
-  Flow          "Review fleet" -> a SupervisorHarness run (supervision.review),
-                with the session summary, per-turn evidence, and the proposals
-                raised in the run. Saved to supervisor/runs/<run_id>/.
-  Improvements  the persistent append-only backlog (raise/route/activate),
-                with on-demand Route / Route-all buttons (the S14/S15 routing
-                desk) and a human-gated Activate button for NEW_RULE proposals
-                (the only path that grows the real rulebook.jsonl).
-  Rules         rulebook.jsonl -- the 5 proven rules plus any human-activated
-                ones -- and the proposed rules pending activation.
+  Dashboard             the current assessment. The Review-fleet action lives
+                        here (a run feeds the dashboard, it is not a separate
+                        page). Machine-state counters are a small secondary strip.
+  Improvements          the persistent append-only backlog (raise/route/activate),
+                        with on-demand Route / Route-all buttons (the S14/S15
+                        routing desk) and a human-gated Activate button for
+                        NEW_RULE proposals (the only path that grows rulebook.jsonl).
+  Rules                 rulebook.jsonl -- the 5 proven rules plus any human-activated
+                        ones -- and the proposed rules pending activation.
+  Fleet & run details   the raw snapshot + full machine-state counters + the last
+                        run's per-turn evidence. Technical.
 
 Routing and activation are on-demand from the Improvements page: a run only
-RAISES. Rule activation is genuinely human-gated (a deliberate button press).
+RAISES (and files its assessment). Rule activation is genuinely human-gated.
 
   streamlit run supervisor/app.py
 """
@@ -35,10 +38,11 @@ sys.path.insert(0, str(LAB / "s1"))
 sys.path.insert(0, str(LAB / "fleet"))
 sys.path.insert(0, str(HERE))
 
-import backlog       # noqa: E402
-import rulebook       # noqa: E402
-import routing        # noqa: E402
-import supervision     # noqa: E402
+import assessment  # noqa: E402
+import backlog      # noqa: E402
+import rulebook      # noqa: E402
+import routing       # noqa: E402
+import supervision   # noqa: E402
 import snapshot as snap  # noqa: E402
 
 st.set_page_config(page_title="Supervisor", layout="wide")
@@ -57,7 +61,7 @@ def _desk() -> "routing.RoutingDesk":
 
 st.sidebar.title("Supervisor")
 st.sidebar.caption("The LLM view of the fleet. Read-only: this surface never "
-                   "changes a worker, a model, or a run. Workspace v0.")
+                   "changes a worker, a model, or a run. Workspace v0.1.")
 
 source = st.sidebar.radio(
     "Snapshot source",
@@ -84,32 +88,23 @@ st.sidebar.caption(f"snapshot hash: `{snapshot_hash}`\n\n"
                    f"{snapshot['worker_count']} worker(s) · "
                    f"{len(snapshot['pending_exceptions'])} pending exception(s)")
 
-current, flow, improvements, rules_tab = st.tabs(
-    ["Current", "Flow", "Improvements", "Rules"])
+dashboard, improvements, rules_tab, fleet = st.tabs(
+    ["Dashboard", "Improvements", "Rules", "Fleet & run details"])
 
-# --- Current: what the supervisor sees ------------------------------------
+# --- Dashboard: the current assessment (primary surface) -------------------
 
-with current:
-    st.subheader("Current fleet snapshot")
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Workers", snapshot["worker_count"])
-    c2.metric("Pending exceptions", len(snapshot["pending_exceptions"]))
-    c3.metric("Scopes", len(snapshot.get("scopes", [])))
-    with st.expander("Snapshot JSON (what the supervisor sees)", expanded=False):
-        st.json(snapshot)
+with dashboard:
+    st.subheader("Supervisor Dashboard")
+    st.caption("The supervisor's current assessment of this fleet. The "
+               "**Review fleet** action refreshes it; machine-state counters "
+               "are secondary below.")
 
-# --- Flow: review the fleet through the SupervisorHarness -----------------
-
-with flow:
-    st.subheader("Review fleet")
-    st.caption("Runs the supervisor through the proven SupervisorHarness path. "
-               "The supervisor may `raise_proposal(text, evidence)` to file "
-               "improvements; routing and activation happen later, on demand.")
+    # The review action feeds the dashboard (it is not a separate page).
     if st.button("Review fleet", type="primary"):
         with st.spinner("Supervisor reviewing (this calls the local model)…"):
             t0 = time.time()
             try:
-                session = supervision.review(snapshot, max_turns=6,
+                session = supervision.review(snapshot, max_turns=8,
                                               request_timeout=900)
             except Exception as e:  # noqa: BLE001 -- surface any model/bench error
                 session = None
@@ -120,52 +115,64 @@ with flow:
         if session is not None:
             session["elapsed_seconds"] = elapsed
             st.session_state["last_session"] = session
+        st.rerun()
 
     if st.session_state.get("last_error"):
         st.error(f"Review failed: {st.session_state['last_error']}")
         st.caption("Is the local model running? `ollama serve` / check "
                    "`http://localhost:11434`.")
 
-    session = st.session_state.get("last_session")
-    if session is not None:
-        st.markdown(session.get("final_response") or "_(no final response)_")
-        recon = session.get("reconstructability", {})
-        st.caption(
-            f"stop={session.get('stop_reason')} · "
-            f"turns={session.get('turn_count')} · "
-            f"python used={session.get('python_used')} "
-            f"({session.get('python_call_count')} call(s)) · "
-            f"{session.get('elapsed_seconds')}s · "
-            f"model `{session.get('model')}` · run `{session.get('run_id')}`")
-        if session.get("budget_events"):
-            st.warning(f"{len(session['budget_events'])} budget event(s)")
+    # Machine-state counters -- deliberately a small secondary strip.
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Workers", snapshot["worker_count"])
+    c2.metric("Pending exceptions", len(snapshot["pending_exceptions"]))
+    c3.metric("Scopes", len(snapshot.get("scopes", [])))
 
-        raised = session.get("raised_proposals") or []
-        if raised:
-            st.markdown(f"**Proposals raised this run ({len(raised)}):**")
-            for rp in raised:
-                st.markdown(f"- `{rp['id']}` — {rp.get('text', '')}"
-                            + (f" _(evidence: {rp.get('evidence')})_"
-                               if rp.get("evidence") else ""))
+    st.markdown("---")
+
+    am = assessment.load_current()
+    if am is None:
+        st.info("No assessment yet. Press **Review fleet** to generate one.")
+    else:
+        filed = am.get("filed")
+        if filed is None:
+            st.warning("The supervisor did not file a structured assessment "
+                       "for this run. See the narrative below.")
+        else:
+            st.markdown("#### Normal / no-action context")
+            st.markdown(filed.get("normal_context") or "_(not stated)_")
+
+            st.markdown("#### Findings")
+            findings = filed.get("findings", [])
+            for f in findings:
+                st.markdown(f"- {f}")
+            if not findings:
+                st.caption("none")
+
+            st.markdown("#### Priorities")
+            priorities = filed.get("priorities", [])
+            for i, p in enumerate(priorities, 1):
+                st.markdown(f"{i}. {p}")
+            if not priorities:
+                st.caption("none")
+
+        st.markdown("#### Suggestions")
+        suggestions = am.get("suggestions", [])
+        if suggestions:
+            for s in suggestions:
+                st.markdown(f"- `{s['id']}` — {s.get('text', '')}"
+                            + (f" _(evidence: {s.get('evidence')})_"
+                               if s.get("evidence") else ""))
             st.caption("Route and activate these on the **Improvements** tab.")
         else:
-            st.caption("No proposals raised this run.")
+            st.caption("none raised this run.")
 
-        with st.expander("Evidence / analysis used", expanded=False):
-            for turn in session.get("turns", []):
-                st.markdown(f"**Turn {turn['turn'] + 1}**"
-                            + (" · final answer" if turn.get("ended_run") else ""))
-                with st.expander("assistant text", expanded=False):
-                    st.text(turn["assistant"])
-                for i, call in enumerate(turn.get("python_calls", []), 1):
-                    st.markdown(f"Python call {i} — "
-                                f"{'ok' if call['ok'] else 'error'}"
-                                + (" (refused)" if call.get("refused") else ""))
-                    st.code(call["code"], language="python")
-                    if call.get("stdout"):
-                        st.code(call["stdout"], language="text")
-                    if call.get("error"):
-                        st.code(call["error"], language="text")
+        with st.expander("Narrative (supervisor's final response)", expanded=False):
+            st.markdown(am.get("final_response") or "_(no final response)_")
+
+        st.caption(f"run `{am.get('run_id')}` · {am.get('fleet_shape')} · "
+                   f"stop={am.get('stop_reason')} · turns={am.get('turn_count')} · "
+                   f"{am.get('elapsed_seconds')}s · model `{am.get('model')}`")
 
 # --- Improvements: the backlog + on-demand routing + human-gated activation --
 
@@ -176,7 +183,8 @@ with improvements:
 
     recs = backlog.load()
     if not recs:
-        st.info("No proposals yet. Run **Review fleet** on the Flow tab to raise one.")
+        st.info("No proposals yet. Run **Review fleet** on the Dashboard to "
+                "raise one.")
 
     # Route all un-routed
     unrouted = [r for r in recs if r["state"] == "raised"]
@@ -298,3 +306,59 @@ with rules_tab:
         st.caption("Activate these on the Improvements tab.")
     else:
         st.caption("No proposed rules pending activation.")
+
+# --- Fleet & run details: raw snapshot + counters + last run's evidence ----
+
+with fleet:
+    st.subheader("Fleet & run details")
+    st.caption("The raw machine state the supervisor sees, and the evidence "
+               "from the last run. Technical.")
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Workers", snapshot["worker_count"])
+    c2.metric("Pending exceptions", len(snapshot["pending_exceptions"]))
+    c3.metric("Scopes", len(snapshot.get("scopes", [])))
+
+    with st.expander("Snapshot JSON (what the supervisor sees)", expanded=False):
+        st.json(snapshot)
+
+    session = st.session_state.get("last_session")
+    if session is not None:
+        st.markdown("---")
+        st.markdown(f"**Last run** `{session.get('run_id')}`")
+        st.caption(
+            f"stop={session.get('stop_reason')} · "
+            f"turns={session.get('turn_count')} · "
+            f"python used={session.get('python_used')} "
+            f"({session.get('python_call_count')} call(s)) · "
+            f"{session.get('elapsed_seconds')}s · "
+            f"model `{session.get('model')}`")
+        if session.get("budget_events"):
+            st.warning(f"{len(session['budget_events'])} budget event(s)")
+
+        raised = session.get("raised_proposals") or []
+        if raised:
+            st.markdown(f"**Proposals raised this run ({len(raised)}):**")
+            for rp in raised:
+                st.markdown(f"- `{rp['id']}` — {rp.get('text', '')}"
+                            + (f" _(evidence: {rp.get('evidence')})_"
+                               if rp.get("evidence") else ""))
+
+        with st.expander("Evidence / analysis used", expanded=False):
+            for turn in session.get("turns", []):
+                st.markdown(f"**Turn {turn['turn'] + 1}**"
+                            + (" · final answer" if turn.get("ended_run") else ""))
+                with st.expander("assistant text", expanded=False):
+                    st.text(turn["assistant"])
+                for i, call in enumerate(turn.get("python_calls", []), 1):
+                    st.markdown(f"Python call {i} — "
+                                f"{'ok' if call['ok'] else 'error'}"
+                                + (" (refused)" if call.get("refused") else ""))
+                    st.code(call["code"], language="python")
+                    if call.get("stdout"):
+                        st.code(call["stdout"], language="text")
+                    if call.get("error"):
+                        st.code(call["error"], language="text")
+    else:
+        st.caption("No run in this session yet. Run **Review fleet** on the "
+                   "Dashboard to populate per-run evidence here.")

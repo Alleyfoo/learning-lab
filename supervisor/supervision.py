@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 import secrets
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -35,15 +36,25 @@ import memory    # noqa: E402  (load_knowledge/preferences/methods)
 import rulebook  # noqa: E402  (load_rules)
 import snapshot as snap_mod  # noqa: E402  (hash_snapshot)
 
+import assessment  # noqa: E402  (the file_assessment tool + current assessment)
 import backlog  # noqa: E402  (the raise_proposal tool + the backlog)
 
 RUNS_DIR = HERE / "runs"
 
-# The v0 operator prompt: the S1 broad question, extended to tell the supervisor
-# it has `raise_proposal(text, evidence)` to file each distinct improvement.
+# The v0.1 operator prompt: the S1 broad question, extended to tell the supervisor
+# to file a structured current assessment (findings/priorities/normal-context) and
+# to raise each distinct improvement worth raising.
 PROMPT = """\
 You are supervising this fleet. Inspect the available system state using the \
 analysis tool, and tell the operator anything you consider worth their attention.
+
+When you have finished inspecting, file your current assessment by calling \
+`file_assessment(findings, priorities, normal_context)` in a ```python block: \
+`findings` is a list of short strings, each a thing you noticed worth the \
+operator's attention (observations, not actions); `priorities` is a list of \
+short strings, ordered most-important first -- what the operator should care \
+about most; `normal_context` is a short string framing what is healthy / needs no \
+action right now (if everything is fine, say so plainly).
 
 You may also raise improvements you think the system itself should consider. To \
 raise an improvement, call `raise_proposal(text, evidence)` in a ```python block, \
@@ -110,8 +121,14 @@ def review(snapshot: dict, *,
     run_id = _new_run_id(snapshot_hash)
     fleet_shape = _fleet_shape(snapshot)
 
+    # the supervisor files its current assessment via file_assessment (injected
+    # into the same bench namespace as raise_proposal). `filed` stays {} if the
+    # model never calls it -> the assessment degrades gracefully (filed=None).
+    filed: dict = {}
+    fa = assessment.file_assessment_callable(filed)
     tool = backlog.raise_proposal_tool(run_id, snapshot_hash, fleet_shape,
-                                       bench_timeout=bench_timeout)
+                                       bench_timeout=bench_timeout,
+                                       extra_inject={"file_assessment": fa})
     h = harness.SupervisorHarness(
         tools=[tool],
         contexts=[harness.FleetContext(snapshot),
@@ -119,7 +136,9 @@ def review(snapshot: dict, *,
                   harness.MemoryContext(knowledge, preferences, methods)],
         model=model, endpoint=endpoint, options=opts,
         request_timeout=request_timeout, bench_timeout=bench_timeout)
+    t0 = time.perf_counter()
     session = h.run(PROMPT, max_turns=max_turns)
+    elapsed = round(time.perf_counter() - t0, 1)
 
     # persist the session
     run_dir = RUNS_DIR / run_id
@@ -128,10 +147,18 @@ def review(snapshot: dict, *,
 
     # the proposals raised in this run (from the backlog, by source_run)
     raised = [r for r in backlog.load() if r.get("source_run") == run_id]
+
+    # compose + persist the human-facing current assessment (the Dashboard read)
+    assessment_doc = assessment.compose(session, run_id, snapshot_hash, fleet_shape,
+                                        filed or None, raised, elapsed)
+    assessment.save_current(assessment_doc)
+    assessment.save(assessment_doc, run_dir / "assessment.json")
+
     session["run_id"] = run_id
     session["snapshot_hash"] = snapshot_hash
     session["fleet_shape"] = fleet_shape
     session["raised_proposals"] = raised
+    session["assessment"] = assessment_doc
     return session
 
 
@@ -149,6 +176,8 @@ def _self_test() -> int:
     tmp = Path(tempfile.mkdtemp())
     global_backlog = backlog.BACKLOG_FILE
     backlog.BACKLOG_FILE = tmp / "backlog.jsonl"
+    global_assessment = assessment.ASSESSMENT_FILE
+    assessment.ASSESSMENT_FILE = tmp / "current_assessment.json"
     global_runs = RUNS_DIR
     runs_dir = tmp / "runs"
     try:
@@ -175,10 +204,14 @@ def _self_test() -> int:
         def stub_chat(messages, *, model, endpoint, options, timeout):
             calls["n"] += 1
             if calls["n"] == 1:
-                return ('I see a failed run. Raising an improvement.\n\n'
-                        '```python\nraise_proposal("Track per-worker failure rate over time.", '
+                return ('I see a failed run. Filing my assessment and raising an improvement.\n\n'
+                        '```python\n'
+                        'file_assessment(["worker a failed its run"], '
+                        '["investigate worker a"], "nothing else needs action")\n'
+                        'raise_proposal("Track per-worker failure rate over time.", '
                         '"worker a has a failed run with effect_applied=False")\n```')
-            return "One failed run worth your attention; I raised one improvement."
+            return ("One failed run worth your attention; I filed an assessment "
+                    "and raised one improvement.")
 
         orig = core._chat
         core._chat = stub_chat
@@ -210,6 +243,27 @@ def _self_test() -> int:
               and lines[0]["source_run"] == session["run_id"],
               "the raise line is in the backlog with the run_id")
 
+        # the assessment was composed from the filed fields + the raised proposal
+        am = session.get("assessment")
+        check(am is not None and am["schema"] == "supervisor.assessment/v1",
+              f"the run produced an assessment: {am}")
+        check(am["filed"]["findings"] == ["worker a failed its run"]
+              and am["filed"]["normal_context"] == "nothing else needs action",
+              f"the assessment carries the filed findings + normal_context: {am['filed']}")
+        check(len(am["suggestions"]) == 1
+              and am["suggestions"][0]["id"] == rp["id"]
+              and am["suggestions"][0]["text"] == rp["text"],
+              "the assessment's suggestions are the run's raised proposals")
+        check(am["final_response"].startswith("One failed run"),
+              "the assessment carries the final-response narrative")
+        # the assessment is persisted (current + per-run)
+        check(assessment.ASSESSMENT_FILE.is_file(),
+              "the current assessment was written to current_assessment.json")
+        check((runs_dir / session["run_id"] / "assessment.json").is_file(),
+              "the assessment was persisted to runs/<run_id>/assessment.json")
+        check(assessment.load_current()["run_id"] == session["run_id"],
+              "load_current reads the assessment just written")
+
         # the harness session shape is intact (reconstructability field present)
         check(session["schema"] == "supervisor.harness.session/v1",
               f"harness session schema intact: {session['schema']}")
@@ -217,6 +271,7 @@ def _self_test() -> int:
               "harness session carries reconstructability + turns")
     finally:
         backlog.BACKLOG_FILE = global_backlog
+        assessment.ASSESSMENT_FILE = global_assessment
         RUNS_DIR = global_runs
         import shutil
         shutil.rmtree(tmp, ignore_errors=True)
@@ -225,10 +280,12 @@ def _self_test() -> int:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
         return 1
     print("SELF-TEST PASSED (review runs through the SupervisorHarness with the "
-          "raise_proposal tool / a stub model raises one proposal with provenance "
-          "/ the session ends on final prose / the run is saved to runs/<run_id>/ "
-          "/ the raise line lands in the backlog with the run_id / the harness "
-          "session shape is intact)")
+          "raise_proposal + file_assessment tools / a stub model files an assessment "
+          "and raises one proposal with provenance / the session ends on final prose "
+          "/ the run is saved to runs/<run_id>/ / the raise line lands in the backlog "
+          "with the run_id / the assessment is composed from the filed fields + the "
+          "raised proposal as a suggestion + persisted to current_assessment.json and "
+          "runs/<run_id>/assessment.json / the harness session shape is intact)")
     return 0
 
 
