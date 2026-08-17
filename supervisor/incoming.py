@@ -178,6 +178,9 @@ def scan(workers: list, data_root: Path) -> dict:
     data_library: list[dict] = []
     if data_root.is_dir():
         for d in sorted(p for p in data_root.iterdir() if p.is_dir()):
+            if d.name.startswith("_"):
+                continue       # generated working representation (e.g. data/_derived/)
+                             # is NOT incoming evidence; never show it as a data dir
             files = [_file_entry(p) for p in sorted(d.iterdir()) if p.is_file()]
             data_library.append({
                 "dir": d.name,
@@ -257,6 +260,13 @@ def _self_test() -> int:
         (data_root / "has-model" / "established_model.json").write_text("{}", encoding="utf-8")
         (data_root / "has-model" / "data.json").write_text("[]", encoding="utf-8")
 
+        # _derived/: a generated working-representation dir (v0.4 materialization
+        # target). It must NOT appear as incoming data.
+        (data_root / "_derived").mkdir(parents=True)
+        (data_root / "_derived" / "acme-august").mkdir(parents=True)
+        (data_root / "_derived" / "acme-august" / "statement.json").write_text(
+            '{"statement": []}', encoding="utf-8")
+
         # --- build fake workers ---------------------------------------------
         # trig-worker: trigger points at linked-by-trigger/ (no inbox files)
         tw_dir = workers_root / "trig-worker"
@@ -310,6 +320,9 @@ def _self_test() -> int:
                             "has-model", "tied-fazerish", "tied-ambiguous"])
         check(dirs == expected,
               f"data_library lists all top-level data/ dirs sorted: {dirs}")
+        check("_derived" not in dirs,
+              f"a _-prefixed (generated) dir is excluded from incoming data: "
+              f"{dirs}")
 
         by_dir = {e["dir"]: e for e in lib}
 
@@ -377,6 +390,7 @@ def _self_test() -> int:
           "worker link via trigger containment AND filename cross-ref / "
           "xlsx sheets enumerated / unlinked dir -> worker None / "
           "has-model badges True with no worker link / "
+          "a _-prefixed generated dir (_derived) is excluded from incoming data / "
           "inboxes list only workers with files + carry stage + sheets / "
           "missing data_root -> empty data_library, no crash)")
     return 0

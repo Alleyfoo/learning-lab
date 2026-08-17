@@ -216,10 +216,13 @@ def _render_incoming_browser(scan_result: dict) -> None:
                     line += " &nbsp; sheets: " + ", ".join(f["sheets"])
                 st.markdown(line)
             # v0.3: a genuinely unmodelled dir (no worker link, no established
-            # model) is a candidate to define work on. xlsx-only dirs (has_model
-            # but no worker) are left as-is -- xlsx ingestion is a later slice.
+            # model) is a candidate to define work on. v0.4: an xlsx-only dir is
+            # also a candidate -- the Define-work panel discovers its sheets and
+            # materializes the operator-declared ones into _derived/ before the
+            # unchanged v0.3 modeller journey.
             has_json = any(f["kind"] == "json" for f in entry["files"])
-            if worker is None and not entry.get("has_model") and has_json:
+            has_xlsx = any(f["kind"] == "xlsx" for f in entry["files"])
+            if worker is None and not entry.get("has_model") and (has_json or has_xlsx):
                 if st.button("Define work", key=f"define_{entry['dir']}"):
                     st.session_state["define:dir"] = entry["dir"]
                     st.rerun()
@@ -308,13 +311,176 @@ def _render_system_map(workers: list, snap_by_name: dict, worker_by_name: dict) 
 
 _DEFINE_KEYS = ("define:dir", "define:goal", "define:task", "define:report",
                 "define:ingest", "define:model", "define:asked", "define:deferred",
-                "define:choice", "define:name", "define:customer")
+                "define:choice", "define:name", "define:customer",
+                "define:derived_rel", "define:origins")
 
 
 def _clear_define() -> None:
     """Drop every Define-work session_state key (cancel / new selection / after establish)."""
     for k in _DEFINE_KEYS:
         st.session_state.pop(k, None)
+    # discover-stage widget values live under their own per-sheet keys and are
+    # cleared on a fresh selection; validated results are transient.
+    for k in list(st.session_state):
+        if k.startswith("define:sel:") or k.startswith("define:coll:") \
+                or k.startswith("define:hdr:") or k.startswith("define:inspect:") \
+                or k == "define:validated":
+            st.session_state.pop(k, None)
+
+
+def _render_discover_stage(dir_name: str) -> None:
+    """v0.4 discover -> declare -> validate -> materialize.
+
+    The program discovers workbook structure (sheet names, row x col counts, a
+    preview of the first rows) with NO LLM. The OPERATOR declares which sheets
+    have business meaning, as which collection, and which row is the header -- the
+    program never decides that. The existing XLSX adapter validates each
+    declaration and REFUSES (before any model call) any sheet it cannot faithfully
+    convert (uncalculated formula, blank/duplicate header, empty/missing sheet).
+    Valid selections materialize into `data/_derived/<dir_name>/` (raw workbooks
+    untouched), the origin map + derived rel are stashed in session_state, and the
+    panel reruns and falls through to the unchanged v0.3 modeller journey.
+    """
+    st.markdown("#### Declare workbook sheets")
+    st.caption("The program discovers sheets and their shape; you declare which "
+               "have business meaning, as which collection, and which row is the "
+               "header. A sheet the adapter cannot faithfully read is refused here "
+               "-- before any model call.")
+    scan_entry = next((e for e in _incoming().get("data_library", [])
+                       if e["dir"] == dir_name), None)
+    if scan_entry is None:
+        st.warning(f"`{dir_name}/` is not in the incoming scan.")
+        return
+    xlsx_files = [f for f in scan_entry["files"] if f["kind"] == "xlsx"]
+    if not xlsx_files:
+        st.warning(f"`{dir_name}/` has no xlsx workbooks to declare.")
+        return
+
+    for f in xlsx_files:
+        wb_name = f["name"]
+        with st.expander(f"`{wb_name}` — sheets: {', '.join(f['sheets']) or 'none'}",
+                         expanded=False):
+            inspect_key = f"define:inspect:{wb_name}"
+            if st.button("Inspect", key=f"define_inspect_{wb_name}"):
+                st.session_state[inspect_key] = True
+                st.rerun()
+            if not st.session_state.get(inspect_key):
+                st.caption("Click Inspect to see each sheet's shape and first rows.")
+                continue
+            xlsx_path = DATA_ROOT / dir_name / wb_name
+            try:
+                sheets = define.discover_workbook(xlsx_path)
+            except Exception as e:  # noqa: BLE001
+                st.error(f"Could not read {wb_name}: {type(e).__name__}: {e}")
+                continue
+            for s in sheets:
+                st.markdown(f"**{s['name']}** — {s['rows']} row(s) × "
+                            f"{s['cols']} col(s)")
+                if s["preview"]:
+                    st.dataframe(s["preview"], use_container_width=True,
+                                 hide_index=False)
+                else:
+                    st.caption("(empty sheet)")
+                col_a, col_b, col_c = st.columns([1, 2, 1])
+                ck = f"define:sel:{wb_name}:{s['name']}"
+                with col_a:
+                    declare = st.checkbox(
+                        "declare", key=ck, value=st.session_state.get(ck, False),
+                        help="Materialize this sheet as a collection")
+                with col_b:
+                    coll_key = f"define:coll:{wb_name}:{s['name']}"
+                    if coll_key not in st.session_state:
+                        st.session_state[coll_key] = s["name"]
+                    st.text_input("collection name", key=coll_key,
+                                  disabled=not declare)
+                with col_c:
+                    hdr_key = f"define:hdr:{wb_name}:{s['name']}"
+                    if hdr_key not in st.session_state:
+                        st.session_state[hdr_key] = 1
+                    st.number_input("header row", min_value=1, step=1,
+                                    key=hdr_key, disabled=not declare)
+
+    # gather declarations across all inspected workbooks/sheets
+    declared: list[tuple] = []   # (wb_name, sheet, collection, header_row)
+    for f in xlsx_files:
+        wb_name = f["name"]
+        if not st.session_state.get(f"define:inspect:{wb_name}"):
+            continue
+        for s_name in f["sheets"]:
+            if st.session_state.get(f"define:sel:{wb_name}:{s_name}"):
+                coll = (st.session_state.get(f"define:coll:{wb_name}:{s_name}")
+                        or s_name).strip()
+                hdr = int(st.session_state.get(f"define:hdr:{wb_name}:{s_name}")
+                          or 1)
+                if coll:
+                    declared.append((wb_name, s_name, coll, hdr))
+
+    if not declared:
+        st.caption("No sheets declared yet. Inspect a workbook and tick 'declare' "
+                   "on the sheets that have business meaning.")
+        return
+
+    st.markdown("---")
+    if st.button("Validate selections", type="primary", key="define_validate"):
+        results = []
+        for wb_name, sheet, coll, hdr in declared:
+            ok, problems, headers, rows = define.validate_selection(
+                DATA_ROOT / dir_name / wb_name, sheet, hdr)
+            results.append((wb_name, sheet, coll, hdr, ok, problems, headers, rows))
+        st.session_state["define:validated"] = results
+        st.rerun()
+
+    results = st.session_state.get("define:validated") or []
+    if not results:
+        st.caption("Validate the selections before materializing.")
+        return
+
+    st.markdown("#### Validation")
+    valid: list[tuple] = []   # (wb_name, sheet, collection, header_row)
+    for wb_name, sheet, coll, hdr, ok, problems, headers, rows in results:
+        if ok:
+            st.success(f"`{wb_name}` · `{sheet}` → **{coll}** (header row {hdr}) — "
+                       f"{rows} row(s); columns: {', '.join(headers) or '—'}")
+            valid.append((wb_name, sheet, coll, hdr))
+        else:
+            st.error(f"`{wb_name}` · `{sheet}` → **{coll}** (header row {hdr}) — "
+                     f"REFUSED: {'; '.join(problems)}")
+            st.caption("This sheet is dropped from the materialize set; the others "
+                       "still proceed.")
+
+    if not valid:
+        st.warning("No valid selections to materialize. Adjust the declarations "
+                   "(e.g. the header row) and re-validate.")
+        return
+
+    st.markdown("#### Materialize")
+    st.caption(f"The selected sheets materialize into `data/_derived/{dir_name}/` "
+               f"as JSON collections; the raw workbooks stay untouched. The "
+               f"unchanged modeller journey then runs over the derived collections.")
+    if st.button("Materialize valid selections", type="primary",
+                 key="define_materialize"):
+        by_wb: dict[str, list] = {}
+        for wb_name, sheet, coll, hdr in valid:
+            by_wb.setdefault(wb_name, []).append((sheet, coll, hdr))
+        all_written: list = []
+        all_origins: dict = {}
+        try:
+            for wb_name, specs_raw in by_wb.items():
+                specs = [define.SheetSpec(s, c, h) for s, c, h in specs_raw]
+                written, origins = define.materialize_selections(
+                    DATA_ROOT / dir_name / wb_name, specs, dir_name)
+                all_written.extend(written)
+                all_origins.update(origins)
+        except Exception as e:  # noqa: BLE001
+            st.error(f"Materialize failed: {type(e).__name__}: {e}")
+            return
+        st.session_state["define:derived_rel"] = f"_derived/{dir_name}"
+        st.session_state["define:origins"] = all_origins
+        st.session_state.pop("define:validated", None)
+        st.session_state.pop("incoming", None)   # the raw dir's link will refresh
+        st.success(f"Materialized {len(all_written)} collection(s) into "
+                   f"`data/_derived/{dir_name}/`. Continuing to the modeller.")
+        st.rerun()
 
 
 def _render_define_panel(dir_name: str) -> None:
@@ -336,16 +502,32 @@ def _render_define_panel(dir_name: str) -> None:
         st.rerun()
     st.markdown("---")
 
-    ws = define.workspace_for(dir_name)
-    if ws is None:
-        st.warning("This directory is not reachable as a modeller workspace "
-                   "(no JSON collections found). xlsx ingestion is a future slice.")
-        return
+    # v0.4: a materialized dir resolves to the DERIVED workspace; an un-
+    # materialized dir resolves to the raw incoming dir. An xlsx-only dir (no
+    # JSON, or fewer than 2 collections) routes through the discover stage first
+    # -- discover -> declare -> validate (REFUSE before any LLM) -> materialize
+    # into _derived/ -> rerun -> fall through to the unchanged v0.3 journey below.
+    if st.session_state.get("define:derived_rel"):
+        ws = define.workspace_from_rel(st.session_state["define:derived_rel"])
+    else:
+        ws = define.workspace_for(dir_name)
 
-    chosen = define.chosen_sources(ws)
+    chosen = define.chosen_sources(ws) if ws is not None else []
+    if not st.session_state.get("define:derived_rel") and len(chosen) < 2:
+        scan_entry = next((e for e in _incoming().get("data_library", [])
+                           if e["dir"] == dir_name), None)
+        has_xlsx = bool(scan_entry and any(f["kind"] == "xlsx"
+                                           for f in scan_entry["files"]))
+        if has_xlsx:
+            _render_discover_stage(dir_name)
+        else:
+            st.warning("The modeller needs at least two JSON collections to relate; "
+                       "this directory has fewer, and no xlsx to declare.")
+        return
     if len(chosen) < 2:
-        st.warning(f"The modeller needs at least two JSON collections to relate; "
-                   f"this directory has {len(chosen)}. xlsx ingestion is a future slice.")
+        st.warning("The modeller needs at least two JSON collections to relate; "
+                   "the materialized workspace has fewer. Cancel and declare more "
+                   "sheets, or add JSON collections to the incoming dir.")
         return
 
     obs = define.observed(ws, chosen)
@@ -542,8 +724,21 @@ def _render_define_panel(dir_name: str) -> None:
             st.error("Give the worker a name.")
             return
         try:
-            w = define.establish_workspace(ws, name.strip(), goal.strip() or name.strip(),
-                                            task, model, customer=customer.strip() or None)
+            # v0.4: on the xlsx-derived path the model's sources point at
+            # _derived/*.json but carry no provenance yet -- attach the durable
+            # workbook/sheet/header_row origin (injected here, after propose and
+            # before establish) and establish with the RAW dir as trigger.
+            origins = st.session_state.get("define:origins")
+            est_model = define.attach_origin(model, origins) if origins else model
+            if origins:
+                w = define.establish_derived(
+                    st.session_state["define:dir"], ws, name.strip(),
+                    goal.strip() or name.strip(), task, est_model,
+                    customer=customer.strip() or None)
+            else:
+                w = define.establish_workspace(
+                    ws, name.strip(), goal.strip() or name.strip(), task, est_model,
+                    customer=customer.strip() or None)
         except Exception as e:  # noqa: BLE001
             st.error(f"Establish failed: {type(e).__name__}: {e}")
             return
@@ -586,7 +781,8 @@ st.sidebar.title("Supervisor")
 st.sidebar.caption("The LLM view of the fleet. Read-only EXCEPT for the one "
                    "explicit, human-gated write path: 'Establish worker' under "
                    "Define work. The LLM never writes; it only proposes. "
-                   "Workspace v0.3.")
+                   "Workspace v0.4 (declared XLSX materialization + durable "
+                   "source provenance).")
 st.sidebar.markdown("**Live fleet**")
 st.sidebar.caption("Map, Review, and the incoming browser all read the live "
                    "fleet (`fleet/workers` + `data/`).")

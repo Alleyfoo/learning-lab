@@ -36,6 +36,7 @@ shared one would touch `modeller/` and `fleet/`, out of scope for v0.3.
 """
 from __future__ import annotations
 
+import datetime as _dt
 import json
 import sys
 import urllib.request
@@ -52,10 +53,17 @@ LAB = HERE.parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(LAB / "modeller"))
 sys.path.insert(0, str(LAB / "fleet"))
+sys.path.insert(0, str(LAB / "adapters"))
 
 import fleet      # noqa: E402  (fleet/fleet.py: establish, load, load_all, ROOT)
 import pipeline   # noqa: E402  (modeller/pipeline.py: the staged journey)
 import incoming   # noqa: E402  (supervisor/incoming.py: scan -- self-test only)
+import xlsx as xlsx_adapter  # noqa: E402  (adapters/xlsx.py: the declared conversion)
+
+# Re-exported so the UI builds declarations through the glue, not by reaching
+# into the adapter module directly. A SheetSpec is a DECLARED sheet -> collection
+# + header_row mapping; the program never guesses one.
+SheetSpec = xlsx_adapter.SheetSpec
 
 MODEL = "glm-5.2:cloud"
 ENDPOINT = "http://localhost:11434/api/generate"
@@ -222,6 +230,16 @@ def render_model(model: dict, task: str) -> list[str]:
     srcs = model.get("sources") or {}
     lines.append("Read " + " and ".join(
         f"**{name}** (`{spec.get('collection')}`)" for name, spec in srcs.items()) + ".")
+    # v0.4: show the durable origin chain when present -- which workbook + sheet +
+    # header_row each converted source came from. Ordinary (non-converted) JSON
+    # sources carry no `origin` and show nothing (no fake provenance).
+    provenance = [(name, spec.get("origin")) for name, spec in srcs.items()
+                  if spec.get("origin")]
+    if provenance:
+        lines.append("**Origin** — where each executable source came from:")
+        for name, o in provenance:
+            lines.append(f"- **{name}** ← `{o.get('path')}` sheet `{o.get('sheet')}` "
+                         f"(header row {o.get('header_row')})")
     if task == "reconciliation":
         m = model.get("match_on") or {}
         lines.append(f"Match **{model.get('left')}**.`{m.get('left_field')}` against "
@@ -288,6 +306,190 @@ def establish_workspace(ws: pipeline.Workspace, name: str, purpose: str, task: s
     base = str(ws.base.relative_to(LAB))
     trigger = f"{base}/{ws.rel}/"
     return establish(name, purpose, task, base, model, trigger,
+                     customer=customer, root=root)
+
+
+# ===========================================================================
+# v0.4 -- declared XLSX materialization with durable source provenance.
+#
+# An unfamiliar workbook enters the product through an explicit, refusal-safe
+# declaration: discover its sheets (no LLM) -> the OPERATOR declares sheet +
+# collection + header_row (the program never decides which sheets have meaning)
+# -> the existing XLSX adapter validates + materializes the selected sheets into
+# a separate derived area (raw workbooks untouched; a sheet that cannot be
+# converted faithfully REFUSES before any LLM call) -> the materialized JSON
+# feeds the UNCHANGED v0.3 journey. Each established source binding carries an
+# `origin` (workbook + sheet + header_row) injected in the glue AFTER `propose`
+# and BEFORE `fleet.establish` (pipeline.define() overwrites `sources` from
+# source_spec, which knows only path/collection, so `origin` cannot ride through
+# propose; fleet.establish writes the model VERBATIM, so the injected `origin`
+# reaches disk). `path` says what the worker executes; `origin` says where that
+# executable representation came from. The executor never reads `origin`.
+#
+# No change to adapters/xlsx.py, modeller/**, taskmodel/**, or fleet/**.
+# ===========================================================================
+
+def discover_workbook(xlsx_path: Path) -> list[dict]:
+    """The structural shape of every sheet in a workbook (no LLM, no values
+    interpreted): one entry per sheet with its name, row x column counts, and a
+    preview of the first ~5 rows as raw lists.
+
+    This is the program's half of the authority boundary: it may DISCOVER
+    structure (sheet names, row/col counts, what the first rows look like) so the
+    operator can pick a `header_row`; it never decides which sheets have business
+    meaning. The preview uses the formula view (`data_only=False`) so a sheet of
+    uncalculated formulas shows its `=...` strings -- the operator can see, before
+    declaring, that a sheet will refuse.
+    """
+    import openpyxl
+    out: list[dict] = []
+    book = openpyxl.load_workbook(str(xlsx_path), read_only=True, data_only=False)
+    try:
+        for name in book.sheetnames:
+            sheet = book[name]
+            rows = list(sheet.iter_rows(values_only=True))
+            preview = [list(r) for r in rows[:5]]
+            out.append({
+                "name": name,
+                "rows": sheet.max_row or len(rows),
+                "cols": sheet.max_column or (len(rows[0]) if rows else 0),
+                "preview": preview,
+            })
+    finally:
+        book.close()
+    return out
+
+
+def validate_selection(xlsx_path: Path, sheet: str, header_row: int
+                       ) -> tuple[bool, list[str], list[str], int]:
+    """A trial conversion of one declared sheet, WITHOUT writing. Reuses the
+    (now-real) adapter refusals: `uncalculated_formula`, `blank_header`,
+    `duplicate_header`, `empty_sheet`, `missing_sheet`. This is the
+    "validate before LLM" step -- a refused selection returns `ok=False` with the
+    adapter's named problem, and the UI stops that selection before any model call.
+
+    Returns (ok, problems, headers, rows). `headers` are the column names the
+    adapter actually emitted (the named headers that produced data); `rows` is the
+    record count. The adapter is the single authority for ok/refusal.
+    """
+    spec = xlsx_adapter.SheetSpec(sheet, "_probe", header_row)
+    result = xlsx_adapter.convert(xlsx_path, [spec])
+    if not result.ok:
+        return False, list(result.problems), [], 0
+    items = result.collections.get("_probe", [])
+    headers = sorted(set().union(*[item.keys() for item in items])) if items else []
+    return True, [], headers, len(items)
+
+
+def materialize_selections(xlsx_path: Path, specs: list[xlsx_adapter.SheetSpec],
+                            raw_rel: str, data_root: Optional[Path] = None
+                            ) -> tuple[list[Path], dict]:
+    """Convert + write the declared sheets into `data/_derived/<raw_rel>/` (the
+    raw workbook dir stays pure). Also writes a ghost-source-safe
+    `materialization.json` manifest there: its top-level keys are all non-list, so
+    `pipeline.sources_in` finds no SourceFile in it (mirrors the
+    `data/xlsx-purchases/adapter.json` pattern). Returns the written JSON paths +
+    the collection -> `origin` map.
+
+    `data_root` defaults to the lab `data/` dir; overridable for the self-test so
+    it never pollutes the real data tree. `raw_rel` is the raw incoming dir name
+    (e.g. "acme-august"); the `origin.path` points back at the RAW workbook
+    (`<raw_rel>/<workbook>`), not the derived JSON.
+    """
+    conversion = xlsx_adapter.convert(xlsx_path, specs)
+    if not conversion.ok:
+        raise xlsx_adapter.UnreadableWorkbook(conversion.problems)
+    base = data_root or (LAB / "data")
+    derived_dir = base / "_derived" / raw_rel
+    written = xlsx_adapter.write_collections(
+        conversion, derived_dir,
+        note=f"materialized from {xlsx_path.name} by supervisor/define.py")
+
+    selections: dict[str, dict] = {}
+    origins: dict[str, dict] = {}
+    for spec, (collection, items) in zip(specs, conversion.collections.items()):
+        selections[collection] = {"workbook": xlsx_path.name,
+                                  "sheet": spec.sheet,
+                                  "header_row": spec.header_row,
+                                  "rows": len(items)}
+        origins[collection] = {
+            "kind": "xlsx",
+            "path": f"{raw_rel}/{xlsx_path.name}",
+            "sheet": spec.sheet,
+            "header_row": spec.header_row,
+        }
+    # Merge with any prior manifest so multiple workbooks in the same incoming
+    # dir accumulate their selections into one derived dir. The manifest's only
+    # structural job is to be ghost-source-safe: every top-level key is non-list,
+    # so `pipeline.sources_in` finds no SourceFile in it.
+    manifest_path = derived_dir / "materialization.json"
+    if manifest_path.is_file():
+        try:
+            prev = json.loads(manifest_path.read_text(encoding="utf-8"))
+            selections = {**(prev.get("selections") or {}), **selections}
+        except Exception:
+            pass
+    manifest = {
+        "_note": "derived working representation; not a source collection",
+        "created_at": _dt.datetime.now().isoformat(timespec="seconds"),
+        "selections": selections,
+    }
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return written, origins
+
+
+def workspace_from_rel(rel: str, data_root: Optional[Path] = None) -> pipeline.Workspace:
+    """A modeller Workspace for an explicit `data/<rel>/` (default base = the lab
+    `data/` dir). The derived workspace (`rel = "_derived/<raw_rel>"`) is NOT
+    produced by `pipeline.workspaces()` (one-level glob, no nesting), so it never
+    appears as a ghost in the supervisor; the glue constructs it explicitly here.
+    `sources_in` then resolves `data/_derived/<raw_rel>/*.json` correctly.
+    """
+    base = data_root or (LAB / "data")
+    return pipeline.Workspace(label=rel, base=base, rel=rel)
+
+
+def attach_origin(model: dict, origins: dict[str, dict]) -> dict:
+    """Stamp each established source binding with its durable `origin` (workbook +
+    sheet + header_row). Injected in the glue AFTER `propose` (which overwrites
+    `sources` from source_spec, path/collection only) and BEFORE `fleet.establish`
+    (which writes the model verbatim, so `origin` reaches `versions/v1.json`).
+    The executor never reads `origin`; only the on-disk model + the map do.
+
+    Match is by the source binding key (= the collection name). A source with no
+    entry in `origins` (an ordinary JSON source, not converted) is left untouched
+    -- no fake provenance. Returns a shallow-copied model; the caller's dict is
+    not mutated.
+    """
+    out = dict(model)
+    srcs = dict(out.get("sources") or {})
+    for name, spec in srcs.items():
+        if name in origins:
+            spec = dict(spec)
+            spec["origin"] = origins[name]
+            srcs[name] = spec
+    out["sources"] = srcs
+    return out
+
+
+def establish_derived(raw_rel: str, derived_ws: pipeline.Workspace, name: str,
+                      purpose: str, task: str, model: dict,
+                      customer: Optional[str] = None, root: Optional[Path] = None):
+    """Establish a worker whose executable sources live in `_derived/` but whose
+    `trigger` points at the RAW incoming dir `data/<raw_rel>/`.
+
+    The semantic split the user froze: `path` (in the model's sources, built by
+    `source_spec` on the derived workspace) says what the worker executes
+    (`_derived/<raw_rel>/*.json`); `trigger` says where the operational thing that
+    arrives lives (the raw workbook dir), so `incoming._link_worker` links the raw
+    incoming dir to the worker -- not the derived working representation. This
+    fixes the current xlsx-purchases -> june-purchases amnesia rather than
+    institutionalizing it. `base = "data"` so `load_collection` resolves
+    `data/_derived/<raw_rel>/*.json`.
+    """
+    return establish(name, purpose, task, "data", model,
+                     trigger=f"data/{raw_rel}/",
                      customer=customer, root=root)
 
 
@@ -421,6 +623,113 @@ def _self_test() -> int:
               f"the data dir links STRUCTURALLY to the new worker via trigger: "
               f"{kesko['worker'] if kesko else None}")
 
+    # --- 6. v0.4 xlsx spine: discover / validate-refuses / materialize /
+    #         derived-workspace-resolves / attach_origin / establish_derived -----
+    # All in a TEMP data tree (data_root override) so the real data/ dir is never
+    # touched. The LLM stages (interpret/propose) and the real incoming.scan
+    # linkage of the raw dir are proven by the real acceptance run, not here;
+    # this proves the deterministic spine and the provenance semantic split.
+    with tempfile.TemporaryDirectory() as tmp:
+        from openpyxl import Workbook
+        data_root = Path(tmp) / "data"
+        raw_rel = "selftest-xlsx"
+        raw_dir = data_root / raw_rel
+        raw_dir.mkdir(parents=True)
+        xlsx_path = raw_dir / "book.xlsx"
+
+        book = Workbook()
+        clean = book.active
+        clean.title = "Statement"
+        clean.append(["Acme Oy -- supplier statement"])   # row 1 (title)
+        clean.append([None])                                # row 2 (blank)
+        clean.append(["Invoice", "Amount"])                # row 3 (header)
+        clean.append(["PI-100", "119.94"])
+        clean.append(["PI-101", "40"])
+        broken = book.create_sheet("Broken formulas")
+        broken.append(["Invoice", "Amount"])               # row 1 (header)
+        broken.append(["PI-200", "=A2*2"])                 # uncalculated formula
+        book.save(str(xlsx_path))
+        book.close()
+
+        # (1) discover_workbook lists both sheets with row/col counts + preview
+        sheets = discover_workbook(xlsx_path)
+        names = [s["name"] for s in sheets]
+        check(names == ["Statement", "Broken formulas"],
+              f"discover_workbook lists both sheets: {names}")
+        stmt = next(s for s in sheets if s["name"] == "Statement")
+        check(stmt["rows"] == 5 and stmt["cols"] == 2,
+              f"Statement shape 5x2: rows={stmt['rows']} cols={stmt['cols']}")
+        check(any("Invoice" in str(stmt["preview"]) for _ in [0]),
+              "Statement preview carries the header row")
+
+        # (2) validate_selection: clean sheet ok; formula sheet REFUSES
+        ok, problems, headers, rows = validate_selection(xlsx_path, "Statement", 3)
+        check(ok, f"clean sheet validates (header_row 3): {problems}")
+        check("Invoice" in headers and "Amount" in headers,
+              f"clean sheet emits the named headers: {headers}")
+        check(rows == 2, f"clean sheet emits 2 data rows: {rows}")
+        ok2, problems2, _, _ = validate_selection(xlsx_path, "Broken formulas", 1)
+        check(not ok2, f"formula sheet must REFUSE (was ok={ok2}): {problems2}")
+        check(any("uncalculated_formula" in p for p in problems2),
+              f"refusal is named uncalculated_formula: {problems2}")
+
+        # (3) materialize the clean sheet into _derived/<raw_rel>/ + manifest
+        clean_spec = xlsx_adapter.SheetSpec("Statement", "statement", 3)
+        written, origins = materialize_selections(
+            xlsx_path, [clean_spec], raw_rel, data_root=data_root)
+        check(len(written) == 1 and written[0].name == "statement.json",
+              f"one derived JSON per clean collection: {written}")
+        check((data_root / "_derived" / raw_rel / "materialization.json").is_file(),
+              "ghost-safe materialization.json manifest written")
+        # the derived workspace resolves and chosen_sources sees ONLY the clean
+        # collection (no ghost SourceFile from the manifest)
+        derived_ws = workspace_from_rel(f"_derived/{raw_rel}", data_root=data_root)
+        derived_chosen = chosen_sources(derived_ws)
+        check([c.collection for c in derived_chosen] == ["statement"],
+              f"derived workspace has exactly the clean collection, no manifest "
+              f"ghost: {[c.collection for c in derived_chosen]}")
+
+        # (4) attach_origin stamps origin on the matching source, leaves others
+        canned = {
+            "task": "reconciliation",
+            "sources": {
+                "statement": {"path": f"_derived/{raw_rel}/statement.json",
+                               "collection": "statement"},
+                "ledger": {"path": "selftest-xlsx/ledger.json",
+                           "collection": "ledger"},   # ordinary JSON, no origin
+            },
+        }
+        stamped = attach_origin(canned, origins)
+        check(stamped["sources"]["statement"]["origin"]["sheet"] == "Statement"
+              and stamped["sources"]["statement"]["origin"]["header_row"] == 3
+              and stamped["sources"]["statement"]["origin"]["path"]
+              == f"{raw_rel}/book.xlsx",
+              f"attach_origin stamps the exact workbook/sheet/header_row origin: "
+              f"{stamped['sources']['statement'].get('origin')}")
+        check("origin" not in stamped["sources"]["ledger"],
+              "an ordinary (non-converted) source gets no fake provenance")
+        check("origin" not in canned["sources"]["statement"],
+              "attach_origin does not mutate the caller's model")
+
+        # (5) establish_derived: trigger points at the RAW dir (not _derived),
+        #     and the injected origin survives verbatim to versions/v1.json
+        fleet_root = Path(tmp) / "fleet"
+        w = establish_derived(raw_rel, derived_ws, "selftest-xlsx-recon",
+                              "Reconcile the supplier statement.", "reconciliation",
+                              stamped, customer="acme", root=fleet_root)
+        check(w.trigger == f"data/{raw_rel}/",
+              f"trigger points at the RAW dir, not _derived: {w.trigger}")
+        stored = json.loads((w.directory / "versions" / "v1.json")
+                            .read_text(encoding="utf-8"))
+        stmt_path = stored["sources"]["statement"]["path"]
+        check(stmt_path == f"_derived/{raw_rel}/statement.json",
+              f"the executable source path points at the derived JSON: {stmt_path}")
+        check(stored["sources"]["statement"]["origin"]["sheet"] == "Statement"
+              and stored["sources"]["statement"]["origin"]["path"]
+              == f"{raw_rel}/book.xlsx",
+              f"the exact XLSX origin survives verbatim to v1.json: "
+              f"{stored['sources']['statement'].get('origin')}")
+
     if failures:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
         return 1
@@ -428,8 +737,15 @@ def _self_test() -> int:
           "reconciliation expressible / canned model previews ok with all four "
           "relations / render_model / build_answer join + free-text / establish "
           "writes exactly 3 files + customer / trigger links the data dir "
-          "structurally). LLM stages (interpret/propose) are proven by the real "
-          "acceptance run, not here.")
+          "structurally / v0.4 xlsx spine: discover lists sheets+shape / "
+          "validate REFUSES an uncalculated formula by name / materialize writes "
+          "derived JSON + ghost-safe manifest and the derived workspace sees only "
+          "the clean collection / attach_origin stamps exact workbook+sheet+"
+          "header_row provenance and leaves ordinary sources alone / "
+          "establish_derived trigger points at the RAW dir while the source path "
+          "points at _derived and the origin survives verbatim to v1.json). "
+          "LLM stages (interpret/propose) + the real incoming.scan linkage of the "
+          "raw dir are proven by the real acceptance run, not here.")
     return 0
 
 
