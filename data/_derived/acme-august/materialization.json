@@ -1,0 +1,18 @@
+{
+  "_note": "derived working representation; not a source collection",
+  "created_at": "2026-08-17T22:34:31",
+  "selections": {
+    "statement": {
+      "workbook": "supplier.xlsx",
+      "sheet": "Statement",
+      "header_row": 3,
+      "rows": 4
+    },
+    "transactions": {
+      "workbook": "ledger.xlsx",
+      "sheet": "Transactions",
+      "header_row": 2,
+      "rows": 4
+    }
+  }
+}

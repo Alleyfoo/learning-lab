@@ -1,0 +1,25 @@
+{
+  "_note": "materialized from ledger.xlsx by supervisor/define.py",
+  "transactions": [
+    {
+      "Invoice": "PI-100",
+      "Date": "2026-08-02",
+      "Amount": "119.94"
+    },
+    {
+      "Invoice": "PI-101",
+      "Date": "2026-08-04",
+      "Amount": "110.94"
+    },
+    {
+      "Invoice": "PI-103",
+      "Date": "2026-08-08",
+      "Amount": "88.5"
+    },
+    {
+      "Invoice": "PI-104",
+      "Date": "2026-08-09",
+      "Amount": "60"
+    }
+  ]
+}

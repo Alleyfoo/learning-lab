@@ -1,0 +1,25 @@
+{
+  "_note": "materialized from supplier.xlsx by supervisor/define.py",
+  "statement": [
+    {
+      "Invoice": "PI-100",
+      "Date": "2026-08-01",
+      "Amount": "119.94"
+    },
+    {
+      "Invoice": "PI-101",
+      "Date": "2026-08-03",
+      "Amount": "40"
+    },
+    {
+      "Invoice": "PI-102",
+      "Date": "2026-08-05",
+      "Amount": "250"
+    },
+    {
+      "Invoice": "PI-103",
+      "Date": "2026-08-07",
+      "Amount": "88.5"
+    }
+  ]
+}

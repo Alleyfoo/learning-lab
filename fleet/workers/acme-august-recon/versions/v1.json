@@ -1,0 +1,47 @@
+{
+  "model_version": 1,
+  "model_id": "acme-august-invoice-amount-reconciliation",
+  "task": "reconciliation",
+  "sources": {
+    "statement": {
+      "path": "_derived/acme-august/statement.json",
+      "collection": "statement",
+      "origin": {
+        "kind": "xlsx",
+        "path": "acme-august/supplier.xlsx",
+        "sheet": "Statement",
+        "header_row": 3
+      }
+    },
+    "transactions": {
+      "path": "_derived/acme-august/transactions.json",
+      "collection": "transactions",
+      "origin": {
+        "kind": "xlsx",
+        "path": "acme-august/ledger.xlsx",
+        "sheet": "Transactions",
+        "header_row": 2
+      }
+    }
+  },
+  "left": "statement",
+  "right": "transactions",
+  "match_on": {
+    "left_field": "Invoice",
+    "right_field": "Invoice"
+  },
+  "compare": [
+    {
+      "field": "Amount",
+      "comparison": "exact"
+    }
+  ],
+  "classify": {
+    "both_same": "both_same",
+    "both_different": "both_different",
+    "only_left": "only_left",
+    "only_right": "only_right"
+  },
+  "output_order": "left_then_right",
+  "on_duplicate_key": "refuse_run"
+}

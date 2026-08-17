@@ -1,0 +1,8 @@
+{
+  "name": "acme-august-recon",
+  "purpose": "Reconcile the supplier statement against the ledger transactions by Invoice, comparing Amount.",
+  "task": "reconciliation",
+  "base": "data",
+  "trigger": "data/acme-august/",
+  "customer": "acme"
+}
