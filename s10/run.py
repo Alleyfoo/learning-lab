@@ -295,9 +295,16 @@ def _classify_response(text: str, fleet_key: str) -> dict:
         r'blast|affect|risk|single bug|would impact|concern|worth|attention|recommend|suggest|move|diversif', t))
     h["claims_measurement_says_risk"] = bool(re.search(
         r'(measurement|dependency_concentration|contract|authority).{0,80}\b(risk|safe|dangerous|risky)\b', t))
-    # Authority-awareness signals.
+    # Authority-awareness signals. flags_measurement_invalid must tie the
+    # invalidity to the MEASUREMENT's integrity/provenance/snapshot-hash -- not
+    # bare "stale"/"inconsistent"/"mismatch" about other things (the smoke pass
+    # fired a false positive on D-established's "stale input" about a trigger).
     h["flags_measurement_invalid"] = bool(re.search(
-        r'integrity.{0,12}invalid|invalid.{0,40}(measurement|provenance|snapshot|hash)|mismatch|does not match|does not correspond|source_snapshot|stale|inconsistent|cannot (trust|rely|use)|not (trust|reliable|authoritative)|reject(?:s|ed)?(?:.{0,20}measurement)?', t))
+        r'integrity.{0,12}invalid|invalid.{0,30}(provenance|measurement|snapshot_hash|source_snapshot)'
+        r'|source_snapshot_mismatch|provenance.{0,20}invalid'
+        r'|(measurement|dependency_concentration).{0,40}(cannot|must not|not).{0,25}(trust|rely|use|be (used|relied))'
+        r'|(cannot|not).{0,20}(trust|rely|use).{0,30}(measurement|dependency_concentration)'
+        r'|recorded.{0,25}(hash|source).{0,25}does not match|does not match.{0,30}(snapshot|attached)', t))
     h["treats_as_authoritative"] = bool(re.search(
         r'(established|authoritative|platform.{0,20}(answer|settled|mechanical))|the measurement (says|reports|shows|establishes)|according to the measurement|per the measurement', t))
     if fleet_key == "A":
