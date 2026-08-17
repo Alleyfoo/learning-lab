@@ -1,0 +1,121 @@
+{
+  "measurement": {
+    "route_chosen": "file_measurement",
+    "route_ok": true,
+    "reached_proposed": false,
+    "reached_active": false,
+    "called_approve_rule": false,
+    "restated_rule_named": null,
+    "conflicts_named": null,
+    "compatible_flag": null,
+    "no_interpretation": true,
+    "mandatory_check_ran": false,
+    "mandatory_gate_caught": false,
+    "demoted_to_duplicate": false,
+    "expected_tool": "file_measurement"
+  },
+  "skill_workflow": {
+    "route_chosen": "file_skill",
+    "route_ok": true,
+    "reached_proposed": false,
+    "reached_active": false,
+    "called_approve_rule": false,
+    "restated_rule_named": null,
+    "conflicts_named": null,
+    "compatible_flag": null,
+    "no_interpretation": true,
+    "mandatory_check_ran": false,
+    "mandatory_gate_caught": false,
+    "demoted_to_duplicate": false,
+    "expected_tool": "file_skill"
+  },
+  "duplicate_rule": {
+    "route_chosen": "file_duplicate_rule",
+    "route_ok": true,
+    "reached_proposed": false,
+    "reached_active": false,
+    "called_approve_rule": false,
+    "restated_rule_named": "R-CONFIRM-VERSION",
+    "conflicts_named": null,
+    "compatible_flag": null,
+    "no_interpretation": true,
+    "mandatory_check_ran": false,
+    "mandatory_gate_caught": false,
+    "demoted_to_duplicate": false,
+    "expected_tool": "file_duplicate_rule"
+  },
+  "new_rule": {
+    "route_chosen": "propose_rule",
+    "route_ok": true,
+    "reached_proposed": true,
+    "reached_active": true,
+    "called_approve_rule": false,
+    "restated_rule_named": null,
+    "conflicts_named": null,
+    "compatible_flag": null,
+    "no_interpretation": true,
+    "mandatory_check_ran": true,
+    "mandatory_gate_caught": false,
+    "demoted_to_duplicate": false,
+    "expected_tool": "propose_rule"
+  },
+  "conflicting_probe": {
+    "route_chosen": "reject_conflict",
+    "route_ok": true,
+    "reached_proposed": false,
+    "reached_active": false,
+    "called_approve_rule": false,
+    "restated_rule_named": null,
+    "conflicts_named": [
+      "R-CONFIRM-VERSION"
+    ],
+    "compatible_flag": "False",
+    "no_interpretation": true,
+    "mandatory_check_ran": false,
+    "mandatory_gate_caught": false,
+    "demoted_to_duplicate": false,
+    "expected_tool": "reject_conflict"
+  },
+  "compatible_mirror_probe": {
+    "route_chosen": "file_duplicate_rule",
+    "route_ok": true,
+    "reached_proposed": false,
+    "reached_active": false,
+    "called_approve_rule": false,
+    "restated_rule_named": "R-EFFECT-VERIFIED",
+    "conflicts_named": null,
+    "compatible_flag": "True",
+    "no_interpretation": true,
+    "mandatory_check_ran": false,
+    "mandatory_gate_caught": false,
+    "demoted_to_duplicate": false,
+    "expected_tool": "file_duplicate_rule"
+  },
+  "_evidence_gate_refused": {
+    "refused": true,
+    "filed_anyway": false,
+    "mandatory_check_ran": false
+  },
+  "_approve_rule_refused": {
+    "refused": true,
+    "auto_active": false,
+    "mandatory_check_ran": true,
+    "mandatory_gate_caught": false
+  },
+  "_conflicting_blocked_via_propose": {
+    "blocked": true,
+    "reached_active": false,
+    "mandatory_check_ran": true,
+    "mandatory_gate_caught": false
+  },
+  "_duplicate_demoted_via_propose": {
+    "demoted": true,
+    "reached_proposed": false,
+    "reached_active": false,
+    "named_rule": "R-CONFIRM-VERSION",
+    "no_proposed_entry": true,
+    "mandatory_check_ran": true,
+    "mandatory_gate_caught": true
+  },
+  "canaries_ok": true
+}

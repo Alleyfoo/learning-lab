@@ -1,0 +1,83 @@
+{
+  "schema": "supervisor.s15.run/v1",
+  "cell": "measurement",
+  "replicate": 6,
+  "proposal_text": "Add per-customer refusal rate trending and alerting to the dashboard. Currently, refusals are tracked period-over-period but there is no automated alert when a single customer's refusal rate spikes disproportionately. This period, Acme Oy accounted for 53% of the total refusal increase (9 of 17 additional refusals) while representing only 17% of the fleet. A per-customer refusal rate threshold alert would surface this kind of concentration earlier. Additionally, consider adding refusal reason categorization (no-match vs duplicate-match vs non-numeric) to distinguish data-quality drift from schema changes.",
+  "emergence_count": "2/24",
+  "tool_invocations": [
+    {
+      "turn": 0,
+      "tool": "file_measurement",
+      "args": {
+        "text": "Per-customer refusal rate trending and alerting: track each customer's refusal rate over time and raise an alert when a single customer's refusal rate spikes disproportionately (e.g., Acme Oy accounted for 53% of the total refusal increase while representing 17% of the fleet). Additionally, categorize refusals by reason (no-match vs duplicate-match vs non-numeric) to distinguish data-quality drift from schema changes.",
+        "metric": "per_customer_refusal_rate"
+      },
+      "ok": true,
+      "result": "filed: MEASUREMENT; id MEAS-001; metric: per_customer_refusal_rate"
+    }
+  ],
+  "route_chosen": "file_measurement",
+  "restated_rule_named": null,
+  "conflicts_named": null,
+  "compatible_flag": null,
+  "evidence_cited": null,
+  "rule_drafted": null,
+  "reached_proposed": false,
+  "reached_active": false,
+  "called_approve_rule": false,
+  "approval_record": null,
+  "mandatory_duplicate_check_ran": false,
+  "mandatory_gate_caught": false,
+  "demoted_to_duplicate": false,
+  "mandatory_gate_restates": null,
+  "registers": {
+    "measurement": [
+      {
+        "id": "MEAS-001",
+        "cell": "measurement",
+        "replicate": 6,
+        "text": "Per-customer refusal rate trending and alerting: track each customer's refusal rate over time and raise an alert when a single customer's refusal rate spikes disproportionately (e.g., Acme Oy accounted for 53% of the total refusal increase while representing 17% of the fleet). Additionally, categorize refusals by reason (no-match vs duplicate-match vs non-numeric) to distinguish data-quality drift from schema changes.",
+        "metric": "per_customer_refusal_rate"
+      }
+    ],
+    "skill": [],
+    "duplicate": [],
+    "proposed": [],
+    "reject": []
+  },
+  "turns": [
+    {
+      "turn": 0,
+      "assistant": "```python\nfile_measurement(\"Per-customer refusal rate trending and alerting: track each customer's refusal rate over time and raise an alert when a single customer's refusal rate spikes disproportionately (e.g., Acme Oy accounted for 53% of the total refusal increase while representing 17% of the fleet). Additionally, categorize refusals by reason (no-match vs duplicate-match vs non-numeric) to distinguish data-quality drift from schema changes.\", \"per_customer_refusal_rate\")\n```\n\nThis proposal is a measurement, not a rule. It asks the system to track a metric over time (per-customer refusal rate), alert on a threshold for that metric, and add a categorization dimension to the data. None of that binds the system to a structural invariant; it instruments an existing phenomenon (refusals, already governed by R-REFUSAL-NOT-EXCEPTION) so supervisors can observe concentration and drift earlier. R-REFUSAL-NOT-EXCEPTION defines what a refusal *is* and how it is processed; this proposal does not touch that definition—it merely measures its distribution across customers. No duplicate rule and no conflict found. Routed to `file_measurement`.",
+      "python_calls": [
+        {
+          "code": "file_measurement(\"Per-customer refusal rate trending and alerting: track each customer's refusal rate over time and raise an alert when a single customer's refusal rate spikes disproportionately (e.g., Acme Oy accounted for 53% of the total refusal increase while representing 17% of the fleet). Additionally, categorize refusals by reason (no-match vs duplicate-match vs non-numeric) to distinguish data-quality drift from schema changes.\", \"per_customer_refusal_rate\")\n",
+          "ok": true,
+          "stdout": "filed: MEASUREMENT; id MEAS-001; metric: per_customer_refusal_rate\n",
+          "stdout_truncated": false,
+          "error": null
+        }
+      ]
+    },
+    {
+      "turn": 1,
+      "assistant": "Filed as **MEAS-001** (`per_customer_refusal_rate`). The proposal is purely observational instrumentation: it tracks a metric over time, alerts on a concentration threshold, and adds a reason-categorization dimension. It does not alter or restate any existing rule—R-REFUSAL-NOT-EXCEPTION still governs what a refusal is and how it is processed; this measurement simply surfaces its distribution across customers so supervisors can detect drift earlier.",
+      "python_calls": [],
+      "ended_run": true
+    }
+  ],
+  "final_response": "Filed as **MEAS-001** (`per_customer_refusal_rate`). The proposal is purely observational instrumentation: it tracks a metric over time, alerts on a concentration threshold, and adds a reason-categorization dimension. It does not alter or restate any existing rule—R-REFUSAL-NOT-EXCEPTION still governs what a refusal is and how it is processed; this measurement simply surfaces its distribution across customers so supervisors can detect drift earlier.",
+  "stop_reason": "final",
+  "turn_count": 2,
+  "ollama_call_count": 2,
+  "budget_events": [],
+  "canary_no_interpretation": true,
+  "canary_no_interpretation_bad": null,
+  "expected_route": "MEASUREMENT",
+  "expected_tool": "file_measurement",
+  "model": "glm-5.2:cloud",
+  "options": {
+    "temperature": 0.2,
+    "num_ctx": 131072
+  }
+}

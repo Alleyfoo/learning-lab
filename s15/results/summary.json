@@ -1,0 +1,139 @@
+{
+  "schema": "supervisor.s15.summary/v1",
+  "cells": {
+    "measurement": {
+      "expected_route": "MEASUREMENT",
+      "expected_tool": "file_measurement",
+      "s14_result": "6/6 MEASUREMENT",
+      "s15_prediction": "unchanged: 6/6 MEASUREMENT (never enters propose_rule)",
+      "n_present": 6,
+      "route_distribution": {
+        "file_measurement": 6
+      },
+      "auto_route_correct": 6,
+      "auto_route_correct_rate": 1.0,
+      "reached_proposed": 0,
+      "reached_active": 0,
+      "called_approve_rule": 0,
+      "no_interpretation_ok": 3,
+      "mandatory_check_ran": 0,
+      "mandatory_gate_caught": 0,
+      "demoted_to_duplicate": 0
+    },
+    "skill_workflow": {
+      "expected_route": "SKILL_WORKFLOW",
+      "expected_tool": "file_skill",
+      "s14_result": "6/6 SKILL_WORKFLOW",
+      "s15_prediction": "unchanged: 6/6 SKILL_WORKFLOW (never enters propose_rule)",
+      "n_present": 6,
+      "route_distribution": {
+        "file_skill": 6
+      },
+      "auto_route_correct": 6,
+      "auto_route_correct_rate": 1.0,
+      "reached_proposed": 0,
+      "reached_active": 0,
+      "called_approve_rule": 0,
+      "no_interpretation_ok": 6,
+      "mandatory_check_ran": 0,
+      "mandatory_gate_caught": 0,
+      "demoted_to_duplicate": 0
+    },
+    "duplicate_rule": {
+      "expected_route": "DUPLICATE_RULE",
+      "expected_tool": "file_duplicate_rule",
+      "s14_result": "3/6 DUPLICATE_RULE, 3/6 wrongly ACTIVE (misroute to propose_rule)",
+      "s15_prediction": "0/6 ACTIVE, 6/6 DUPLICATE_RULE -- the mandatory gate catches the restatement before the conflict gate",
+      "n_present": 6,
+      "route_distribution": {
+        "file_duplicate_rule": 4,
+        "propose_rule": 2
+      },
+      "auto_route_correct": 4,
+      "auto_route_correct_rate": 0.6666666666666666,
+      "reached_proposed": 0,
+      "reached_active": 0,
+      "called_approve_rule": 0,
+      "no_interpretation_ok": 6,
+      "mandatory_check_ran": 2,
+      "mandatory_gate_caught": 2,
+      "demoted_to_duplicate": 2
+    },
+    "new_rule": {
+      "expected_route": "NEW_RULE",
+      "expected_tool": "propose_rule",
+      "s14_result": "6/6 -> ACTIVE",
+      "s15_prediction": "6/6 still proceeds to ACTIVE (engine rule is novel; duplicate check returns None; lifecycle continues)",
+      "n_present": 6,
+      "route_distribution": {
+        "propose_rule": 6
+      },
+      "auto_route_correct": 6,
+      "auto_route_correct_rate": 1.0,
+      "reached_proposed": 6,
+      "reached_active": 6,
+      "called_approve_rule": 0,
+      "no_interpretation_ok": 6,
+      "mandatory_check_ran": 6,
+      "mandatory_gate_caught": 0,
+      "demoted_to_duplicate": 0
+    },
+    "conflicting_probe": {
+      "expected_route": "REJECT_CONFLICT",
+      "expected_tool": "reject_conflict",
+      "s14_result": "6/6 REJECT_CONFLICT (never active)",
+      "s15_prediction": "unchanged: 6/6 REJECT_CONFLICT (never active)",
+      "n_present": 6,
+      "route_distribution": {
+        "reject_conflict": 6
+      },
+      "auto_route_correct": 6,
+      "auto_route_correct_rate": 1.0,
+      "reached_proposed": 0,
+      "reached_active": 0,
+      "called_approve_rule": 0,
+      "no_interpretation_ok": 6,
+      "mandatory_check_ran": 0,
+      "mandatory_gate_caught": 0,
+      "demoted_to_duplicate": 0
+    },
+    "compatible_mirror_probe": {
+      "expected_route": "DUPLICATE_RULE",
+      "expected_tool": "file_duplicate_rule",
+      "s14_result": "6/6 DUPLICATE_RULE",
+      "s15_prediction": "unchanged: 6/6 DUPLICATE_RULE",
+      "n_present": 6,
+      "route_distribution": {
+        "file_duplicate_rule": 6
+      },
+      "auto_route_correct": 6,
+      "auto_route_correct_rate": 1.0,
+      "reached_proposed": 0,
+      "reached_active": 0,
+      "called_approve_rule": 0,
+      "no_interpretation_ok": 6,
+      "mandatory_check_ran": 0,
+      "mandatory_gate_caught": 0,
+      "demoted_to_duplicate": 0
+    }
+  },
+  "overall": {
+    "n_present": 36,
+    "n_expected": 36,
+    "auto_route_correct_total": 34,
+    "auto_route_correct_rate": 0.9444444444444444,
+    "headline_test": {
+      "duplicate_rule_0_active": true,
+      "duplicate_rule_active_count": 0,
+      "duplicate_rule_demoted_count": 2,
+      "new_rule_still_active_6_of_6": true,
+      "new_rule_active_count": 6,
+      "new_rule_mandatory_gate_did_not_catch": true,
+      "mandatory_gate_ran_on_every_propose_in_new_rule": true,
+      "measurement_unchanged": true,
+      "skill_unchanged": true,
+      "conflicting_unchanged": true,
+      "mirror_unchanged": true
+    }
+  }
+}
