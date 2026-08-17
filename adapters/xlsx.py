@@ -54,6 +54,20 @@ an empty sheet, a missing sheet       nothing to convert
 
 Refusing is the point. An adapter that guesses puts a wrong number into a
 deterministic pipeline that will then be faithful to it forever.
+
+### How an uncalculated formula is detected
+
+`convert()` reads with `data_only=True`, which returns a formula cell's cached
+result -- or `None` if the workbook was never calculated. That `None` is
+byte-for-byte indistinguishable from a genuinely empty cell, so silently dropping
+it (the old behaviour) put a *missing field* into the pipeline with no signal --
+worse than a wrong number, because a reconciliation key field that vanishes
+misclassifies the row as only-left/only-right. To tell the two apart, `convert()`
+also reads the `data_only=False` view, where a formula cell exposes its formula
+string (leading `=`), and refuses any cell that is a formula AND whose cached
+value is `None`. A formula cell that *does* have a cached value is read from the
+cache and used as-is (faithful to what Excel last computed). The second read is
+the price of not guessing; do not remove it.
 """
 from __future__ import annotations
 
@@ -131,9 +145,40 @@ def cell_value(value: Any) -> Optional[str]:
     raise ValueError(f"unsupported_cell_type:{type(value).__name__}")
 
 
+def _formula_coords(path: Path) -> dict[str, set[tuple[int, int]]]:
+    """Coordinates (1-based row, 1-based col) of cells holding a formula, per sheet.
+
+    `convert()` reads with `data_only=True`, which returns a formula cell's
+    *cached* result -- or `None` if it was never calculated. A `None` there is
+    indistinguishable from a genuinely empty cell, so the only way to tell an
+    uncalculated formula from an empty cell is to cross-reference the
+    `data_only=False` view, where a formula cell exposes its formula string
+    (leading ``=``). This is the one place the adapter looks at the formula
+    itself; it never acts on it.
+    """
+    coords: dict[str, set[tuple[int, int]]] = {}
+    book = openpyxl.load_workbook(path, data_only=False, read_only=True)
+    try:
+        for name in book.sheetnames:
+            sheet = book[name]
+            found: set[tuple[int, int]] = set()
+            for r, row in enumerate(sheet.iter_rows(values_only=True), start=1):
+                for c, v in enumerate(row, start=1):
+                    if isinstance(v, str) and v.startswith("="):
+                        found.add((r, c))
+            if found:
+                coords[name] = found
+    finally:
+        book.close()
+    return coords
+
+
 def convert(path: Path, specs: list[SheetSpec]) -> Conversion:
-    """Read the declared sheets. `data_only=True` reads cached formula results."""
+    """Read the declared sheets. `data_only=True` reads cached formula results;
+    a formula cell with no cached result is refused (cross-referenced against
+    the formula view -- see `_formula_coords`)."""
     out = Conversion()
+    formulas = _formula_coords(path)
     book = openpyxl.load_workbook(path, data_only=True, read_only=True)
     try:
         for spec in specs:
@@ -163,14 +208,25 @@ def convert(path: Path, specs: list[SheetSpec]) -> Conversion:
             if len(named) != len(set(named)):
                 out.problems.append(f"duplicate_header: {spec.sheet!r} {named}")
 
+            sheet_formulas = formulas.get(spec.sheet, set())
             items = []
             for number, row in enumerate(rows[spec.header_row:],
                                          start=spec.header_row + 1):
                 if all(v is None for v in row):
                     continue               # a wholly blank row is not a record
                 item = {}
-                for header, value in zip(headers, row):
+                for index, (header, value) in enumerate(zip(headers, row)):
                     if not header:
+                        continue
+                    # A None in a formula cell means the workbook was never
+                    # calculated: there is no faithful value to read. Refuse
+                    # rather than silently drop the field (which would put a
+                    # wrong shape into a deterministic pipeline). A None in a
+                    # non-formula cell is a genuinely empty cell -> omitted.
+                    if value is None and (number, index + 1) in sheet_formulas:
+                        out.problems.append(
+                            f"uncalculated_formula: {spec.sheet!r}!{header} "
+                            f"row {number}")
                         continue
                     try:
                         converted = cell_value(value)
@@ -307,12 +363,53 @@ def _self_test() -> int:
         check(any("empty_sheet" in p for p in result.problems),
               f"CANARY: a header with no rows must be refused: {result.problems}")
 
-        # --- an uncalculated formula ---------------------------------------
+        # --- an uncalculated formula: the direct cell_value guard -----------
+        # cell_value refuses a formula string outright. This guards anyone who
+        # ever calls it with data_only=False values; convert() itself is
+        # exercised by the workbook-level canary below.
         try:
             cell_value("=A1*B1")
-            failures.append("CANARY: an uncalculated formula must be refused")
+            failures.append("CANARY: a formula string must be refused by cell_value")
         except ValueError as exc:
             check("uncalculated_formula" in str(exc), f"named correctly: {exc}")
+
+        # --- an uncalculated formula: the real workbook-level canary -------
+        # openpyxl never computes/caches a formula it writes, so a workbook
+        # built here with a formula cell is exactly the 'company arrives with a
+        # workbook exported by a non-Excel tool / never saved in Excel' case.
+        # data_only=True reads the formula cell back as None -- the same as a
+        # genuinely empty cell. The old convert() silently dropped the field and
+        # reported ok; this canary proves that path now refuses.
+        fbook = Workbook()
+        fs = fbook.active
+        fs.title = "Invoices"
+        fs.append(["Invoice", "Amount"])           # header row 1
+        fs.append(["PI-100", "=A2*2"])             # uncalculated formula in Amount
+        fs.append(["PI-101", 40])                  # a clean literal for contrast
+        fpath = Path(tmp) / "formula.xlsx"
+        fbook.save(fpath)
+        fresult = convert(fpath, [SheetSpec("Invoices", "invoices")])
+        check(not fresult.ok,
+              f"CANARY: an uncalculated formula in a real workbook must refuse "
+              f"the conversion (was ok={fresult.ok}): {fresult.problems}")
+        check(any("uncalculated_formula" in p and "Amount" in p and "row 2" in p
+                  for p in fresult.problems),
+              f"CANARY: the refusal must name the sheet!field row: "
+              f"{fresult.problems}")
+        # the clean literal row must still have converted (the refusal is
+        # per-cell, not a whole-sheet abort). The formula row assembles as a
+        # partial record in memory, but ok=False means it is never written --
+        # that is the regression: the old code returned ok=True with the field
+        # silently missing; now the conversion is refused.
+        inv = fresult.collections.get("invoices", [])
+        check(any(r.get("Invoice") == "PI-101" and r.get("Amount") == "40" for r in inv),
+              f"CANARY: the clean literal row must still convert: {inv}")
+        # and a refused conversion must not be writable
+        try:
+            write_collections(fresult, Path(tmp) / "fout")
+            failures.append("CANARY: a formula-refused conversion must not be written")
+        except UnreadableWorkbook:
+            pass
 
         # --- writing produces the shape everything else consumes -----------
         out_dir = Path(tmp) / "out"
@@ -337,8 +434,11 @@ def _self_test() -> int:
           "rather than emptied / 19.99 and 0.1 survive exactly and are exactly "
           "computable, and 0.30000000000000004 is reported as it IS rather than "
           "tidied / blank headers, duplicate headers, missing sheets, empty "
-          "sheets and uncalculated formulas are all refused / a refused "
-          "conversion is never written)")
+          "sheets are refused / an uncalculated formula in a REAL workbook is "
+          "refused at the convert() boundary (cross-referenced against the "
+          "formula view, not just the cell_value string guard) and named to its "
+          "sheet!field row, and the clean row beside it still converts / a "
+          "refused conversion is never written)")
     return 0
 
 
