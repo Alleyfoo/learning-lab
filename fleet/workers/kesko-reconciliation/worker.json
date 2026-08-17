@@ -1,0 +1,8 @@
+{
+  "name": "kesko-reconciliation",
+  "purpose": "Reconcile the purchase ledger against the supplier statement by Invoice <-> Their ref, comparing Amount.",
+  "task": "reconciliation",
+  "base": "data",
+  "trigger": "data/kesko-reconciliation/",
+  "customer": "kesko"
+}

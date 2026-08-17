@@ -1,31 +1,49 @@
 #!/usr/bin/env python3
-"""Workspace v0.2 -- the Supervisor Streamlit surface, recentred on the System Map.
+"""Workspace v0.3 -- the Supervisor Streamlit surface, recentred on the System Map,
+with the modeller integrated as a "Define work" flow.
 
 The organizing concept is the **company's actual flow**: Company -> Incoming Data ->
-Understanding -> Modelled Work -> Output. The Fleet System Map is back as the **primary
+Understanding -> Modelled Work -> Output. The Fleet System Map is the **primary
 visual model**: it renders the *modelled-work* half of that flow (company/scope ->
 declared inputs/sources -> modelled workers -> outputs, with exception/investigator
 side paths) and begins after modelling. The raw "Incoming Data" the map does not yet
-draw is supplied by a new **incoming-file/workbook/sheet browser** to its left -- the
+draw is supplied by the **incoming-file/workbook/sheet browser** to its left -- the
 `data/` library (including data not yet modelled into a worker) and each worker's
-inbox/processed/exceptions. "Understanding"/modelling still happens on a separate
-surface (PRODUCT.md priority #4 -- the next milestone, not yet done). The supervisor's
-**current assessment sits on top** of this company context, so its verdict is visibly
-attached to the flows it describes.
+inbox/processed/exceptions. The supervisor's **current assessment sits on top** of this
+company context, so its verdict is visibly attached to the flows it describes.
+
+v0.3 closes the gap between the two halves (PRODUCT.md priority #4): a `data/` dir in
+the incoming browser that has **no worker and no model** carries a **"Define work"**
+button. Clicking it opens a full-width panel that drives the EXISTING modeller floor
+(via `supervisor/define.py`, a thin glue layer over `modeller/pipeline.py` +
+`modeller/builder.py` -- not a second modeller) one stage at a time, with the operator
+in the loop: inspect the selected data -> describe the job -> observe (program) /
+interpret (LLM) / propose a task model (LLM) -> answer a load-bearing question only if
+asked -> deterministic preview -> **explicitly Establish worker** -> return to the map
+and see the new worker on it. Evidence boundaries (OBSERVED/INFERRED/CONFIRMED) and
+the sufficiency gates are the modeller's, unchanged. Establishment is an EXPLICIT human
+action: the LLM proposes the model; only the operator clicks "Establish worker"
+(PRODUCT.md authority model -- the LLM may suggest freely; it cannot silently take
+production authority).
 
   System Map (primary)   incoming browser (left) + the Fleet System Map (centre) +
                          the supervisor's current assessment (on top). The Review-fleet
                          action lives here and feeds the assessment. Live fleet only.
+                         "Define work" opens here when an unmodelled incoming-data dir
+                         is selected, and Establish returns here with the new worker
+                         on the map.
   Dashboard              the full current assessment (supporting read).
   Improvements           the persistent append-only backlog (raise/route/activate).
-  Rules                 rulebook.jsonl + pending activations.
+  Rules                  rulebook.jsonl + pending activations.
   Fleet & run details    the raw snapshot + full counters + the last run's per-turn
                          evidence. Technical.
 
 Everything reads the **live fleet** (`fleet/workers` + `data/`). The S1 fixture selector
 is gone -- the map, the review, and the browser must describe one coherent fleet, and
-the recentering is around the company's actual flows, not a lab condition. Read-only:
-this surface never changes a worker, a model, or a run.
+the recentering is around the company's actual flows, not a lab condition. The surface
+is read-only EXCEPT for the one explicit, human-gated write path: "Establish worker"
+in the Define-work panel, which calls `fleet.establish` to write a new worker into
+`fleet/workers/`. The LLM never writes; it only proposes.
 
   run-supervisor.bat   (or: python -m streamlit run supervisor/app.py)
 """
@@ -48,6 +66,7 @@ import fleet          # noqa: E402  (load_all -- the live fleet)
 import system_map     # noqa: E402  (build, legend, status_legend, name_from)
 import map_component  # noqa: E402  (the vis-network Streamlit component)
 import incoming       # noqa: E402  (the read-only incoming-data browser)
+import define         # noqa: E402  (v0.3: glue to the modeller floor + establishment)
 import assessment     # noqa: E402
 import backlog        # noqa: E402
 import rulebook       # noqa: E402
@@ -196,6 +215,14 @@ def _render_incoming_browser(scan_result: dict) -> None:
                 if f["sheets"]:
                     line += " &nbsp; sheets: " + ", ".join(f["sheets"])
                 st.markdown(line)
+            # v0.3: a genuinely unmodelled dir (no worker link, no established
+            # model) is a candidate to define work on. xlsx-only dirs (has_model
+            # but no worker) are left as-is -- xlsx ingestion is a later slice.
+            has_json = any(f["kind"] == "json" for f in entry["files"])
+            if worker is None and not entry.get("has_model") and has_json:
+                if st.button("Define work", key=f"define_{entry['dir']}"):
+                    st.session_state["define:dir"] = entry["dir"]
+                    st.rerun()
 
     st.markdown("**Worker inboxes**")
     inboxes = scan_result.get("inboxes", [])
@@ -276,12 +303,290 @@ def _render_system_map(workers: list, snap_by_name: dict, worker_by_name: dict) 
 
 
 # ===========================================================================
+# Define work (v0.3) -- drive the existing modeller floor + establish a worker
+# ===========================================================================
+
+_DEFINE_KEYS = ("define:dir", "define:goal", "define:task", "define:report",
+                "define:ingest", "define:model", "define:asked", "define:deferred",
+                "define:choice", "define:name", "define:customer")
+
+
+def _clear_define() -> None:
+    """Drop every Define-work session_state key (cancel / new selection / after establish)."""
+    for k in _DEFINE_KEYS:
+        st.session_state.pop(k, None)
+
+
+def _render_define_panel(dir_name: str) -> None:
+    """The full-width Define-work panel. Mirrors modeller/app.py's stages, driven
+    via supervisor/define.py glue. Returns having rendered the panel; the caller
+    gates the normal System Map view off while this is active.
+
+    Establishment is the one write path in the supervisor: it is explicit
+    ("Establish worker" button) and only the operator can click it. The LLM only
+    proposes; it never writes.
+    """
+    st.subheader(f"Define work  —  `{dir_name}/`")
+    st.caption("Drive the existing modeller over this incoming data, then explicitly "
+               "establish a worker. The LLM proposes the model; only you establish it. "
+               "Cancel to return to the map.")
+    c_cancel, _ = st.columns([1, 6])
+    if c_cancel.button("Cancel", key="define_cancel"):
+        _clear_define()
+        st.rerun()
+    st.markdown("---")
+
+    ws = define.workspace_for(dir_name)
+    if ws is None:
+        st.warning("This directory is not reachable as a modeller workspace "
+                   "(no JSON collections found). xlsx ingestion is a future slice.")
+        return
+
+    chosen = define.chosen_sources(ws)
+    if len(chosen) < 2:
+        st.warning(f"The modeller needs at least two JSON collections to relate; "
+                   f"this directory has {len(chosen)}. xlsx ingestion is a future slice.")
+        return
+
+    obs = define.observed(ws, chosen)
+
+    # --- 0 · selected data ------------------------------------------------
+    with st.expander(f"Selected data — {len(chosen)} collection(s)", expanded=True):
+        for s in chosen:
+            st.markdown(f"- `{s.filename}` → **{s.collection}**  "
+                        f"&nbsp; <span style='color:#888'>{s.rows} row(s)</span>",
+                        unsafe_allow_html=True)
+        rels = define.relationships(obs)
+        if rels:
+            st.caption("Candidate relationships (measured):")
+            for r in rels:
+                st.markdown(f"- `{r['left']}` ↔ `{r['right']}`  "
+                            f"&nbsp; <span style='color:#888'>left coverage "
+                            f"{r.get('left_coverage')} · right unique "
+                            f"{r.get('right_unique')}</span>", unsafe_allow_html=True)
+
+    # --- 1 · describe the job ----------------------------------------------
+    goal = st.text_area(
+        "In your own words", key="define:goal", value="", height=80,
+        placeholder="e.g. Reconcile the purchase ledger against the supplier statement "
+                    "by Invoice, comparing Amount.")
+    tasks = define.expressible_tasks(chosen)
+    task = st.selectbox("Task family (structure can't pick; you do)",
+                        tasks, key="define:task")
+    run = st.button("Work out the task", type="primary", key="define_run",
+                    disabled=not goal.strip())
+
+    if run:
+        with st.spinner("Inspecting (this calls the local model)…"):
+            try:
+                report, ingest = define.interpret(obs, goal)
+            except Exception as e:  # noqa: BLE001
+                st.session_state["last_error"] = f"{type(e).__name__}: {e}"
+                st.rerun()
+        with st.spinner("Defining the task (this calls the local model)…"):
+            try:
+                model, asked, deferred = define.propose(
+                    report, goal, define.source_spec(ws, chosen), obs, task)
+            except Exception as e:  # noqa: BLE001
+                st.session_state["last_error"] = f"{type(e).__name__}: {e}"
+                st.rerun()
+        st.session_state["define:report"] = report
+        st.session_state["define:ingest"] = ingest
+        st.session_state["define:model"] = model
+        st.session_state["define:asked"] = asked
+        st.session_state["define:deferred"] = deferred
+        st.session_state["last_error"] = None
+        st.rerun()
+
+    if st.session_state.get("last_error"):
+        st.error(f"Work out the task failed: {st.session_state['last_error']}")
+        st.caption("Is the local model running? `ollama serve` / check "
+                   "`http://localhost:11434`.")
+
+    report = st.session_state.get("define:report")
+    if report is None:
+        return
+
+    # --- 2 · understanding + proposed task ---------------------------------
+    st.markdown("#### Understanding")
+    left, right = st.columns(2)
+    with left:
+        st.markdown("**Inferred** — the inspector's interpretation, with its basis")
+        inferred = [c for c in report if c["status"] == "INFERRED"]
+        for c in inferred:
+            b = c["claim"]
+            where = f"{b.get('source')}" + (f".{b['field']}" if b.get("field") else "")
+            st.write(f"`{where}` — {b.get('meaning')}")
+            st.caption("basis: " + ", ".join(c.get("basis") or []))
+        if not inferred:
+            st.caption("None.")
+    with right:
+        st.markdown("**Unknown** — uncertainties, each addressed to its subject")
+        unknowns = [c for c in report if c["status"] == "UNKNOWN"]
+        for c in unknowns:
+            b = c["claim"]
+            where = f"{b.get('source')}" + (f".{b['field']}" if b.get("field") else "")
+            st.write(f"`{where}` — {b.get('question')}")
+        if not unknowns:
+            st.caption("None outstanding.")
+        st.markdown("**Confirmed**")
+        settled = [c for c in report if c["status"] == "CONFIRMED"]
+        for c in settled:
+            st.write(f"{c['claim'].get('meaning')} — was {c.get('was')}, "
+                     f"by {c.get('confirmed_by')}")
+        if not settled:
+            st.caption("Nothing has needed a human answer.")
+
+    ingest = st.session_state.get("define:ingest") or {}
+    dropped = ingest.get("rejected") or []
+    stripped = ingest.get("stripped") or []
+    if dropped or stripped:
+        with st.expander(f"Boundary refused {len(dropped)} claim(s), "
+                         f"stripped {len(stripped)}"):
+            st.json({"rejected": dropped, "stripped": stripped})
+
+    deferred = st.session_state.get("define:deferred") or []
+    if deferred:
+        with st.expander(f"{len(deferred)} question(s) recorded but not asked — "
+                         f"the answer would not change the model"):
+            for entry, why in deferred:
+                st.write(f"`{entry.get('source')}.{entry.get('field')}` — "
+                         f"{entry.get('question') or entry.get('binding')}")
+                st.caption(why)
+
+    asked = st.session_state.get("define:asked") or []
+    model = st.session_state.get("define:model")
+
+    # --- 3 · missing truth (only if a load-bearing question is pending) -----
+    if asked:
+        st.markdown("#### One thing I cannot establish")
+        qs = define.questions(asked, obs)
+        if not qs:
+            st.warning("The definer blocked but produced no answerable question. "
+                       "Rephrase the goal, or use the advanced JSON below.")
+        else:
+            q = qs[0]
+            st.caption("Load-bearing: " + asked[0][1])
+            st.warning(q.text)
+            if len(qs) > 1:
+                st.caption(f"{len(qs) - 1} further question(s) will be asked "
+                           f"separately.")
+            choice = (st.radio("Answer", q.options, key="define:choice")
+                     if q.options else st.text_input("Answer", key="define:choice"))
+            if st.button("That's the one", type="primary", key="define_answer"):
+                answer = define.build_answer(q, choice)
+                st.session_state["define:report"] = define.apply_answer(
+                    st.session_state["define:report"], q, answer)
+                with st.spinner("Resuming (this calls the local model)…"):
+                    try:
+                        model2, asked2, deferred2 = define.propose(
+                            st.session_state["define:report"], goal,
+                            define.source_spec(ws, chosen), obs, task, resumed=True)
+                    except Exception as e:  # noqa: BLE001
+                        st.session_state["last_error"] = f"{type(e).__name__}: {e}"
+                        st.rerun()
+                st.session_state["define:model"] = model2
+                st.session_state["define:asked"] = asked2
+                st.session_state["define:deferred"] = deferred2
+                st.session_state.pop("define:choice", None)
+                st.rerun()
+        # While a question is pending, do not show preview/establish below.
+        _render_advanced_model(ws, chosen, obs, task)
+        return
+
+    if model is None:
+        st.error("The definer did not produce a model. Rephrase the goal, or paste a "
+                "model in the advanced JSON below.")
+        _render_advanced_model(ws, chosen, obs, task)
+        return
+
+    # --- proposed task -----------------------------------------------------
+    st.markdown("#### Proposed task")
+    for line in define.render_model(model, task):
+        st.markdown(line)
+    _render_advanced_model(ws, chosen, obs, task)
+
+    # --- 4 · deterministic preview -----------------------------------------
+    st.markdown("#### Deterministic preview")
+    complaint = define.check_join(model, obs, report)
+    if complaint:
+        st.warning(f"Sufficiency check: {complaint}")
+    p = define.preview(ws, model)
+    if not p.ok:
+        st.error("Preview failed — the model did not validate against the data:")
+        for prob in p.problems:
+            st.code(str(prob))
+        st.caption("Edit the model in the advanced JSON above, or rephrase the goal "
+                   "and run again.")
+        return
+    st.caption(f"{len(p.rows)} row(s) · {len(p.refused)} refused.")
+    if p.rows:
+        st.dataframe(p.rows, use_container_width=True, hide_index=True)
+    if p.refused:
+        with st.expander(f"Refused rows ({len(p.refused)})"):
+            st.dataframe(p.refused, use_container_width=True, hide_index=True)
+    if p.notes:
+        st.caption("; ".join(p.notes))
+
+    # --- 5 · establish (the explicit human write action) -------------------
+    st.markdown("#### Establish worker")
+    st.caption("This writes a new worker into `fleet/workers/` (worker.json + "
+               "versions/v1.json + history.jsonl) and returns to the map. The LLM "
+               "cannot do this; only you can.")
+    name = st.text_input("Worker name", key="define:name", value=dir_name)
+    customer = st.text_input("Scope / customer (optional — names the map lane; "
+                             "leave blank for an unscoped lane)",
+                             key="define:customer", value="")
+    if st.button("Establish worker", type="primary", key="define_establish"):
+        if not name.strip():
+            st.error("Give the worker a name.")
+            return
+        try:
+            w = define.establish_workspace(ws, name.strip(), goal.strip() or name.strip(),
+                                            task, model, customer=customer.strip() or None)
+        except Exception as e:  # noqa: BLE001
+            st.error(f"Establish failed: {type(e).__name__}: {e}")
+            return
+        st.success(f"Established `{w.name}` (v{w.current_version}) on the live fleet. "
+                   f"Returning to the System Map.")
+        _clear_define()
+        # the new worker must be picked up by the un-cached fleet.load_all() and
+        # re-linked by the incoming scan; drop the cached scan so it refreshes.
+        st.session_state.pop("incoming", None)
+        st.rerun()
+
+
+def _render_advanced_model(ws, chosen, obs, task) -> None:
+    """The advanced JSON editor / safety net (reuses modeller/app.py:234-242's
+    fallback). Lets the operator paste or edit a model JSON and use it directly,
+    bypassing a flaky LLM. It is previewed+validated by the normal path above."""
+    with st.expander("Advanced — paste / edit the model JSON", expanded=False):
+        current = st.session_state.get("define:model")
+        seed = json.dumps(current, indent=2, ensure_ascii=False) if current else "{}"
+        edited = st.text_area("Model JSON", value=seed, height=200,
+                              key="define:json")
+        if st.button("Use this JSON instead", key="define_use_json"):
+            try:
+                model = json.loads(edited)
+            except json.JSONDecodeError as e:
+                st.error(f"Invalid JSON: {e}")
+                return
+            model.setdefault("task", task)
+            st.session_state["define:model"] = model
+            # a hand-edited model is treated as settled: clear any pending question.
+            st.session_state["define:asked"] = []
+            st.rerun()
+
+
+# ===========================================================================
 # Sidebar: live fleet
 # ===========================================================================
 
 st.sidebar.title("Supervisor")
-st.sidebar.caption("The LLM view of the fleet. Read-only: this surface never "
-                   "changes a worker, a model, or a run. Workspace v0.2.")
+st.sidebar.caption("The LLM view of the fleet. Read-only EXCEPT for the one "
+                   "explicit, human-gated write path: 'Establish worker' under "
+                   "Define work. The LLM never writes; it only proposes. "
+                   "Workspace v0.3.")
 st.sidebar.markdown("**Live fleet**")
 st.sidebar.caption("Map, Review, and the incoming browser all read the live "
                    "fleet (`fleet/workers` + `data/`).")
@@ -310,53 +615,61 @@ map_tab, dashboard, improvements, rules_tab, fleet_tab = st.tabs(
 
 with map_tab:
     st.subheader("System Map")
-    st.caption("The map renders the modelled-work half of the company's flow "
-               "(Company -> Modelled Work -> Output); the incoming-data browser to the "
-               "left supplies the not-yet-modelled side. The map is derived entirely "
-               "from fleet state; the supervisor's assessment sits on top of it. "
-               "Task nodes are clickable.")
 
-    # --- action row: Review + secondary counters ----------------------------
-    c_act, c_w, c_e, c_s = st.columns([2, 1, 1, 1])
-    if c_act.button("Review fleet", type="primary"):
-        with st.spinner("Supervisor reviewing (this calls the local model)…"):
-            t0 = time.time()
-            try:
-                session = supervision.review(snapshot, max_turns=8,
-                                              request_timeout=900)
-            except Exception as e:  # noqa: BLE001 -- surface any model/bench error
-                session = None
-                st.session_state["last_error"] = f"{type(e).__name__}: {e}"
-            else:
-                st.session_state["last_error"] = None
-            elapsed = round(time.time() - t0, 1)
-        if session is not None:
-            session["elapsed_seconds"] = elapsed
-            st.session_state["last_session"] = session
-            # a run may have landed files in a worker's inbox; refresh the scan
-            st.session_state.pop("incoming", None)
-        st.rerun()
+    # v0.3: the Define-work panel replaces the normal System Map view while an
+    # incoming-data dir is selected for modelling. It is the one surface in the
+    # supervisor that writes -- and only via the explicit, human-gated Establish
+    # action. Cancel returns to the normal map view.
+    if st.session_state.get("define:dir"):
+        _render_define_panel(st.session_state["define:dir"])
+    else:
+        st.caption("The map renders the modelled-work half of the company's flow "
+                   "(Company -> Modelled Work -> Output); the incoming-data browser "
+                   "to the left supplies the not-yet-modelled side. The map is derived "
+                   "entirely from fleet state; the supervisor's assessment sits on top "
+                   "of it. Task nodes are clickable.")
 
-    c_w.metric("Workers", snapshot["worker_count"])
-    c_e.metric("Pending exceptions", len(snapshot["pending_exceptions"]))
-    c_s.metric("Scopes", len(snapshot.get("scopes", [])))
+        # --- action row: Review + secondary counters ------------------------
+        c_act, c_w, c_e, c_s = st.columns([2, 1, 1, 1])
+        if c_act.button("Review fleet", type="primary"):
+            with st.spinner("Supervisor reviewing (this calls the local model)…"):
+                t0 = time.time()
+                try:
+                    session = supervision.review(snapshot, max_turns=8,
+                                                  request_timeout=900)
+                except Exception as e:  # noqa: BLE001 -- surface any model/bench error
+                    session = None
+                    st.session_state["last_error"] = f"{type(e).__name__}: {e}"
+                else:
+                    st.session_state["last_error"] = None
+                elapsed = round(time.time() - t0, 1)
+            if session is not None:
+                session["elapsed_seconds"] = elapsed
+                st.session_state["last_session"] = session
+                # a run may have landed files in a worker's inbox; refresh the scan
+                st.session_state.pop("incoming", None)
+            st.rerun()
 
-    if st.session_state.get("last_error"):
-        st.error(f"Review failed: {st.session_state['last_error']}")
-        st.caption("Is the local model running? `ollama serve` / check "
-                   "`http://localhost:11434`.")
+        c_w.metric("Workers", snapshot["worker_count"])
+        c_e.metric("Pending exceptions", len(snapshot["pending_exceptions"]))
+        c_s.metric("Scopes", len(snapshot.get("scopes", [])))
 
-    st.markdown("---")
+        if st.session_state.get("last_error"):
+            st.error(f"Review failed: {st.session_state['last_error']}")
+            st.caption("Is the local model running? `ollama serve` / check "
+                       "`http://localhost:11434`.")
 
-    # --- assessment on top of the company context --------------------------
-    _render_assessment_banner(assessment.load_current())
+        st.markdown("---")
 
-    # --- the company context: incoming browser (left) + System Map (right) -
-    left, right = st.columns([2, 10])
-    with left:
-        _render_incoming_browser(_incoming())
-    with right:
-        _render_system_map(workers, snap_by_name, worker_by_name)
+        # --- assessment on top of the company context ----------------------
+        _render_assessment_banner(assessment.load_current())
+
+        # --- the company context: incoming browser (left) + System Map (right)
+        left, right = st.columns([2, 10])
+        with left:
+            _render_incoming_browser(_incoming())
+        with right:
+            _render_system_map(workers, snap_by_name, worker_by_name)
 
 # ===========================================================================
 # Dashboard (supporting) -- the full current assessment
