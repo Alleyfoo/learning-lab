@@ -295,11 +295,14 @@ def RulebookContext(rules: list, improvements: list) -> ContextProvider:
 # Event types, in the order they appear in a session:
 #   session_started, context_added, tools_declared, authority_declared,
 #   model_request, model_response, tool_call, tool_result,
-#   supervisor_output, session_finished.
+#   tool_call_budget_exceeded, supervisor_output, session_finished.
+# `tool_call_budget_exceeded` is S12's host-owned execution-budget event --
+# harness metadata (the exact cutoff), NOT message content; replay() does not
+# walk it (the bounded feedback the model sees is carried in a tool_result).
 EVENT_TYPES = (
     "session_started", "context_added", "tools_declared", "authority_declared",
     "model_request", "model_response", "tool_call", "tool_result",
-    "supervisor_output", "session_finished",
+    "tool_call_budget_exceeded", "supervisor_output", "session_finished",
 )
 
 
@@ -429,13 +432,22 @@ class SupervisorHarness:
                  model: str = core.MODEL, endpoint: str = core.ENDPOINT,
                  options: Optional[dict] = None,
                  request_timeout: float = 600.0,
-                 bench_timeout: float = 10.0) -> None:
+                 bench_timeout: float = 10.0,
+                 per_turn_tool_call_budget: Optional[int] = 64,
+                 per_session_tool_call_budget: Optional[int] = 128) -> None:
         self.policy = policy or Policy()
         self.model = model
         self.endpoint = endpoint
         self.options = options or {"temperature": 0.2}
         self.request_timeout = request_timeout
         self.bench_timeout = bench_timeout
+        # S12 -- host-owned, NON-SEMANTIC tool execution budget. It does not
+        # decide whether a call is useful or duplicates established work; it
+        # guarantees one malformed model turn cannot execute unbounded
+        # operations. None = no limit. Defaults (64/128) are ~2.3x/~4.6x the
+        # preserved S1-S11 normal-run max (28); every normal run sits below.
+        self.per_turn_tool_call_budget = per_turn_tool_call_budget
+        self.per_session_tool_call_budget = per_session_tool_call_budget
         self.tools: dict[str, Tool] = {}
         for t in tools:
             self.policy.assert_allowed(t.authority_class, "tool", t.name)
@@ -465,18 +477,30 @@ class SupervisorHarness:
                      "block; that is your final response and ends the session.")
         return "\n".join(parts)
 
-    def run(self, operator_prompt: str, *, max_turns: int = 6) -> dict:
+    def run(self, operator_prompt: str, *, max_turns: int = 6,
+            per_turn_tool_call_budget: Optional[int] = None,
+            per_session_tool_call_budget: Optional[int] = None) -> dict:
         """Run one supervisor session. Returns a session record with the EventLog.
 
         `operator_prompt` is the broad supervision question (s1/prompt.txt) --
         it must NOT encode expected answers. Context providers supply the rest.
+
+        `per_turn_tool_call_budget` / `per_session_tool_call_budget` override the
+        harness defaults for this session only (None = use the configured
+        default). The budget is host-owned and non-semantic.
         """
+        ptb = (self.per_turn_tool_call_budget
+               if per_turn_tool_call_budget is None else per_turn_tool_call_budget)
+        psb = (self.per_session_tool_call_budget
+               if per_session_tool_call_budget is None else per_session_tool_call_budget)
         log = EventLog()
         log.emit("session_started", operator_prompt=operator_prompt,
                  model=self.model, endpoint=self.endpoint,
                  options=self.options, max_turns=max_turns,
                  tool_names=list(self.tools),
-                 context_names=[c.name for c in self.contexts])
+                 context_names=[c.name for c in self.contexts],
+                 per_turn_tool_call_budget=ptb,
+                 per_session_tool_call_budget=psb)
 
         # 1. context -- emit each provider's full text (reconstructable).
         system_blocks: list[str] = [operator_prompt] if operator_prompt else []
@@ -516,6 +540,7 @@ class SupervisorHarness:
         final_response: Optional[str] = None
         stop_reason = "final"
         state = {"snapshot": _snapshot_from_contexts(self.contexts)}
+        session_calls = 0  # S12: tool calls dispatched across the whole session
         for turn_idx in range(max_turns):
             log.emit("model_request", turn=turn_idx,
                      messages=[dict(m) for m in messages])
@@ -537,7 +562,18 @@ class SupervisorHarness:
                 stop_reason = "final"
                 break
             tool_outputs: list[str] = []
+            turn_dispatched = 0
+            budget_stop: Optional[str] = None  # None | "turn" | "session"
             for code in blocks:
+                # S12 -- host-owned, non-semantic execution budget. Checked
+                # BEFORE dispatch: once a limit is reached, remaining blocks in
+                # this response are not executed. Completed calls are preserved.
+                if psb is not None and session_calls >= psb:
+                    budget_stop = "session"
+                    break
+                if ptb is not None and turn_dispatched >= ptb:
+                    budget_stop = "turn"
+                    break
                 log.emit("tool_call", turn=turn_idx, tool_name="python_analysis",
                          input={"code": code})
                 outcome = self.tools["python_analysis"].execute(
@@ -559,6 +595,36 @@ class SupervisorHarness:
                     "stdout_truncated": outcome["stdout_truncated"],
                     "error": outcome["error"], "refused": outcome["refused"]})
                 tool_outputs.append(feedback)
+                turn_dispatched += 1
+                session_calls += 1
+            if budget_stop is not None:
+                limit = ptb if budget_stop == "turn" else psb
+                remaining = len(blocks) - turn_dispatched
+                fb = ("Python bench output:\n\nTOOL_CALL_BUDGET_EXCEEDED: the "
+                      "host-owned tool execution budget was reached for this "
+                      + ("turn" if budget_stop == "turn" else "session")
+                      + f". {turn_dispatched} already-executed call(s) were "
+                      f"preserved; {remaining} further call(s) in this response "
+                      "were not dispatched. Continue with the information you "
+                      "have, or give your final answer.")
+                log.emit("tool_call_budget_exceeded", turn=turn_idx,
+                         scope=budget_stop, limit=limit,
+                         dispatched=turn_dispatched, remaining=remaining,
+                         session_calls=session_calls)
+                # a tool_result carries the bounded feedback so the model sees
+                # it AND replay(events) reconstructs the user message exactly.
+                log.emit("tool_result", turn=turn_idx, tool_name="python_analysis",
+                         output={"ok": False, "stdout": "", "error": None,
+                                 "refused": False, "budget_exceeded": True,
+                                 "budget_scope": budget_stop,
+                                 "budget_limit": limit},
+                         feedback_text=fb)
+                turn_rec["python_calls"].append({
+                    "code": None, "ok": False, "stdout": "",
+                    "stdout_truncated": False, "error": None, "refused": False,
+                    "budget_exceeded": True, "budget_scope": budget_stop,
+                    "budget_limit": limit})
+                tool_outputs.append(fb)
             turns.append(turn_rec)
             messages.append({"role": "assistant", "content": assistant_text})
             messages.append({"role": "user", "content": "\n\n".join(tool_outputs)})
@@ -566,10 +632,18 @@ class SupervisorHarness:
             stop_reason = "max_turns"
             final_response = turns[-1]["assistant"] if turns else ""
 
+        budget_events = [e for e in log.events
+                         if e["type"] == "tool_call_budget_exceeded"]
+        # python_call_count counts REAL dispatched tool calls only (the budget
+        # marker entries, code=None/budget_exceeded=True, are not executions).
+        real_python_calls = sum(
+            1 for t in turns for c in t["python_calls"]
+            if not c.get("budget_exceeded"))
         log.emit("session_finished", stop_reason=stop_reason,
                  turn_count=len(turns),
-                 python_used=any(t["python_calls"] for t in turns),
-                 python_call_count=sum(len(t["python_calls"]) for t in turns))
+                 python_used=real_python_calls > 0,
+                 python_call_count=real_python_calls,
+                 budget_events_count=len(budget_events))
 
         # reconstructability canary: replay(events) must equal what was sent.
         replayed = replay(log.events)
@@ -591,10 +665,14 @@ class SupervisorHarness:
             "tool_names": list(self.tools),
             "context_names": [c.name for c in self.contexts],
             "authority": {"allow": list(ALLOW), "never": list(NEVER)},
+            "per_turn_tool_call_budget": ptb,
+            "per_session_tool_call_budget": psb,
             "stop_reason": stop_reason,
             "turn_count": len(turns),
-            "python_used": any(t["python_calls"] for t in turns),
-            "python_call_count": sum(len(t["python_calls"]) for t in turns),
+            "python_used": real_python_calls > 0,
+            "python_call_count": real_python_calls,
+            "budget_events_count": len(budget_events),
+            "budget_events": budget_events,
             "turns": turns,
             "final_response": final_response,
             "events": log.events,
@@ -746,6 +824,82 @@ def _self_test() -> int:
           "RECONSTRUCTABILITY CANARY: model_request.messages == replay(events) "
           "-- the session record alone reconstructs everything the model saw")
 
+    # --- S12: host-owned tool execution budget -- per-turn cutoff -------------
+    # A stub model emits 10 fenced blocks in one turn; a per-turn budget of 4
+    # must dispatch exactly 4, record the exact cutoff, never execute the rest,
+    # and preserve reconstructability.
+    b1 = {"n": 0}
+
+    def stub_budget_turn(messages, *, model, endpoint, options, timeout):
+        b1["n"] += 1
+        if b1["n"] == 1:
+            return "probe\n" + "".join(
+                f"```python\nprint({i})\n```\n" for i in range(10))
+        return "done"
+    orig = core._chat
+    core._chat = stub_budget_turn
+    try:
+        brec = harness.run("budget turn test", max_turns=4,
+                           per_turn_tool_call_budget=4, per_session_tool_call_budget=100)
+    finally:
+        core._chat = orig
+    check(brec["python_call_count"] == 4,
+          f"per-turn budget dispatched exactly 4: {brec['python_call_count']}")
+    check(brec["budget_events_count"] == 1,
+          f"one per-turn budget event: {brec['budget_events_count']}")
+    be = brec["budget_events"][0]
+    check(be["scope"] == "turn" and be["limit"] == 4 and be["dispatched"] == 4
+          and be["remaining"] == 6,
+          f"per-turn budget event exact cutoff: {be}")
+    t0_calls = [e for e in brec["events"]
+                if e["type"] == "tool_call" and e.get("turn") == 0]
+    check(len(t0_calls) == 4,
+          f"only 4 tool_call events in turn 0 (6 remaining never executed): {len(t0_calls)}")
+    brep = replay(brec["events"])
+    breq = [e["messages"] for e in brec["events"] if e["type"] == "model_request"]
+    check(breq == brep,
+          "BUDGET RECONSTRUCTABILITY CANARY (per-turn): model_request.messages == "
+          "replay(events) on a budget-hit session")
+    check(any("TOOL_CALL_BUDGET_EXCEEDED" in m["content"]
+              for ms in brep for m in ms if m["role"] == "user"),
+          "per-turn budget feedback is in the reconstructed user message")
+
+    # --- S12: host-owned tool execution budget -- per-session cutoff ----------
+    # per_session=3 across two turns (2 then 2): exactly 3 dispatch, 1 left over.
+    b2 = {"n": 0}
+
+    def stub_budget_session(messages, *, model, endpoint, options, timeout):
+        b2["n"] += 1
+        if b2["n"] == 1:
+            return "t0\n" + "".join(
+                f"```python\nprint({i})\n```\n" for i in range(2))
+        if b2["n"] == 2:
+            return "t1\n" + "".join(
+                f"```python\nprint({i})\n```\n" for i in range(2))
+        return "done"
+    orig = core._chat
+    core._chat = stub_budget_session
+    try:
+        srec = harness.run("budget session test", max_turns=5,
+                           per_turn_tool_call_budget=10, per_session_tool_call_budget=3)
+    finally:
+        core._chat = orig
+    check(srec["python_call_count"] == 3,
+          f"per-session budget dispatched exactly 3 total: {srec['python_call_count']}")
+    check(srec["budget_events_count"] == 1,
+          f"one per-session budget event: {srec['budget_events_count']}")
+    se = srec["budget_events"][0]
+    check(se["scope"] == "session" and se["limit"] == 3 and se["dispatched"] == 1
+          and se["remaining"] == 1 and se["session_calls"] == 3,
+          f"per-session budget event exact cutoff: {se}")
+    total_calls = [e for e in srec["events"] if e["type"] == "tool_call"]
+    check(len(total_calls) == 3,
+          f"only 3 tool_call events total (1 left over never executed): {len(total_calls)}")
+    sreq = [e["messages"] for e in srec["events"] if e["type"] == "model_request"]
+    check(sreq == replay(srec["events"]),
+          "BUDGET RECONSTRUCTABILITY CANARY (per-session): "
+          "model_request.messages == replay(events)")
+
     # --- authority not widened: the bench still refuses file/shell/network ----
     r = pt.execute({"code": "import os; os.listdir('.')"}, {"snapshot": {}})
     check(not r["ok"] and "os" in (r["error"] or ""),
@@ -763,7 +917,9 @@ def _self_test() -> int:
           "python_analysis contract declares the fresh namespace / a stub session "
           "runs through the boundary / the append-only event log has all event "
           "types / RECONSTRUCTABILITY CANARY: replay(events) == model_request "
-          "messages / the bench still refuses os and open behind the harness / "
+          "messages / S12 BUDGET CANARIES: per-turn + per-session cutoffs exact, "
+          "remaining calls never execute, reconstructability holds on budget-hit / "
+          "the bench still refuses os and open behind the harness / "
           "core.review remains available)")
     return 0
 

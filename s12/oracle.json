@@ -15,7 +15,8 @@
     "harness_py_intentionally_modified": true,
     "harness_py_change_nature": "additive: per_turn/per_session tool-call budget params + budget check in dispatch loop + tool_call_budget_exceeded event + self-test additions. Existing dispatch semantics unchanged for sessions under the budget.",
     "snapshot_py_lf_hash": "df37d914a8b8b12d",
-    "rulebook_jsonl_lf_hash": "7949cde4e8724f1b",
+    "rulebook_jsonl_lf_hash": "292aa890213107d3",
+    "rulebook_hash_correction_note": "The S11 handoff recorded rulebook.jsonl's RAW (CRLF) hash 7949cde4e8724f1b mislabeled as the LF-hash. The true LF-normalized hash is 292aa890213107d3, unchanged since the S3 commit (80d0249) -- the file was never modified. S11's canary only checked rulebook did not change DURING its run (raw before==after), never against a frozen LF value. S12 corrects the record and canaries the true LF value.",
     "s5_seed_unchanged": true,
     "note": "The post-edit harness.py LF-hash is a build artifact captured at runtime (canary asserts hash_before_runs == hash_after_runs, i.e. stable across the S12 runs). It is not stored here to keep the oracle frozen before the build."
   },
@@ -46,14 +47,17 @@
   },
 
   "modes": {
+    "_note": "Reused VERBATIM from S11 (frozen). S12 runs reuse s11._mode_analysis_tool / s11._contexts_for / s11._ModeContext, which read s11/oracle.json's preamble+refusal and s11/run.py's hardcoded MODE_TOOL_SUFFIXES. S12 does NOT define new mode text -- 'policy not weakened' means the S11 mode text is held frozen. The values below are an exact copy of what the runs use; the S12 canary asserts oracle modes == s11 constants.",
+    "modes_correction_note": "During stub-validation (before any model call) the original S12 oracle modes block was found to be a REWRITTEN copy, not the verbatim S11 text it claimed to be: its SUPERVISION preamble said 'You may still compute...' which trips the no-interpretation substring canary on 'ill' inside 'still', and it was not the text the runs actually use (the runs read s11/oracle.json + s11/run.py). Corrected here to the exact S11 text so the oracle is an accurate frozen record. No behavior changes: the runs already used the S11 text via the reused s11 machinery.",
     "SUPERVISION": {
-      "preamble": "OPERATING MODE -- SUPERVISION: this is an ordinary supervisory review. The dependency_concentration measurement is the established, integrity-valid factual source for the dependency-distribution question. Do not independently re-derive that distribution from worker records; use the measurement's by_type counts and shares directly. A python_analysis call that recomputes the dependency distribution from worker records is duplicate established work and is refused. You may still compute other things the measurement does not cover: customer breakdown, exception history, affected worker identities, correlations across axes the measurement does not combine.",
-      "refusal_message": "DUPLICATE_ESTABLISHED_MEASUREMENT / dependency_concentration already provides the mechanical distribution for this snapshot in SUPERVISION mode. Use its by_type counts and shares directly; do not re-derive them from worker records.",
-      "tool_suffix": "OPERATING MODE -- SUPERVISION: this is an ordinary supervisory review. The dependency_concentration measurement is the established, integrity-valid factual source for the dependency-distribution question. A python_analysis call that recomputes that distribution from worker records is duplicate established work and is REFUSED; use the measurement by_type counts and shares directly. Other analysis (customer breakdown, exception history, affected worker identities, correlations the measurement does not cover) is permitted."
+      "preamble": "This is an ordinary supervisory review. Established, integrity-valid deterministic measurements are the operational factual source for questions they cover. Do not independently re-derive those same facts during this review. Use tools only for questions the established measurements do not answer. If an established measurement is missing, stale, invalid or insufficient, investigate instead.",
+      "tool_suffix": "OPERATING MODE -- SUPERVISION: this is an ordinary supervisory review. The dependency_concentration measurement is the established, integrity-valid factual source for the dependency-distribution question. A python_analysis call that recomputes that distribution from worker records is duplicate established work and is REFUSED; use the measurement by_type counts and shares directly. Other analysis (customer breakdown, exception history, affected worker identities, correlations the measurement does not cover) is permitted.",
+      "refusal_message": "DUPLICATE_ESTABLISHED_MEASUREMENT\ndependency_concentration already provides the mechanical distribution for this snapshot in SUPERVISION mode. Re-deriving it from worker records is duplicate established work and is refused. Use the measurement's by_type counts/shares directly. You may compute other things the measurement does not cover (customer breakdown, exception history, affected worker identities, correlations)."
     },
     "AUDIT": {
-      "preamble": "OPERATING MODE -- AUDIT: this is a measurement audit. Independently recompute the dependency_concentration result from underlying worker records and compare it with the established measurement. Recomputation is permitted and expected here.",
-      "tool_suffix": "OPERATING MODE -- AUDIT: this is a measurement audit. Independently recompute the dependency_concentration result from underlying worker records and compare it with the established measurement. Recomputation is permitted and expected here."
+      "preamble": "This is a measurement audit. Independently recompute the dependency-concentration result from underlying records and compare it with the established measurement. Re-derivation is explicitly permitted and expected.",
+      "tool_suffix": "OPERATING MODE -- AUDIT: this is a measurement audit. Independently recompute the dependency_concentration result from underlying worker records and compare it with the established measurement. Recomputation is permitted and expected here.",
+      "refusal_message": null
     }
   },
 
