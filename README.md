@@ -1,360 +1,221 @@
 # Learning Lab
 
-Research into a supervisory LLM that sits **above** a deterministic fleet of modelled tasks.
+A working research system for turning messy data work into **explicit deterministic workers**, then studying what an LLM is useful for **around** those workers: understanding new work, supervising established work, investigating novelty, and proposing improvements.
 
-The project started as a data-task modelling study and then crossed into a broader question:
-
-> **What is the main LLM actually for once established work is deterministic, explicit, inspectable, and usually does not need an LLM at runtime?**
-
-The answer emerging from the experiments is not “put an agent in every workflow.” It is closer to:
+The central design idea is:
 
 > **The AI designs, supervises, investigates and improves the workers. The workers do the work.**
 
-This repository is a research lab, not a production framework.
+This repository contains both a functioning deterministic task/fleet implementation and the research record that produced it. It is a research lab, not a production framework.
 
----
+## Current product direction
 
-## The architecture
-
-The inherited floor is a deterministic task-and-fleet system: task models, workers, inbox/recovery, committing runtime, confirmations, investigations and a system map. Ordinary established work runs without an LLM.
+The product is not meant to be an “AI incident dashboard” over an abstract fleet. The intended top-level object is a **company and the work being understood for that company**:
 
 ```text
-new work       -> LLM helps DEFINE -> deterministic worker
-normal work    -> deterministic runtime
-something bad  -> exception -> LLM may INVESTIGATE
-
-fleet-wide state / history
-        ↓
-SUPERVISORY LLM
-        ↓
-what matters?
-what changed?
-what should be investigated?
-what could the platform improve?
+company
+  ↓
+incoming files / workbooks / sheets / tables
+  ↓
+program measures what is actually present
+  ↓
+LLM helps interpret purpose and load-bearing unknowns
+  ↓
+explicit task model
+  ↓
+deterministic worker
+  ↓
+company system map: sources → modelled work → outputs/effects
+  ↓
+normal deterministic operation
+  ↓
+supervisor explains what matters, investigates novelty and proposes improvements
 ```
 
-The supervisor is not continuously “thinking.” The platform can remain continuously alive while the LLM wakes only when useful: operator request, event, schedule or later reflection trigger.
+The repository already contains most of these pieces, but they are still split across separate modeller, fleet/map and supervisor surfaces. The next product step is to **recenter them around Company → Incoming Data → Understanding → Modelled Work → Output**, with the existing system map as a primary visual model and the supervisor as an interpretation layer over that context.
 
-The deterministic fleet is the **experimental apparatus**. The research target is the intelligence above it.
+See [PRODUCT.md](PRODUCT.md) for the product/system map and the distinction between what exists now and what is still missing.
 
----
+## What is implemented now
 
-## What the supervisor is for
+### Deterministic task floor
 
-Four roles have emerged:
+Established work runs without an LLM. The current floor includes:
 
-| Role | Question |
+- immutable model/task version history;
+- deterministic task execution;
+- committing effects with read-back verification;
+- explicit refusals distinct from exceptions;
+- inbox item identity and duplicate handling;
+- crash/recovery distinctions between safe retry, already-landed and indeterminate effects;
+- confirmations bound to exact model versions;
+- investigations and exception handling;
+- a read-only fleet/system map derived from authoritative worker state.
+
+Four task families are represented in the current system:
+
+- reservation;
+- enrichment;
+- aggregation;
+- reconciliation.
+
+### Task modeller
+
+`modeller/` is the current DEFINE path. The operator selects data and describes the job in ordinary language. The program owns mechanically observed facts; the LLM interprets purpose and proposes the task model; load-bearing unknowns are asked only when evidence cannot settle them.
+
+```bash
+python -m streamlit run modeller/app.py
+```
+
+### Fleet and system map
+
+`fleet/` owns established-worker state, operations views, investigation routing and the existing system map. The map is derived from authoritative state rather than storing a second description of the system. It already represents declared customer/scope lanes, inputs, modelled sources, workers, shared executors, effects and exception paths.
+
+```bash
+python -m streamlit run fleet/app.py
+```
+
+Choose **System map** in the fleet console to inspect the existing map.
+
+### Supervisor Workspace v0.1
+
+`supervisor/` contains the explicit supervisory harness and the current Streamlit workspace. The supervisor has read/analysis/proposal authority but no silent production authority.
+
+Workspace v0.1 currently provides:
+
+- a persisted supervisor-authored assessment;
+- findings, priorities and normal/no-action context;
+- improvement proposals with provenance;
+- on-demand institutional routing;
+- mandatory duplicate-before-conflict checking for proposed rules;
+- human-gated rule activation;
+- reconstructable supervisor sessions and bounded tool use.
+
+On Windows:
+
+```text
+run-supervisor.bat
+```
+
+or directly:
+
+```bash
+python -m streamlit run supervisor/app.py
+```
+
+The supervisor workspace is **supporting machinery, not the final product shell**. Its next integration target is the company/data/map workspace described in [PRODUCT.md](PRODUCT.md).
+
+## The authority boundary
+
+The project deliberately separates fact, interpretation and authority.
+
+```text
+PROGRAM / SOURCE
+  owns mechanically observed facts
+
+LLM
+  may interpret, ask, analyse, explain and propose
+
+HUMAN / INSTITUTIONAL MECHANISM
+  controls changes to production authority
+```
+
+Important examples:
+
+- a program may establish `left_coverage = 3/3`; it does not thereby establish “this is the intended join”;
+- a declared refusal is a healthy outcome when the worker is following its policy;
+- `effect_applied=True` means the effect was applied **and verified**;
+- human confirmation resolves an exact claim for an exact model version; inference does not silently become observation;
+- the supervisor may propose a rule, but it cannot silently activate one.
+
+The recurring principle is:
+
+> **Intelligence may discover useful questions. Repeated useful questions can become explicit machinery.**
+
+## Repository map
+
+The root intentionally contains both live system code and frozen research history. Start here:
+
+| Path | Role |
 | --- | --- |
-| **Interpreter** | What does a new request mean, and what truths are load-bearing? |
-| **Supervisor** | What is happening across the fleet that is worth the operator knowing? |
-| **Investigator** | What changed, why did something fail, and what repair is safe to propose? |
-| **Reflector** | What keeps recurring, what have we learned, and what should the system improve? |
+| `adapters/` | input adapters, including workbook/data ingestion support |
+| `inspector/` | mechanical observation / evidence production |
+| `modeller/` | DEFINE path from observed data + purpose to task model |
+| `taskmodel/` | shared task-model structures/contracts |
+| `worker/` | deterministic worker/runtime machinery |
+| `fleet/` | established fleet, operations, investigations and system map |
+| `supervisor/` | supervisory harness, memory, improvements/rules and Workspace v0.1 |
+| `reservation/` | reservation task family |
+| `enrichment/` | enrichment task family |
+| `aggregation/` | aggregation task family |
+| `reconciliation/` | reconciliation task family |
+| `calendar_job/` | established reservation/unattended runtime path |
 
-The important separation is authority:
+The following are primarily **research record / frozen experimental evidence**, not the normal product entry point:
 
-```text
-LLM may observe, analyse, explain and propose
-                    ≠
-LLM may silently change production authority
-```
+- `experiment*/`;
+- `definition_phase/`;
+- `s1/` … `s15/`;
+- `uq1_audit/`;
+- root research reports, falsification ledgers and historical work-order documents.
 
-The established runtime remains deterministic. The supervisor does not promote worker versions, apply effects, mutate customer data or quietly rewrite rules.
+Do not “clean up” those directories merely because they are old. Negative results, frozen fixtures, grader corrections and counterexamples are part of the evidence trail.
 
----
+## Research status
 
-## The learning idea
+The early data-task modelling sequence established the deterministic/evidence floor. The later supervisory sequence S1–S15 is complete and frozen.
 
-“Learning” here does **not** mean updating model weights.
-
-The experiments have produced several distinct things the supervisor can learn:
-
-```text
-KNOWLEDGE     what the system means
-PREFERENCE    what the operator considers worth attention
-METHOD        how to investigate/supervise well
-IMPROVEMENT   what could make the platform better
-RULE          what the system must not silently violate
-```
-
-These are deliberately different objects.
-
-A human correction such as “enrichment workers are non-committing by design” is semantic knowledge, not a mechanically observed fact. An operator saying “do not interrupt me merely because run history is thin” is a preference. A lesson such as “check shared dependencies and blast radius, not only failing workers” is a supervisory method.
-
-The Rulebook is different again: it records institutional constraints such as confirmations being version-bound or successful effects requiring read-back verification.
-
-### The longer learning loop
-
-The direction now being tested is:
+In very compressed form:
 
 ```text
-LLM invents a useful question
-        ↓
-uses tools / Python to analyse it
-        ↓
-the question proves useful repeatedly
-        ↓
-supervisor proposes a platform improvement
-        ↓
-Rulebook / authority / human gate
-        ↓
-mechanical deterministic measurement is added
-        ↓
-future LLM needs less ad-hoc reasoning for the same fact
+S1–S5   what a supervisor notices, learns and computes
+S6      explicit reconstructable harness + authority boundary
+S7–S10  useful-question → measurement; method/measurement/authority interaction
+S11     ordinary SUPERVISION separated from deliberate AUDIT
+S12     harness enforcement and tool-budget closure
+S13     operator desk: real supervisory findings and improvement suggestions
+S14     routing suggestions to measurement / skill / rule / conflict / duplicate
+S15     mandatory duplicate gate at the rule-authority boundary
 ```
 
-This is intentionally almost the reverse of “make the agent increasingly autonomous.”
+Workspace v0/v0.1 then moved proven machinery out of the experiment folders into the live `supervisor/` product path.
 
-> **If the system learns successfully, repeated intelligence should become cheaper explicit machinery.**
-
-The platform owns mechanically observed facts. The LLM still owns interpretation.
-
-For example:
-
-```text
-OBSERVED
-55 / 70 workers use dependency X
-
-INFERRED
-that concentration creates an important blast-radius risk
-```
-
-The second claim must never be laundered into the first.
-
----
-
-## Supervisor harness
-
-S6 established a small explicit harness around the supervisor rather than adopting a large external agent framework.
-
-The harness owns runtime mechanics:
-
-```text
-trigger / operator request
-        ↓
-SupervisorHarness
-  ├─ context providers
-  ├─ model interaction
-  ├─ scoped tools
-  ├─ authority policy
-  └─ append-only session events
-        ↓
-Supervisor LLM
-        ↓
-0..N tool-assisted steps
-        ↓
-final output / nothing
-```
-
-Current providers/capabilities wrap the existing code rather than replacing it:
-
-- `supervisor/snapshot.py` — read-only fleet context
-- `supervisor/bench.py` — restricted Python analysis over copied data
-- `supervisor/memory.py` — knowledge, preferences and methods
-- `supervisor/rulebook.py` — Rulebook and Improvement register
-- `supervisor/harness.py` — explicit tool/context/policy/session boundary
-- `supervisor/core.py` — original model loop retained for the earlier experiments
-
-One design rule was borrowed from DeepSeek Harness because it fits this project unusually well:
-
-> **Anything model-visible must be reconstructable from the session record.**
-
-S6 records context, declared tools/authority, every model request/response, every tool call/result and the final supervisor output in an append-only session log.
-
-### Authority floor
-
-The harness may allow capabilities such as:
-
-```text
-read fleet state
-analyse copied data
-read knowledge / preferences / methods / rules
-write supervisor-owned session history
-write supervisor-owned improvement proposals
-```
-
-It explicitly denies production authority such as:
-
-```text
-modify workers or models
-promote versions
-execute the production runtime
-apply effects
-alter customer/source data
-unrestricted filesystem
-shell
-network
-```
-
----
-
-## Experiments S1–S6
-
-The current research staircase is deliberately empirical: each round is frozen before moving to the next.
-
-### S1 — What is worth telling me?
-
-A cold supervisor reviewed small read-only fleet snapshots with an optional Python bench.
-
-It surfaced a real failed effect and distinguished healthy refusals from failures, but over-reported on a boring healthy worker and misread some system semantics. It also found genuine fleet-level reporting defects unprompted.
-
-Python use: **0/4 runs**. At that scale, the fleet was readable directly.
-
-See [`s1/results/FINDINGS.md`](s1/results/FINDINGS.md).
-
-### S2 — Can feedback change supervision?
-
-The S1 failure was split into two persistent memory classes:
-
-- system semantic knowledge from operator correction;
-- operator supervision preference.
-
-The memory transferred to a genuinely different enrichment worker: the supervisor stopped repeating the S1 architecture misreads and low-value warnings, while still leading with a real failed-effect condition.
-
-This established that experience can change interpretation and attention threshold **without changing the workers underneath**.
-
-See [`s2/results/FINDINGS.md`](s2/results/FINDINGS.md).
-
-### S3 — Improvement Box + Rulebook
-
-The supervisor was given a durable Improvement register and a small Rulebook seeded only with already-established architectural constraints.
-
-It correctly distinguished:
-
-- a compatible real improvement;
-- a semantic duplicate of that improvement;
-- a proposal that conflicts with version-bound confirmations;
-- a mirror proposal on the same topic that respects the rule.
-
-The conflict stayed stable across rule ordering permutations.
-
-Core principle:
-
-> **An improvement may contradict an active rule. It may not do so silently.**
-
-See [`s3/results/FINDINGS.md`](s3/results/FINDINGS.md).
-
-### S4 — Does scale trigger computation?
-
-A cold supervisor reviewed a frozen 70-worker / 473-run fleet with the same broad prompt and no memory, rulebook or personality.
-
-At ~77k tokens of fleet state, it autonomously reached for the Python bench: **4 calls across 3 turns**, with no instruction to use Python.
-
-It computed cross-worker/time-series findings such as:
-
-- rising refusal trends;
-- post-promotion regressions;
-- stale confirmations after promotion;
-- actual exception state minus fleet-reported exceptions.
-
-It hit **6/7** planted signals. The clean miss was executor concentration: the data existed, but the supervisor never formed the concentration question.
-
-See [`s4/results/FINDINGS.md`](s4/results/FINDINGS.md).
-
-### S5 — Can a supervisor learn a method?
-
-The S4 concentration miss became operator feedback:
-
-> consider shared dependencies and blast radius, not only individual worker health.
-
-The distiller produced a new **method** memory class. The learned method was deliberately abstracted away from the taught example (engines).
-
-On a different fleet, the cold supervisor missed a 55/70 shared-input concentration. With the learned method loaded, it counted and surfaced that different dependency type, and also noticed other concentrations it had not been taught explicitly.
-
-A distributed mirror showed that the method mainly taught the supervisor **to look**, rather than simply to invent concentration everywhere.
-
-See [`s5/results/FINDINGS.md`](s5/results/FINDINGS.md).
-
-### S6 — Supervisor Harness Floor
-
-S6 was a refactor/proof round, not a new intelligence experiment.
-
-The frozen S4 fleet was re-run through the explicit `SupervisorHarness`.
-
-| | Old S4 loop | Harnessed S4 |
-| --- | ---: | ---: |
-| Python calls | 4 | 4 |
-| Turns | 3 | 2 |
-| Python errors | 2 | 0 |
-| Hand-judged signals | 6/7 | 6/7 |
-| Reconstructable session | no | yes |
-| Authority boundary | implicit | explicit |
-
-The intelligence result stayed the same, including the same concentration miss. The recurring fresh-namespace `NameError` disappeared because the Python tool contract finally stated that each call receives a fresh namespace; the bench semantics themselves were not changed.
-
-See [`s6/results/FINDINGS.md`](s6/results/FINDINGS.md).
-
----
+No S16 laboratory is planned. The current goal is to use the established machinery inside a more coherent company-centric product rather than manufacturing additional governance puzzles without an observed need.
 
 ## Evidence discipline
 
-This lab tries hard not to turn one successful run into a universal claim.
-
-Recurring practices include:
+The lab tries not to turn one successful model run into a universal claim. Repeated practices include:
 
 - freeze expectations before model calls;
-- preserve misses and surprising outputs;
+- preserve misses and negative results;
 - mirror/counterexample cases;
 - permutation tests where ordering could confound a result;
+- falsify the grader as well as the model;
 - distinguish mechanically observed facts from LLM inference;
 - distinguish operator correction from mechanical truth;
 - keep historical experiments frozen;
-- treat keyword scans as hints, not authoritative semantic grading;
-- record model/tool transcripts and provenance.
+- record model/tool transcripts and provenance;
+- state explicitly when evidence is narrow, n=1, model-specific or incomplete.
 
-Several rounds intentionally document errors in their own oracle or first-pass evaluator rather than silently correcting the result after the fact.
+## Known engineering cleanup
 
-Individual experiments are still generally **one model / one seed / one run**, so they are evidence of behaviour, not a distribution of reliability.
+A recent external review correctly identified several cheap maintainability improvements that remain useful but are secondary to product integration:
 
----
+- share LLM client/configuration across **live product paths** while leaving frozen experiments pinned to what they actually ran;
+- provide one runner for the many module `--self-test` entry points;
+- add an explicit dependency manifest;
+- split task-specific modeller prompts/policies out of the large `modeller/pipeline.py` when doing so can be kept behavior-preserving.
 
-## Current direction
+These are engineering tasks, not new research claims.
 
-The next research direction is to close the learning loop:
+## Where to read next
 
-> **When a supervisory question repeatedly proves useful, can it be proposed, conflict-checked and human-approved into a deterministic platform measurement — while keeping fact and interpretation separate?**
-
-The concentration/blast-radius method is a natural first candidate because it now has a history across S4–S6.
-
-The intended test is not merely “can we add another field to the snapshot?” It is whether the full authority path works:
-
-```text
-repeated useful analysis
-→ improvement proposal
-→ rule/conflict check
-→ human approval
-→ deterministic measurement
-→ cheaper future supervision
-```
-
-No autonomous self-modification is authorized.
-
----
+- [PRODUCT.md](PRODUCT.md) — current product mental model, live components, missing integration and next direction.
+- [`.handoff.md`](.handoff.md) — detailed current implementation handoff.
+- [`falsification_ledger.md`](falsification_ledger.md) — historical falsification/correction record.
+- [`research_agentic_data_task_modelling.md`](research_agentic_data_task_modelling.md) — earlier research framing.
+- [`MIGRATION.json`](MIGRATION.json) — repository migration authority/history.
 
 ## Repository history
 
-This repository inherited the full history and tags of `Alleyfoo/Data-Task-Modelling-Lab`.
-
-The old source repository was frozen at `bb128b8` / tag `learning-lab-start`; active development continues here. [`MIGRATION.json`](MIGRATION.json) records the crossing.
-
-Older root-level research documents and experiment directories are intentionally preserved. They are the history and deterministic floor that led to the current Learning Lab; they are not the best starting point for understanding the current research target.
-
-For the detailed chronological state, see [`.handoff.md`](.handoff.md).
-
----
-
-## Status
-
-**S1–S6 complete and frozen.**
-
-Current floor:
-
-```text
-S1  supervisor can notice
-S2  supervisor can learn meaning + attention
-S3  supervisor can reason against institutional rules
-S4  supervisor can invent computation at fleet scale
-S5  supervisor can learn and transfer a way of investigating
-S6  supervisor has an explicit auditable harness and authority boundary
-```
-
-The project is now testing whether useful intelligence can teach the deterministic platform what should become ordinary machinery — without giving the LLM silent production authority.
+This repository inherited the history and tags of `Alleyfoo/Data-Task-Modelling-Lab`. The old source was frozen at the migration boundary; active development continues in `Alleyfoo/learning-lab` on `main`.
