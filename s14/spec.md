@@ -129,7 +129,10 @@ Route tools (filing — one per route; calling one IS the route decision):
 - `file_measurement(text, metric)` → appends to `measurement_register.jsonl`;
   returns `MEAS-###` id. Route = MEASUREMENT.
 - `file_skill(text, procedure)` → appends to `skill_register.jsonl`; returns
-  `SKIL-###`. Route = SKILL_WORKFLOW.
+  `WORK-###`. Route = SKILL_WORKFLOW. (The id prefix is `WORK` and the return
+  string says `WORKFLOW`, not `SKILL` — the no-interpretation canary's blunt
+  substring matcher flags `ill` inside `skill`, a false positive on an id prefix
+  that is not a fleet verdict. Renaming keeps the canary un-weakened.)
 - `file_duplicate_rule(text, restated_rule)` → validates `restated_rule` is a
   known rule id; appends to `duplicate_register.jsonl`; returns `DUP-###`.
   Route = DUPLICATE_RULE.

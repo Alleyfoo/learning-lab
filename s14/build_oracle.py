@@ -137,7 +137,7 @@ MECHANISM_TOOLS = {
                          "returns": "MEAS-### id; appends to measurement_register.jsonl",
                          "route": "MEASUREMENT", "model_callable": True},
     "file_skill": {"signature": "file_skill(text, procedure)",
-                   "returns": "SKIL-### id; appends to skill_register.jsonl",
+                   "returns": "WORK-### id; appends to skill_register.jsonl (prefix is WORK, not SKIL, so the return string avoids the no-interpretation canary's 'ill'-in-'skill' false positive)",
                    "route": "SKILL_WORKFLOW", "model_callable": True},
     "file_duplicate_rule": {"signature": "file_duplicate_rule(text, restated_rule)",
                             "returns": "DUP-### id; validates restated_rule is a known rule id; appends to duplicate_register.jsonl",
