@@ -112,6 +112,18 @@ def append_improvement(entry: dict) -> dict:
     return entry
 
 
+def append_rule(entry: dict) -> dict:
+    """Append a rule to the real rulebook (the only path that grows it).
+
+    Workspace v0 activation: a human activates a proposed NEW_RULE from the
+    backlog, and the activated rule is appended here so future runs see it via
+    RulebookContext. The 5 proven seed rules are never touched by this; it only
+    ever appends. `entry` should carry {at, seeded, id, area, statement, provenance}.
+    """
+    _append(RULEBOOK_FILE, entry)
+    return entry
+
+
 def seed_rules(*, force: bool = False) -> list[dict]:
     """Seed the rulebook with the proven architectural rules.
 
