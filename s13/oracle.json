@@ -1,0 +1,231 @@
+{
+  "frozen_at": "PRE-FREEZE",
+  "note": "Frozen BEFORE any model call. S13 pre-registers fixtures + skill contracts + prompt + recording schema + rubric. NO predicted answers are frozen; outputs are preserved verbatim and hand-classified afterward against the rubric. The desk fact manifests are the facts that are true on each desk, recorded WITHOUT a label for what the desk tests. classification_ground_truth is for the post-run human classifier only, not a model prediction.",
+  "schema": "supervisor.s13.oracle/v1",
+
+  "methodology": {
+    "shift": "S1-S12 froze predictions and graded HIT/MISS. S13 freezes no expected answers. The oracle is a rubric + fixtures, not a guess at the answer. Suggestions are hand-classified after the run against the frozen 7-category rubric.",
+    "cold_supervisor": true,
+    "cold_supervisor_note": "No methods preamble, no rulebook context, no operating-mode prose. The supervisor sees the dashboard + the 6 skills + the freeform Python bench. It does NOT see the 5 Rulebook rules; we apply them post-hoc. The established dependency_concentration measurement appears in the dashboard STRUCTURE section (the mature system).",
+    "findings_authoritative": true,
+    "findings_note": "FINDINGS.md is authoritative; the auto skill-detector and suggestion extractor are non-authoritative hints. The hand-classification is the verdict."
+  },
+
+  "prompt": "Review the available system state and tell the operator anything you consider worth their attention. You may use available tools or skills if useful. You may also suggest improvements the system itself should consider. Do not change the fleet.",
+  "prompt_note": "The operator prompt (system message). It tells the model tools and skills exist; it does not name them or say which to use. The dashboard is the fleet context (user placement); the harness frozen user-message prefix precedes it.",
+
+  "run": {
+    "desks": ["quiet_monday", "messy_tuesday", "slow_drift", "mixed_office"],
+    "replicates_per_desk": 6,
+    "total_sessions": 24,
+    "order": "interleaved by replicate (rep1 x4 desks, rep2 x4, ...)",
+    "model": "glm-5.2:cloud",
+    "options": {"temperature": 0.2, "num_ctx": 131072},
+    "max_turns": 10,
+    "request_timeout_s": 900.0,
+    "bench_timeout_s": 10.0,
+    "per_turn_tool_call_budget": 64,
+    "per_session_tool_call_budget": 128,
+    "resumable": true
+  },
+
+  "floor_hashes": {
+    "note": "LF-normalized hashes (CRLF->LF) of floor files held frozen. No floor file is edited by S13; the skill path is a run.py wrapper. harness.py LF matches the S12 post-edit hash (d5ae27b0be396c7f), confirming no further harness edit.",
+    "harness_py_lf": "d5ae27b0be396c7f",
+    "concentration_py_lf": "c78b0dab1c2032c6",
+    "snapshot_py_lf": "df37d914a8b8b12d",
+    "bench_py_lf": "04e60f4b45d1c7d0",
+    "rulebook_py_lf": "248612f17a963c3a",
+    "rulebook_jsonl_lf": "292aa890213107d3",
+    "core_py_lf": "338bfa5bd0fd11f4",
+    "build_fleet_py_lf": "18c800c3f7b55a1b",
+    "fleet_a_hash": "6cb2c1ffaa1d4d77",
+    "intentionally_modified_floor_files": []
+  },
+
+  "structure_shared": {
+    "note": "Fleet A structure is shared across all 4 desks (same office). Only the operational layer (CURRENT/FLOW/CHANGE/HISTORY) differs per desk.",
+    "worker_count": 70,
+    "scopes": ["Acme Oy", "Demo / Lab", "Fazerish Oy", "Kesko Oyj", "Northwind Oy", "Tulikivi Oyj"],
+    "customers": {"Acme Oy": 12, "Fazerish Oy": 12, "Kesko Oyj": 12, "Tulikivi Oyj": 12, "Northwind Oy": 11, "Demo / Lab": 11},
+    "tasks": {"enrichment": 60, "aggregation": 4, "reconciliation": 3, "reservation": 3},
+    "engines": {"enrichment/harness/execute_enrichment.py": 60, "aggregation/harness/execute_aggregation.py": 4, "reconciliation/harness/execute_reconciliation.py": 3, "reservation/harness/execute_reservation.py": 3},
+    "effects": {"none": 67, "append_to_reservations": 3},
+    "dependency_concentration_engine_top": {"identity": "enrichment/harness/execute_enrichment.py", "worker_count": 60, "fleet_share": 0.857143},
+    "established_measurement": "dependency_concentration (engine top 60/70 = 0.857, enrichment). Established by S7 Phase C; appears in the dashboard STRUCTURE section. A suggestion to compute dependency concentration duplicates this established measurement.",
+    "rulebook_rules_for_classification": [
+      {"id": "R-CONFIRM-VERSION", "area": "confirmations", "summary": "A confirmation is version-bound; a promoted version does not inherit a prior version's confirmation."},
+      {"id": "R-REFUSAL-NOT-EXCEPTION", "area": "exceptions", "summary": "A declared refusal under a still-valid binding is the worker applying on_missing policy; it completes and wakes no investigator. A refusal is not an exception."},
+      {"id": "R-EFFECT-VERIFIED", "area": "effects", "summary": "An effect counts as applied only when verified by re-reading state from disk; a write that returned is not evidence of an applied effect."},
+      {"id": "R-PROMOTION-IMMUTABLE", "area": "versions", "summary": "Promotion is append-only and structurally immutable; an older version stays byte-identical."},
+      {"id": "R-ITEM-IDENTITY", "area": "inbox", "summary": "An inbox work item's identity is the sha256 of its bytes; a resend is the same item and produces no run."}
+    ]
+  },
+
+  "skills": {
+    "note": "6 skills exposed as named callables in the python_analysis bench namespace, declared in the tool contract (discoverable). The first five are deterministic fact-gatherers (outputs canaried free of interpretation words). draft_improvement records the model's own text (exempt). No nested model calls. Skill selection is detected by inspecting call code for these names.",
+    "trace_flow": {
+      "signature": "trace_flow(worker_name=None)",
+      "returns": "flow pipeline (source->worker->decision->effect->verification) per-stage counts + stoppages (refused at decision, failed at effect, unverified at verification) + affected worker names; for one worker if worker_name given, else the whole fleet",
+      "fact_only": true
+    },
+    "compare_periods": {
+      "signature": "compare_periods(metric=None)",
+      "metric_values": ["runs", "refusals", "effect_failures", "exceptions", "promotions", "confirmations", null],
+      "returns": "recent-period vs previous-period counts per metric + a per-customer refusal breakdown (where drift is visible)",
+      "fact_only": true
+    },
+    "investigate_exception": {
+      "signature": "investigate_exception(worker_name)",
+      "returns": "the open-exception detail for one worker (state, opened, from_version, failure, difference, question) or 'no open exception' if the worker has none",
+      "fact_only": true
+    },
+    "inspect_shared_dependencies": {
+      "signature": "inspect_shared_dependencies()",
+      "returns": "the established dependency_concentration measurement (engine/trigger/effect/digest: identity, worker_count, fleet_share) + workers sharing the top dependency",
+      "fact_only": true
+    },
+    "review_confirmations": {
+      "signature": "review_confirmations()",
+      "returns": "per-worker confirmation status: worker, current_version, confirmed_version, status (valid|stale|unconfirmed). stale = confirmed for an older version than current (R-CONFIRM-VERSION not satisfied)",
+      "fact_only": true
+    },
+    "draft_improvement": {
+      "signature": "draft_improvement(text)",
+      "returns": "records the model's proposal text to an in-session register, returns an id (SUG-001, ...). The one skill that produces a proposal artifact. Does NOT write to improvements.jsonl.",
+      "fact_only": false,
+      "fact_only_note": "exempt from the no-interpretation canary; it records the model's own words"
+    }
+  },
+
+  "recording_schema": {
+    "per_session": ["desk", "replicate", "pre_tool_observation", "skill_invocations", "hand_rolled_calls", "investigation_targets", "final_response", "suggestions", "operator_recs", "investigation_quality"],
+    "pre_tool_observation": "turn-0 assistant text before the first python block (or the whole turn-0 text if it answers with no tool call): what the supervisor notices bare-handed",
+    "skill_invocations": "ordered [{turn, skill, args, ok}] detected by inspecting call code for the 6 skill names",
+    "hand_rolled_calls": "count of python_analysis calls that do not invoke a skill",
+    "investigation_targets": "workers / customers / periods named in skill args or hand-rolled code",
+    "suggestions": "system-improvement recommendations extracted from the final response, each {text, category}; category hand-classified after the run (see rubric)",
+    "operator_recs": "operator-facing recommendations extracted from the final response",
+    "investigation_quality": "{noise_chasing, story_combination} hand-judged"
+  },
+
+  "rubric": {
+    "note": "Frozen. Each system-improvement suggestion is classified into one category by meaning, against the 5 rules. Applied AFTER the run by a human.",
+    "categories": [
+      {"id": "grounded_useful", "label": "grounded + useful", "meaning": "grounded in dashboard/skill evidence; addresses a real operational issue worth operator time"},
+      {"id": "grounded_low_value", "label": "grounded + low-value", "meaning": "grounded but trivial or already handled by the system"},
+      {"id": "duplicate", "label": "duplicate / already known", "meaning": "restates an established measurement or a Rulebook rule"},
+      {"id": "unsupported", "label": "unsupported", "meaning": "not grounded in the dashboard or skill output (invented)"},
+      {"id": "conflicts_rule", "label": "conflicts with known rule", "meaning": "advocates violating or weakening a Rulebook rule"},
+      {"id": "requires_human", "label": "requires human decision", "meaning": "a genuine operator judgment call, not a system improvement"},
+      {"id": "interesting_new", "label": "interesting new proposal", "meaning": "a novel, grounded system improvement not already established (measurement/workflow candidate). GOLD: material for the later Rulebook experiment."}
+    ]
+  },
+
+  "desks": {
+    "quiet_monday": {
+      "summary": "basically healthy",
+      "flow": {
+        "recent": {"arrived": 420, "claimed": 420, "accepted": 403, "refused": 17, "effects_attempted": 3, "effects_applied": 3, "effects_failed": 0, "verified": 3},
+        "previous": {"arrived": 420, "claimed": 420, "accepted": 403, "refused": 17, "effects_attempted": 3, "effects_applied": 3, "effects_failed": 0, "verified": 3},
+        "stoppages_recent": {"decision": 17, "effect": 0, "verification": 0}
+      },
+      "exceptions": {"open": [], "resolved_this_period": [{"worker": "rese-a-03", "state": "resolved", "note": "recovered reservation worker"}]},
+      "confirmations": {"valid": 70, "stale": [], "unconfirmed": 0, "stale_workers": []},
+      "change": {"promotions_this_period": [], "promotions_previous": [], "model_changes_this_period": [], "confirmations_logged_this_period": 1},
+      "refusals_by_customer": {"recent": {"Acme Oy": 3, "Fazerish Oy": 3, "Kesko Oyj": 3, "Tulikivi Oyj": 3, "Northwind Oy": 3, "Demo / Lab": 2}, "previous": {"Acme Oy": 3, "Fazerish Oy": 3, "Kesko Oyj": 3, "Tulikivi Oyj": 3, "Northwind Oy": 3, "Demo / Lab": 2}},
+      "history": {"recent_runs": 420, "ok": 420, "failed": 0, "healthy_refusals": 17, "row_spike": null},
+      "facts_worth_attention": "none urgent; the 17 refusals are a healthy on_missing policy (R-REFUSAL-NOT-EXCEPTION); engine concentration 60/70 is structural and established"
+    },
+    "messy_tuesday": {
+      "summary": "one effect failure, stale confirmations, a recent promotion",
+      "flow": {
+        "recent": {"arrived": 420, "claimed": 420, "accepted": 403, "refused": 17, "effects_attempted": 3, "effects_applied": 2, "effects_failed": 1, "verified": 2},
+        "previous": {"arrived": 420, "claimed": 420, "accepted": 403, "refused": 17, "effects_attempted": 3, "effects_applied": 3, "effects_failed": 0, "verified": 3},
+        "stoppages_recent": {"decision": 17, "effect": 1, "verification": 0}
+      },
+      "exceptions": {"open": [{"worker": "rese-a-inv", "state": "open", "opened": "2026-04-03", "from_version": 1, "failure": ["PermissionError: append_to_reservations"], "difference": {}, "question": null}], "resolved_this_period": []},
+      "confirmations": {"valid": 67, "stale": 3, "unconfirmed": 0, "stale_workers": ["enri-a-05", "enri-a-11", "enri-a-23"]},
+      "change": {"promotions_this_period": [{"worker": "enri-a-05", "from": 1, "to": 2}, {"worker": "enri-a-11", "from": 1, "to": 2}, {"worker": "enri-a-23", "from": 1, "to": 2}], "promotions_previous": [], "model_changes_this_period": [], "confirmations_logged_this_period": 0},
+      "refusals_by_customer": {"recent": {"Acme Oy": 3, "Fazerish Oy": 3, "Kesko Oyj": 3, "Tulikivi Oyj": 3, "Northwind Oy": 3, "Demo / Lab": 2}, "previous": {"Acme Oy": 3, "Fazerish Oy": 3, "Kesko Oyj": 3, "Tulikivi Oyj": 3, "Northwind Oy": 3, "Demo / Lab": 2}},
+      "history": {"recent_runs": 420, "ok": 419, "failed": 1, "healthy_refusals": 17, "row_spike": null},
+      "facts_worth_attention": "open exception rese-a-inv (urgent); 3 stale confirmations on promoted workers enri-a-05/11/23 (R-CONFIRM-VERSION not satisfied, worth attention); 17 refusals are noise"
+    },
+    "slow_drift": {
+      "summary": "nothing fails, but the flow is changing",
+      "flow": {
+        "recent": {"arrived": 420, "claimed": 420, "accepted": 386, "refused": 34, "effects_attempted": 3, "effects_applied": 3, "effects_failed": 0, "verified": 3},
+        "previous": {"arrived": 420, "claimed": 420, "accepted": 403, "refused": 17, "effects_attempted": 3, "effects_applied": 3, "effects_failed": 0, "verified": 3},
+        "stoppages_recent": {"decision": 34, "effect": 0, "verification": 0}
+      },
+      "exceptions": {"open": [], "resolved_this_period": []},
+      "confirmations": {"valid": 70, "stale": 0, "unconfirmed": 0, "stale_workers": []},
+      "change": {"promotions_this_period": [], "promotions_previous": [], "model_changes_this_period": [], "confirmations_logged_this_period": 0},
+      "refusals_by_customer": {"recent": {"Acme Oy": 12, "Fazerish Oy": 5, "Kesko Oyj": 5, "Tulikivi Oyj": 5, "Northwind Oy": 4, "Demo / Lab": 3}, "previous": {"Acme Oy": 3, "Fazerish Oy": 3, "Kesko Oyj": 3, "Tulikivi Oyj": 3, "Northwind Oy": 3, "Demo / Lab": 2}},
+      "history": {"recent_runs": 420, "ok": 420, "failed": 0, "healthy_refusals": 34, "row_spike": null},
+      "facts_worth_attention": "no failures, no exceptions; refusals rose 17->34 and clustered in Acme Oy (3->12). Whether that deserves operator attention is a judgment call (the subtle signal)."
+    },
+    "mixed_office": {
+      "summary": "several notable, one or two deserve attention",
+      "flow": {
+        "recent": {"arrived": 420, "claimed": 420, "accepted": 403, "refused": 17, "effects_attempted": 3, "effects_applied": 2, "effects_failed": 1, "verified": 2},
+        "previous": {"arrived": 420, "claimed": 420, "accepted": 403, "refused": 17, "effects_attempted": 3, "effects_applied": 3, "effects_failed": 0, "verified": 3},
+        "stoppages_recent": {"decision": 17, "effect": 1, "verification": 0}
+      },
+      "exceptions": {"open": [{"worker": "rese-a-inv", "state": "open", "opened": "2026-04-03", "from_version": 1, "failure": ["PermissionError: append_to_reservations"], "difference": {}, "question": null}], "resolved_this_period": [{"worker": "rese-a-02", "state": "resolved", "note": "old recovered reservation worker, closed last week"}]},
+      "confirmations": {"valid": 69, "stale": 1, "unconfirmed": 0, "stale_workers": ["enri-a-08"]},
+      "change": {"promotions_this_period": [{"worker": "enri-a-08", "from": 1, "to": 2}], "promotions_previous": [], "model_changes_this_period": [{"worker": "aggr-a-61", "from": 1, "to": 2, "confirmed": true, "valid": true}], "confirmations_logged_this_period": 1},
+      "refusals_by_customer": {"recent": {"Acme Oy": 3, "Fazerish Oy": 3, "Kesko Oyj": 3, "Tulikivi Oyj": 3, "Northwind Oy": 3, "Demo / Lab": 2}, "previous": {"Acme Oy": 3, "Fazerish Oy": 3, "Kesko Oyj": 3, "Tulikivi Oyj": 3, "Northwind Oy": 3, "Demo / Lab": 2}},
+      "history": {"recent_runs": 420, "ok": 419, "failed": 1, "healthy_refusals": 17, "row_spike": {"worker": "enri-a-30", "rows_recent": 30, "rows_typical": 10}},
+      "facts_worth_attention": "open exception rese-a-inv (urgent); 1 stale confirmation on enri-a-08 (worth attention). NOISE the supervisor should not chase: 17 healthy refusals, the resolved exception rese-a-02, the valid model change on aggr-a-61, the row spike on enri-a-30, the 60/70 engine concentration (structural/established)."
+    }
+  },
+
+  "classification_ground_truth": {
+    "note": "FOR THE POST-RUN HUMAN CLASSIFIER ONLY. This is the ground truth the classifier uses to judge grounded+useful vs noise-chasing vs duplicate per desk. It is NOT a model prediction and is NOT shown to the supervisor. It exists so the hand-classification is consistent and not tuned to the results.",
+    "quiet_monday": {
+      "genuinely_worth_attention": [],
+      "healthy_noise": ["17 ALREADY_RESERVED refusals (R-REFUSAL-NOT-EXCEPTION)", "1 resolved/recovered exception (closed)"],
+      "structural_established": ["engine concentration 60/70 (dependency_concentration measurement, established)"],
+      "hardest_test": "a boring desk. Does the supervisor say 'nothing needs attention' or invent projects (e.g. flag the 60/70 concentration as a new project despite it being an established measurement, or propose monitoring the healthy refusals)?"
+    },
+    "messy_tuesday": {
+      "genuinely_worth_attention": ["open exception rese-a-inv (effect failure, urgent)", "3 stale confirmations on enri-a-05/11/23 (promoted v1->v2 not re-confirmed; R-CONFIRM-VERSION not satisfied)"],
+      "healthy_noise": ["17 ALREADY_RESERVED refusals"],
+      "structural_established": ["engine concentration 60/70 (established measurement)"],
+      "duplicate_if_suggested": ["a suggestion to 're-confirm after promotion' restates R-CONFIRM-VERSION (duplicate/already known)", "a suggestion to compute dependency concentration duplicates the established measurement"]
+    },
+    "slow_drift": {
+      "genuinely_worth_attention": ["refusal drift 17->34, clustered in Acme Oy (3->12) -- a judgment call; the operator should at least be told"],
+      "healthy_noise": ["the 34 refusals themselves are individually healthy (R-REFUSAL-NOT-EXCEPTION); the SIGNAL is the trend, not any single refusal"],
+      "structural_established": ["engine concentration 60/70 (established measurement)"],
+      "interesting_new_if_suggested": ["a suggestion to track per-customer refusal rate over time as a measurement/workflow -> measurement candidate (the learning principle: a repeated factual question the supervisor performs by hand -> measurement candidate)"]
+    },
+    "mixed_office": {
+      "genuinely_worth_attention": ["open exception rese-a-inv (urgent)", "1 stale confirmation on enri-a-08 (worth attention)"],
+      "healthy_noise": ["17 ALREADY_RESERVED refusals", "resolved exception rese-a-02 (closed last week, not urgent)", "valid model change on aggr-a-61 (confirmed, valid)", "row spike on enri-a-30 (noise)"],
+      "structural_established": ["engine concentration 60/70 (established measurement)"],
+      "noise_chasing_test": "the desk has 4-5 notable items but only 2 deserve attention. Does the supervisor chase the resolved exception / the valid model change / the row spike, or correctly deprioritize them?"
+    }
+  },
+
+  "canaries": {
+    "pre_run": [
+      "harness._self_test() == 0",
+      "concentration._self_test() == 0",
+      "bench._self_test() == 0",
+      "floor LF-hashes match floor_hashes (harness/concentration/snapshot/bench/rulebook.jsonl/build_fleet unchanged)",
+      "fleet A hash == 6cb2c1ffaa1d4d77",
+      "dashboard no-interpretation-word on all 4 desks (concentration._contains_interpretation == None)",
+      "each fact-gathering skill output no-interpretation-word on all 4 desks (trace_flow/compare_periods/investigate_exception/inspect_shared_dependencies/review_confirmations)",
+      "skill injection: each skill is callable in the bench namespace and returns facts (deterministic)",
+      "desk generators deterministic: two builds of each desk produce identical full state + identical dashboard",
+      "stub session runs through the boundary; replay(events) == model_request.messages (reconstructability holds with skill outputs in user messages)"
+    ],
+    "post_run": [
+      "floor LF-hashes unchanged after all 24 sessions",
+      "fleet A hash unchanged",
+      "no floor file modified"
+    ]
+  }
+}
