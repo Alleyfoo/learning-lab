@@ -1,0 +1,16 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'digest', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\n\n# Customer breakdown\ncust = collections.Counter(w[\"customer\"] for w in workers)\nprint(\"=== Customers ===\")\nfor c, n in cust.most_common():\n    print(f\"  {c}: {n}\")"
+  }
+]

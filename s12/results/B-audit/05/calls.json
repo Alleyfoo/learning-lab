@@ -1,0 +1,44 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentration\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"\\n="
+  },
+  {
+    "purposes": [
+      "complementary"
+    ],
+    "primary": "complementary",
+    "evidence": {
+      "complementary": "reads complementary fields ['task', 'customer', 'name', 'investigation']"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Check the exception worker and any other anomalies\nfor w in workers:\n    s = w[\"summary\"]\n    if s[\"last_status\"] != \"ok\" or s[\"exceptions\"] > 0 or s[\"effects_failed\"] > 0:\n        print(f\"WORKER: {w['name']} | task={w"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'effect', 'task'] over workers"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\n\n# Check the exception worker and any other anomalies\nfor w in workers:\n    s = w[\"summary\"]\n    if s[\"last_status\"] != \"ok\" or s[\"exceptions\"] > 0 or s[\"effects_failed\"]"
+  }
+]

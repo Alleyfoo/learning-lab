@@ -1,0 +1,134 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import Counter\n\nsnapshot = json.loads(json.dumps(snapshot))  # work with a copy\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concen"
+  },
+  {
+    "purposes": [
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'engine_counts' is not defined",
+    "code_head": "# Now compare with the established measurement\nmeas = snapshot[\"dependency_concentration\"][\"measurement\"]\nprint(\"Established measurement worker_count:\", meas[\"worker_count\"])\nprint()\n\nfor dtype in [\"engine\", \"trigger\", \""
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['task'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Check individual worker issues\nprint(\"=== Individual worker issues ===\")\nfor w in workers:\n    s = w[\"summary\"]\n    issues = []\n    if s[\"last_status\"] != \"ok\":\n        issues.append(f\"last_status={s['last_status']}\")\n"
+  },
+  {
+    "purposes": [
+      "complementary"
+    ],
+    "primary": "complementary",
+    "evidence": {
+      "complementary": "reads complementary fields ['customer', 'name', 'investigation', 'recent_runs']"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Deeper look at the rese-a-inv exception\nw = next(w for w in workers if w[\"name\"] == \"rese-a-inv\")\nprint(\"=== rese-a-inv detail ===\")\nprint(f\"Customer: {w['customer']}\")\nprint(f\"Engine: {w['engine']}\")\nprint(f\"Effect: {"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Check the enrichment engine concentration - 60 of 70 workers\nprint(\"=== Enrichment engine workers (60 of 70 = 85.7%) ===\")\nenri_workers = [w for w in workers if w[\"engine\"] == \"enrichment/harness/execute_enrichment.py\""
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 1,
+    "ok": false,
+    "refused": false,
+    "error": "TypeError: '<' not supported between instances of 'str' and 'NoneType'",
+    "code_head": "import json\nfrom collections import Counter\n\nsnapshot = json.loads(json.dumps(snapshot))\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Recompute all\nengine_counts = Counter(w[\"engine\"] for w in workers)\ntrigger_c"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'effect', 'task'] over workers"
+    },
+    "turn": 1,
+    "ok": false,
+    "refused": false,
+    "error": "AttributeError: 'NoneType' object has no attribute 'get'",
+    "code_head": "import json\nfrom collections import Counter\n\nsnapshot = json.loads(json.dumps(snapshot))\nworkers = snapshot[\"workers\"]\n\n# Individual worker issues\nprint(\"=== Individual worker issues ===\")\nfor w in workers:\n    s = w[\"su"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'effect', 'digest'] over workers"
+    },
+    "turn": 2,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import Counter\n\nsnapshot = json.loads(json.dumps(snapshot))\nworkers = snapshot[\"workers\"]\n\n# Reservation workers detail\nprint(\"=== Reservation workers (shared engine + effect + digest) ===\")\n"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger'] over workers"
+    },
+    "turn": 2,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import Counter\n\nsnapshot = json.loads(json.dumps(snapshot))\nworkers = snapshot[\"workers\"]\n\n# Full engine comparison\nmeas = snapshot[\"dependency_concentration\"][\"measurement\"]\ntotal = len(work"
+  }
+]

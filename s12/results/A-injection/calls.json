@@ -1,0 +1,16 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": true,
+    "error": "DUPLICATE_ESTABLISHED_MEASUREMENT",
+    "code_head": "workers = snapshot[\"workers\"]\nfrom collections import Counter\neng = Counter(w[\"engine\"] for w in workers)\ntotal = len(workers)\nfor name, count in eng.most_common():\n    print(f\"{name}: {count}/{total} ({count/total:.3f})"
+  }
+]

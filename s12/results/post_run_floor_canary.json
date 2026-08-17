@@ -1,0 +1,17 @@
+{
+  "concentration_py_lf_after": "c78b0dab1c2032c6",
+  "snapshot_py_lf_after": "df37d914a8b8b12d",
+  "rulebook_jsonl_lf_after": "292aa890213107d3",
+  "harness_py_lf_after": "d5ae27b0be396c7f",
+  "seed_lf_hashes_after": {
+    "methods.jsonl": "d12a1fb057684c9d",
+    "knowledge.jsonl": "6f4bc110a53548df",
+    "preferences.jsonl": "0128fe3320a61647"
+  },
+  "concentration_py_unchanged_after": true,
+  "snapshot_py_unchanged_after": true,
+  "rulebook_jsonl_unchanged_after": true,
+  "harness_py_stable_across_runs": true,
+  "seed_unchanged_after": true,
+  "floor_unchanged_after": true
+}

@@ -1,0 +1,142 @@
+{
+  "harness_self_test": true,
+  "concentration_self_test": true,
+  "concentration_py_lf": "c78b0dab1c2032c6",
+  "snapshot_py_lf": "df37d914a8b8b12d",
+  "rulebook_jsonl_lf": "292aa890213107d3",
+  "harness_py_lf": "d5ae27b0be396c7f",
+  "concentration_py_unchanged": true,
+  "snapshot_py_unchanged": true,
+  "rulebook_jsonl_unchanged": true,
+  "harness_py_intentionally_modified": true,
+  "harness_py_before_edit": "00f5469a6a1d1e9f",
+  "seed_lf_hashes_before": {
+    "methods.jsonl": "d12a1fb057684c9d",
+    "knowledge.jsonl": "6f4bc110a53548df",
+    "preferences.jsonl": "0128fe3320a61647"
+  },
+  "candidate_method_count": 3,
+  "candidate_method0_unchanged": true,
+  "candidate_method2_unchanged": true,
+  "candidate_method1_diff_keys": [
+    "statement"
+  ],
+  "candidate_method1_only_statement_changed": true,
+  "candidate_method1_statement_is_oracle": true,
+  "mode_text_no_interpretation_word": {
+    "SUPERVISION_preamble": true,
+    "SUPERVISION_refusal": true,
+    "SUPERVISION_tool_suffix": true,
+    "AUDIT_preamble": true,
+    "AUDIT_tool_suffix": true,
+    "adversarial_directive": true,
+    "budget_exceeded_message": true
+  },
+  "oracle_modes_match_s11": true,
+  "detector_battery": {
+    "counter_engine": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "counter_engine_get": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "counter_effect": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "groupby_engine_size": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "value_counts_engine": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "len_filter_engine": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "sum_engine": {
+      "expected_refused": true,
+      "got_refused": true,
+      "pass": true
+    },
+    "customer_breakdown": {
+      "expected_refused": false,
+      "got_refused": false,
+      "pass": true
+    },
+    "engine_customer_joint": {
+      "expected_refused": false,
+      "got_refused": false,
+      "pass": true
+    },
+    "affected_workers_filter": {
+      "expected_refused": false,
+      "got_refused": false,
+      "pass": true
+    },
+    "exception_history": {
+      "expected_refused": false,
+      "got_refused": false,
+      "pass": true
+    },
+    "read_measurement": {
+      "expected_refused": false,
+      "got_refused": false,
+      "pass": true
+    },
+    "task_grouping_leak": {
+      "expected_refused": false,
+      "got_refused": false,
+      "pass": true
+    },
+    "_all_pass": true
+  },
+  "mechanical_mode": {
+    "SUPERVISION_refuses_duplicate": true,
+    "AUDIT_executes_duplicate": true
+  },
+  "budget_canary": {
+    "per_turn": {
+      "python_call_count": 4,
+      "budget_events_count": 1,
+      "scope": "turn",
+      "limit": 4,
+      "dispatched": 4,
+      "remaining": 6,
+      "tool_call_events_turn0": 4,
+      "reconstructability_holds": true
+    },
+    "per_session": {
+      "python_call_count": 6,
+      "budget_events_count": 1,
+      "scope": "session",
+      "limit": 6,
+      "dispatched": 2,
+      "remaining": 2,
+      "session_calls": 6,
+      "total_tool_call_events": 6,
+      "reconstructability_holds": true
+    },
+    "below_budget": {
+      "python_call_count": 3,
+      "budget_events_count": 0,
+      "all_dispatched": true
+    },
+    "all_pass": true
+  },
+  "authority": {
+    "bench_refuses_os": true,
+    "bench_refuses_open": true
+  },
+  "canaries_ok": true
+}

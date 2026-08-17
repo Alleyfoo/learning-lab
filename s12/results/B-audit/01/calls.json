@@ -1,0 +1,120 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentration\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"\\n="
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Detailed comparison: check each type for discrepancies\nmeas = snapshot[\"dependency_concentration\"][\"measurement\"]\ntotal = len(workers)\n\ntypes_to_check = {\n    \"engine\": lambda w: w[\"engine\"],\n    \"trigger\": lambda w: w"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['effect', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let's also look at the task type distribution and customer distribution for context\ntask_counts = collections.Counter(w[\"task\"] for w in workers)\nprint(\"=== TASK TYPES ===\")\nfor t, c in task_counts.most_common():\n    p"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['digest', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let's understand the digest distribution better - what do the digests map to?\ndigest_to_workers = collections.defaultdict(list)\nfor w in workers:\n    vh = w.get(\"version_history\", [])\n    cv = w.get(\"current_version\")\n"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let's look at the enrichment engine concentration more carefully\n# 60 of 70 workers use the enrichment engine - that's 85.7%\n# Let's verify which workers use which engine\nengine_to_workers = collections.defaultdict(lis"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Detailed comparison: check each type for discrepancies\nmeas = snapshot[\"dependency_concentration\"][\"measurement\"]\n\ntypes_to_check = {\n    \"engine\""
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['effect', 'task'] over workers"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\n\n# Task type distribution\ntask_counts = collections.Counter(w[\"task\"] for w in workers)\nprint(\"=== TASK TYPES ===\")\nfor t, c in task_counts.most_common():\n    print(f\"  {"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'digest', 'task'] over workers"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\n\n# Engine -> workers detail\nengine_to_workers = collections.defaultdict(list)\nfor w in workers:\n    engine_to_workers[w[\"engine\"]].append(w[\"name\"])\n\nprint(\"=== ENGINE ->"
+  }
+]

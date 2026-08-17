@@ -1,0 +1,18 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentration\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"\\n="
+  }
+]

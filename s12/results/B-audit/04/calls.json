@@ -1,0 +1,16 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json\nfrom collections import Counter\n\nsnapshot = json.loads(json.dumps(snapshot))  # work with a copy\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concen"
+  }
+]

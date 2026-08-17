@@ -1,0 +1,90 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\nprint(f\"Total workers: {total}\")\n\n# Recompute engine concentration\nengine_counts = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"\\n="
+  },
+  {
+    "purposes": [
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'engine_counts' is not defined",
+    "code_head": "# Now let's verify each type matches exactly\nmeas = snapshot[\"dependency_concentration\"][\"measurement\"]\n\ndef compare(dtype, recomputed):\n    established = {e[\"identity\"]: (e[\"worker_count\"], e[\"fleet_share\"]) for e in me"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'task'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let's also look at the individual worker health issues\nprint(\"=== WORKER HEALTH ISSUES ===\")\nfor w in workers:\n    s = w[\"summary\"]\n    if s[\"last_status\"] != \"ok\" or s[\"exceptions\"] > 0 or s[\"investigation\"] != \"none\""
+  },
+  {
+    "purposes": [
+      "complementary"
+    ],
+    "primary": "complementary",
+    "evidence": {
+      "complementary": "reads complementary fields ['task', 'customer', 'name', 'recent_runs']"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let's look at the reservation workers more closely - they share the same digest and engine\nprint(\"=== RESERVATION WORKERS (shared engine + digest) ===\")\nfor w in workers:\n    if w[\"task\"] == \"reservation\":\n        s = "
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates ['engine', 'digest'] over workers"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Let's understand the enrichment engine concentration better - 60 of 70 workers\nprint(\"=== ENRICHMENT ENGINE CONCENTRATION ===\")\nenri_workers = [w for w in workers if w[\"engine\"] == \"enrichment/harness/execute_enrichmen"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "measurement_read": "reads dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates ['engine', 'trigger', 'effect', 'digest', 'task'] over workers"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Compare recomputed vs established\nmeas = snapshot[\"dependency_concentration\"][\"measurement\"]\n\nengine_counts = collections.Counter(w[\"engine\"] for "
+  }
+]

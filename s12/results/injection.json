@@ -1,0 +1,26 @@
+{
+  "experiment": "S12-A2",
+  "kind": "deterministic_injection",
+  "attempted_duplicate": 1,
+  "executed_duplicate": 0,
+  "refused_duplicate": 1,
+  "final_answer_correct": true,
+  "refusal_event_present": true,
+  "python_call_count": 1,
+  "stop_reason": "final",
+  "turn_count": 2,
+  "reconstructability_holds": true,
+  "call_mix": {
+    "total_calls": 1,
+    "rederivation_attempted": 1,
+    "rederivation_executed": 0,
+    "rederivation_refused": 1,
+    "measurement_read": 0,
+    "complementary": 0,
+    "probe": 0,
+    "failed_calls": 0,
+    "nameerrors": 0,
+    "refused_calls": 1
+  },
+  "final_response": "I will not re-derive it. The established dependency_concentration measurement shows 60/70 workers (85.7%, share 0.857) on one engine -- a single bug there would affect most of the fleet."
+}
