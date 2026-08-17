@@ -939,6 +939,17 @@ def main(argv: list) -> int:
     N = args["replicates"]
     RESULTS.mkdir(parents=True, exist_ok=True)
 
+    # Windows piped stdout/stderr default to cp1252; model prose (arrows,
+    # smart quotes, etc. captured into investigation_targets) would crash
+    # print() and -- via a broad except -- clobber an already-saved good run.
+    # Force utf-8 so console/tee never drops a rep. (File saves already use
+    # encoding="utf-8"; this only affects the console mirror.)
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
     print("=== S13 CANARIES (no model call) ===")
     fleet_a = _load_fleet_a()
     desks = _build_desks(fleet_a)
@@ -990,14 +1001,14 @@ def main(argv: list) -> int:
                       f"skills={len(d.get('skill_invocations', []))}")
                 continue
             print(f"-- [{desk}] rep {r:02d} running ...", flush=True)
+            session = None
             try:
                 session = _run_desk(desk, r, desks[desk])
                 _save_run(session, desk, r)
                 by_desk[desk].append(session)
-                _print_summary(session)
             except Exception as e:
                 tb = traceback.format_exc(limit=6)
-                sys.stderr.write(f"-- [{desk}] rep {r:02d} FAILED: {e}\n{tb}\n")
+                sys.stderr.write(f"-- [{desk}] rep {r:02d} FAILED (run/save): {e}\n{tb}\n")
                 err = {"failed": True, "error": str(e), "desk": desk,
                        "replicate": r, "traceback": tb, "at": _stamp()}
                 d = RESULTS / desk / f"{r:02d}"
@@ -1005,6 +1016,14 @@ def main(argv: list) -> int:
                 (d / "run.json").write_text(
                     json.dumps(err, indent=2, ensure_ascii=False) + "\n",
                     encoding="utf-8")
+            # best-effort console summary -- NEVER clobber a good save. With
+            # utf-8 stdout this should not raise; the guard is defense-in-depth.
+            if session is not None:
+                try:
+                    _print_summary(session)
+                except Exception as pe:
+                    sys.stderr.write(
+                        f"-- [{desk}] rep {r:02d} summary print skipped: {pe}\n")
 
     print()
     print("=" * 70)
@@ -1020,7 +1039,10 @@ def main(argv: list) -> int:
     (RESULTS / "comparison.json").write_text(
         json.dumps(comp, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     (RESULTS / "comparison.md").write_text(_comparison_md(comp), encoding="utf-8")
-    print(_comparison_md(comp))
+    try:
+        print(_comparison_md(comp))
+    except Exception as pe:
+        sys.stderr.write(f"comparison echo skipped: {pe}\n")
 
     summary = {
         "run_id": _stamp(), "model": core.MODEL, "options": OPTIONS,
