@@ -1,0 +1,64 @@
+{
+  "harness_self_test": true,
+  "concentration_self_test": true,
+  "concentration_py_normalized_hash": "c78b0dab1c2032c6",
+  "concentration_py_unchanged": true,
+  "contract_no_interpretation_word": true,
+  "contract_bad_word": null,
+  "authority_blocks_no_interpretation_word": {
+    "established": true,
+    "candidate": true,
+    "invalid": true
+  },
+  "authority_blocks_bad_word": {
+    "established": null,
+    "candidate": null,
+    "invalid": null
+  },
+  "notes_no_interpretation_word": true,
+  "notes_bad_word": null,
+  "envelope_no_interpretation_word": {
+    "A-established": true,
+    "A-candidate": true,
+    "A-invalid": true,
+    "D-established": true
+  },
+  "envelope_bad_word": {
+    "A-established": null,
+    "A-candidate": null,
+    "A-invalid": null,
+    "D-established": null
+  },
+  "measure_pure_snapshot_unchanged": true,
+  "mechanical_integrity": {
+    "A_actual_hash": "6cb2c1ffaa1d4d77",
+    "established_source_equals_attached": true,
+    "established_integrity_valid": true,
+    "candidate_integrity_unverified": true,
+    "candidate_status_candidate": true,
+    "invalid_source_differs_attached": true,
+    "invalid_integrity_invalid": true,
+    "invalid_reason_present": true,
+    "invalid_recorded_hash": "0000000000000000"
+  },
+  "seed_lf_hashes_before": {
+    "methods.jsonl": "d12a1fb057684c9d",
+    "knowledge.jsonl": "6f4bc110a53548df",
+    "preferences.jsonl": "0128fe3320a61647"
+  },
+  "candidate_method_count": 3,
+  "candidate_method0_unchanged": true,
+  "candidate_method2_unchanged": true,
+  "candidate_method1_diff_keys": [
+    "statement"
+  ],
+  "candidate_method1_only_statement_changed": true,
+  "candidate_method1_statement_is_oracle": true,
+  "original_method2_statement_is_oracle": true,
+  "floor_hashes_before": {
+    "snapshot.py": "df37d914a8b8b12d",
+    "rulebook.jsonl": "7949cde4e8724f1b",
+    "concentration.py": "8a4d8d4cdbaec2a8"
+  },
+  "canaries_ok": true
+}

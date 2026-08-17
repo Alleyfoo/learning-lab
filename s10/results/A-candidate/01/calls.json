@@ -1,0 +1,18 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\nprint(\"Total workers:\", len(workers))\n\n# Current incidents\npending = snapshot.get(\"pending_exceptions\", [])\nprint(\"\\nPending exceptions:\", len(pending))\nfor p in pe"
+  }
+]

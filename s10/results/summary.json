@@ -1,0 +1,504 @@
+{
+  "run_id": "20260817T053805Z",
+  "model": "glm-5.2:cloud",
+  "options": {
+    "temperature": 0.2,
+    "num_ctx": 131072
+  },
+  "max_turns": 10,
+  "replicates_per_cell": 8,
+  "cells": [
+    "A-established",
+    "A-candidate",
+    "A-invalid",
+    "D-established"
+  ],
+  "canary": {
+    "harness_self_test": true,
+    "concentration_self_test": true,
+    "concentration_py_normalized_hash": "c78b0dab1c2032c6",
+    "concentration_py_unchanged": true,
+    "contract_no_interpretation_word": true,
+    "contract_bad_word": null,
+    "authority_blocks_no_interpretation_word": {
+      "established": true,
+      "candidate": true,
+      "invalid": true
+    },
+    "authority_blocks_bad_word": {
+      "established": null,
+      "candidate": null,
+      "invalid": null
+    },
+    "notes_no_interpretation_word": true,
+    "notes_bad_word": null,
+    "envelope_no_interpretation_word": {
+      "A-established": true,
+      "A-candidate": true,
+      "A-invalid": true,
+      "D-established": true
+    },
+    "envelope_bad_word": {
+      "A-established": null,
+      "A-candidate": null,
+      "A-invalid": null,
+      "D-established": null
+    },
+    "measure_pure_snapshot_unchanged": true,
+    "mechanical_integrity": {
+      "A_actual_hash": "6cb2c1ffaa1d4d77",
+      "established_source_equals_attached": true,
+      "established_integrity_valid": true,
+      "candidate_integrity_unverified": true,
+      "candidate_status_candidate": true,
+      "invalid_source_differs_attached": true,
+      "invalid_integrity_invalid": true,
+      "invalid_reason_present": true,
+      "invalid_recorded_hash": "0000000000000000"
+    },
+    "seed_lf_hashes_before": {
+      "methods.jsonl": "d12a1fb057684c9d",
+      "knowledge.jsonl": "6f4bc110a53548df",
+      "preferences.jsonl": "0128fe3320a61647"
+    },
+    "candidate_method_count": 3,
+    "candidate_method0_unchanged": true,
+    "candidate_method2_unchanged": true,
+    "candidate_method1_diff_keys": [
+      "statement"
+    ],
+    "candidate_method1_only_statement_changed": true,
+    "candidate_method1_statement_is_oracle": true,
+    "original_method2_statement_is_oracle": true,
+    "floor_hashes_before": {
+      "snapshot.py": "df37d914a8b8b12d",
+      "rulebook.jsonl": "7949cde4e8724f1b",
+      "concentration.py": "8a4d8d4cdbaec2a8"
+    },
+    "canaries_ok": true
+  },
+  "post_run_floor_canary": {
+    "floor_hashes_after": {
+      "snapshot.py": "df37d914a8b8b12d",
+      "rulebook.jsonl": "7949cde4e8724f1b",
+      "concentration.py": "8a4d8d4cdbaec2a8"
+    },
+    "seed_lf_hashes_after": {
+      "methods.jsonl": "d12a1fb057684c9d",
+      "knowledge.jsonl": "6f4bc110a53548df",
+      "preferences.jsonl": "0128fe3320a61647"
+    },
+    "concentration_py_lf_after": "c78b0dab1c2032c6",
+    "floor_unchanged": true,
+    "seed_unchanged": true,
+    "concentration_py_unchanged_after": true
+  },
+  "comparison": {
+    "A-established": {
+      "cell": "A-established",
+      "n": 8,
+      "call_count": {
+        "mean": 1.5,
+        "min": 1,
+        "max": 3,
+        "values": [
+          1,
+          1,
+          2,
+          1,
+          1,
+          3,
+          1,
+          2
+        ]
+      },
+      "rederivation": {
+        "mean": 1.5,
+        "values": [
+          1,
+          1,
+          2,
+          1,
+          1,
+          3,
+          1,
+          2
+        ]
+      },
+      "measurement_read": {
+        "mean": 1.375,
+        "values": [
+          1,
+          1,
+          2,
+          1,
+          1,
+          2,
+          1,
+          2
+        ]
+      },
+      "authority_read": {
+        "mean": 0.0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "complementary": {
+        "mean": 0.0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "nameerrors": {
+        "sum": 1,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "categorical": {
+        "rederive+cite": 8
+      },
+      "cites_measurement_rate": 1.0,
+      "flags_invalid_rate": 0.0,
+      "treats_authoritative_rate": 0.0,
+      "correct_rate": 1.0,
+      "claims_measurement_says_risk_any": false,
+      "interpretation_with_llm_all": true
+    },
+    "A-candidate": {
+      "cell": "A-candidate",
+      "n": 8,
+      "call_count": {
+        "mean": 1.375,
+        "min": 1,
+        "max": 2,
+        "values": [
+          1,
+          2,
+          1,
+          2,
+          1,
+          2,
+          1,
+          1
+        ]
+      },
+      "rederivation": {
+        "mean": 1.375,
+        "values": [
+          1,
+          2,
+          1,
+          2,
+          1,
+          2,
+          1,
+          1
+        ]
+      },
+      "measurement_read": {
+        "mean": 0.875,
+        "values": [
+          1,
+          1,
+          0,
+          2,
+          0,
+          2,
+          1,
+          0
+        ]
+      },
+      "authority_read": {
+        "mean": 0.0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "complementary": {
+        "mean": 0.0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "nameerrors": {
+        "sum": 1,
+        "values": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "categorical": {
+        "verify": 8
+      },
+      "cites_measurement_rate": 1.0,
+      "flags_invalid_rate": 0.0,
+      "treats_authoritative_rate": 0.5,
+      "correct_rate": 1.0,
+      "claims_measurement_says_risk_any": false,
+      "interpretation_with_llm_all": true
+    },
+    "A-invalid": {
+      "cell": "A-invalid",
+      "n": 8,
+      "call_count": {
+        "mean": 2.875,
+        "min": 1,
+        "max": 6,
+        "values": [
+          1,
+          1,
+          6,
+          3,
+          1,
+          3,
+          3,
+          5
+        ]
+      },
+      "rederivation": {
+        "mean": 2.875,
+        "values": [
+          1,
+          1,
+          6,
+          3,
+          1,
+          3,
+          3,
+          5
+        ]
+      },
+      "measurement_read": {
+        "mean": 1.5,
+        "values": [
+          0,
+          1,
+          3,
+          2,
+          0,
+          3,
+          2,
+          1
+        ]
+      },
+      "authority_read": {
+        "mean": 1.375,
+        "values": [
+          0,
+          1,
+          3,
+          1,
+          0,
+          3,
+          2,
+          1
+        ]
+      },
+      "complementary": {
+        "mean": 0.0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "nameerrors": {
+        "sum": 6,
+        "values": [
+          0,
+          0,
+          5,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "categorical": {
+        "reject": 8
+      },
+      "cites_measurement_rate": 1.0,
+      "flags_invalid_rate": 1.0,
+      "treats_authoritative_rate": 0.625,
+      "correct_rate": 1.0,
+      "claims_measurement_says_risk_any": false,
+      "interpretation_with_llm_all": true
+    },
+    "D-established": {
+      "cell": "D-established",
+      "n": 8,
+      "call_count": {
+        "mean": 1.375,
+        "min": 1,
+        "max": 4,
+        "values": [
+          1,
+          4,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "rederivation": {
+        "mean": 1.375,
+        "values": [
+          1,
+          4,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "measurement_read": {
+        "mean": 0.75,
+        "values": [
+          0,
+          2,
+          1,
+          1,
+          1,
+          0,
+          1,
+          0
+        ]
+      },
+      "authority_read": {
+        "mean": 0.0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "complementary": {
+        "mean": 0.0,
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "nameerrors": {
+        "sum": 2,
+        "values": [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "categorical": {
+        "rederive+cite": 4,
+        "rederive": 4
+      },
+      "cites_measurement_rate": 0.5,
+      "flags_invalid_rate": 0.0,
+      "treats_authoritative_rate": 0.0,
+      "correct_rate": 1.0,
+      "claims_measurement_says_risk_any": true,
+      "interpretation_with_llm_all": true
+    },
+    "_contrasts": {
+      "status_axis_A-established_vs_A-candidate": {
+        "rederivation_mean": [
+          1.5,
+          1.375
+        ],
+        "cites_rate": [
+          1.0,
+          1.0
+        ],
+        "note": "same numbers, only status (established vs candidate) differs"
+      },
+      "integrity_axis_A-established_vs_A-invalid": {
+        "rederivation_mean": [
+          1.5,
+          2.875
+        ],
+        "flags_invalid_rate": [
+          0.0,
+          1.0
+        ],
+        "treats_authoritative_rate": [
+          0.0,
+          0.625
+        ],
+        "note": "same status (established), only integrity (valid vs invalid) differs -- the strongest discriminant"
+      },
+      "mirror_D-established": {
+        "invents_false_concentration_any": false,
+        "claims_meas_risk_any": true,
+        "note": "established != must-surface-risk; an established+valid measurement of 'no concentration' must not invent one"
+      }
+    }
+  }
+}

@@ -1,0 +1,76 @@
+[
+  {
+    "purposes": [
+      "authority_read",
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "authority_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "authority_read": "inspects the authority block (status/integrity/hashes/reason)",
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ndc = snapshot[\"dependency_concentration\"][\"measurement\"]\n\nprint(\"Total workers:\", snapshot[\"worker_count\"])\nprint()\n\n# Current incidents\npending = snapshot.get(\"pen"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Look at reservation workers in detail\nres_workers = [w for w in workers if w[\"task\"] == \"reservation\"]\nprint(\"=== Reservation workers ===\")\nfor w in res_workers:\n    s = w[\"summary\"]\n    print(f\"  {w['name']} | cust={w"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['digest'] from worker records"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\n\n# Look at reservation workers in detail\nres_workers = [w for w in workers if w[\"task\"] == \"reservation\"]\nprint(\"=== Reservation workers ===\")\nfor w in res_workers:\n    s"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['trigger', 'digest'] from worker records"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\nenri = [w for w in workers if w[\"task\"] == \"enrichment\"]\n\n# Clean cross-tab of customer x digest\ncross = collections.Counter()\nfor w in enri:\n    d = w[\"version_history\"]"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['digest'] from worker records"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\nenri = [w for w in workers if w[\"task\"] == \"enrichment\"]\n\n# Simple: list each enrichment worker's customer and digest\nlines = []\nfor w in enri:\n    d = w[\"version_history"
+  }
+]

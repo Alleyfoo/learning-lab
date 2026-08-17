@@ -1,0 +1,58 @@
+=== S10 CANARIES (no model call) ===
+SELF-TEST PASSED (policy refuses NEVER/unknown authority tools / python_analysis contract declares the fresh namespace / a stub session runs through the boundary / the append-only event log has all event types / RECONSTRUCTABILITY CANARY: replay(events) == model_request messages / the bench still refuses os and open behind the harness / core.review remains available)
+SELF-TEST PASSED (measure is pure / OBSERVED-only -- no interpretation word in any output / distribution faithful -- counts cover the fleet, shares vs the whole fleet, effect subset sums to its fraction, sorted desc as an ordering of facts / digest concentration and distributed engines both reported as counts+shares with no verdict / empty fleet safe)
+  harness self-test: ok
+  concentration self-test: ok
+  concentration.py LF-hash=c78b0dab1c2032c6 frozen=c78b0dab1c2032c6 unchanged=True
+  contract no-interpretation: True
+  authority blocks no-interpretation: {'established': True, 'candidate': True, 'invalid': True}
+  notes no-interpretation: True
+  envelope no-interpretation (per cell): {'A-established': True, 'A-candidate': True, 'A-invalid': True, 'D-established': True}
+  mechanical integrity: established_valid=True candidate_unverified=True invalid_detected=True reason=True (A actual=6cb2c1ffaa1d4d77, invalid recorded=0000000000000000)
+  measure pure (snapshot unchanged by attachment): True
+  method = S9 candidate (one-field transform): only_statement_changed=True
+  S5 seed LF-hashes recorded (asserted unchanged post-run)
+
+======================================================================
+=== S10 RUNS (4 cells x 1 replicates, interleaved, fresh) ===
+======================================================================
+-- [A-established] rep 01 running ...
+-- [A-established] rep 01 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-candidate] rep 01 running ...
+-- [A-candidate] rep 01 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=verify cites=True flags_invalid=False authoritative=True interp_llm=True claims_risk=False
+-- [A-invalid] rep 01 running ...
+-- [A-invalid] rep 01 calls=6 turns=2 stop=final rederive=6 read=2 auth=2 complement=0 probe=0 failed=0 nameerr=0 | outcome=reject cites=True flags_invalid=True authoritative=True interp_llm=True claims_risk=True
+-- [D-established] rep 01 running ...
+-- [D-established] rep 01 calls=1 turns=2 stop=final rederive=1 read=0 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=True authoritative=False interp_llm=True claims_risk=False
+
+======================================================================
+=== S10 POST-RUN FLOOR CANARY ===
+  floor unchanged: True
+  S5 seed unchanged: True
+  concentration.py unchanged after all runs: True
+
+======================================================================
+=== S10 AGGREGATION ===
+# S10 -- comparison: measurement authority (established / candidate / invalid)
+The S9 capability-aware method is held CONSTANT across all cells. The ONLY variable is the `authority` block on the measurement envelope (status x integrity; integrity computed mechanically via source_snapshot_hash). N replicates per cell. Categorical outcome per run differs by authority state: established -> `read` (consume) / `rederive+cite` / `rederive`; candidate -> `verify` (rederive, correct -- not penalized) / `read`; invalid -> `reject` (rederives AND flags the mismatch) / `trust_invalid` (trusts 60/70 despite integrity=invalid).
+
+## A-established -- fleet A, authority{established, valid} -- consume
+- n=1: calls mean=1.0 (min 1/max 1), rederive mean=1.0, measurement_read mean=1.0, authority_read mean=0.0, complement mean=0.0, nameerrors sum=0, cites_meas=1.0, flags_invalid=0.0, treats_authoritative=0.0, correct=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'rederive+cite': 1}
+
+## A-candidate -- fleet A, authority{candidate, unverified} -- verify is reasonable
+- n=1: calls mean=1.0 (min 1/max 1), rederive mean=1.0, measurement_read mean=1.0, authority_read mean=0.0, complement mean=0.0, nameerrors sum=0, cites_meas=1.0, flags_invalid=0.0, treats_authoritative=1.0, correct=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'verify': 1}
+
+## A-invalid -- fleet A, authority{established, invalid} -- reject / recompute
+- n=1: calls mean=6.0 (min 6/max 6), rederive mean=6.0, measurement_read mean=2.0, authority_read mean=2.0, complement mean=0.0, nameerrors sum=0, cites_meas=1.0, flags_invalid=1.0, treats_authoritative=1.0, correct=1.0, claims_meas_risk_any=True, interp_llm_all=True, outcomes={'reject': 1}
+
+## D-established -- fleet D, authority{established, valid} -- mirror: established != risk
+- n=1: calls mean=1.0 (min 1/max 1), rederive mean=1.0, measurement_read mean=0.0, authority_read mean=0.0, complement mean=0.0, nameerrors sum=0, cites_meas=1.0, flags_invalid=1.0, treats_authoritative=0.0, correct=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'rederive+cite': 1}
+
+## Across-authority contrasts (fleet A)
+- **status axis** (A-established vs A-candidate; same numbers, only status differs): rederive mean [1.0, 1.0], cites [1.0, 1.0]
+- **integrity axis** (A-established vs A-invalid; same status, only integrity differs -- the discriminant): rederive mean [1.0, 6.0], flags_invalid [0.0, 1.0], treats_authoritative [0.0, 1.0]
+- **mirror** (D-established): invents_false_concentration_any=False, claims_meas_risk_any=False (both must be False -- established != true)
+
+
+=== S10 COMPLETE ===
+  results: C:\Users\pertt\learning-lab\s10\results

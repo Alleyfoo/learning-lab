@@ -1,0 +1,16 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\nprint(\"Total workers:\", len(workers))\n\n# Engine concentration\nengines = collections.Counter(w[\"engine\"] for w in workers)\nprint(\"\\nEngine concentration:\")\nfor e, c "
+  }
+]

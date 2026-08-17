@@ -1,0 +1,16 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\nworker_count = snapshot[\"worker_count\"]\n\n# Engine concentration\nfrom collections import Counter\nengines = Counter(w[\"engine\"] for w in workers)\ntriggers = Counter(w[\"trigger\"] for w in worke"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "purposes": [
+      "authority_read",
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "authority_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "authority_read": "inspects the authority block (status/integrity/hashes/reason)",
+      "concentration_rederivation": "aggregates deps ['engine', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\nprint(\"Total workers:\", len(workers))\n\n# Engine concentration\nfrom collections import Counter\nengines = Counter(w[\"engine\"] for w in workers)\nprint(\"\\nEngine concentration:\")\nfor eng, cnt in"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates deps ['engine'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "# Verify engine concentration matches the measurement\nworkers = snapshot[\"workers\"]\nfrom collections import Counter\n\nengines = Counter(w[\"engine\"] for w in workers)\nprint(\"Engine counts (computed from workers):\")\nfor eng"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\nfrom collections import Counter\n\n# Check digest-to-engine mapping: are the 4 large digests all enrichment workers?\ndigest_engine = {}\nfor w in workers:\n    d = w[\"version_history\"][0][\"diges"
+  }
+]

@@ -1,0 +1,408 @@
+{
+  "A-established": {
+    "cell": "A-established",
+    "n": 8,
+    "call_count": {
+      "mean": 1.5,
+      "min": 1,
+      "max": 3,
+      "values": [
+        1,
+        1,
+        2,
+        1,
+        1,
+        3,
+        1,
+        2
+      ]
+    },
+    "rederivation": {
+      "mean": 1.5,
+      "values": [
+        1,
+        1,
+        2,
+        1,
+        1,
+        3,
+        1,
+        2
+      ]
+    },
+    "measurement_read": {
+      "mean": 1.375,
+      "values": [
+        1,
+        1,
+        2,
+        1,
+        1,
+        2,
+        1,
+        2
+      ]
+    },
+    "authority_read": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "complementary": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "nameerrors": {
+      "sum": 1,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "categorical": {
+      "rederive+cite": 8
+    },
+    "cites_measurement_rate": 1.0,
+    "flags_invalid_rate": 0.0,
+    "treats_authoritative_rate": 0.0,
+    "correct_rate": 1.0,
+    "claims_measurement_says_risk_any": false,
+    "interpretation_with_llm_all": true
+  },
+  "A-candidate": {
+    "cell": "A-candidate",
+    "n": 8,
+    "call_count": {
+      "mean": 1.375,
+      "min": 1,
+      "max": 2,
+      "values": [
+        1,
+        2,
+        1,
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
+    },
+    "rederivation": {
+      "mean": 1.375,
+      "values": [
+        1,
+        2,
+        1,
+        2,
+        1,
+        2,
+        1,
+        1
+      ]
+    },
+    "measurement_read": {
+      "mean": 0.875,
+      "values": [
+        1,
+        1,
+        0,
+        2,
+        0,
+        2,
+        1,
+        0
+      ]
+    },
+    "authority_read": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "complementary": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "nameerrors": {
+      "sum": 1,
+      "values": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "categorical": {
+      "verify": 8
+    },
+    "cites_measurement_rate": 1.0,
+    "flags_invalid_rate": 0.0,
+    "treats_authoritative_rate": 0.5,
+    "correct_rate": 1.0,
+    "claims_measurement_says_risk_any": false,
+    "interpretation_with_llm_all": true
+  },
+  "A-invalid": {
+    "cell": "A-invalid",
+    "n": 8,
+    "call_count": {
+      "mean": 2.875,
+      "min": 1,
+      "max": 6,
+      "values": [
+        1,
+        1,
+        6,
+        3,
+        1,
+        3,
+        3,
+        5
+      ]
+    },
+    "rederivation": {
+      "mean": 2.875,
+      "values": [
+        1,
+        1,
+        6,
+        3,
+        1,
+        3,
+        3,
+        5
+      ]
+    },
+    "measurement_read": {
+      "mean": 1.5,
+      "values": [
+        0,
+        1,
+        3,
+        2,
+        0,
+        3,
+        2,
+        1
+      ]
+    },
+    "authority_read": {
+      "mean": 1.375,
+      "values": [
+        0,
+        1,
+        3,
+        1,
+        0,
+        3,
+        2,
+        1
+      ]
+    },
+    "complementary": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "nameerrors": {
+      "sum": 6,
+      "values": [
+        0,
+        0,
+        5,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    "categorical": {
+      "reject": 8
+    },
+    "cites_measurement_rate": 1.0,
+    "flags_invalid_rate": 1.0,
+    "treats_authoritative_rate": 0.625,
+    "correct_rate": 1.0,
+    "claims_measurement_says_risk_any": false,
+    "interpretation_with_llm_all": true
+  },
+  "D-established": {
+    "cell": "D-established",
+    "n": 8,
+    "call_count": {
+      "mean": 1.375,
+      "min": 1,
+      "max": 4,
+      "values": [
+        1,
+        4,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "rederivation": {
+      "mean": 1.375,
+      "values": [
+        1,
+        4,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "measurement_read": {
+      "mean": 0.75,
+      "values": [
+        0,
+        2,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0
+      ]
+    },
+    "authority_read": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "complementary": {
+      "mean": 0.0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "nameerrors": {
+      "sum": 2,
+      "values": [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "categorical": {
+      "rederive+cite": 4,
+      "rederive": 4
+    },
+    "cites_measurement_rate": 0.5,
+    "flags_invalid_rate": 0.0,
+    "treats_authoritative_rate": 0.0,
+    "correct_rate": 1.0,
+    "claims_measurement_says_risk_any": true,
+    "interpretation_with_llm_all": true
+  },
+  "_contrasts": {
+    "status_axis_A-established_vs_A-candidate": {
+      "rederivation_mean": [
+        1.5,
+        1.375
+      ],
+      "cites_rate": [
+        1.0,
+        1.0
+      ],
+      "note": "same numbers, only status (established vs candidate) differs"
+    },
+    "integrity_axis_A-established_vs_A-invalid": {
+      "rederivation_mean": [
+        1.5,
+        2.875
+      ],
+      "flags_invalid_rate": [
+        0.0,
+        1.0
+      ],
+      "treats_authoritative_rate": [
+        0.0,
+        0.625
+      ],
+      "note": "same status (established), only integrity (valid vs invalid) differs -- the strongest discriminant"
+    },
+    "mirror_D-established": {
+      "invents_false_concentration_any": false,
+      "claims_meas_risk_any": true,
+      "note": "established != must-surface-risk; an established+valid measurement of 'no concentration' must not invent one"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+[
+  {
+    "purposes": [
+      "authority_read",
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "authority_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "authority_read": "inspects the authority block (status/integrity/hashes/reason)",
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nsnapshot = json.loads(json.dumps(snapshot))  # work with a copy\nworkers = snapshot[\"workers\"]\ntotal = snapshot[\"worker_count\"]\n\n# 1. Engine concentration\nengines = collections.Counter(w[\"engine\""
+  },
+  {
+    "purposes": [
+      "authority_read",
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "authority_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "authority_read": "inspects the authority block (status/integrity/hashes/reason)",
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nsnapshot = json.loads(json.dumps(snapshot))\nworkers = snapshot[\"workers\"]\ntotal = snapshot[\"worker_count\"]\n\n# Re-run all analysis in one block\nengines = collections.Counter(w[\"engine\"] for w in "
+  },
+  {
+    "purposes": [
+      "authority_read",
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "authority_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "authority_read": "inspects the authority block (status/integrity/hashes/reason)",
+      "concentration_rederivation": "aggregates deps ['engine', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nsnapshot = json.loads(json.dumps(snapshot))\nworkers = snapshot[\"workers\"]\ntotal = snapshot[\"worker_count\"]\n\n# Engine concentration\nengines = collections.Counter(w[\"engine\"] for w in workers)\npri"
+  }
+]

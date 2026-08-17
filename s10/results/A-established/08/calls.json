@@ -1,0 +1,34 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\ndep = snapshot[\"dependency_concentration\"][\"measurement\"]\n\n# Engine concentration\nprint(\"=== ENGINE CONCENTRATION ===\")\nfor e in dep[\"by_type\"][\"engine\"]:\n    print(f\"  {e['identity']}: {e['"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates deps ['engine', 'trigger', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "workers = snapshot[\"workers\"]\ndep = snapshot[\"dependency_concentration\"][\"measurement\"]\n\n# Engine concentration\nprint(\"=== ENGINE CONCENTRATION ===\")\nfor e in dep[\"by_type\"][\"engine\"]:\n    print(f\"  {e['identity']}: {e['"
+  }
+]

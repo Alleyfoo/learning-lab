@@ -1,0 +1,62 @@
+[
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import json, collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Task type breakdown\nby_task = collections.Counter(w[\"task\"] for w in workers)\nprint(\"Workers by task:\", dict(by_task))\n\n# Engine concentrati"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation"
+    ],
+    "primary": "concentration_rederivation",
+    "evidence": {
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'workers' is not defined",
+    "code_head": "# Check the reservation worker behavior more closely\nrese_workers = [w for w in workers if w[\"task\"] == \"reservation\"]\n\n# All request the same date?\nall_dates = set()\nfor w in rese_workers:\n    for r in w[\"recent_runs\"]:"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 0,
+    "ok": false,
+    "refused": false,
+    "error": "NameError: name 'total' is not defined",
+    "code_head": "# Summary of concentration risks\nprint(\"=== CONCENTRATION RISK SUMMARY ===\")\nprint(f\"\\nTotal workers: {total}\")\nprint(f\"\\nEngine concentration (max single):\")\neng = snapshot[\"dependency_concentration\"][\"measurement\"][\"by"
+  },
+  {
+    "purposes": [
+      "concentration_rederivation",
+      "measurement_read"
+    ],
+    "primary": "measurement_read",
+    "evidence": {
+      "measurement_read": "accesses dependency_concentration / contract / by_type",
+      "concentration_rederivation": "aggregates deps ['engine', 'effect', 'digest'] from worker records"
+    },
+    "turn": 1,
+    "ok": true,
+    "refused": false,
+    "error": null,
+    "code_head": "import collections\n\nworkers = snapshot[\"workers\"]\ntotal = len(workers)\n\n# Reservation worker details\nrese_workers = [w for w in workers if w[\"task\"] == \"reservation\"]\n\nall_dates = set()\nfor w in rese_workers:\n    for r i"
+  }
+]

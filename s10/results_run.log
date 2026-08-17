@@ -1,0 +1,114 @@
+=== S10 CANARIES (no model call) ===
+SELF-TEST PASSED (policy refuses NEVER/unknown authority tools / python_analysis contract declares the fresh namespace / a stub session runs through the boundary / the append-only event log has all event types / RECONSTRUCTABILITY CANARY: replay(events) == model_request messages / the bench still refuses os and open behind the harness / core.review remains available)
+SELF-TEST PASSED (measure is pure / OBSERVED-only -- no interpretation word in any output / distribution faithful -- counts cover the fleet, shares vs the whole fleet, effect subset sums to its fraction, sorted desc as an ordering of facts / digest concentration and distributed engines both reported as counts+shares with no verdict / empty fleet safe)
+  harness self-test: ok
+  concentration self-test: ok
+  concentration.py LF-hash=c78b0dab1c2032c6 frozen=c78b0dab1c2032c6 unchanged=True
+  contract no-interpretation: True
+  authority blocks no-interpretation: {'established': True, 'candidate': True, 'invalid': True}
+  notes no-interpretation: True
+  envelope no-interpretation (per cell): {'A-established': True, 'A-candidate': True, 'A-invalid': True, 'D-established': True}
+  mechanical integrity: established_valid=True candidate_unverified=True invalid_detected=True reason=True (A actual=6cb2c1ffaa1d4d77, invalid recorded=0000000000000000)
+  measure pure (snapshot unchanged by attachment): True
+  method = S9 candidate (one-field transform): only_statement_changed=True
+  S5 seed LF-hashes recorded (asserted unchanged post-run)
+
+======================================================================
+=== S10 RUNS (4 cells x 8 replicates, interleaved, fresh) ===
+======================================================================
+-- [A-established] rep 01 running ...
+-- [A-established] rep 01 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-candidate] rep 01 running ...
+-- [A-candidate] rep 01 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=verify cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-invalid] rep 01 running ...
+-- [A-invalid] rep 01 calls=1 turns=2 stop=final rederive=1 read=0 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=reject cites=True flags_invalid=True authoritative=False interp_llm=True claims_risk=False
+-- [D-established] rep 01 running ...
+-- [D-established] rep 01 calls=1 turns=2 stop=final rederive=1 read=0 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-established] rep 02 running ...
+-- [A-established] rep 02 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-candidate] rep 02 running ...
+-- [A-candidate] rep 02 calls=2 turns=2 stop=final rederive=2 read=1 auth=0 complement=0 probe=0 failed=1 nameerr=1 | outcome=verify cites=True flags_invalid=False authoritative=True interp_llm=True claims_risk=False
+-- [A-invalid] rep 02 running ...
+-- [A-invalid] rep 02 calls=1 turns=2 stop=final rederive=1 read=1 auth=1 complement=0 probe=0 failed=0 nameerr=0 | outcome=reject cites=True flags_invalid=True authoritative=True interp_llm=True claims_risk=False
+-- [D-established] rep 02 running ...
+-- [D-established] rep 02 calls=4 turns=3 stop=final rederive=4 read=2 auth=0 complement=0 probe=0 failed=2 nameerr=2 | outcome=rederive cites=False flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-established] rep 03 running ...
+-- [A-established] rep 03 calls=2 turns=2 stop=final rederive=2 read=2 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-candidate] rep 03 running ...
+-- [A-candidate] rep 03 calls=1 turns=2 stop=final rederive=1 read=0 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=verify cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-invalid] rep 03 running ...
+-- [A-invalid] rep 03 calls=6 turns=2 stop=final rederive=6 read=3 auth=3 complement=0 probe=0 failed=5 nameerr=5 | outcome=reject cites=True flags_invalid=True authoritative=False interp_llm=True claims_risk=False
+-- [D-established] rep 03 running ...
+-- [D-established] rep 03 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-established] rep 04 running ...
+-- [A-established] rep 04 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-candidate] rep 04 running ...
+-- [A-candidate] rep 04 calls=2 turns=2 stop=final rederive=2 read=2 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=verify cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-invalid] rep 04 running ...
+-- [A-invalid] rep 04 calls=3 turns=2 stop=final rederive=3 read=2 auth=1 complement=0 probe=0 failed=0 nameerr=0 | outcome=reject cites=True flags_invalid=True authoritative=True interp_llm=True claims_risk=False
+-- [D-established] rep 04 running ...
+-- [D-established] rep 04 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites=False flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-established] rep 05 running ...
+-- [A-established] rep 05 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-candidate] rep 05 running ...
+-- [A-candidate] rep 05 calls=1 turns=2 stop=final rederive=1 read=0 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=verify cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-invalid] rep 05 running ...
+-- [A-invalid] rep 05 calls=1 turns=2 stop=final rederive=1 read=0 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=reject cites=True flags_invalid=True authoritative=True interp_llm=True claims_risk=False
+-- [D-established] rep 05 running ...
+-- [D-established] rep 05 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites=False flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-established] rep 06 running ...
+-- [A-established] rep 06 calls=3 turns=2 stop=final rederive=3 read=2 auth=0 complement=0 probe=0 failed=1 nameerr=1 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-candidate] rep 06 running ...
+-- [A-candidate] rep 06 calls=2 turns=2 stop=final rederive=2 read=2 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=verify cites=True flags_invalid=False authoritative=True interp_llm=True claims_risk=False
+-- [A-invalid] rep 06 running ...
+-- [A-invalid] rep 06 calls=3 turns=2 stop=final rederive=3 read=3 auth=3 complement=0 probe=0 failed=0 nameerr=0 | outcome=reject cites=True flags_invalid=True authoritative=True interp_llm=True claims_risk=False
+-- [D-established] rep 06 running ...
+-- [D-established] rep 06 calls=1 turns=2 stop=final rederive=1 read=0 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-established] rep 07 running ...
+-- [A-established] rep 07 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-candidate] rep 07 running ...
+-- [A-candidate] rep 07 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=verify cites=True flags_invalid=False authoritative=True interp_llm=True claims_risk=False
+-- [A-invalid] rep 07 running ...
+-- [A-invalid] rep 07 calls=3 turns=2 stop=final rederive=3 read=2 auth=2 complement=0 probe=0 failed=0 nameerr=0 | outcome=reject cites=True flags_invalid=True authoritative=True interp_llm=True claims_risk=False
+-- [D-established] rep 07 running ...
+-- [D-established] rep 07 calls=1 turns=2 stop=final rederive=1 read=1 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive cites=False flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-established] rep 08 running ...
+-- [A-established] rep 08 calls=2 turns=2 stop=final rederive=2 read=2 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=False
+-- [A-candidate] rep 08 running ...
+-- [A-candidate] rep 08 calls=1 turns=2 stop=final rederive=1 read=0 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=verify cites=True flags_invalid=False authoritative=True interp_llm=True claims_risk=False
+-- [A-invalid] rep 08 running ...
+-- [A-invalid] rep 08 calls=5 turns=3 stop=final rederive=5 read=1 auth=1 complement=0 probe=0 failed=1 nameerr=1 | outcome=reject cites=True flags_invalid=True authoritative=False interp_llm=True claims_risk=False
+-- [D-established] rep 08 running ...
+-- [D-established] rep 08 calls=1 turns=2 stop=final rederive=1 read=0 auth=0 complement=0 probe=0 failed=0 nameerr=0 | outcome=rederive+cite cites=True flags_invalid=False authoritative=False interp_llm=True claims_risk=True
+
+======================================================================
+=== S10 POST-RUN FLOOR CANARY ===
+  floor unchanged: True
+  S5 seed unchanged: True
+  concentration.py unchanged after all runs: True
+
+======================================================================
+=== S10 AGGREGATION ===
+# S10 -- comparison: measurement authority (established / candidate / invalid)
+The S9 capability-aware method is held CONSTANT across all cells. The ONLY variable is the `authority` block on the measurement envelope (status x integrity; integrity computed mechanically via source_snapshot_hash). N replicates per cell. Categorical outcome per run differs by authority state: established -> `read` (consume) / `rederive+cite` / `rederive`; candidate -> `verify` (rederive, correct -- not penalized) / `read`; invalid -> `reject` (rederives AND flags the mismatch) / `trust_invalid` (trusts 60/70 despite integrity=invalid).
+
+## A-established -- fleet A, authority{established, valid} -- consume
+- n=8: calls mean=1.5 (min 1/max 3), rederive mean=1.5, measurement_read mean=1.375, authority_read mean=0.0, complement mean=0.0, nameerrors sum=1, cites_meas=1.0, flags_invalid=0.0, treats_authoritative=0.0, correct=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'rederive+cite': 8}
+
+## A-candidate -- fleet A, authority{candidate, unverified} -- verify is reasonable
+- n=8: calls mean=1.375 (min 1/max 2), rederive mean=1.375, measurement_read mean=0.875, authority_read mean=0.0, complement mean=0.0, nameerrors sum=1, cites_meas=1.0, flags_invalid=0.0, treats_authoritative=0.5, correct=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'verify': 8}
+
+## A-invalid -- fleet A, authority{established, invalid} -- reject / recompute
+- n=8: calls mean=2.875 (min 1/max 6), rederive mean=2.875, measurement_read mean=1.5, authority_read mean=1.375, complement mean=0.0, nameerrors sum=6, cites_meas=1.0, flags_invalid=1.0, treats_authoritative=0.625, correct=1.0, claims_meas_risk_any=False, interp_llm_all=True, outcomes={'reject': 8}
+
+## D-established -- fleet D, authority{established, valid} -- mirror: established != risk
+- n=8: calls mean=1.375 (min 1/max 4), rederive mean=1.375, measurement_read mean=0.75, authority_read mean=0.0, complement mean=0.0, nameerrors sum=2, cites_meas=0.5, flags_invalid=0.0, treats_authoritative=0.0, correct=1.0, claims_meas_risk_any=True, interp_llm_all=True, outcomes={'rederive+cite': 4, 'rederive': 4}
+
+## Across-authority contrasts (fleet A)
+- **status axis** (A-established vs A-candidate; same numbers, only status differs): rederive mean [1.5, 1.375], cites [1.0, 1.0]
+- **integrity axis** (A-established vs A-invalid; same status, only integrity differs -- the discriminant): rederive mean [1.5, 2.875], flags_invalid [0.0, 1.0], treats_authoritative [0.0, 0.625]
+- **mirror** (D-established): invents_false_concentration_any=False, claims_meas_risk_any=True (both must be False -- established != true)
+
+
+=== S10 COMPLETE ===
+  results: C:\Users\pertt\learning-lab\s10\results
