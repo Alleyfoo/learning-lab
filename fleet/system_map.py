@@ -101,10 +101,69 @@ def worker_id(name: str) -> str:
 
 
 def name_from(node_id: Optional[str]) -> Optional[str]:
-    """The worker a clicked node selects, or None. The map's only action in v0."""
+    """The worker a clicked node selects, or None. The map's only action in v0.
+
+    Kept for fleet/app.py. The supervisor uses parse_selection instead.
+    """
     if not node_id or not node_id.startswith("worker:"):
         return None
     return node_id.split(":", 1)[1]
+
+
+# The typed prefixes a node id may carry. Order matters only for readability;
+# dispatch is by exact prefix, and source/destination carry trailing segments.
+_SELECTION_PREFIXES = ("worker", "input", "scope", "source", "destination")
+
+
+def parse_selection(node_id: Optional[str]) -> Optional[dict]:
+    """A typed selection from a clicked node id, or None.
+
+    The map's only action is to report the clicked id; Python interprets it.
+    `name_from` is unchanged for fleet/app.py. This parser is the v0.5 contract:
+
+        worker:W            -> {"kind": "worker", "worker": W}
+        input:W             -> {"kind": "inbox",  "worker": W}
+        scope:X             -> {"kind": "company", "company": X}
+        source:W:C          -> {"kind": "source", "worker": W, "source": C}
+        destination:<key>   -> {"kind": "destination", "key": <full node id>}
+        anything else       -> None
+
+    A destination id encodes a system[/area][/object] but the second segment is
+    ambiguous (it may be area or object -- "Finance/Reskontra" vs
+    "Catalog/Items"), so we do not split it here. The detail panel resolves the
+    full declaration by matching destination_key() against the workers.
+
+    Names containing ":" would break source splitting; no seeded name does, so
+    the constraint is documented rather than enforced.
+    """
+    if not node_id or not isinstance(node_id, str):
+        return None
+    prefix, _, rest = node_id.partition(":")
+    if prefix not in _SELECTION_PREFIXES or not rest:
+        return None
+    if prefix == "worker":
+        return {"kind": "worker", "worker": rest}
+    if prefix == "input":
+        return {"kind": "inbox", "worker": rest}
+    if prefix == "scope":
+        return {"kind": "company", "company": rest}
+    if prefix == "source":
+        w, _, coll = rest.partition(":")
+        if not coll:
+            return None
+        return {"kind": "source", "worker": w, "source": coll}
+    # destination:<key> -- the panel matches destination_key() on the workers.
+    return {"kind": "destination", "key": node_id}
+
+
+def destination_key(dest: dict) -> str:
+    """The deterministic node id for a destination declaration.
+
+    Identical declarations converge on the same node; we never unify by label
+    similarity, only by an exact declared identity.
+    """
+    parts = [dest.get("system"), dest.get("area"), dest.get("object")]
+    return ":".join(["destination"] + [p for p in parts if p])
 
 
 def scope_of(w) -> Optional[str]:
@@ -198,7 +257,8 @@ def _emit_worker(w, y: int, nodes: list, edges: list, executors: dict) -> bool:
             iid, f"inbox\n{adapter or 'json'}", "input", COL_INPUT, y,
             title=(f"{w.trigger}\n{box['processed']} processed · "
                    f"{box['waiting']} waiting · "
-                   f"{box['exceptions']} queued exception(s)")))
+                   f"{box['exceptions']} queued exception(s)"),
+            clickable=True))
         edges.append(_edge(iid, wid, "data", adapter or ""))
 
     sources = sorted((w.model.get("sources") or {}).items())
@@ -206,7 +266,8 @@ def _emit_worker(w, y: int, nodes: list, edges: list, executors: dict) -> bool:
         sid = f"source:{w.name}:{name}"
         offset = (index - (len(sources) - 1) / 2) * 62
         nodes.append(_node(sid, name, "source", COL_SOURCE, y + offset, size=13,
-                           title=f"{spec.get('path')} · {spec.get('collection')}"))
+                           title=f"{spec.get('path')} · {spec.get('collection')}",
+                           clickable=True))
         edges.append(_edge(sid, wid, "data"))
 
     eid = f"executor:{w.engine}"
@@ -263,7 +324,8 @@ def build(workers: Optional[list] = None) -> dict:
                 (top + y - ROW_HEIGHT) / 2, size=26,
                 status=worst([status_of(w) for w in group]),
                 title=(f"{scope} — {len(group)} task(s) · worst state "
-                       f"{worst([status_of(w) for w in group])}")))
+                       f"{worst([status_of(w) for w in group])}"),
+                clickable=True))
             for w in group:
                 edges.append(_edge(f"scope:{scope}", worker_id(w.name), "owns"))
         y += BAND_GAP
@@ -429,6 +491,44 @@ def _self_test() -> int:
           "a worker click must resolve to the existing worker view")
     for other in ("scope:Acme Oy", "executor:x", "source:x:y", None):
         check(name_from(other) is None, f"v1 acts on worker nodes only: {other}")
+
+    # --- v0.5 typed selection contract ------------------------------------
+    check(parse_selection("worker:acme-timesheets") ==
+          {"kind": "worker", "worker": "acme-timesheets"},
+          "worker: parses to a worker selection")
+    check(parse_selection("input:fazerish-invoicing") ==
+          {"kind": "inbox", "worker": "fazerish-invoicing"},
+          "input: parses to an inbox selection")
+    check(parse_selection("scope:Acme Oy") ==
+          {"kind": "company", "company": "Acme Oy"},
+          "scope: parses to a company selection")
+    check(parse_selection("source:acme-august-recon:statement") ==
+          {"kind": "source", "worker": "acme-august-recon", "source": "statement"},
+          "source:W:C parses to a source selection")
+    check(parse_selection("destination:finance") ==
+          {"kind": "destination", "key": "destination:finance"},
+          "destination: parses to a keyed selection")
+    check(parse_selection("destination:finance:reskontra") ==
+          {"kind": "destination", "key": "destination:finance:reskontra"},
+          "destination:S:A keeps the full key")
+    check(destination_key({"system": "finance", "area": "reskontra"}) ==
+          "destination:finance:reskontra",
+          "destination_key joins non-empty parts")
+    check(destination_key({"system": "catalog", "object": "items"}) ==
+          "destination:catalog:items",
+          "destination_key omits empty middle parts")
+    for other in ("executor:x", "capability:investigator", "exception:w",
+                  "", "worker:", "source:nocoll", None, 123):
+        check(parse_selection(other) is None,
+              f"non-selectable ids parse to None: {other!r}")
+    # the seeded scope/input/source nodes are now clickable
+    for scope in scopes:
+        check(by_id[f"scope:{scope}"]["clickable"] is True,
+              f"{scope} scope node must be clickable")
+    check(by_id["input:fazerish-invoicing"]["clickable"] is True,
+          "inbox nodes must be clickable")
+    check(by_id["source:acme-august-recon:statement"]["clickable"] is True,
+          "source nodes must be clickable")
 
     if failures:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")

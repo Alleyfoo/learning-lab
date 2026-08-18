@@ -273,10 +273,16 @@ def _render_system_map(workers: list, snap_by_name: dict, worker_by_name: dict) 
                f"Lanes are derived from each worker's declared `customer`; engines and "
                f"the investigator are shared, so they sit outside every lane.")
 
-    # click a worker node -> show its detail from the snapshot record
-    picked = system_map.name_from((clicked or {}).get("id"))
-    if picked:
-        st.session_state["map_pick"] = picked
+    # click a node -> typed selection. The map only reports the clicked id;
+    # Python interprets it. map_pick (bare worker name) is kept for the worker
+    # panel below; map_selection carries the typed selection for other kinds.
+    sel = system_map.parse_selection((clicked or {}).get("id"))
+    if sel:
+        st.session_state["map_selection"] = sel
+        if sel["kind"] == "worker":
+            st.session_state["map_pick"] = sel["worker"]
+        else:
+            st.session_state.pop("map_pick", None)
         st.rerun()
 
     pick = st.session_state.get("map_pick")
@@ -307,7 +313,56 @@ def _render_system_map(workers: list, snap_by_name: dict, worker_by_name: dict) 
                                f"directory: `{w.directory}`")
                 if st.button("Clear selection", key="clear_map_pick"):
                     st.session_state.pop("map_pick", None)
+                    st.session_state.pop("map_selection", None)
                     st.rerun()
+
+    # a non-worker selection renders a type-appropriate operating/detail panel
+    cur = st.session_state.get("map_selection")
+    if cur and cur["kind"] != "worker":
+        _render_typed_panel(cur, workers, worker_by_name, snap_by_name)
+
+
+def _clear_map_selection() -> None:
+    st.session_state.pop("map_pick", None)
+    st.session_state.pop("map_selection", None)
+
+
+def _render_typed_panel(sel: dict, workers: list, worker_by_name: dict,
+                        snap_by_name: dict) -> None:
+    """Dispatch a non-worker map selection to its operating/detail panel."""
+    kind = sel["kind"]
+    if kind == "inbox":
+        _render_inbox_panel(sel, worker_by_name)
+    elif kind == "company":
+        _render_company_panel(sel, workers)
+    elif kind == "source":
+        _render_source_panel(sel, worker_by_name)
+    elif kind == "destination":
+        _render_destination_panel(sel, workers)
+    else:
+        st.caption(f"(selection kind `{kind}` not yet implemented)")
+
+
+# ---------------------------------------------------------------------------
+# v0.5 operating/detail panels for non-worker map selections.
+# Filled in across Phase 2 (inbox), Phase 3 (company), Phase 4 (destination),
+# Phase 5 (source). Each renders inside the System Map tab, below the graph.
+# ---------------------------------------------------------------------------
+
+def _render_inbox_panel(sel: dict, worker_by_name: dict) -> None:
+    st.caption(f"(inbox panel for `{sel.get('worker')}` -- Phase 2)")
+
+
+def _render_company_panel(sel: dict, workers: list) -> None:
+    st.caption(f"(company panel for `{sel.get('company')}` -- Phase 3)")
+
+
+def _render_source_panel(sel: dict, worker_by_name: dict) -> None:
+    st.caption(f"(source panel for `{sel.get('worker')}:{sel.get('source')}` -- Phase 5)")
+
+
+def _render_destination_panel(sel: dict, workers: list) -> None:
+    st.caption(f"(destination panel -- Phase 4)")
 
 
 # ===========================================================================
