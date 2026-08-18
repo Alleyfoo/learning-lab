@@ -450,10 +450,11 @@ def _render_company_panel(sel: dict, workers: list) -> None:
         st.markdown(f"**Established work** ({len(worker_by_cust)})")
         if worker_by_cust:
             for w in worker_by_cust.values():
-                st.markdown(f"- `{w.name}` · task `{w.task}`"
-                            + (f" · destination `{'/'.join(v for v in "
-                               f"(w.destination or {}).values() if v)}`"
-                               if w.destination else ""))
+                line = f"- `{w.name}` · task `{w.task}`"
+                if w.destination:
+                    dest = "/".join(v for v in w.destination.values() if v)
+                    line += f" · destination `{dest}`"
+                st.markdown(line)
         else:
             st.caption("_no established workers yet_")
 
