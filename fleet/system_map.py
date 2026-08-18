@@ -75,6 +75,9 @@ EDGE_STYLE = {
     "executes": {"color": "#B07C3A", "dashes": False, "arrows": "to"},
     "effect": {"color": "#5E7C8C", "dashes": False, "arrows": "to"},
     "exception": {"color": "#B23B2E", "dashes": True, "arrows": "to"},
+    # v0.5: a declared destination, not an executed effect. Dashed to read as
+    # "intended, not landed" -- distinct from both data flow and effect authority.
+    "intended": {"color": "#6A5ACD", "dashes": True, "arrows": "to"},
 }
 
 # Derived status. Worst first — a scope inherits the worst state beneath it.
@@ -281,6 +284,20 @@ def _emit_worker(w, y: int, nodes: list, edges: list, executors: dict) -> bool:
             title=(f"effect authority · {summary['effects_applied']} applied, "
                    f"{summary['effects_failed']} failed")))
         edges.append(_edge(wid, fid, "effect", "applies"))
+    elif w.destination:
+        # v0.5: a declared destination, not an executed effect. The node id is
+        # deterministic so identical declarations converge; we never unify by
+        # label similarity. Distinct from the committing effect node above --
+        # this is an INTENT, and the detail panel says so (authority: none).
+        dest = w.destination
+        did = destination_key(dest)
+        label = "\n".join(v for v in (dest.get("system"), dest.get("area"))
+                          if v)
+        mode = (w.delivery or {}).get("mode", "")
+        title = f"declared destination · delivery: {mode or 'unspecified'}"
+        nodes.append(_node(did, label or "destination", "effect", COL_EFFECT, y,
+                           clickable=True, size=15, title=title))
+        edges.append(_edge(wid, did, "intended", mode))
     else:
         columns = [o.get("target") for o in (w.model.get("outputs") or [])]
         nodes.append(_node(fid, "result table", "effect", COL_EFFECT, y, size=13,
@@ -529,6 +546,56 @@ def _self_test() -> int:
           "inbox nodes must be clickable")
     check(by_id["source:acme-august-recon:statement"]["clickable"] is True,
           "source nodes must be clickable")
+
+    # --- v0.5 destination vs effect authority (acceptance C/D/E) ------------
+    # E: a committing worker keeps its real effect node, never a destination.
+    res = next((w for w in workers if w.committing), None)
+    check(res is not None, "the fleet must have a committing worker (reservation)")
+    res_data = build([res])
+    res_ids = [n["id"] for n in res_data["nodes"]]
+    check(f"effect:{res.name}" in res_ids,
+          f"CANARY E: {res.name} must keep its effect node (real authority)")
+    res_label = next(n["label"] for n in res_data["nodes"]
+                     if n["id"] == f"effect:{res.name}")
+    check("committed" in res_label,
+          f"CANARY E: {res.name}'s effect node must say 'committed'")
+    check(not any(i.startswith("destination:") for i in res_ids),
+          f"CANARY E: {res.name} must NOT get a destination node")
+    check(any(e["kind"] == "effect" for e in res_data["edges"]),
+          f"CANARY E: {res.name} keeps an 'effect' edge")
+
+    # C/D: a noncommitting worker with a declared destination renders a
+    # destination node (not 'result table') and an 'intended' edge -- even when
+    # delivery is 'automatic', which must NOT read as effect authority.
+    base = next((w for w in workers if not w.committing
+                 and w.task == "reconciliation"), None)
+    check(base is not None, "the fleet must have a reconciliation worker")
+    fake = fleet.Worker(
+        directory=base.directory,
+        identity={**base.identity,
+                  "destination": {"system": "catalog", "object": "items"},
+                  "delivery": {"mode": "automatic"}},
+        versions=base.versions, history=base.history,
+        runs=base.runs, investigation=base.investigation)
+    fdata = build([fake])
+    fids = [n["id"] for n in fdata["nodes"]]
+    check("destination:catalog:items" in fids,
+          "CANARY C: a declared destination must produce a destination node")
+    check(f"effect:{fake.name}" not in fids,
+          "CANARY C: a noncommitting worker with a destination must NOT keep "
+          "a 'result table' effect node")
+    dest_node = next(n for n in fdata["nodes"]
+                     if n["id"] == "destination:catalog:items")
+    check(dest_node["clickable"] is True,
+          "destination nodes must be clickable")
+    intended = [e for e in fdata["edges"] if e["kind"] == "intended"]
+    check(len(intended) == 1 and intended[0]["to"] == "destination:catalog:items",
+          "CANARY D: a declared destination connects via an 'intended' edge")
+    check(intended[0]["label"] == "automatic",
+          "the intended edge carries the declared delivery mode")
+    # delivery=automatic must NOT manufacture committing/effect authority
+    check(fake.committing is False,
+          "CANARY D: delivery=automatic must NOT make a worker committing")
 
     if failures:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")

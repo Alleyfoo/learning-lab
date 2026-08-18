@@ -135,6 +135,25 @@ class Worker:
         return self.identity.get("trigger") or self.identity["base"]
 
     @property
+    def destination(self) -> Optional[dict]:
+        """Where the result of this work BELONGS (a declared business fact).
+
+        Distinct from `effect` (executable effect authority, a model field):
+        a destination says where a result is intended to go, not that the
+        worker can write there. Lives on identity alongside `customer`, so it
+        never collides with `on_accept`/committing and persists across model
+        versions. May be None (the worker just produces a result table).
+        """
+        return self.identity.get("destination")
+
+    @property
+    def delivery(self) -> Optional[dict]:
+        """Desired delivery mode for the destination: view/export/approval/
+        automatic. A progression of intent, NOT effect authority -- a worker
+        may declare `automatic` without any connector existing."""
+        return self.identity.get("delivery")
+
+    @property
     def current_version(self) -> int:
         return max(self.versions) if self.versions else 0
 
