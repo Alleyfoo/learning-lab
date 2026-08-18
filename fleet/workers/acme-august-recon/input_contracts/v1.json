@@ -1,0 +1,14 @@
+{
+  "roles": {
+    "statement": {
+      "sheet": "Statement",
+      "collection": "statement",
+      "header_row": 3
+    },
+    "transactions": {
+      "sheet": "Transactions",
+      "collection": "transactions",
+      "header_row": 2
+    }
+  }
+}

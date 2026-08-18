@@ -520,6 +520,31 @@ def _self_test() -> int:
         check(set(w.input_contracts) == {1, 2},
               f"both contract versions retained: {set(w.input_contracts)}")
 
+    # --- Acme carries the operational shape: roles on identity, shape on ---
+    # contract, and the contract's collections align 1:1 with the model's
+    # sources. `origin` in v1.json stays as founding provenance; the contract
+    # is the forward shape future arrivals must match.
+    acme = load(ROOT / "acme-august-recon")
+    check(acme.input_contract is not None,
+          "acme has an input_contracts/v1.json")
+    contract_colls = {r["collection"]
+                      for r in acme.input_contract["roles"].values()}
+    model_colls = {s["collection"] for s in acme.model["sources"].values()}
+    check(contract_colls == model_colls == {"statement", "transactions"},
+          f"acme contract collections align 1:1 with model sources: "
+          f"{contract_colls} vs {model_colls}")
+    check(set(acme.input_contract["roles"])
+          == set(acme.model["sources"]),
+          f"acme contract roles align 1:1 with model source keys: "
+          f"{set(acme.input_contract['roles'])} vs {set(acme.model['sources'])}")
+    check(set(acme.identity.get("source_roles", {}))
+          == set(acme.model["sources"]),
+          f"acme stable source_roles on identity align with model sources: "
+          f"{set(acme.identity.get('source_roles', {}))}")
+    check(all(r["slot"] == "sole" and r["required"]
+             for r in acme.identity["source_roles"].values()),
+          "acme's two roles are sole + required (N-of-M completeness, 2 docs)")
+
     if failures:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
         return 1

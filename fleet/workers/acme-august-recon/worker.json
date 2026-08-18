@@ -4,5 +4,19 @@
   "task": "reconciliation",
   "base": "data",
   "trigger": "data/acme-august/",
-  "customer": "acme"
+  "customer": "acme",
+  "input_adapter": "xlsx",
+  "work_item_identity": "content_digest",
+  "source_roles": {
+    "statement": {
+      "label": "supplier statement",
+      "slot": "sole",
+      "required": true
+    },
+    "transactions": {
+      "label": "ledger transactions",
+      "slot": "sole",
+      "required": true
+    }
+  }
 }
