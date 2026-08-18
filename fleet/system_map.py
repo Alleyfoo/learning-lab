@@ -201,11 +201,20 @@ def worst(statuses) -> str:
     return "healthy"
 
 
-def lanes(workers: list) -> list:
-    """Workers grouped into scope bands, deterministically. Derived only."""
+def lanes(workers: list, extra_scopes: Optional[list] = None) -> list:
+    """Workers grouped into scope bands, deterministically. Derived only.
+
+    `extra_scopes` (v0.5) adds scope bands that have NO workers yet -- a
+    pre-worker company known from an intake.json sidecar. A scope with no
+    workers still renders a lane node (see build); nothing is invented about
+    its workers because there are none.
+    """
     bands: dict = {}
     for w in workers:
         bands.setdefault(scope_of(w), []).append(w)
+    for s in (extra_scopes or []):
+        if s:
+            bands.setdefault(s, [])
     return [(scope, sorted(group, key=lambda w: w.name))
             for scope, group in sorted(
                 bands.items(), key=lambda kv: (kv[0] is None, kv[0] or ""))]
@@ -317,8 +326,13 @@ def _emit_worker(w, y: int, nodes: list, edges: list, executors: dict) -> bool:
     return False
 
 
-def build(workers: Optional[list] = None) -> dict:
-    """The whole graph, from fleet state. Reads only."""
+def build(workers: Optional[list] = None,
+          extra_scopes: Optional[list] = None) -> dict:
+    """The whole graph, from fleet state. Reads only.
+
+    `extra_scopes` (v0.5) renders scope nodes for companies known from intake
+    metadata before any worker exists. fleet/app.py calls build() without it.
+    """
     workers = sorted(workers if workers is not None else fleet.load_all(),
                      key=lambda w: w.name)
     nodes: list[dict] = []
@@ -327,7 +341,7 @@ def build(workers: Optional[list] = None) -> dict:
     any_exception = False
     y = 0
 
-    for scope, group in lanes(workers):
+    for scope, group in lanes(workers, extra_scopes):
         top = y
         for w in group:
             any_exception |= _emit_worker(w, y, nodes, edges, executors)
@@ -335,10 +349,13 @@ def build(workers: Optional[list] = None) -> dict:
         if scope:
             # The lane label carries the WORST status beneath it, so an
             # exception under one customer is visible without opening anything
-            # -- and is visibly theirs, not the fleet's.
+            # -- and is visibly theirs, not the fleet's. An empty band (a
+            # pre-worker scope from intake metadata) places the node at `top`
+            # rather than the midpoint formula, which assumes a worker row.
+            mid = top if not group else (top + y - ROW_HEIGHT) / 2
             nodes.append(_node(
                 f"scope:{scope}", scope, "scope", COL_SCOPE,
-                (top + y - ROW_HEIGHT) / 2, size=26,
+                mid, size=26,
                 status=worst([status_of(w) for w in group]),
                 title=(f"{scope} — {len(group)} task(s) · worst state "
                        f"{worst([status_of(w) for w in group])}"),
@@ -596,6 +613,16 @@ def _self_test() -> int:
     # delivery=automatic must NOT manufacture committing/effect authority
     check(fake.committing is False,
           "CANARY D: delivery=automatic must NOT make a worker committing")
+
+    # --- v0.5 pre-worker scope nodes (intake metadata, no workers) ----------
+    solo = build([], extra_scopes=["solo-co"])
+    solo_ids = [n["id"] for n in solo["nodes"]]
+    check("scope:solo-co" in solo_ids,
+          "CANARY: extra_scopes renders a scope node with no workers")
+    check(not any(e["kind"] == "owns" for e in solo["edges"]),
+          "CANARY: a pre-worker scope owns nothing (no invented workers)")
+    check(next(n for n in solo["nodes"] if n["id"] == "scope:solo-co")["clickable"]
+          is True, "a pre-worker scope node is clickable")
 
     if failures:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")

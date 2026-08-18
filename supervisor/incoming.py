@@ -28,6 +28,8 @@ is not machine-findable. The genuine "model exists but not deployed as a worker"
 """
 from __future__ import annotations
 
+import json
+import re
 import sys
 from pathlib import Path
 from typing import Optional
@@ -166,12 +168,50 @@ def _link_worker(data_dir: Path, data_file_names: set[str],
     return best.name if best is not None and best_overlap > 0 else None
 
 
+def _read_intake(d: Path) -> dict:
+    """The intake.json sidecar of a data dir, or {} if absent/unreadable.
+
+    v0.5 pre-worker company identity: {company, label}. Folder naming is not
+    authority; this metadata is. Carried alongside the existing adapter.json /
+    established_model.json sidecar convention.
+    """
+    p = d / "intake.json"
+    if not p.is_file():
+        return {}
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def slugify(text: str) -> str:
+    """A deterministic data-dir slug from a free-text label: lowercase,
+    alnum runs joined by hyphens. 'August supplier reconciliation' ->
+    'august-supplier-reconciliation'."""
+    return "-".join(re.findall(r"[a-z0-9]+", (text or "").lower())) or "data"
+
+
+def unique_slug(label: str, existing: set[str]) -> str:
+    """slugify(label), with a -2/-3/... suffix if it already exists."""
+    base = slugify(label)
+    if base not in existing:
+        return base
+    n = 2
+    while f"{base}-{n}" in existing:
+        n += 1
+    return f"{base}-{n}"
+
+
 def scan(workers: list, data_root: Path) -> dict:
     """The company's incoming data.
 
     Returns:
       data_library: one entry per top-level subdir of `data_root`:
-        {dir, files: [{name, kind, sheets}], has_adapter, has_model, worker: str|None}
+        {dir, files: [{name, kind, sheets}], has_adapter, has_model,
+         worker: str|None, company: str|None, label: str|None}
+        `company`/`label` come from an optional intake.json sidecar (v0.5
+        pre-worker company identity); None when absent.
       inboxes: one entry per worker that actually has inbox/processed/exceptions files:
         {worker, customer, files: [{name, kind, stage, sheets}]}
     """
@@ -182,12 +222,15 @@ def scan(workers: list, data_root: Path) -> dict:
                 continue       # generated working representation (e.g. data/_derived/)
                              # is NOT incoming evidence; never show it as a data dir
             files = [_file_entry(p) for p in sorted(d.iterdir()) if p.is_file()]
+            intake = _read_intake(d)
             data_library.append({
                 "dir": d.name,
                 "files": files,
                 "has_adapter": (d / "adapter.json").is_file(),
                 "has_model": (d / "established_model.json").is_file(),
                 "worker": _link_worker(d, {f["name"] for f in files}, workers),
+                "company": intake.get("company"),
+                "label": intake.get("label"),
             })
 
     inboxes: list[dict] = []
@@ -349,6 +392,34 @@ def _self_test() -> int:
         hm = by_dir["has-model"]
         check(hm["has_adapter"] and hm["has_model"] and hm["worker"] is None,
               f"has-model dir: badges True, no worker link: {hm}")
+
+        # --- v0.5 intake.json sidecar surfaces company/label -----------------
+        (data_root / "acme-intake").mkdir(parents=True)
+        (data_root / "acme-intake" / "supplier.xlsx").write_text("x", encoding="utf-8")
+        (data_root / "acme-intake" / "intake.json").write_text(
+            json.dumps({"company": "acme", "label": "August recon"}), encoding="utf-8")
+        # a malformed intake.json must not crash the scan
+        (data_root / "bad-intake").mkdir(parents=True)
+        (data_root / "bad-intake" / "raw.json").write_text("[]", encoding="utf-8")
+        (data_root / "bad-intake" / "intake.json").write_text("{not json", encoding="utf-8")
+        result2 = scan(workers, data_root)
+        by_dir2 = {e["dir"]: e for e in result2["data_library"]}
+        ai = by_dir2["acme-intake"]
+        check(ai["company"] == "acme" and ai["label"] == "August recon",
+              f"intake.json surfaces company+label: {ai['company']!r}, {ai['label']!r}")
+        check(by_dir2["unlinked"]["company"] is None,
+              "a dir without intake.json has company None")
+        check(by_dir2["bad-intake"]["company"] is None,
+              "a malformed intake.json yields company None (no crash)")
+
+        # --- slugify / unique_slug -------------------------------------------
+        check(slugify("August supplier reconciliation")
+              == "august-supplier-reconciliation", "slugify basic")
+        check(slugify("  Acme / Reskontra! ") == "acme-reskontra",
+              "slugify strips punctuation/case/whitespace")
+        check(unique_slug("data", {"data"}) == "data-2", "unique_slug suffixes")
+        check(unique_slug("data", {"data", "data-2", "data-3"}) == "data-4",
+              "unique_slug skips taken suffixes")
 
         # tied-fazerish: april and fazerish both match 1 file -> name-token tiebreak
         # picks fazerish-invoicing (shares "fazerish" with the dir name)

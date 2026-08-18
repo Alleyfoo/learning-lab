@@ -258,7 +258,13 @@ def _render_incoming_browser(scan_result: dict) -> None:
 
 def _render_system_map(workers: list, snap_by_name: dict, worker_by_name: dict) -> None:
     """The Fleet System Map + legend + click-to-select worker detail."""
-    graph = system_map.build(workers)
+    # v0.5: pre-worker companies (known from intake.json sidecars) appear as
+    # scope nodes even before any worker is established. lanes() merges them
+    # with worker-declared scopes (setdefault), so no duplicate lanes.
+    scan = _incoming()
+    extra_scopes = sorted({e.get("company") for e in scan.get("data_library", [])
+                           if e.get("company")})
+    graph = system_map.build(workers, extra_scopes=extra_scopes)
     clicked = map_component.system_map(graph["nodes"], graph["edges"],
                                         height=720, key="supervisor_map")
     st.markdown(" · ".join(
@@ -354,7 +360,84 @@ def _render_inbox_panel(sel: dict, worker_by_name: dict) -> None:
 
 
 def _render_company_panel(sel: dict, workers: list) -> None:
-    st.caption(f"(company panel for `{sel.get('company')}` -- Phase 3)")
+    """Company context + the + Add data source operating action (v0.5 item 4).
+
+    Shows what is established for this company and what incoming data is known,
+    then lets the operator drop raw files in as new company evidence. Those files
+    become a new `data/<slug>/` dir with an `intake.json` sidecar (the authoritative
+    pre-worker company association) and hand straight into the existing v0.4
+    Define journey by setting the `define:dir` seam. No new modelling path.
+    """
+    company = sel.get("company")
+    scan = _incoming()
+    worker_by_cust = {w.name: w for w in workers
+                      if system_map.scope_of(w) == company}
+    incoming_dirs = [e for e in scan.get("data_library", [])
+                     if e.get("company") == company
+                     or (e.get("worker") in worker_by_cust)]
+    with st.expander(f"Company: {company}", expanded=True):
+        st.markdown(f"**Established work** ({len(worker_by_cust)})")
+        if worker_by_cust:
+            for w in worker_by_cust.values():
+                st.markdown(f"- `{w.name}` · task `{w.task}`"
+                            + (f" · destination `{'/'.join(v for v in "
+                               f"(w.destination or {}).values() if v)}`"
+                               if w.destination else ""))
+        else:
+            st.caption("_no established workers yet_")
+
+        st.markdown(f"**Incoming / known data** ({len(incoming_dirs)})")
+        if incoming_dirs:
+            for e in incoming_dirs:
+                label = f"- `{e['dir']}/` · {len(e['files'])} file(s)"
+                if e.get("label"):
+                    label += f" · {e['label']}"
+                if e.get("worker"):
+                    label += f" · worker `{e['worker']}`"
+                st.markdown(label)
+        else:
+            st.caption("_none yet_")
+
+        st.markdown("**Add a new data source**")
+        st.caption("Raw files become incoming company evidence under `data/`. "
+                   "They do NOT enter `_derived/` directly -- the existing v0.4 "
+                   "journey (discover → declare → materialize → model → Establish) "
+                   "runs unchanged after this.")
+        uploads = st.file_uploader(
+            "Drop raw workbooks (xlsx)",
+            type=["xlsx"], accept_multiple_files=True,
+            key=f"company_add_files_{company}")
+        label = st.text_input("Label for this intake",
+                              key=f"company_add_label_{company}")
+        if st.button("+ Add data source", type="primary",
+                     key=f"company_add_go_{company}"):
+            if not uploads:
+                st.error("Choose at least one workbook file.")
+            elif not label.strip():
+                st.error("Give this intake a label.")
+            else:
+                existing = {e["dir"] for e in scan.get("data_library", [])}
+                slug = incoming.unique_slug(label.strip(), existing)
+                target = DATA_ROOT / slug
+                target.mkdir(parents=True, exist_ok=False)
+                for up in uploads:
+                    (target / up.name).write_bytes(up.getvalue())
+                (target / "intake.json").write_text(
+                    json.dumps({"company": company, "label": label.strip()},
+                               indent=2) + "\n",
+                    encoding="utf-8")
+                # hand into the existing v0.4 Define journey -- the single seam
+                st.session_state["define:dir"] = slug
+                st.session_state["define:customer"] = company
+                st.session_state.pop("map_pick", None)
+                st.session_state.pop("map_selection", None)
+                st.session_state.pop("incoming", None)  # refresh the scan
+                st.success(f"Added `{slug}/` with intake.json. Opening the "
+                           f"Define-work journey.")
+                st.rerun()
+        if st.button("Clear selection", key="clear_company_pick"):
+            _clear_map_selection()
+            st.rerun()
 
 
 def _render_source_panel(sel: dict, worker_by_name: dict) -> None:
@@ -635,6 +718,15 @@ def _render_define_panel(dir_name: str) -> None:
         _clear_define()
         st.rerun()
     st.markdown("---")
+
+    # v0.5: if this dir carries an intake.json sidecar, pre-populate the customer
+    # so an established worker's customer AGREES with the intake company rather
+    # than being separately guessed. Only when the operator has not already set one.
+    if "define:customer" not in st.session_state:
+        entry = next((e for e in _incoming().get("data_library", [])
+                      if e["dir"] == dir_name), None)
+        if entry and entry.get("company"):
+            st.session_state["define:customer"] = entry["company"]
 
     # v0.4: a materialized dir resolves to the DERIVED workspace; an un-
     # materialized dir resolves to the raw incoming dir. An xlsx-only dir (no
