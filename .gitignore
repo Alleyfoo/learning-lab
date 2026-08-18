@@ -4,3 +4,14 @@ __pycache__/
 # Modeller approvals are per-user artifacts, written by whoever runs the app.
 # The mechanism is evidenced by builder.py --self-test, not by committed records.
 modeller/approvals/
+
+# Worker runtime state -- the operational history a worker accrues by running.
+# Retained raw arrivals (Phase 6: processed/<digest>.<ext>) are deliberately
+# kept on disk for provenance, but must NOT be tracked: real company data flows
+# here. Model versions, worker.json, input_contracts, and the materialized
+# state/sources/ are NOT runtime history and stay tracked.
+fleet/workers/*/inbox/
+fleet/workers/*/processed/
+fleet/workers/*/exceptions/
+fleet/workers/*/input_set.json
+fleet/workers/*/runs.jsonl

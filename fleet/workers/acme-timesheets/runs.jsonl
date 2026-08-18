@@ -1,8 +1,0 @@
-{"at": "2026-08-16T10:20:51+00:00", "version": 1, "ok": true, "rows": 4, "refused": 0, "refusals": [], "problems": []}
-{"at": "2026-08-16T10:20:51+00:00", "version": 1, "ok": true, "rows": 4, "refused": 0, "refusals": [], "problems": []}
-{"at": "2026-08-16T10:20:51+00:00", "version": 1, "ok": true, "rows": 4, "refused": 0, "refusals": [], "problems": []}
-{"at": "2026-08-16T10:20:51+00:00", "version": 1, "ok": true, "rows": 4, "refused": 0, "refusals": [], "problems": []}
-{"at": "2026-08-16T10:20:51+00:00", "version": 1, "ok": true, "rows": 4, "refused": 0, "refusals": [], "problems": []}
-{"at": "2026-08-16T10:20:51+00:00", "version": 1, "ok": true, "rows": 4, "refused": 0, "refusals": [], "problems": []}
-{"at": "2026-08-16T10:20:51+00:00", "version": 1, "ok": false, "rows": 0, "refused": 0, "refusals": [], "problems": ["field_not_in_source@timesheet_cost_with_name:lookup.match_right: staff_id"]}
-{"at": "2026-08-16T10:22:10+00:00", "version": 2, "ok": true, "rows": 4, "refused": 0, "refusals": [], "problems": []}
