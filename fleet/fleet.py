@@ -532,6 +532,54 @@ def _self_test() -> int:
         check(set(w.input_contracts) == {1, 2},
               f"both contract versions retained: {set(w.input_contracts)}")
 
+    # --- Phase 5: run_input is atomic on the run line (design §6.1) -------
+    # A run with run_input writes ONE line carrying it; a run without writes
+    # the legacy line unchanged. There is no run ID to join a separate linkage
+    # record onto, so the provenance block rides the same append. The
+    # fingerprint inside it is what Phase 4.5 recovery matches against
+    # runs.jsonl -- so it must survive verbatim in the written line.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        w = establish(root, "ri", "Atomic run_input probe.", "enrichment",
+                      "data", model)
+        runs_jsonl = w.directory / "runs.jsonl"
+
+        # a run with NO run_input -> the legacy line, unchanged
+        before_lines = (runs_jsonl.read_text(encoding="utf-8").splitlines()
+                        if runs_jsonl.is_file() else [])
+        r0 = record_run(w)
+        after_lines = runs_jsonl.read_text(encoding="utf-8").splitlines()
+        check("run_input" not in r0,
+              f"a run without run_input must not carry it: {r0}")
+        check(len(after_lines) - len(before_lines) == 1,
+              "each record_run appends exactly ONE line (atomic)")
+        legacy_line = json.loads(after_lines[-1])
+        check("run_input" not in legacy_line,
+              "the written legacy line carries no run_input key (back-compat)")
+
+        # a run WITH run_input -> one line carrying it, fingerprint verbatim
+        ri = {"input_set": {"worker": w.name, "id": None},
+              "input_contract": "v1", "model": 1,
+              "fingerprint": "deadbeef" * 8, "slots": {
+                  "statement": {"document": "supplier.xlsx",
+                                "digest": "0" * 64, "sheet": "Statement",
+                                "header_row": 3, "materialized_as": "s.json"}}}
+        before_lines = after_lines
+        r1 = record_run(w, run_input=ri)
+        after_lines = runs_jsonl.read_text(encoding="utf-8").splitlines()
+        check(len(after_lines) - len(before_lines) == 1,
+              "a run with run_input still appends exactly ONE line (atomic)")
+        check(r1["run_input"] == ri,
+              f"the returned record carries run_input verbatim: {r1.get('run_input')}")
+        written = json.loads(after_lines[-1])
+        check(written.get("run_input") == ri,
+              "the written line carries run_input verbatim")
+        check(written["run_input"]["fingerprint"] == ri["fingerprint"],
+              "the fingerprint survives to the written line (recovery matches it)")
+        # the legacy line above is untouched by the run_input append
+        check("run_input" not in json.loads(after_lines[-2]),
+              "CANARY: the prior legacy line is not retroactively decorated")
+
     # --- Acme carries the operational shape: roles on identity, shape on ---
     # contract, and the contract's collections align 1:1 with the model's
     # sources. `origin` in v1.json stays as founding provenance; the contract
@@ -567,7 +615,12 @@ def _self_test() -> int:
           "while v1 keeps all four runs / the summary separates this version "
           "from all time / a resolved investigation records what closed it / "
           "exactly one key differs between v1 and v2 / an older version renders "
-          "as it was / the engine is named so it can be audited)")
+          "as it was / the engine is named so it can be audited / "
+          "input_contracts load per version with a None back-compat gate / "
+          "acme's roles+contract+model sources align 1:1 / "
+          "Phase 5: a run with run_input appends ONE line carrying it "
+          "verbatim incl. the fingerprint, a run without writes the legacy "
+          "line unchanged and is never retroactively decorated)")
     return 0
 
 
