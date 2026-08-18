@@ -86,6 +86,7 @@ class Worker:
     history: list[dict] = dc_field(default_factory=list)
     runs: list[dict] = dc_field(default_factory=list)
     investigation: Optional[dict] = None
+    input_contracts: dict[int, dict] = dc_field(default_factory=dict)
 
     # --- identity ---------------------------------------------------------
     @property
@@ -161,6 +162,22 @@ class Worker:
     def model(self) -> dict:
         return self.versions[self.current_version]
 
+    @property
+    def input_contract(self) -> Optional[dict]:
+        """The version-bound executable input contract for the current version,
+        or None when the worker has none.
+
+        Mirrors how the version model is loaded: a per-worker
+        `input_contracts/v<N>.json`, same `N` as the current model version. A
+        model answers what to do; an input contract answers what data
+        representation this version is allowed to do it with. The stable
+        SOURCE ROLES (labels, sole/shared, required-ness, adapter policy) live
+        on identity (`source_roles`), so they survive a re-model; the contract
+        carries shape only. None is the back-compat gate: workers that take a
+        JSON request and have no sheet contract keep working unchanged.
+        """
+        return self.input_contracts.get(self.current_version)
+
     # --- run record, always per version ------------------------------------
     def runs_for(self, version: int) -> list[dict]:
         return [r for r in self.runs if r["version"] == version]
@@ -212,12 +229,19 @@ def load(directory: Path) -> Worker:
     versions = {}
     for path in sorted((directory / "versions").glob("v*.json")):
         versions[int(path.stem[1:])] = json.loads(path.read_text(encoding="utf-8"))
+    input_contracts = {}
+    contracts_dir = directory / "input_contracts"
+    if contracts_dir.is_dir():
+        for path in sorted(contracts_dir.glob("v*.json")):
+            input_contracts[int(path.stem[1:])] = json.loads(
+                path.read_text(encoding="utf-8"))
     inv_path = directory / "investigation.json"
     return Worker(directory, identity, versions,
                   _read_lines(directory / "history.jsonl"),
                   _read_lines(directory / "runs.jsonl"),
                   json.loads(inv_path.read_text(encoding="utf-8"))
-                  if inv_path.is_file() else None)
+                  if inv_path.is_file() else None,
+                  input_contracts)
 
 
 def load_all(root: Path = ROOT) -> list[Worker]:
@@ -452,6 +476,49 @@ def _self_test() -> int:
               f"the engine is named so it can be audited: {w.engine}")
         check(readable(w, 1) != readable(w, 2),
               "an older version renders as it was, not as the current one")
+
+    # --- input_contracts: version-bound executable input contract -----------
+    # A model answers what to do; an input contract answers what data
+    # representation this version is allowed to do it with. It lives in a
+    # SEPARATE file (input_contracts/v<N>.json), not in versions/v<N>.json,
+    # because taskmodel.parse would otherwise contaminate the task body with
+    # the unknown top-level key (task_model.py:191). Same N as the model.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        w = establish(root, "ic", "Bind recurring evidence.", "enrichment",
+                      "data", model)
+        check(w.input_contract is None,
+              "a worker with no input_contracts/ returns None (back-compat gate)")
+
+        contracts_dir = w.directory / "input_contracts"
+        contracts_dir.mkdir()
+        c1 = {"roles": {"statement": {"sheet": "Statement", "header_row": 3,
+                                      "collection": "statement"}}}
+        (contracts_dir / "v1.json").write_text(
+            json.dumps(c1, indent=2) + "\n", encoding="utf-8")
+        w = load(w.directory)
+        check(w.input_contract is not None
+              and w.input_contract["roles"]["statement"]["sheet"] == "Statement",
+              f"v1 input contract loads: {w.input_contract}")
+        check(set(w.input_contracts) == {1},
+              f"input_contracts keyed by version: {w.input_contracts}")
+
+        # a version bump to v2 with its own contract reads v2, not v1
+        v2model = W.apply_replacements(
+            model, [{"source": "staff", "from": "staff_id", "to": "employee_id"}])
+        w = promote(w, v2model, "contract advanced",
+                    [{"source": "staff", "from": "staff_id", "to": "employee_id"}])
+        check(w.current_version == 2 and w.input_contract is None,
+              "v2 with no input_contracts/v2.json returns None (gate per version)")
+        c2 = {"roles": {"statement": {"sheet": "Stmt2", "header_row": 2,
+                                      "collection": "statement"}}}
+        (contracts_dir / "v2.json").write_text(
+            json.dumps(c2, indent=2) + "\n", encoding="utf-8")
+        w = load(w.directory)
+        check(w.input_contract["roles"]["statement"]["sheet"] == "Stmt2",
+              f"after a version bump, input_contract reads v2: {w.input_contract}")
+        check(set(w.input_contracts) == {1, 2},
+              f"both contract versions retained: {set(w.input_contracts)}")
 
     if failures:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")

@@ -122,6 +122,25 @@ def specs_from(raw: Any) -> list[SheetSpec]:
             for s in raw]
 
 
+def specs_from_contract(contract: Any) -> dict[str, SheetSpec]:
+    """Turn a version-bound input contract into role-keyed SheetSpecs.
+
+    A contract lives in `input_contracts/v<N>.json` and answers: "what data
+    representation is this version allowed to do it with?" It carries shape
+    only (sheet/header_row/collection per role), NOT the stable role set --
+    the roles, their labels, sole/shared slot kind and required-ness live on
+    identity (`source_roles`). This is the bridge between the contract file
+    and the existing `convert`/`write_collections` flow, which takes SheetSpecs.
+
+    Returns a dict keyed by role name so a binding can address one slot; the
+    values are SheetSpecs reused verbatim by `convert`.
+    """
+    roles = (contract or {}).get("roles") or {}
+    return {role: SheetSpec(spec["sheet"], spec["collection"],
+                            int(spec.get("header_row", 1)))
+            for role, spec in roles.items()}
+
+
 def cell_value(value: Any) -> Optional[str]:
     """One cell, converted by the declared table. Raises on anything else."""
     if value is None:
@@ -460,6 +479,28 @@ def _self_test() -> int:
             failures.append("CANARY: a refused conversion must not be written")
         except UnreadableWorkbook:
             pass
+
+    # --- specs_from_contract: a version-bound contract becomes role-keyed ---
+    # The bridge between input_contracts/v<N>.json and the convert flow.
+    contract = {"roles": {
+        "statement":    {"sheet": "Statement", "header_row": 3,
+                         "collection": "statement"},
+        "transactions": {"sheet": "Transactions", "header_row": 2,
+                         "collection": "transactions"},
+    }}
+    role_specs = specs_from_contract(contract)
+    check(set(role_specs) == {"statement", "transactions"},
+          f"contract specs are role-keyed: {set(role_specs)}")
+    check(role_specs["statement"] == SheetSpec("Statement", "statement", 3)
+          and role_specs["transactions"] == SheetSpec("Transactions",
+                                                      "transactions", 2),
+          f"each role carries sheet/collection/header_row: {role_specs}")
+    # a contract's specs are SheetSpecs -- the type convert already accepts --
+    # so the bridge composes with convert by construction (no separate path).
+
+    # the back-compat shape: None / empty contract -> no specs, no crash
+    check(specs_from_contract(None) == {} and specs_from_contract({}) == {},
+          "an absent/empty contract yields no specs (the back-compat gate)")
 
     if failures:
         sys.stderr.write("SELF-TEST FAILED:\n  " + "\n  ".join(failures) + "\n")
