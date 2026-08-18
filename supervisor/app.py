@@ -372,7 +372,10 @@ def _render_destination_panel(sel: dict, workers: list) -> None:
 _DEFINE_KEYS = ("define:dir", "define:goal", "define:task", "define:report",
                 "define:ingest", "define:model", "define:asked", "define:deferred",
                 "define:choice", "define:name", "define:customer",
-                "define:derived_rel", "define:origins")
+                "define:derived_rel", "define:origins",
+                # v0.5: declared destination / delivery (operator-entered at Establish)
+                "define:dest_system", "define:dest_area", "define:dest_object",
+                "define:delivery")
 
 
 def _clear_define() -> None:
@@ -779,10 +782,44 @@ def _render_define_panel(dir_name: str) -> None:
     customer = st.text_input("Scope / customer (optional — names the map lane; "
                              "leave blank for an unscoped lane)",
                              key="define:customer", value="")
+
+    # v0.5: where does the result BELONG? A declared destination, not effect
+    # authority -- the worker is not granted any write capability by stating
+    # this. Optional; blank means the worker just produces a result table.
+    with st.expander("Destination (optional — where the result belongs)", False):
+        st.caption("Declares a business destination and a desired delivery mode. "
+                   "This is INTENT, not authority: stating `automatic` does NOT "
+                   "give the worker any write capability. Effect authority remains "
+                   "grounded in executable machinery, separately.")
+        dest_system = st.text_input("System (e.g. finance, catalog)",
+                                    key="define:dest_system", value="")
+        dest_area = st.text_input("Area (optional, e.g. reskontra)",
+                                  key="define:dest_area", value="")
+        dest_object = st.text_input("Object (optional, e.g. items)",
+                                    key="define:dest_object", value="")
+        delivery = st.selectbox(
+            "Desired delivery mode",
+            ["", "view", "export", "approval", "automatic"],
+            key="define:delivery",
+            help="view: visible here · export: produce an artifact · approval: "
+                 "deliver on human authorization · automatic: unattended (only "
+                 "real if an effect/connector exists -- declaring it does not "
+                 "create one)")
+
     if st.button("Establish worker", type="primary", key="define_establish"):
         if not name.strip():
             st.error("Give the worker a name.")
             return
+        # assemble the declared destination (drop blank segments); only real
+        # when a system is named.
+        dest = None
+        if dest_system.strip():
+            dest = {"system": dest_system.strip()}
+            if dest_area.strip():
+                dest["area"] = dest_area.strip()
+            if dest_object.strip():
+                dest["object"] = dest_object.strip()
+        dlv = {"mode": delivery} if delivery else None
         try:
             # v0.4: on the xlsx-derived path the model's sources point at
             # _derived/*.json but carry no provenance yet -- attach the durable
@@ -794,11 +831,13 @@ def _render_define_panel(dir_name: str) -> None:
                 w = define.establish_derived(
                     st.session_state["define:dir"], ws, name.strip(),
                     goal.strip() or name.strip(), task, est_model,
-                    customer=customer.strip() or None)
+                    customer=customer.strip() or None,
+                    destination=dest, delivery=dlv)
             else:
                 w = define.establish_workspace(
                     ws, name.strip(), goal.strip() or name.strip(), task, est_model,
-                    customer=customer.strip() or None)
+                    customer=customer.strip() or None,
+                    destination=dest, delivery=dlv)
         except Exception as e:  # noqa: BLE001
             st.error(f"Establish failed: {type(e).__name__}: {e}")
             return

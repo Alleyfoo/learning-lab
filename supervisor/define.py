@@ -267,6 +267,8 @@ def render_model(model: dict, task: str) -> list[str]:
 
 def establish(name: str, purpose: str, task: str, base: str, model: dict,
               trigger: str, customer: Optional[str] = None,
+              destination: Optional[dict] = None,
+              delivery: Optional[dict] = None,
               root: Optional[Path] = None):
     """Establish a worker in the live fleet (or `root`). Writes exactly three
     files: worker.json, versions/v1.json, history.jsonl (see fleet.fleet.establish).
@@ -276,6 +278,11 @@ def establish(name: str, purpose: str, task: str, base: str, model: dict,
     extended). Without it the worker renders in an unscoped map band
     (`system_map.lanes` handles None) -- not a Company entity.
 
+    `destination` / `delivery` (v0.5) are likewise written into worker.json
+    post-establish, alongside `customer`. They are declared business facts (where
+    the result belongs, desired delivery mode) -- NOT model fields, so they never
+    reach versions/v1.json and never collide with `on_accept`/effect authority.
+
     `model.setdefault("task", task)` defends against a definer that omits the task
     field; the executor reads `model["task"]` via `pipeline.build`.
     """
@@ -283,17 +290,24 @@ def establish(name: str, purpose: str, task: str, base: str, model: dict,
     model = dict(model)
     model.setdefault("task", task)
     w = fleet.establish(root, name, purpose, task, base, model, trigger=trigger)
-    if customer:
+    if customer or destination or delivery:
         wp = w.directory / "worker.json"
         ident = json.loads(wp.read_text(encoding="utf-8"))
-        ident["customer"] = customer
+        if customer:
+            ident["customer"] = customer
+        if destination:
+            ident["destination"] = destination
+        if delivery:
+            ident["delivery"] = delivery
         wp.write_text(json.dumps(ident, indent=2) + "\n", encoding="utf-8")
-        w = fleet.load(w.directory)  # reload so identity carries customer
+        w = fleet.load(w.directory)  # reload so identity carries the new fields
     return w
 
 
 def establish_workspace(ws: pipeline.Workspace, name: str, purpose: str, task: str,
                         model: dict, customer: Optional[str] = None,
+                        destination: Optional[dict] = None,
+                        delivery: Optional[dict] = None,
                         root: Optional[Path] = None):
     """Establish from a Workspace, computing `base` and `trigger` from it.
 
@@ -306,7 +320,8 @@ def establish_workspace(ws: pipeline.Workspace, name: str, purpose: str, task: s
     base = str(ws.base.relative_to(LAB))
     trigger = f"{base}/{ws.rel}/"
     return establish(name, purpose, task, base, model, trigger,
-                     customer=customer, root=root)
+                     customer=customer, destination=destination,
+                     delivery=delivery, root=root)
 
 
 # ===========================================================================
@@ -475,7 +490,10 @@ def attach_origin(model: dict, origins: dict[str, dict]) -> dict:
 
 def establish_derived(raw_rel: str, derived_ws: pipeline.Workspace, name: str,
                       purpose: str, task: str, model: dict,
-                      customer: Optional[str] = None, root: Optional[Path] = None):
+                      customer: Optional[str] = None,
+                      destination: Optional[dict] = None,
+                      delivery: Optional[dict] = None,
+                      root: Optional[Path] = None):
     """Establish a worker whose executable sources live in `_derived/` but whose
     `trigger` points at the RAW incoming dir `data/<raw_rel>/`.
 
@@ -490,7 +508,8 @@ def establish_derived(raw_rel: str, derived_ws: pipeline.Workspace, name: str,
     """
     return establish(name, purpose, task, "data", model,
                      trigger=f"data/{raw_rel}/",
-                     customer=customer, root=root)
+                     customer=customer, destination=destination,
+                     delivery=delivery, root=root)
 
 
 # ---------------------------------------------------------------------------
@@ -712,15 +731,28 @@ def _self_test() -> int:
               "attach_origin does not mutate the caller's model")
 
         # (5) establish_derived: trigger points at the RAW dir (not _derived),
-        #     and the injected origin survives verbatim to versions/v1.json
+        #     and the injected origin survives verbatim to versions/v1.json.
+        #     v0.5: a declared destination/delivery ride on worker.json identity
+        #     (like customer), NOT on the model, so v1.json stays pure task
+        #     semantics (acceptance C + the task-semantics != destination split).
         fleet_root = Path(tmp) / "fleet"
         w = establish_derived(raw_rel, derived_ws, "selftest-xlsx-recon",
                               "Reconcile the supplier statement.", "reconciliation",
-                              stamped, customer="acme", root=fleet_root)
+                              stamped, customer="acme",
+                              destination={"system": "finance", "area": "reskontra"},
+                              delivery={"mode": "review"}, root=fleet_root)
         check(w.trigger == f"data/{raw_rel}/",
               f"trigger points at the RAW dir, not _derived: {w.trigger}")
+        check(w.identity.get("destination") ==
+              {"system": "finance", "area": "reskontra"},
+              f"destination written into worker.json: {w.identity.get('destination')}")
+        check(w.identity.get("delivery") == {"mode": "review"},
+              f"delivery written into worker.json: {w.identity.get('delivery')}")
         stored = json.loads((w.directory / "versions" / "v1.json")
                             .read_text(encoding="utf-8"))
+        check("destination" not in stored and "delivery" not in stored,
+              "CANARY: destination/delivery are identity fields, NOT model "
+              "fields -- v1.json must carry only task semantics")
         stmt_path = stored["sources"]["statement"]["path"]
         check(stmt_path == f"_derived/{raw_rel}/statement.json",
               f"the executable source path points at the derived JSON: {stmt_path}")
