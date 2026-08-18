@@ -107,6 +107,47 @@ def is_complete(w: "fleet.Worker") -> bool:
     return all(r in doc["roles"] for r in required_roles(w))
 
 
+# --- the input-set fingerprint (recovery: run exactly once) --------------
+
+def _fingerprint_of(doc: dict) -> Optional[str]:
+    """Deterministic digest over {model version, input-contract version,
+    sorted role -> source-digest bindings}. Only a COMPLETE set has one; a
+    partial set has bindings but no fingerprint (design §5.2)."""
+    if not doc or not doc.get("complete"):
+        return None
+    bindings = sorted((role, doc["roles"][role]["digest"])
+                      for role in doc["roles"])
+    material = json.dumps(
+        {"model": doc["model"], "input_contract": doc["input_contract"],
+         "bindings": bindings}, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(material.encode("utf-8")).hexdigest()
+
+
+def fingerprint(w: "fleet.Worker") -> Optional[str]:
+    return _fingerprint_of(load(w))
+
+
+def run_input(w: "fleet.Worker") -> Optional[dict]:
+    """Assemble the per-run provenance block for a complete set (design §6).
+
+    `{input_set, input_contract, model, fingerprint, slots}`. `input_set.id`
+    is None in v0.6 -- one open set per worker (§5.1); a future
+    `input_set_id` for overlapping periods slots in here without changing the
+    run record shape. `fingerprint` is what recovery matches against
+    `runs.jsonl` to run a complete set exactly once.
+    """
+    doc = load(w)
+    if not doc:
+        return None
+    slots = {role: {"document": b["document"], "digest": b["digest"],
+                    "sheet": b["sheet"], "header_row": b["header_row"],
+                    "materialized_as": b["materialized_as"]}
+             for role, b in doc["roles"].items()}
+    return {"input_set": {"worker": doc["worker"], "id": None},
+            "input_contract": doc["input_contract"], "model": doc["model"],
+            "fingerprint": doc.get("fingerprint"), "slots": slots}
+
+
 def bound_roles(w: "fleet.Worker") -> list[str]:
     doc = load(w)
     return sorted((doc or {}).get("roles", {}))
@@ -183,6 +224,13 @@ def bind(w: "fleet.Worker", roles: list[str], file_path: Path) -> dict:
 
     complete = all(r in doc["roles"] for r in required_roles(w))
     doc["complete"] = complete
+    if complete:
+        # A complete set gets a fingerprint (design §5.2): recovery matches it
+        # against runs.jsonl to run the set exactly once. A partial set has
+        # bindings but no fingerprint.
+        doc["fingerprint"] = _fingerprint_of(doc)
+    elif "fingerprint" in doc:
+        del doc["fingerprint"]
     _save(w, doc)
     return {"roles": list(roles), "complete": complete, "bindings": bindings,
             "problems": []}
@@ -344,9 +392,109 @@ def _self_test() -> int:
         check((w.directory / "processed" / "may.xlsx").is_file(),
               "the shared workbook drains to processed/")
 
+        # === PHASE 4.5 CRASH CANARIES (the hard gate) ====================
+        # A complete input set runs EXACTLY ONCE. The fingerprint guard lets
+        # recovery distinguish "complete, not yet run" from "complete, already
+        # run but not terminalized" -- overriding the noncommitting
+        # safe_to_retry re-run that would duplicate a runs.jsonl line.
+
+        def fp_count(worker, fp):
+            return sum(1 for r in fleet.load(worker.directory).runs
+                       if (r.get("run_input") or {}).get("fingerprint") == fp)
+
+        def fresh_acme(tag):
+            return build_worker(tag, "acme", acme_model, acme_roles,
+                                acme_contract, "reconciliation")
+
+        # --- CANARY 1: crash after the first slot is bound -----------------
+        # Restart: the statement binding remains staged, the set is partial
+        # (1/2), and NO run was appended. Recovery preserves it.
+        w = fresh_acme(".selftest-c1")
+        drop(w, fleet.LAB / "data" / "acme-august" / "supplier.xlsx",
+             "supplier.xlsx", role="statement")
+        try:
+            inbox.poll(w, crash_at="after_bind_stage")
+            failures.append("canary 1: the injected crash must interrupt")
+        except inbox.CrashInjected:
+            pass
+        check(len(fleet.load(w.directory).runs) == 0,
+              "CANARY 1: no run appended after the first slot bound")
+        check(is_complete(w) is False and bound_roles(w) == ["statement"],
+              f"CANARY 1: the set is partial (1/2), statement staged: {load(w)}")
+        rec = inbox.recover(w)
+        check(rec == [], "CANARY 1: recovery preserves a partial set (no run)")
+        check(len(fleet.load(w.directory).runs) == 0 and not is_complete(w),
+              "CANARY 1: recovery did not run or complete a partial set")
+        # a further poll skips the staged item and waits (no ledger to bind)
+        inbox.poll(w)
+        check(len(fleet.load(w.directory).runs) == 0,
+              "CANARY 1: a re-poll of a partial set still fires no run")
+
+        # --- CANARY 2: crash after the second slot materializes, ----------
+        # before record_run. Restart: set complete, no matching run -> recovery
+        # runs ONCE, then terminalizes and clears.
+        w = fresh_acme(".selftest-c2")
+        drop(w, fleet.LAB / "data" / "acme-august" / "supplier.xlsx",
+             "supplier.xlsx", role="statement")
+        inbox.poll(w)  # stage the statement
+        drop(w, fleet.LAB / "data" / "acme-august" / "ledger.xlsx",
+             "ledger.xlsx", role="transactions")
+        try:
+            inbox.poll(w, crash_at="after_bind_complete")
+            failures.append("canary 2: the injected crash must interrupt")
+        except inbox.CrashInjected:
+            pass
+        fp2 = fingerprint(w)
+        check(fp2 is not None and is_complete(w),
+              f"CANARY 2: the set is complete with a fingerprint after the "
+              f"crash: fp={fp2}")
+        check(fp_count(w, fp2) == 0,
+              "CANARY 2: no run recorded yet (crash was before record_run)")
+        rec = inbox.recover(w)
+        check(fp_count(w, fp2) == 1,
+              "CANARY 2: recovery ran the complete set EXACTLY ONCE")
+        check(load(w) is None,
+              "CANARY 2: recovery cleared the set after running")
+        check(rec and all(r["state"] == "recovered_completed" for r in rec),
+              f"CANARY 2: recovery terminalized the set members: {rec}")
+
+        # --- CANARY 3 (LOAD-BEARING): crash after record_run append, -------
+        # before terminalize. Restart: set complete, the fingerprint is ALREADY
+        # in runs.jsonl -> recovery terminalizes WITHOUT another run. The
+        # fingerprint appears in runs.jsonl EXACTLY ONCE across crash+recovery.
+        w = fresh_acme(".selftest-c3")
+        drop(w, fleet.LAB / "data" / "acme-august" / "supplier.xlsx",
+             "supplier.xlsx", role="statement")
+        inbox.poll(w)  # stage the statement
+        drop(w, fleet.LAB / "data" / "acme-august" / "ledger.xlsx",
+             "ledger.xlsx", role="transactions")
+        try:
+            inbox.poll(w, crash_at="after_effect")
+            failures.append("canary 3: the injected crash must interrupt")
+        except inbox.CrashInjected:
+            pass
+        fp3 = fingerprint(w)
+        check(fp_count(w, fp3) == 1,
+              "CANARY 3: record_run fired once before the crash (fingerprint "
+              "in runs.jsonl exactly once)")
+        check(is_complete(w) and load(w) is not None,
+              "CANARY 3: the set is still complete (not cleared before crash)")
+        runs_before = len(fleet.load(w.directory).runs)
+        rec = inbox.recover(w)
+        check(len(fleet.load(w.directory).runs) == runs_before,
+              "CANARY 3 (LOAD-BEARING): recovery did NOT append a second run")
+        check(fp_count(w, fp3) == 1,
+              "CANARY 3 (LOAD-BEARING): the fingerprint appears in runs.jsonl "
+              "EXACTLY ONCE across crash + recovery")
+        check(load(w) is None,
+              "CANARY 3: recovery terminalized and cleared the set")
+        check(rec and all(r["state"] == "recovered_completed" for r in rec),
+              f"CANARY 3: recovery terminalized without re-running: {rec}")
+
     finally:
         for s in (".selftest-acme", ".selftest-acme2", ".selftest-acme3",
-                  ".selftest-faz"):
+                  ".selftest-faz", ".selftest-c1", ".selftest-c2",
+                  ".selftest-c3"):
             shutil.rmtree(fleet.LAB / "fleet" / s, ignore_errors=True)
 
     if failures:
@@ -356,7 +504,12 @@ def _self_test() -> int:
           "transactions completes 2/2 and fires ONE ok run, both files drain, "
           "set clears / a shape mismatch refuses with NO binding and NO run / "
           "a sole file with no explicit slot is refused not guessed / fazerish: "
-          "one shared workbook completes the 2-slot set immediately and runs)")
+          "one shared workbook completes the 2-slot set immediately and runs / "
+          "CANARY 1 crash-after-first-slot: partial set preserved, no run / "
+          "CANARY 2 crash-before-record_run: recovery runs the complete set "
+          "exactly once / CANARY 3 crash-after-record_run: recovery "
+          "terminalizes WITHOUT a second run -- fingerprint in runs.jsonl "
+          "exactly once)")
     return 0
 
 

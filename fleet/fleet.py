@@ -270,8 +270,18 @@ def establish(root: Path, name: str, purpose: str, task: str, base: str,
     return load(directory)
 
 
-def record_run(w: Worker, request: Optional[str] = None) -> dict:
-    """Run the worker as established, and append the outcome. No LLM here."""
+def record_run(w: Worker, request: Optional[str] = None,
+               run_input: Optional[dict] = None) -> dict:
+    """Run the worker as established, and append the outcome. No LLM here.
+
+    `run_input` (v0.6) is the per-run provenance block for a recurring worker:
+    versions + the input-set fingerprint + per-slot document/digest/sheet/
+    header_row/materialized_as. It is merged into the record BEFORE the single
+    append so the run line is atomic and immutable (design §6.1) -- there is no
+    run ID to join a separate linkage record onto, and the line cannot be
+    decorated after it is written. None = the legacy line, unchanged. The
+    fingerprint inside run_input is what recovery matches on (design §5.2).
+    """
     est = W.Established(w.name, w.current_version, w.model, w.base, _now())
     if w.committing:
         # THE COMMITTING PATH. A refusal is healthy and attempts no effect; an
@@ -313,6 +323,8 @@ def record_run(w: Worker, request: Optional[str] = None) -> dict:
             (w.directory / "last_packet.json").write_text(
                 json.dumps(outcome.packet, indent=2, ensure_ascii=False) + "\n",
                 encoding="utf-8")
+    if run_input is not None:
+        record["run_input"] = run_input
     _append(w.directory / "runs.jsonl", record)
     w.runs.append(record)
     return record

@@ -370,10 +370,18 @@ def _poll_contract_item(w: fleet.Worker, path: Path, item: Item,
         side = _role_sidecar(path)
         if side.is_file():
             side.unlink()
+        if crash_at == "after_bind_stage":
+            raise CrashInjected("after_bind_stage")
         return [record]
 
     # Complete -> run the worker over the whole set, then terminalize.
-    run = fleet.record_run(w, request=item.request)
+    # run_input (versions + the input-set fingerprint + per-slot provenance) is
+    # passed INTO record_run so it is written atomically with the run line
+    # (design §6.1). The fingerprint in that line is what recovery matches on.
+    if crash_at == "after_bind_complete":
+        raise CrashInjected("after_bind_complete")
+    run = fleet.record_run(w, request=item.request,
+                           run_input=input_set.run_input(w))
     if crash_at == "after_effect":
         raise CrashInjected("after_effect")
     return _terminalize_set(w, item, run)
@@ -550,9 +558,98 @@ def reconcile(w: fleet.Worker, claim: dict) -> tuple[str, str]:
     return "safe_to_retry", "the effect is definitely absent"
 
 
+def _run_with_fingerprint(w: fleet.Worker, fp: str) -> Optional[dict]:
+    """The run record in runs.jsonl whose run_input.fingerprint equals `fp`,
+    or None. Recovery matches on this to decide run-exactly-once."""
+    if not fp:
+        return None
+    for r in reversed(fleet.load(w.directory).runs):
+        if (r.get("run_input") or {}).get("fingerprint") == fp:
+            return r
+    return None
+
+
+def _recover_terminalize(w: fleet.Worker, run: dict) -> list[dict]:
+    """Terminalize a complete set that recovery resolved: one recovered_
+    ledger record per bound document, each raw file drained from inbox/ to
+    processed/ or exceptions/, then the set cleared. `run` is either the run
+    recovery just recorded (no matching run existed) or the already-recorded
+    run recovery matched (so it terminalizes WITHOUT re-running)."""
+    healthy = run["ok"]
+    state = "recovered_completed" if healthy else "recovered_exception"
+    destination = "processed" if healthy else "exceptions"
+    doc = input_set.load(w) or {"roles": {}}
+    by_doc: dict[str, dict] = {}
+    for role, binding in doc.get("roles", {}).items():
+        entry = by_doc.setdefault(binding["document"],
+                                  {"digest": binding["digest"], "roles": []})
+        entry["roles"].append(role)
+    outcomes: list[dict] = []
+    for document, info in by_doc.items():
+        record = {"at": _now(), "item_id": info["digest"],
+                  "payload_digest": info["digest"], "file": document,
+                  "state": state, "roles": sorted(info["roles"]),
+                  "request": None, "decision": run.get("decision"),
+                  "reason": run.get("reason"),
+                  "effect_applied": run.get("effect_applied"),
+                  "problems": run.get("problems", []),
+                  "recovered": True}
+        _append(w, record)
+        src = w.directory / "inbox" / document
+        if src.is_file():
+            shutil.move(str(src), w.directory / destination / document)
+        side = _role_sidecar(src)
+        if side.is_file():
+            side.unlink()
+        outcomes.append(record)
+    input_set.clear(w)
+    return outcomes
+
+
+def _recover_contract(w: fleet.Worker) -> list[dict]:
+    """The v0.6 set-wise recovery contract (design §5.2). Four cases:
+
+      complete set + no matching run  -> run ONCE, then terminalize  (canary 2)
+      complete set + matching run      -> terminalize WITHOUT another run
+                                         (canary 3: run exactly once)
+      partial set                      -> PRESERVE; wait for remaining slots
+                                         (canary 1; no run)
+      corrupt/ambiguous                -> exception, never guess
+
+    A complete set's fingerprint is matched against runs.jsonl. This OVERRIDES
+    the noncommitting safe_to_retry re-run (reconcile returns safe_to_retry
+    for a worker that commits no effect): a completed run is durable history,
+    so re-execution would duplicate a runs.jsonl line even though no external
+    effect duplicates.
+    """
+    doc = input_set.load(w)
+    if doc is None or not doc.get("complete"):
+        # partial or no set: preserve. A partial set waits for the remaining
+        # slots; a mid-bind crash's dangling claim is re-bound on the next
+        # poll. Recovery runs nothing here.
+        return []
+    fp = input_set.fingerprint(w)
+    matched = _run_with_fingerprint(w, fp)
+    if matched is not None:
+        # The run is already in runs.jsonl (crash after record_run, before
+        # terminalize). Complete WITHOUT another run.
+        return _recover_terminalize(w, matched)
+    # Complete set, no matching run (crash after materialize, before
+    # record_run). Run ONCE -- atomically, with run_input carrying the
+    # fingerprint -- then terminalize.
+    run = fleet.record_run(w, request=None, run_input=input_set.run_input(w))
+    return _recover_terminalize(w, run)
+
+
 def recover(w: fleet.Worker) -> list[dict]:
     """Resolve every interrupted item. Deterministic; no LLM, no clock logic."""
     ensure(w)
+    # v0.6 contract workers recover SET-wise, not item-wise. A complete input
+    # set runs exactly once: the fingerprint guard overrides the noncommitting
+    # safe_to_retry re-run that would otherwise duplicate a runs.jsonl line
+    # (design §5.2). Routed here before the legacy per-item recovery.
+    if w.input_contract is not None:
+        return _recover_contract(w)
     outcomes = []
     for claim in dangling(w):
         verdict, why = reconcile(w, claim)
