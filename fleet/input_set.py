@@ -287,6 +287,13 @@ def _self_test() -> int:
             (w.directory / "inbox" / f"{name}.role").write_text(
                 role, encoding="utf-8")
 
+    def digest_of(path) -> str:
+        return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+    def retained(w, name, src, dest="processed"):
+        """The on-disk path a dropped file drains to (digest-namespaced)."""
+        return w.directory / dest / inbox.retained_name(name, digest_of(src))
+
     try:
         # --- ACME: two sole slots, N-of-M completeness ---------------------
         acme_model = "acme-august-recon/versions/v1.json"
@@ -328,9 +335,11 @@ def _self_test() -> int:
               f"runs={len(runs)} ok={runs[-1]['ok'] if runs else None}")
         check(load(w) is None,
               "CANARY: the open set is cleared after the run terminalizes")
-        check((w.directory / "processed" / "supplier.xlsx").is_file()
-              and (w.directory / "processed" / "ledger.xlsx").is_file(),
-              "both bound files drained to processed/")
+        check(retained(w, "supplier.xlsx",
+                       fleet.LAB / "data" / "acme-august" / "supplier.xlsx").is_file()
+              and retained(w, "ledger.xlsx",
+                           fleet.LAB / "data" / "acme-august" / "ledger.xlsx").is_file(),
+              "both bound files drained to processed/ (digest-namespaced)")
         check(not (w.directory / "inbox" / "supplier.xlsx").is_file()
               and not (w.directory / "inbox" / "ledger.xlsx").is_file(),
               "the inbox drains for both set members")
@@ -348,8 +357,10 @@ def _self_test() -> int:
               f"a shape mismatch excepts with named problems: {out}")
         check(load(w) is None and len(fleet.load(w.directory).runs) == 0,
               "CANARY: a refused binding records NO binding and fires NO run")
-        check((w.directory / "exceptions" / "wrong.xlsx").is_file(),
-              "the refused file is queued in exceptions/")
+        check(retained(w, "wrong.xlsx",
+                       fleet.LAB / "data" / "xlsx-fazerish" / "may-order-lines.xlsx",
+                       "exceptions").is_file(),
+              "the refused file is queued in exceptions/ (digest-namespaced)")
 
         # --- ACME: a sole file with no slot sidecar is refused, not guessed -
         w = build_worker(".selftest-acme3", "acme", acme_model, acme_roles,
@@ -389,8 +400,9 @@ def _self_test() -> int:
               f"runs={len(runs)}")
         check(load(w) is None,
               "the shared set is cleared after the run")
-        check((w.directory / "processed" / "may.xlsx").is_file(),
-              "the shared workbook drains to processed/")
+        check(retained(w, "may.xlsx",
+                       fleet.LAB / "data" / "xlsx-fazerish" / "may-order-lines.xlsx").is_file(),
+              "the shared workbook drains to processed/ (digest-namespaced)")
 
         # === PHASE 4.5 CRASH CANARIES (the hard gate) ====================
         # A complete input set runs EXACTLY ONCE. The fingerprint guard lets

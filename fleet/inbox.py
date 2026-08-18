@@ -107,6 +107,18 @@ TERMINAL = ("completed", "exception", "skipped_duplicate",
             "recovered_completed", "recovered_exception")
 
 
+def retained_name(document: str, digest: str) -> str:
+    """Digest-namespaced raw-retention name: ``<digest>.<ext>``.
+
+    Two same-named different-bytes arrivals both survive in ``processed/``
+    (design §6.2) -- the bare filename would overwrite, losing the exact raw
+    evidence an earlier run recorded. The original filename is kept in the
+    ledger ``file`` field, not on disk; the digest is the truth. This is raw
+    retention only: the materialized JSON is still overwritten per run.
+    """
+    return f"{digest}{Path(document).suffix}"
+
+
 class UnknownIdentityPolicy(Exception):
     """The worker declares a work-item identity this inbox cannot compute."""
 
@@ -311,7 +323,8 @@ def _terminalize_set(w: fleet.Worker, completing: Item, run: dict) -> list[dict]
         _append(w, record)
         src = w.directory / "inbox" / document
         if src.is_file():
-            shutil.move(str(src), w.directory / destination / document)
+            shutil.move(str(src),
+                        w.directory / destination / retained_name(document, info["digest"]))
         side = _role_sidecar(src)
         if side.is_file():
             side.unlink()
@@ -337,7 +350,8 @@ def _poll_contract_item(w: fleet.Worker, path: Path, item: Item,
                                          "bind it to a role explicitly "
                                          "(filename is not authority)"}
         _append(w, record)
-        shutil.move(str(path), w.directory / "exceptions" / path.name)
+        shutil.move(str(path),
+                    w.directory / "exceptions" / retained_name(path.name, item.payload_digest))
         side = _role_sidecar(path)
         if side.is_file():
             side.unlink()
@@ -352,7 +366,8 @@ def _poll_contract_item(w: fleet.Worker, path: Path, item: Item,
                   "reason": "the workbook could not be converted faithfully "
                             "against the slot's contract"}
         _append(w, record)
-        shutil.move(str(path), w.directory / "exceptions" / path.name)
+        shutil.move(str(path),
+                    w.directory / "exceptions" / retained_name(path.name, item.payload_digest))
         side = _role_sidecar(path)
         if side.is_file():
             side.unlink()
@@ -597,7 +612,8 @@ def _recover_terminalize(w: fleet.Worker, run: dict) -> list[dict]:
         _append(w, record)
         src = w.directory / "inbox" / document
         if src.is_file():
-            shutil.move(str(src), w.directory / destination / document)
+            shutil.move(str(src),
+                        w.directory / destination / retained_name(document, info["digest"]))
         side = _role_sidecar(src)
         if side.is_file():
             side.unlink()
@@ -825,8 +841,10 @@ def _run_xlsx_in_lab(check, failures) -> int:
         check(len(out) == 1 and out[0]["state"] == "completed",
               f"the contract-sourced xlsx arrival completes via the ordinary "
               f"poll: {out}")
-        check((w.directory / "processed" / "may.xlsx").is_file(),
-              "…and is filed to processed/ by the ordinary path")
+        _may_src = fleet.LAB / "data" / "xlsx-fazerish" / "may-order-lines.xlsx"
+        check((w.directory / "processed" / retained_name(
+                  "may.xlsx", hashlib.sha256(_may_src.read_bytes()).hexdigest())).is_file(),
+              "…and is filed to processed/ by the ordinary path (digest-namespaced)")
         check(any(e["state"] == "completed" for e in ledger(w)),
               "…and wrote a ledger line")
         runs = fleet.load(w.directory).runs
@@ -837,6 +855,39 @@ def _run_xlsx_in_lab(check, failures) -> int:
         check((w.base / "sources" / "order_lines.json").is_file()
               and (w.base / "sources" / "price_list.json").is_file(),
               "the workbook's sheets were written to the model's source paths")
+
+        # --- PHASE 6: collision-safe raw retention (design §6.2) ------------
+        # The run above landed `may.xlsx` (digest_a) in processed/. Now arrive a
+        # SAME-named, DIFFERENT-bytes workbook: it must NOT overwrite the first
+        # -- both survive, distinguishable by digest, and the ledger carries
+        # both. The bare filename would lose the exact raw evidence the earlier
+        # run recorded; the digest is the truth (materialized JSON is still
+        # overwritten per run -- this is raw retention only).
+        from openpyxl import load_workbook
+        src_a = fleet.LAB / "data" / "xlsx-fazerish" / "may-order-lines.xlsx"
+        digest_a = hashlib.sha256(src_a.read_bytes()).hexdigest()
+        twin = scratch / "twin.xlsx"
+        wb = load_workbook(src_a)
+        # bump one Qty cell: same shape, different bytes, still a healthy run
+        cell = wb["Order lines"].cell(row=3, column=3)
+        cell.value = int(cell.value or 0) + 1
+        wb.save(twin)
+        digest_b = hashlib.sha256(twin.read_bytes()).hexdigest()
+        check(digest_a != digest_b, "the twin has different bytes (same shape)")
+        shutil.copy(twin, w.directory / "inbox" / "may.xlsx")
+        poll(w)
+        check((w.directory / "processed" / retained_name("may.xlsx", digest_a)).is_file()
+              and (w.directory / "processed" / retained_name("may.xlsx", digest_b)).is_file(),
+              "BOTH same-named different-bytes arrivals survive in processed/ "
+              "(distinguishable by digest, not overwrite)")
+        completed = [e for e in ledger(w) if e["state"] == "completed"]
+        by_file: dict[str, set] = {}
+        for e in completed:
+            by_file.setdefault(e["file"], set()).add(e["payload_digest"])
+        check("may.xlsx" in by_file and digest_a in by_file["may.xlsx"]
+              and digest_b in by_file["may.xlsx"],
+              f"the ledger carries both arrivals under file may.xlsx with "
+              f"distinct digests: { {k: sorted(v) for k, v in by_file.items()} }")
     finally:
         shutil.rmtree(scratch, ignore_errors=True)
 
@@ -846,7 +897,9 @@ def _run_xlsx_in_lab(check, failures) -> int:
     print("XLSX GATE PASSED (a scratch worker whose sheet shape lives ONLY in "
           "input_contracts/v1.json still converts, runs the enrichment, files "
           "to processed/ and writes a ledger line via the ordinary poll -- the "
-          "v0.6 spec-source move is atomic and non-breaking)")
+          "v0.6 spec-source move is atomic and non-breaking / "
+          "Phase 6: two same-named different-bytes arrivals both survive in "
+          "processed/ distinguishable by digest, and the ledger carries both)")
     return 0
 
 
