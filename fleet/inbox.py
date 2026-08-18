@@ -62,6 +62,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import fleet  # noqa: E402
+import input_set  # noqa: E402
 
 sys.path.insert(0, str(HERE.parent / "worker"))
 import runtime  # noqa: E402
@@ -240,6 +241,144 @@ def waiting(w: fleet.Worker) -> list[Path]:
     return sorted(found)
 
 
+def _role_sidecar(path: Path) -> Path:
+    """The operator's explicit slot choice for a sole-slot file: a
+    `<filename>.role` sidecar carrying the role name. Binding authority is an
+    operator act, never filename inference (design §4)."""
+    return path.with_name(path.name + ".role")
+
+
+def _target_roles(w: fleet.Worker, path: Path) -> Optional[list[str]]:
+    """Which roles an arriving file binds.
+
+    shared-slot worker: every shared role -- one workbook fills them all
+    (fazerish). sole-slot worker: the one role named in the `<file>.role`
+    sidecar (acme) -- None if no sidecar was written, which becomes an
+    exception rather than a guess from the filename. Mixed sole/shared slot
+    workers are beyond v0.6's two workers and are refused here.
+    """
+    shared = input_set.shared_roles(w)
+    sole = input_set.sole_roles(w)
+    if shared and not sole:
+        return shared
+    if sole and not shared:
+        side = _role_sidecar(path)
+        if not side.is_file():
+            return None
+        role = side.read_text(encoding="utf-8").strip()
+        if role not in sole:
+            return None
+        return [role]
+    raise ValueError(
+        f"{w.name} mixes sole and shared slots; v0.6 supports one kind only")
+
+
+def _terminalize_set(w: fleet.Worker, completing: Item, run: dict) -> list[dict]:
+    """A complete set's run fired. Terminalize EVERY bound document: one
+    ledger line per bound file (carrying every role it fills), and each raw
+    file drained from inbox/ to processed/ or exceptions/. Then clear the set.
+
+    The run is ONE record_run for the whole set; the ledger is per-item, so
+    every bound document reaches a terminal state. The completing item's
+    claim was written by `poll`; staged members were claimed+staged earlier.
+    A shared workbook that fills several roles is ONE outcome carrying all of
+    them (one file in, one terminal record out); a multi-sole set is one
+    outcome per document.
+    """
+    doc = input_set.load(w) or {"roles": {}}
+    healthy = run["ok"]
+    state = "completed" if healthy else "exception"
+    destination = "processed" if healthy else "exceptions"
+    # group roles by the bound document (a shared workbook fills several)
+    by_doc: dict[str, dict] = {}
+    for role, binding in doc.get("roles", {}).items():
+        entry = by_doc.setdefault(binding["document"],
+                                  {"digest": binding["digest"], "roles": []})
+        entry["roles"].append(role)
+    outcomes: list[dict] = []
+    for document, info in by_doc.items():
+        is_completing = info["digest"] == completing.payload_digest
+        record = {"at": _now(), "item_id": info["digest"],
+                  "payload_digest": info["digest"], "file": document,
+                  "state": state, "roles": sorted(info["roles"]),
+                  "request": completing.request if is_completing else None,
+                  "decision": run.get("decision") if is_completing else None,
+                  "reason": run.get("reason") if is_completing else None,
+                  "effect_applied": (run.get("effect_applied")
+                                     if is_completing else None),
+                  "problems": (run.get("problems", []) if is_completing
+                               else [])}
+        _append(w, record)
+        src = w.directory / "inbox" / document
+        if src.is_file():
+            shutil.move(str(src), w.directory / destination / document)
+        side = _role_sidecar(src)
+        if side.is_file():
+            side.unlink()
+        outcomes.append(record)
+    input_set.clear(w)
+    return outcomes
+
+
+def _poll_contract_item(w: fleet.Worker, path: Path, item: Item,
+                        crash_at: Optional[str]) -> list[dict]:
+    """The v0.6 per-item flow for a worker with an input_contract.
+
+    bind -> (partial: stage) | (complete: run + terminalize the set). A shape
+    mismatch at bind is an exception with no partial mutation. The claim was
+    already written by `poll`; this owns everything after it.
+    """
+    roles = _target_roles(w, path)
+    if roles is None:
+        record = {"at": _now(), "item_id": item.item_id,
+                  "payload_digest": item.payload_digest, "file": path.name,
+                  "state": "exception", "request": item.request,
+                  "roles": [], "reason": "no slot assigned to this file; "
+                                         "bind it to a role explicitly "
+                                         "(filename is not authority)"}
+        _append(w, record)
+        shutil.move(str(path), w.directory / "exceptions" / path.name)
+        side = _role_sidecar(path)
+        if side.is_file():
+            side.unlink()
+        return [record]
+
+    result = input_set.bind(w, roles, path)
+    if result["problems"]:
+        record = {"at": _now(), "item_id": item.item_id,
+                  "payload_digest": item.payload_digest, "file": path.name,
+                  "state": "exception", "request": item.request, "roles": roles,
+                  "problems": result["problems"],
+                  "reason": "the workbook could not be converted faithfully "
+                            "against the slot's contract"}
+        _append(w, record)
+        shutil.move(str(path), w.directory / "exceptions" / path.name)
+        side = _role_sidecar(path)
+        if side.is_file():
+            side.unlink()
+        return [record]
+
+    if not result["complete"]:
+        # Stage: the set is partial. The file stays in inbox/ (the set, not the
+        # file location, is the authority); the sidecar is consumed (the
+        # binding is recorded in input_set.json). A re-poll sees "staged" and
+        # skips it until the remaining slots arrive.
+        record = {"at": _now(), "item_id": item.item_id,
+                  "payload_digest": item.payload_digest, "file": path.name,
+                  "state": "staged", "roles": roles, "request": item.request}
+        _append(w, record)
+        side = _role_sidecar(path)
+        if side.is_file():
+            side.unlink()
+        return [record]
+
+    # Complete -> run the worker over the whole set, then terminalize.
+    run = fleet.record_run(w, request=item.request)
+    if crash_at == "after_effect":
+        raise CrashInjected("after_effect")
+    return _terminalize_set(w, item, run)
+
+
 def poll(w: fleet.Worker, crash_at: Optional[str] = None) -> list[dict]:
     """One deterministic pass over the inbox. Contains no LLM and no clock logic.
 
@@ -255,6 +394,12 @@ def poll(w: fleet.Worker, crash_at: Optional[str] = None) -> list[dict]:
     ensure(w)
     outcomes = []
     for path in waiting(w):
+        # A file may have been drained mid-pass: a prior iteration's set-
+        # completion (v0.6 contract path) terminalizes every bound document in
+        # the open set, including ones still in this snapshot. Skip anything
+        # already gone rather than treating a drain as an unreadable item.
+        if not path.is_file():
+            continue
         try:
             item = read_item(w, path)
         except (OSError, ValueError, KeyError) as exc:
@@ -279,12 +424,32 @@ def poll(w: fleet.Worker, crash_at: Optional[str] = None) -> list[dict]:
             outcomes.append(record)
             continue
 
+        # A staged item is already bound into the worker's open input set
+        # (v0.6 contract path). It stays in inbox/ waiting for the remaining
+        # slots; do not re-claim, do not move it -- the set, not the file
+        # location, is the authority for partial state.
+        if seen == "staged":
+            continue
+
         _append(w, {"at": _now(), "item_id": item.item_id,
                     "payload_digest": item.payload_digest, "file": path.name,
                     "state": "claimed", "request": item.request,
                     "precondition": _precondition(w, item.request)})
         if crash_at == "after_claim":
             raise CrashInjected("after_claim")
+
+        # --- v0.6 contract path: bind into the open input set ---------------
+        # A worker with a version-bound input_contract binds each xlsx arrival
+        # to a source ROLE (explicit operator choice for sole slots; all
+        # shared roles at once for a shared-slot workbook), validates it
+        # against that role's contract, materializes it, and runs ONLY when
+        # the set is complete. This recasts the per-file run as "one document
+        # completes an N-slot set" and lets a multi-document reconciliation
+        # stage until both sides are bound. Non-contract workers fall through
+        # to the legacy per-file path unchanged.
+        if w.input_contract is not None and path.suffix == ".xlsx":
+            outcomes += _poll_contract_item(w, path, item, crash_at)
+            continue
 
         if path.suffix == ".xlsx":
             xlsx = _xlsx()
@@ -476,6 +641,7 @@ def summary(w: fleet.Worker) -> dict:
         "items_seen": len(final),
         "completed": len(ever_completed),
         "in_flight": sum(1 for s in final.values() if s == "claimed"),
+        "staged": sum(1 for s in final.values() if s == "staged"),
         "recovered": sum(1 for e in entries
                          if str(e["state"]).startswith("recovered_")),
         "duplicates_skipped": sum(1 for e in entries

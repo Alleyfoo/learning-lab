@@ -166,7 +166,7 @@ def run(est: Established, established_digest: Optional[str] = None) -> Outcome:
         est.runs.append({"ok": False, "reason": "definition_changed"})
         return Outcome(ok=False, packet=packet)
 
-    preview = builder.preview(TASK, est.model, base=est.base)
+    preview = builder.preview(est.model.get("task") or TASK, est.model, base=est.base)
     if not preview.ok:
         est.runs.append({"ok": False, "reason": "contract_failed"})
         return Outcome(ok=False,
