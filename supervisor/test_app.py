@@ -109,6 +109,42 @@ def _self_test() -> int:
         check(_expander_present(at, f"Inbox: {inbox['worker']}"),
               f"inbox panel expander missing for {inbox['worker']}")
 
+    # --- v0.6 Phase 7: the operator binding surface (sole + shared) --------
+    # AppTest cannot drive the file_uploader, so the operator's slot choice is
+    # simulated via session_state (the selectbox key the inbox panel reads).
+    by_name = {w.name: w for w in fleet.load_all()}
+    acme = by_name.get("acme-august-recon")
+    fazerish = by_name.get("fazerish-invoicing")
+
+    def _has_selectbox(at_, label):
+        return any(getattr(s, "label", None) == label for s in at_.selectbox)
+
+    def _has_caption_containing(at_, needle):
+        return any(needle in str(getattr(c, "value", "")) for c in at_.caption)
+
+    if acme:
+        sel = {"kind": "inbox", "worker": "acme-august-recon"}
+        at = _run_with(selection=sel)
+        # simulate the operator binding the next upload to the `statement` slot
+        at.session_state["inbox_slot_acme-august-recon"] = "statement"
+        at.run()
+        check(not at.exception,
+              f"acme inbox (sole slots) raised: {[str(e) for e in at.exception]}")
+        check(_has_selectbox(at, "Bind to slot"),
+              "acme inbox panel offers a slot picker for its sole slots")
+        check(not _has_caption_containing(at, "Shared slots"),
+              "a sole-slot worker does not show the shared-slots caption")
+
+    if fazerish:
+        sel = {"kind": "inbox", "worker": "fazerish-invoicing"}
+        at = _run_with(selection=sel)
+        check(not at.exception,
+              f"fazerish inbox (shared slots) raised: {[str(e) for e in at.exception]}")
+        check(_has_caption_containing(at, "Shared slots"),
+              "fazerish inbox panel shows the shared-slots caption (one upload binds all)")
+        check(not _has_selectbox(at, "Bind to slot"),
+              "a shared-slot worker does not offer a slot picker")
+
     # --- company panel (acceptance B surface) --------------------------------
     if company:
         at = _run_with(selection=company)
@@ -148,7 +184,9 @@ def _self_test() -> int:
         return 1
     print("SELF-TEST PASSED (AppTest: each map-selection kind renders its "
           "type-appropriate panel -- inbox / company / source / destination / "
-          "worker -- with no exception)")
+          "worker -- with no exception / Phase 7: acme inbox offers a sole-slot "
+          "picker (operator choice via session_state), fazerish inbox shows the "
+          "shared-slots caption with no picker)")
     return 0
 
 

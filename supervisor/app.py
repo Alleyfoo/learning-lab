@@ -413,6 +413,29 @@ def _render_inbox_panel(sel: dict, worker_by_name: dict) -> None:
             confirm = True
 
         upload_types = ["xlsx"] if adapter == "xlsx" else ["json"]
+        # v0.6 Phase 7: a contract worker binds an uploaded file to a SLOT. For
+        # SOLE slots the operator picks which slot (the .role sidecar); for
+        # SHARED slots one upload binds all of them (no choice). Non-contract
+        # workers (slot_choice is None) keep the v0.5 upload-and-process surface.
+        chosen_role = None
+        sc = operate.slot_choice(w)
+        if sc is not None:
+            roles_meta = w.identity.get("source_roles") or {}
+            if sc["mixed"]:
+                st.warning("This worker mixes sole and shared slots, which the "
+                           "bind path refuses. Bind its files another way.")
+            elif sc["sole"]:
+                labels = {r: (roles_meta.get(r, {}) or {}).get("label", r)
+                          for r in sc["sole"]}
+                chosen_role = st.selectbox(
+                    "Bind to slot", sc["sole"],
+                    format_func=lambda r: labels[r],
+                    key=f"inbox_slot_{wname}")
+                st.caption("Filename is not authority -- your slot choice is "
+                           "written as the `.role` sidecar the ordinary poll reads.")
+            elif sc["shared"]:
+                st.caption(f"Shared slots ({', '.join(sc['shared'])}) -- one "
+                           f"upload binds all of them; no slot choice.")
         uploaded = st.file_uploader(
             f"Work item ({expected})", type=upload_types, accept_multiple_files=False,
             key=f"inbox_upload_{wname}")
@@ -426,10 +449,15 @@ def _render_inbox_panel(sel: dict, worker_by_name: dict) -> None:
                 st.error("Choose a file first.")
             elif w.committing and not confirm:
                 st.error("Confirm that you understand this lands the effect.")
+            elif sc is not None and sc["sole"] and not chosen_role:
+                st.error("Pick a slot for this file first.")
             else:
                 try:
-                    operate.save_to_inbox(w, uploaded.name, uploaded.getvalue())
+                    operate.save_to_inbox(w, uploaded.name, uploaded.getvalue(),
+                                           role=chosen_role)
                     msg = f"Landed `{uploaded.name}` in `{wname}/inbox/`."
+                    if chosen_role:
+                        msg += f" Bound to slot `{chosen_role}`."
                     if do_process:
                         outcomes = operate.poll_inbox(w)
                         states = ", ".join(f"{o.get('file')}: {o.get('state')}"
