@@ -67,6 +67,7 @@ import system_map     # noqa: E402  (build, legend, status_legend, name_from)
 import map_component  # noqa: E402  (the vis-network Streamlit component)
 import incoming       # noqa: E402  (the read-only incoming-data browser)
 import define         # noqa: E402  (v0.3: glue to the modeller floor + establishment)
+import operate        # noqa: E402  (v0.5: thin wrappers over the ordinary inbox path)
 import assessment     # noqa: E402
 import backlog        # noqa: E402
 import rulebook       # noqa: E402
@@ -356,7 +357,77 @@ def _render_typed_panel(sel: dict, workers: list, worker_by_name: dict,
 # ---------------------------------------------------------------------------
 
 def _render_inbox_panel(sel: dict, worker_by_name: dict) -> None:
-    st.caption(f"(inbox panel for `{sel.get('worker')}` -- Phase 2)")
+    """Operating panel for an inbox (input) node (v0.5 item 3, acceptance A).
+
+    Uploads a real work item into the worker's actual `inbox/` and optionally
+    runs ONE ordinary `inbox.poll` pass. There is no dashboard-specific
+    processing path: poll is the same path a CLI/seed uses, and it is the only
+    thing that writes the ledger, dispatches record_run, and moves files to
+    processed/exceptions.
+    """
+    wname = sel.get("worker")
+    w = worker_by_name.get(wname)
+    with st.expander(f"Inbox: {wname}", expanded=True):
+        if w is None:
+            st.caption(f"No worker `{wname}`.")
+            if st.button("Clear selection", key="clear_inbox_pick"):
+                _clear_map_selection()
+                st.rerun()
+            return
+        adapter = w.identity.get("input_adapter")
+        expected = "xlsx" if adapter == "xlsx" else "json"
+        st.markdown(f"**Worker.** `{wname}` · task `{w.task}` · "
+                    f"expected input `{expected}`")
+        if w.identity.get("adapter_sheets"):
+            sheets = ", ".join(f"{s['sheet']} → {s['collection']}"
+                               for s in w.identity["adapter_sheets"])
+            st.caption(f"adapter sheets: {sheets}")
+        counts = operate.inbox_counts(w)
+        st.markdown(f"**Waiting:** {counts['waiting']} · "
+                    f"**Processed:** {counts['processed']} · "
+                    f"**Exceptions:** {counts['exceptions']}")
+
+        if w.committing:
+            st.warning(f"On acceptance this worker commits `{w.effect}` — "
+                       f"processing lands the REAL effect (a booking is "
+                       f"appended, not previewed). This is the ordinary path, "
+                       f"not a dashboard shortcut.")
+            confirm = st.checkbox("I understand this lands the effect",
+                                  key=f"inbox_confirm_{wname}")
+        else:
+            confirm = True
+
+        upload_types = ["xlsx"] if adapter == "xlsx" else ["json"]
+        uploaded = st.file_uploader(
+            f"Work item ({expected})", type=upload_types, accept_multiple_files=False,
+            key=f"inbox_upload_{wname}")
+
+        c1, c2 = st.columns(2)
+        do_upload = c1.button("Upload", key=f"inbox_upload_go_{wname}")
+        do_process = c2.button("Upload and process", type="primary",
+                               key=f"inbox_process_go_{wname}")
+        if do_upload or do_process:
+            if uploaded is None:
+                st.error("Choose a file first.")
+            elif w.committing and not confirm:
+                st.error("Confirm that you understand this lands the effect.")
+            else:
+                try:
+                    operate.save_to_inbox(w, uploaded.name, uploaded.getvalue())
+                    msg = f"Landed `{uploaded.name}` in `{wname}/inbox/`."
+                    if do_process:
+                        outcomes = operate.poll_inbox(w)
+                        states = ", ".join(f"{o.get('file')}: {o.get('state')}"
+                                           for o in outcomes) or "(nothing to run)"
+                        msg += f" Ordinary poll → {states}."
+                    st.success(msg)
+                    st.session_state.pop("incoming", None)  # refresh the scan
+                    st.rerun()
+                except Exception as e:  # noqa: BLE001
+                    st.error(f"{type(e).__name__}: {e}")
+        if st.button("Clear selection", key="clear_inbox_pick"):
+            _clear_map_selection()
+            st.rerun()
 
 
 def _render_company_panel(sel: dict, workers: list) -> None:
