@@ -388,7 +388,12 @@ def _render_inbox_panel(sel: dict, worker_by_name: dict) -> None:
         expected = "xlsx" if adapter == "xlsx" else "json"
         st.markdown(f"**Worker.** `{wname}` · task `{w.task}` · "
                     f"expected input `{expected}`")
-        if w.identity.get("adapter_sheets"):
+        if w.input_contract is not None:
+            roles = w.input_contract.get("roles", {})
+            sheets = ", ".join(f"{r['sheet']} → {r['collection']}"
+                               for r in roles.values())
+            st.caption(f"adapter sheets: {sheets}")
+        elif w.identity.get("adapter_sheets"):
             sheets = ", ".join(f"{s['sheet']} → {s['collection']}"
                                for s in w.identity["adapter_sheets"])
             st.caption(f"adapter sheets: {sheets}")

@@ -79,6 +79,22 @@ def _xlsx():
     import adapters.xlsx as module
     return module
 
+
+def _sheet_specs(xlsx, w: "fleet.Worker") -> list:
+    """The SheetSpecs an xlsx arrival is validated against.
+
+    v0.6 source of truth: the worker's version-bound `input_contract`
+    (`input_contracts/v<N>.json`), via `specs_from_contract` -- a contract
+    answers what data representation this version is allowed to do it with.
+    Falls back to the legacy `identity["adapter_sheets"]` shape when no
+    contract exists, so workers not yet migrated (and non-sheet workers never
+    reaching this branch) keep working unchanged. The back-compat gate.
+    """
+    contract = w.input_contract
+    if contract is not None:
+        return list(xlsx.specs_from_contract(contract).values())
+    return xlsx.specs_from(w.identity["adapter_sheets"])
+
 LEDGER = "ledger.jsonl"
 FOLDERS = ("inbox", "processed", "exceptions")
 
@@ -272,8 +288,7 @@ def poll(w: fleet.Worker, crash_at: Optional[str] = None) -> list[dict]:
 
         if path.suffix == ".xlsx":
             xlsx = _xlsx()
-            conversion = xlsx.convert(path, xlsx.specs_from(
-                w.identity["adapter_sheets"]))
+            conversion = xlsx.convert(path, _sheet_specs(xlsx, w))
             if not conversion.ok:
                 record = {"at": _now(), "item_id": item.item_id,
                           "payload_digest": item.payload_digest,
@@ -483,7 +498,93 @@ def _self_test() -> int:
 
     model = json.loads((fleet.LAB / "reservation" / "models" /
                         "reservation_v1.json").read_text(encoding="utf-8"))
-    return _run_in_lab(check, failures, model)
+    rc = _run_in_lab(check, failures, model)
+    if rc:
+        return rc
+    # The v0.6 hard gate: the inbox spec-source moved from
+    # identity["adapter_sheets"] to the version-bound input_contract. A scratch
+    # xlsx worker whose contract is the ONLY place its sheet shape lives must
+    # still convert, run, and file to processed/ via the ordinary poll. This is
+    # the Fazerish-migration canary: if the contract path is not wired, the
+    # live xlsx inbox breaks.
+    return _run_xlsx_in_lab(check, failures)
+
+
+def _run_xlsx_in_lab(check, failures) -> int:
+    scratch = fleet.LAB / "fleet" / ".selftest-xlsx"
+    if scratch.exists():
+        shutil.rmtree(scratch)
+    try:
+        root = scratch / "workers"
+        root.mkdir(parents=True)
+        fazerish_model = json.loads(
+            (fleet.LAB / "fleet" / "workers" / "fazerish-invoicing" /
+             "versions" / "v1.json").read_text(encoding="utf-8"))
+        base_rel = "fleet/.selftest-xlsx/workers/xlsx-worker/state"
+        w = fleet.establish(root, "xlsx-worker", "Xlsx inbox gate.", "enrichment",
+                            base_rel, fazerish_model)
+        # Post-write the stable source roles + operational policy (establish
+        # writes only the identity core; roles/policy are added the same way
+        # `work_item_identity` is in the reservation self-test).
+        ident = json.loads((w.directory / "worker.json").read_text(encoding="utf-8"))
+        ident["input_adapter"] = "xlsx"
+        ident["work_item_identity"] = "content_digest"
+        ident["source_roles"] = {
+            "order_lines": {"label": "order lines", "slot": "shared",
+                            "required": True},
+            "price_list": {"label": "price list", "slot": "shared",
+                           "required": True},
+        }
+        (w.directory / "worker.json").write_text(
+            json.dumps(ident, indent=2) + "\n", encoding="utf-8")
+        # The contract is the ONLY place the sheet shape lives now -- no
+        # adapter_sheets on identity. Same version as the model.
+        contracts_dir = w.directory / "input_contracts"
+        contracts_dir.mkdir()
+        (contracts_dir / "v1.json").write_text(json.dumps({
+            "roles": {
+                "order_lines": {"sheet": "Order lines", "collection": "order_lines",
+                                "header_row": 1},
+                "price_list": {"sheet": "Price list", "collection": "price_list",
+                               "header_row": 1},
+            }}, indent=2) + "\n", encoding="utf-8")
+        w = fleet.load(w.directory)
+        ensure(w)
+        check(w.input_contract is not None
+              and "adapter_sheets" not in w.identity,
+              "the xlsx gate worker sources shape from input_contract, not identity")
+
+        shutil.copy(
+            fleet.LAB / "data" / "xlsx-fazerish" / "may-order-lines.xlsx",
+            w.directory / "inbox" / "may.xlsx")
+
+        out = poll(w)
+        check(len(out) == 1 and out[0]["state"] == "completed",
+              f"the contract-sourced xlsx arrival completes via the ordinary "
+              f"poll: {out}")
+        check((w.directory / "processed" / "may.xlsx").is_file(),
+              "…and is filed to processed/ by the ordinary path")
+        check(any(e["state"] == "completed" for e in ledger(w)),
+              "…and wrote a ledger line")
+        runs = fleet.load(w.directory).runs
+        check(runs and runs[-1]["ok"] and runs[-1]["rows"] == 3,
+              f"…and the enrichment ran clean on the materialized sources: "
+              f"{runs[-1] if runs else None}")
+        # the materialized source JSONs landed at the model-declared paths
+        check((w.base / "sources" / "order_lines.json").is_file()
+              and (w.base / "sources" / "price_list.json").is_file(),
+              "the workbook's sheets were written to the model's source paths")
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+
+    if failures:
+        sys.stderr.write("XLSX GATE FAILED:\n  " + "\n  ".join(failures) + "\n")
+        return 1
+    print("XLSX GATE PASSED (a scratch worker whose sheet shape lives ONLY in "
+          "input_contracts/v1.json still converts, runs the enrichment, files "
+          "to processed/ and writes a ledger line via the ordinary poll -- the "
+          "v0.6 spec-source move is atomic and non-breaking)")
+    return 0
 
 
 def _run_in_lab(check, failures, model) -> int:

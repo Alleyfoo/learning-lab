@@ -1,0 +1,14 @@
+{
+  "roles": {
+    "order_lines": {
+      "sheet": "Order lines",
+      "collection": "order_lines",
+      "header_row": 1
+    },
+    "price_list": {
+      "sheet": "Price list",
+      "collection": "price_list",
+      "header_row": 1
+    }
+  }
+}

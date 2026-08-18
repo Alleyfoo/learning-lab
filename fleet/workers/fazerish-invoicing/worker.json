@@ -7,16 +7,16 @@
   "customer": "Fazerish Oy",
   "input_adapter": "xlsx",
   "work_item_identity": "content_digest",
-  "adapter_sheets": [
-    {
-      "sheet": "Order lines",
-      "collection": "order_lines",
-      "header_row": 1
+  "source_roles": {
+    "order_lines": {
+      "label": "order lines",
+      "slot": "shared",
+      "required": true
     },
-    {
-      "sheet": "Price list",
-      "collection": "price_list",
-      "header_row": 1
+    "price_list": {
+      "label": "price list",
+      "slot": "shared",
+      "required": true
     }
-  ]
+  }
 }
