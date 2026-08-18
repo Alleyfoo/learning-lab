@@ -1,0 +1,52 @@
+{
+  "statement": [
+    {
+      "Date": "2026-07-15",
+      "Supplier Name": "Acme Corp",
+      "InvoiceNumber": "ACC-INV-001",
+      "Amount": "2500.00",
+      "Currency": "GBP",
+      "Status": "PAID"
+    },
+    {
+      "Date": "2026-07-18",
+      "Supplier Name": "Acme Corp",
+      "InvoiceNumber": "ACC-INV-002",
+      "Amount": "1850.50",
+      "Currency": "GBP",
+      "Status": "UNPAID"
+    },
+    {
+      "Date": "2026-07-22",
+      "Supplier Name": "Beta Supplies Ltd",
+      "InvoiceNumber": "BSI-2047",
+      "Amount": "425.75",
+      "Currency": "GBP",
+      "Status": "PAID"
+    },
+    {
+      "Date": "2026-07-25",
+      "Supplier Name": "Beta Supplies Ltd",
+      "InvoiceNumber": "BSI-2048",
+      "Amount": "890.00",
+      "Currency": "GBP",
+      "Status": "UNPAID"
+    },
+    {
+      "Date": "2026-08-01",
+      "Supplier Name": "Gamma Traders Co",
+      "InvoiceNumber": "GTC-3011",
+      "Amount": "1500.00",
+      "Currency": "GBP",
+      "Status": "PAID"
+    },
+    {
+      "Date": "2026-08-05",
+      "Supplier Name": "Delta Systems Inc",
+      "InvoiceNumber": "DSI-4002",
+      "Amount": "3200.25",
+      "Currency": "GBP",
+      "Status": "PAID"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "ledger": [
+    {
+      "Date": "2026-07-15",
+      "ReferenceNumber": "LDR-001",
+      "SupplierName": "Acme Corp",
+      "InvoiceNumber": "ACC-INV-001",
+      "Amount": "2500.00",
+      "Status": "CLEARED",
+      "Notes": "Verified match to statement"
+    },
+    {
+      "Date": "2026-07-18",
+      "ReferenceNumber": "LDR-002",
+      "SupplierName": "Acme Corp",
+      "InvoiceNumber": "ACC-INV-002",
+      "Amount": "1850.50",
+      "Status": "PENDING",
+      "Notes": "Payment not yet received"
+    },
+    {
+      "Date": "2026-07-22",
+      "ReferenceNumber": "LDR-003",
+      "SupplierName": "Beta Supplies Ltd",
+      "InvoiceNumber": "BSI-2047",
+      "Amount": "425.75",
+      "Status": "CLEARED",
+      "Notes": "Verified match to statement"
+    },
+    {
+      "Date": "2026-07-25",
+      "ReferenceNumber": "LDR-004",
+      "SupplierName": "Beta Supplies Ltd",
+      "InvoiceNumber": "BSI-2048",
+      "Amount": "890.00",
+      "Status": "PENDING",
+      "Notes": "Payment not yet received"
+    },
+    {
+      "Date": "2026-08-01",
+      "ReferenceNumber": "LDR-005",
+      "SupplierName": "Gamma Traders Co",
+      "InvoiceNumber": "GTC-3011",
+      "Amount": "1500.00",
+      "Status": "CLEARED",
+      "Notes": "Verified match to statement"
+    },
+    {
+      "Date": "2026-08-05",
+      "ReferenceNumber": "LDR-006",
+      "SupplierName": "Delta Systems Inc",
+      "InvoiceNumber": "DSI-4002",
+      "Amount": "3200.25",
+      "Status": "CLEARED",
+      "Notes": "Verified match to statement"
+    }
+  ]
+}

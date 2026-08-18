@@ -1,0 +1,9 @@
+Supplier Statement File - Synthetic Reconciliation Fixture
+=============================================================
+Header: Date, Supplier Name, InvoiceNumber, Amount, Currency, Status
+2026-07-15, Acme Corp, ACC-INV-001, 2500.00, GBP, PAID
+2026-07-18, Acme Corp, ACC-INV-002, 1850.50, GBP, UNPAID
+2026-07-22, Beta Supplies Ltd, BSI-2047, 425.75, GBP, PAID
+2026-07-25, Beta Supplies Ltd, BSI-2048, 890.00, GBP, UNPAID
+2026-08-01, Gamma Traders Co, GTC-3011, 1500.00, GBP, PAID
+2026-08-05, Delta Systems Inc, DSI-4002, 3200.25, GBP, PAID

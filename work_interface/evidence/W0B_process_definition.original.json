@@ -1,0 +1,110 @@
+{
+  "purpose": "Reconcile two peer sources of invoice data to identify missing invoices on either side and amount differences for records present in both files.",
+  "task_family": "Invoice-to-Invoice Reconciliation",
+  "sources": [
+    {
+      "stable_role": "source_A",
+      "file_path": "supplier-statement.txt",
+      "observed_fields": ["Date", "SupplierName", "InvoiceNumber", "Amount", "Currency", "Status"],
+      "expected_characteristics": "comma-delimited text file containing invoice records with external supplier statement data"
+    },
+    {
+      "stable_role": "source_B", 
+      "file_path": "ledger-book.txt",
+      "observed_fields": ["Date", "ReferenceNumber", "SupplierName", "InvoiceNumber", "Amount", "Status", "Notes"],
+      "expected_characteristics": "comma-delimited text file containing ledger tracking records with internal payment status"
+    }
+  ],
+  "business_rules": [
+    {
+      "rule_id": "B1",
+      "description": "No authoritative source; both files treated as peers for comparison.",
+      "classification": "human-supplied"
+    },
+    {
+      "rule_id": "B2",
+      "description": "Match records using InvoiceNumber only; do not translate or normalize status values (PAID/UNPAID vs CLEARED/PENDING).",
+      "classification": "human-supplied"
+    }
+  ],
+  "matching_or_processing_rules": [
+    {
+      "rule_id": "M1",
+      "description": "Join on InvoiceNumber field exactly as written in both sources.",
+      "classification": "mechanically observed"
+    },
+    {
+      "rule_id": "M2",
+      "description": "Compare Amount field as numeric values for differences; preserve source status values as contextual metadata without normalization.",
+      "classification": "human-supplied"
+    }
+  ],
+  "output": {
+    "discrepancy_report": {
+      "missing_in_source_A": [
+        "InvoiceNumber not present in supplier-statement.txt but in ledger-book.txt",
+        "With corresponding SupplierName, Date, Amount, and status context"
+      ],
+      "missing_in_source_B": [
+        "ReferenceNumber (ledger) or InvoiceNumber not present in ledger-book.txt but in supplier-statement.txt", 
+        "With corresponding SupplierName, Amount, Currency, and status context"
+      ],
+      "amount_differences": [
+        "For invoices present in both files: numeric difference between source_A.Amount and source_B.Amount"
+      ]
+    }
+  },
+  "destination": "Review-only output; no external write authority granted.",
+  "requested_delivery": {
+    "format": "JSON artifact plus human-readable discrepancy report",
+    "status_reported_in_json": true, 
+    "authority_status": "non-authoritative proposal for Learning Lab validation"
+  },
+  "requested_authority": null,
+  "human_confirmations": [
+    {
+      "question_id": "Q_source_truth", 
+      "question": "Which file should be treated as source-of-truth for matching?",
+      "answer_provided": "Neither; both files are peer sources. Report what is missing from either side and differences in compared fields.",
+      "classification": "human-supplied"
+    },
+    {
+      "question_id": "Q_status_handling",
+      "question": "How to handle the difference in status values (PAID/UNPAID vs CLEARED/PENDING)?",
+      "answer_provided": "Do not translate or normalize status values. Compare Amount only; preserve status as context if useful but do not treat as executable rule.",
+      "classification": "human-supplied"
+    },
+    {
+      "question_id": "Q_output_format",
+      "question": "What output format is desired for the process definition?",
+      "answer_provided": "JSON artifact showing discrepancy report: invoices missing from either side, amount differences for matches.",
+      "classification": "human-supplied"
+    }
+  ],
+  "open_questions": [
+    {
+      "question_id": "Q1_notes_importance",
+      "question": "Should the Notes field in ledger-book.txt be considered when evaluating discrepancies or marking records as exceptions?",
+      "status": "unresolved"
+    },
+    {
+      "question_id": "Q2_currency_handling", 
+      "question": "Both files show Currency=GBP but what if different suppliers use different currencies? Should currency match be part of the reconciliation rule?",
+      "status": "unresolved"
+    }
+  ],
+  "evidence_notes": [
+    {
+      "note_id": "E1",
+      "source_file": "supplier-statement.txt",
+      "observed_content": "Header: Date, Supplier Name, InvoiceNumber, Amount, Currency, Status followed by 6 data rows for Acme Corp (ACC-INV-001, ACC-INV-002), Beta Supplies Ltd (BSI-2047, BSI-2048), Gamma Traders Co (GTC-3011), and Delta Systems Inc (DSI-4002).",
+      "classification": "mechanically observed"
+    },
+    {
+      "note_id": "E2",
+      "source_file": "ledger-book.txt",
+      "observed_content": "Header: Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes followed by 6 data rows with LDR-001 to LDR-006 referencing the same invoices, with CLEARED/PENDING status and Verified match or Payment not yet received notes.",
+      "classification": "mechanically observed"
+    }
+  ]
+}

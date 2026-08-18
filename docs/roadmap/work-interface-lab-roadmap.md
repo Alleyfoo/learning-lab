@@ -103,6 +103,113 @@ The interface may become conversational. The authority model does not.
 
 ---
 
+# 0. Observed evidence (W0A–W0D)
+
+This section records what was actually observed in the first conversational
+experiments and the resulting boundary experiment. It does **not** change the
+hypothesis or `PRODUCT.md`; it refines how the test programme below should be read.
+
+Code and frozen evidence for the boundary experiment live under
+`work_interface/` (see `work_interface/findings.md` for the full report).
+
+## W0A–W0C — conversational Work agent produces a process definition
+
+A local model (Qwen) driven by a `define-lab-process` skill produced a candidate
+process definition for a two-source invoice reconciliation from sample files and a
+plain-language request. Observations:
+
+- The conversational agent **can** carry a useful definition conversation and reach a
+  plausible-looking artifact.
+- The artifact it produced was **prose-shaped**, not structural: `business_rules`
+  and `matching_or_processing_rules` were free-form arrays with `classification`
+  tags; `sources` was a list; the task family was a prose label. The matching key
+  ("Join on InvoiceNumber") and the amount comparison ("Compare Amount field")
+  lived only in description sentences.
+- The artifact was **internally contradictory** in ways its own self-check did not
+  catch: the same decision (the match key) was tagged both `human-supplied` and
+  `mechanically observed`; the output named `ReferenceNumber` while the match rule
+  used `InvoiceNumber`; `Amount` was compared while `Currency` was left unresolved;
+  `expected_characteristics` prose mixed observed file structure with inferred
+  business meaning; the header `Supplier Name` was silently normalized to
+  `SupplierName` in `observed_fields`.
+- The artifact's self-assessment explicitly claimed it contained **no unsupported
+  semantic assumptions**. It did. A validator cannot trust that self-assessment.
+
+The frozen byte-for-byte artifact is kept as a **negative fixture** at
+`work_interface/evidence/W0B_process_definition.original.json`
+(sha256 `c254b9e4c620fabac09c8b5bbd79fdd3f2329eb364f5fb33eed44a5edd6720ea`) and
+must never be edited.
+
+## W0D — the deterministic boundary experiment
+
+The question the W0A–W0C evidence forced: what is the smallest explicit Work
+Definition contract Learning Lab can validate **deterministically, without reading
+prose**?
+
+Result (research only, no product integration):
+
+- A Work Definition v0 contract exists as an **envelope over a task-family body**,
+  reusing `task_model`'s envelope discipline and the reconciliation family's existing
+  closed vocabularies — not a new universal task language. This preserves the
+  "extracted from demonstrated structure, not invented" discipline of the existing
+  floor.
+- A deterministic validator (`work_interface/work_definition.py`) refuses the frozen
+  W0B artifact with **four named reasons** (`malformed_sources`,
+  `match_key_not_declared`, `unknown_task_family`, `unknown_work_definition_version`)
+  and refuses malformed external shapes by name rather than crashing. It exercises
+  a closed vocabulary of 26 refusal codes; every code is exercised by self-test.
+- A minimally corrected candidate (case B) passes the boundary, then **strips
+  cleanly into the existing floor** (`task_model` envelope + reconciliation body +
+  `constructs()`), carrying no new authority and needing no second conversation.
+- `VALID ≠ ESTABLISHED` holds: `requested_authority` must be null; any
+  `established`/`approved`/`validation_override`/`skip_validation`/`bypass_*` key is
+  refused; the validator is independent of the artifact's self-assessment prose.
+
+## What the evidence changes in how to read the test programme
+
+Two refinements, recorded here so the W1–W8 sections below are graded correctly:
+
+1. **The honest result for case A is *not* "the validator caught every W0B
+   contradiction."** The deeper contradictions (conflicting basis, undeclared output
+   field, load-bearing currency, the header normalization) are **not
+   deterministically detectable from a prose artifact**. They become detectable
+   only once the artifact is **structural**. So the boundary's job is to *require*
+   the structural form and refuse the prose one; the skill's job is to *produce* the
+   structural form. **W1 should therefore be graded on whether the skill produces the
+   v0 structural form from a conversation, not on whether the validator can rescue a
+   prose one.** This refines Q2 below ("can the artifact be validated mechanically
+   before any LLM-derived meaning becomes authority?"): yes, *if the artifact is
+   structural*; a prose artifact is refused at the gate, which is the correct
+   outcome.
+
+2. **The Work Definition should be framed as envelope + body, not a flat field
+   list.** §2 below lists `task semantics` and `business rules` as peer fields.
+   The evidence says: keep the envelope (identity, sources, evidence/authority
+   basis, unresolved questions, requested destination/authority) but let the *body*
+   be the existing task family's body. The W0B artifact's two parallel rule arrays
+   (`business_rules` + `matching_or_processing_rules`) are exactly the wrong
+   abstraction — two free-form rule lists with classification tags is what let the
+   same decision be tagged two ways. One structural `match_on` with one `basis` is
+   the discipline. §2's field list should be read as "envelope plus a task-family
+   body," not as a flat universal schema.
+
+## Which W-tests this evidence bears on
+
+- **W1 (definition round trip):** partial. The *hand-off* property ("Lab can
+  translate/interpret it into its existing preview/establishment path without a
+  second conversation") is demonstrated by the strip-to-floor test. The *skill
+  production* property (does a real `define-lab-process` run emit the v0 structural
+  form?) is **not** demonstrated — the W0B run emitted prose. That is the correct next
+  experiment and is explicitly out of scope for this slice.
+- **W2 (proposal is not authority):** cases B, C, E demonstrated at the boundary
+  (`authority_requested`, `prose_override_attempt`, plus the manufactured-
+  confirmation and prose-self-claim canaries). Cases A, D, F require the live
+  establishment path and are not exercised here.
+- **W0 (exchange boundary canary):** not exercised (no transport built, by design).
+- **W3–W8:** not exercised.
+
+---
+
 # 1. The Work folder
 
 Assume a deliberately narrow workspace:

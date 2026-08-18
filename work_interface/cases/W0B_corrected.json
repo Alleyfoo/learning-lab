@@ -1,0 +1,101 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "w0b_supplier_statement_ledger_reconciliation",
+  "provenance": {
+    "producer": "corrected-from-W0B",
+    "skill": "define-lab-process",
+    "produced_at": "2026-08-18",
+    "note": "Minimal correction of the W0B Qwen artifact to satisfy the Work Definition v0 boundary. Frozen W0B original kept byte-for-byte under work_interface/evidence/."
+  },
+  "purpose": "Reconcile two peer sources of invoice data to identify invoices missing on either side and amount differences for records present in both.",
+  "sources": {
+    "statement": {
+      "role_label": "supplier statement",
+      "fixture": "supplier-statement.txt",
+      "path": "statement.json",
+      "collection": "statement",
+      "observed_fields": ["Date", "Supplier Name", "InvoiceNumber", "Amount", "Currency", "Status"],
+      "basis": "observed"
+    },
+    "ledger": {
+      "role_label": "internal ledger",
+      "fixture": "ledger-book.txt",
+      "path": "ledger.json",
+      "collection": "ledger",
+      "observed_fields": ["Date", "ReferenceNumber", "SupplierName", "InvoiceNumber", "Amount", "Status", "Notes"],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "statement",
+    "right": "ledger",
+    "match_on": {
+      "left_field": "InvoiceNumber",
+      "right_field": "InvoiceNumber",
+      "basis": "human_confirmed",
+      "confirmation": "Q_match_key"
+    },
+    "compare": [
+      {
+        "field": "Amount",
+        "comparison": "within",
+        "tolerance": "0.01",
+        "basis": "human_confirmed",
+        "confirmation": "Q_amount_compare"
+      }
+    ],
+    "classify": {
+      "both_same": "matched",
+      "both_different": "amount_differs",
+      "only_left": "missing_from_ledger",
+      "only_right": "missing_from_statement"
+    },
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_run",
+    "on_non_numeric": "refuse_run"
+  },
+  "output": {
+    "reports_fields": ["InvoiceNumber", "Amount"],
+    "context_fields": ["Date", "Supplier Name", "Status"]
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_match_key",
+      "question": "Which field identifies the same invoice in both files?",
+      "answer": "InvoiceNumber",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_amount_compare",
+      "question": "Should Amount be compared, and with what tolerance?",
+      "answer": "Yes, numeric within 0.01",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_currency",
+      "question": "Is currency part of the reconciliation rule?",
+      "answer": "No. All sample amounts are GBP; Currency is not compared and is not part of the rule.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_source_truth",
+      "question": "Which file is the source of truth for matching?",
+      "answer": "Neither; both are peer sources. Report what is missing from either side and differences in compared fields.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "Q_notes",
+      "question": "Should the Notes field be considered when evaluating discrepancies?",
+      "load_bearing": false,
+      "status": "unresolved"
+    }
+  ],
+  "requested_destination": "review_only",
+  "requested_delivery": {
+    "format": "json_discrepancy_report"
+  },
+  "requested_authority": null
+}
