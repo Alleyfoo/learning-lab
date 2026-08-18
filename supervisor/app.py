@@ -198,18 +198,25 @@ def _render_incoming_browser(scan_result: dict) -> None:
     for entry in lib:
         worker = entry.get("worker")
         bits = []
+        status_parts = []
         if worker:
             bits.append(_badge(f"worker:{worker}", "#2a6f2a"))
+            status_parts.append(f"worker:{worker}")
         else:
             bits.append(_badge("no worker link", "#8a6d3b"))
+            status_parts.append("no worker link")
         if entry.get("has_model"):
             bits.append(_badge("model exists", "#3a6a9a"))
+            status_parts.append("model exists")
         if entry.get("has_adapter"):
             bits.append(_badge("adapter", "#6a6a6a"))
-        header = (f"`{entry['dir']}/` &nbsp; " + " ".join(bits)
-                  + f" &nbsp; <span style='color:#888;font-size:0.8em'>"
-                  f"{len(entry['files'])} file(s)</span>")
-        with st.expander(header, expanded=False):
+            status_parts.append("adapter")
+        # Streamlit's expander label does not render HTML, so the label is
+        # plain text; the coloured badges live inside the expanded body.
+        label = (f"{entry['dir']}/ · {' · '.join(status_parts)} · "
+                 f"{len(entry['files'])} file(s)")
+        with st.expander(label, expanded=False):
+            st.markdown(" ".join(bits), unsafe_allow_html=True)
             for f in entry["files"]:
                 line = f"- {f['name']} ({f['kind']})"
                 if f["sheets"]:
@@ -232,11 +239,9 @@ def _render_incoming_browser(scan_result: dict) -> None:
     if not inboxes:
         st.caption("no inbox files in any worker.")
     for ib in inboxes:
-        header = (f"`{ib['worker']}` &nbsp; <span style='color:#888;font-size:0.8em'>"
-                  f"{ib.get('customer') or '—'}</span> &nbsp; "
-                  f"<span style='color:#888;font-size:0.8em'>{len(ib['files'])} "
-                  f"file(s)</span>")
-        with st.expander(header, expanded=False):
+        customer = ib.get("customer") or "—"
+        label = f"{ib['worker']} · {customer} · {len(ib['files'])} file(s)"
+        with st.expander(label, expanded=False):
             by_stage = {"inbox": [], "processed": [], "exceptions": []}
             for f in ib["files"]:
                 by_stage.setdefault(f["stage"], []).append(f)
