@@ -358,11 +358,82 @@ def _render_company_panel(sel: dict, workers: list) -> None:
 
 
 def _render_source_panel(sel: dict, worker_by_name: dict) -> None:
-    st.caption(f"(source panel for `{sel.get('worker')}:{sel.get('source')}` -- Phase 5)")
+    """Read-only provenance panel for a source node (v0.5 item 9).
+
+    Displays the v0.4 durable origin already carried in v1.json: the executable
+    source path (what the worker runs against) plus the workbook/sheet/header_row
+    origin (where that executable representation came from). Display only.
+    """
+    wname, coll = sel.get("worker"), sel.get("source")
+    w = worker_by_name.get(wname)
+    with st.expander(f"Source: {coll}", expanded=True):
+        if w is None or coll not in (w.model.get("sources") or {}):
+            st.caption(f"No source `{coll}` on worker `{wname}`.")
+            if st.button("Clear selection", key="clear_source_pick"):
+                _clear_map_selection()
+                st.rerun()
+            return
+        spec = w.model["sources"][coll]
+        st.markdown(f"**Collection.** `{coll}`")
+        st.markdown(f"**Executable source.** `{spec.get('path')}`  "
+                    f"(resolved under base `{w.identity.get('base')}`)")
+        origin = spec.get("origin")
+        if origin:
+            st.markdown("**Origin.**")
+            st.markdown(f"- workbook: `{origin.get('path')}`")
+            st.markdown(f"- sheet: `{origin.get('sheet')}`")
+            st.markdown(f"- header row: `{origin.get('header_row')}`")
+            st.markdown(f"- kind: `{origin.get('kind')}`")
+        else:
+            st.caption("Direct JSON source — no workbook provenance.")
+        st.markdown(f"**Used by.** `{wname}` · v{w.current_version} · task `{w.task}`")
+        if st.button("Clear selection", key="clear_source_pick"):
+            _clear_map_selection()
+            st.rerun()
 
 
 def _render_destination_panel(sel: dict, workers: list) -> None:
-    st.caption(f"(destination panel -- Phase 4)")
+    """Detail panel for a declared destination node (the v0.5 D canary).
+
+    Distinguishes DESIRED DELIVERY (declared intent) from AUTOMATED EFFECT
+    AUTHORITY (grounded in executable machinery). A worker may declare
+    `automatic` without any connector existing; the panel must never represent
+    that as real authority. Destination nodes only exist for noncommitting
+    workers in v0.5, so authority here is always 'none'.
+    """
+    key = sel.get("key")
+    feeds = [w for w in workers
+             if w.destination and system_map.destination_key(w.destination) == key]
+    with st.expander("Destination", expanded=True):
+        if not feeds:
+            st.caption("No established worker declares this destination.")
+            if st.button("Clear selection", key="clear_dest_pick"):
+                _clear_map_selection()
+                st.rerun()
+            return
+        dest = feeds[0].destination
+        parts = [dest.get("system"), dest.get("area"), dest.get("object")]
+        st.markdown(" / ".join(p for p in parts if p))
+        st.markdown("**Receives from:**")
+        for w in feeds:
+            st.markdown(f"- `{w.name}` · task `{w.task}`")
+        mode = (feeds[0].delivery or {}).get("mode", "unspecified")
+        st.markdown(f"**Desired delivery:** `{mode}`")
+        # Authority is sourced from the workers' real committing/effect facts,
+        # never from delivery.mode. Destination nodes are noncommitting in v0.5.
+        any_authority = any(w.committing for w in feeds)
+        if any_authority:
+            st.markdown("**Automated effect authority:** a feeding worker commits "
+                        "a real effect (see its worker node).")
+        else:
+            st.markdown("**Automated effect authority:** none — these workers "
+                        "commit no effect. The desired delivery is intent, not a "
+                        "connector; no integration is implied.")
+        st.caption("A destination may be known long before a connector exists. "
+                   "Declaring `automatic` does not mint write authority.")
+        if st.button("Clear selection", key="clear_dest_pick"):
+            _clear_map_selection()
+            st.rerun()
 
 
 # ===========================================================================
