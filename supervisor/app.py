@@ -283,14 +283,24 @@ def _render_system_map(workers: list, snap_by_name: dict, worker_by_name: dict) 
     # click a node -> typed selection. The map only reports the clicked id;
     # Python interprets it. map_pick (bare worker name) is kept for the worker
     # panel below; map_selection carries the typed selection for other kinds.
-    sel = system_map.parse_selection((clicked or {}).get("id"))
-    if sel:
-        st.session_state["map_selection"] = sel
-        if sel["kind"] == "worker":
-            st.session_state["map_pick"] = sel["worker"]
-        else:
-            st.session_state.pop("map_pick", None)
-        st.rerun()
+    #
+    # A click posts {id, t} where t is a fresh JS ms each click. That component
+    # value PERSISTS across reruns (Streamlit keeps the last setComponentValue),
+    # so without dedup a click would re-enter this branch every run and rerun
+    # forever -- the "tab twitching / constant refresh" symptom. Dedupe on t:
+    # process a click exactly once, then ignore the persisted value until a new
+    # click posts a new t. (t exists in the component protocol precisely for this.)
+    click_t = (clicked or {}).get("t") if clicked else None
+    if click_t is not None and click_t != st.session_state.get("map_click_t"):
+        st.session_state["map_click_t"] = click_t
+        sel = system_map.parse_selection((clicked or {}).get("id"))
+        if sel:
+            st.session_state["map_selection"] = sel
+            if sel["kind"] == "worker":
+                st.session_state["map_pick"] = sel["worker"]
+            else:
+                st.session_state.pop("map_pick", None)
+            st.rerun()
 
     pick = st.session_state.get("map_pick")
     if pick:
