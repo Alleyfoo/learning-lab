@@ -144,14 +144,92 @@ complete on first arrival → run immediately (preserves today's per-file run).
 run; bind a transactions → complete (2/2) → run fires. Fazerish — bind one
 workbook → complete (2/2) immediately → run.
 
+## Phase 4.5 — Input-set terminal/recovery contract (carry the deterministic floor)
+
+Phase 4 introduces a new durable object (`input_set.json`). It must inherit the
+inbox floor's interruption model, or recovery re-runs and duplicates *history*
+even though no external effect duplicates. Grounded in the existing recovery:
+`reconcile()` returns `safe_to_retry` for noncommitting workers
+(`inbox.py:350-352`) and `recover()` re-runs via `record_run` (`inbox.py:405`).
+Pre-v0.6 that was correct (no effect to duplicate); post-v0.6 a completed run is
+durable history with exact `run_input`, so re-execution duplicates a
+`runs.jsonl` line. This phase closes that window. Applies to **both** workers —
+Fazerish (shared, single-document completion) has the same crash window as Acme.
+
+**Terminal state machine** (the lifecycle of the one open input set):
+
+```text
+PARTIAL SET       persist bindings, wait for remaining slots
+COMPLETE SET      persist complete state + compute fingerprint
+                  → assemble run_input
+                  → record_run ONCE (run_input carries the fingerprint)
+RUN APPENDED      → terminalize the inbox item(s)
+                  → clear/archive the open input_set
+```
+
+**Input-set fingerprint** — a deterministic digest over:
+
+```text
+model version
+input-contract version
+sorted (role → source digest) bindings
+```
+
+Stored in `input_set.json` at completion and in `run_input` on the run record.
+Computed only for a complete set; a partial set has bindings but no fingerprint.
+
+**Recovery contract** (the four cases recovery must distinguish):
+
+```text
+complete set + no matching run in runs.jsonl
+    → safe to run (once)
+
+complete set + matching run already appended (fingerprint present)
+    → complete WITHOUT another run: terminalize ledger, clear set
+
+partial set
+    → preserve and wait (no run)
+
+corrupt/ambiguous set
+    → exception, never guess (the existing indeterminate precedent)
+```
+
+"Matching run" = `runs.jsonl` contains a line whose `run_input.fingerprint`
+equals the complete set's fingerprint. This composes with the existing per-item
+claim floor: the fingerprint guard **overrides** the noncommitting
+`safe_to_retry` re-run (`inbox.py:350-352`) for set-completion runs — recovery
+checks the fingerprint *before* re-running.
+
+**Set turnover:** once a complete set's run is terminalized and the set cleared,
+a fresh empty open set may begin. The one-open-set limitation (Phase 4 / design
+§5.1) is preserved: while a set is partial or complete-but-not-cleared, no new
+set.
+
+**Crash canaries (self-test, all on Acme):**
+
+1. **Crash after first slot bound** → restart → the `statement` binding remains
+   staged, set partial (1/2), **no run** appended.
+2. **Crash after second slot/materialization but before `record_run`** → restart
+   → set complete, no matching run → **exactly one run** appended, then set
+   clears.
+3. **Crash after `record_run` append but before terminal ledger/clear** →
+   restart → set complete, matching fingerprint already in `runs.jsonl` →
+   **still exactly one run** (not two), recovery terminalizes the ledger and
+   clears the set.
+
+Canary 3 is the load-bearing one: it proves recovery does not duplicate
+historical execution. The assertion is "the fingerprint appears in `runs.jsonl`
+exactly once across the crash + recovery."
+
 ## Phase 5 — Atomic `run_input` on `record_run`
 
 **`fleet/fleet.py:record_run`** gains `run_input=None`; merge it into `record`
 in each of the three branches (257/275/284) before the single `_append` (292).
 The recurring path assembles `run_input` (design §6: `input_set`,
-`input_contract` version, `model` version, per-slot
-document/digest/sheet/header_row/materialized_as) and passes it in. Existing
-callers pass nothing → back-comat.
+`input_contract` version, `model` version, the **input-set fingerprint** from
+Phase 4.5, and per-slot document/digest/sheet/header_row/materialized_as) and
+passes it in. The fingerprint in the appended line is what Phase 4.5 recovery
+matches on. Existing callers pass nothing → back-comat.
 
 **Self-test (fleet.py):** a run with `run_input` writes one line carrying it; a
 run without it writes the legacy line unchanged.
@@ -190,30 +268,42 @@ principle as v0.5). AppTest simulates bindings via `session_state`.
 - bind `ledger_sept.xlsx` → `transactions` → validate → materialize → complete
   (2/2) → run;
 - the run record is ONE atomic `runs.jsonl` line carrying `model=v1`,
-  `input_contract=v1`, `input_set=<X>`, and per slot
-  document/digest/sheet/header_row/materialized_as;
+  `input_contract=v1`, `input_set=<X>`, the **input-set fingerprint**, and per
+  slot document/digest/sheet/header_row/materialized_as;
 - the raw arrivals are retained by digest → "show me the exact source used in
-  this run" resolves worker → run → slot → digest → retained raw bytes.
+  this run" resolves worker → run → slot → digest → retained raw bytes;
+- **run exactly once:** after a simulated crash between `record_run` and
+  terminalize (Phase 4.5 canary 3), recovery produces no second run — the
+  fingerprint appears in `runs.jsonl` exactly once.
 
 **Negative probe:** a shape-changed October statement (header moved to row 4) →
 binding fails at validation → exception, no run → operator may choose re-model
 (new model version + new `input_contracts` version + new founding `origin`) as a
 separate explicit action.
 
-This probe is the gate for v0.6.
+This probe is the gate for v0.6. Success means: model once → receive recurring
+evidence → bind explicitly → validate deterministically → wait for complete
+business input → run exactly once → retain exact raw evidence → explain exactly
+which inputs produced that run.
 
 ---
 
 ## Explicitly deferred (per design note §8)
 
 No filename-pattern authority · no contract inside `versions/v1.json` · no
-separate run/linkage record (run_input is a kwarg) · no multiple input sets in
-flight (one open set per worker) · no connector work · no materialization archive
-(raw retention only) · no decoupled model/contract version advancement.
+separate run/linkage record (run_input is a kwarg; the fingerprint is not a run
+ID — it identifies an input set, not a run) · no multiple input sets in flight
+(one open set per worker) · no connector work · no materialization archive (raw
+retention only) · no decoupled model/contract version advancement.
 
-## Sequencing risk to watch
+## Sequencing risks to watch
 
-Phase 2 MUST land Fazerish's `input_contracts/v1.json` in the same commit that
-moves the inbox spec source — otherwise the live xlsx inbox breaks between
-commits. The Phase 2 self-test (Fazerish end-to-end) is the gate that proves the
-migration is atomic.
+- **Phase 2** MUST land Fazerish's `input_contracts/v1.json` in the same commit
+  that moves the inbox spec source — otherwise the live xlsx inbox breaks
+  between commits. The Phase 2 self-test (Fazerish end-to-end) is the gate that
+  proves the migration is atomic.
+- **Phase 4.5 before Phase 5 deployment:** the fingerprint that Phase 5 writes
+  into `run_input` is what Phase 4.5 recovery matches on. Phase 5's `run_input`
+  kwarg can land first (back-comat, no callers yet), but the recurring path must
+  not go live until Phase 4.5's recovery contract and canaries are green —
+  otherwise a crash duplicates history on the very first real September run.
