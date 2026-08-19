@@ -1,1045 +1,454 @@
-<title>Messy Data to Controlled Automation</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning Lab — From Messy Work to Verified Operations</title>
+<meta name="description" content="Learning Lab is an experimental architecture for turning real company work into verified, reusable and deterministic operational capabilities, with an LLM as the conversational interface rather than the authority-bearing system.">
 <style>
-  :root {
-    --ground: #f3f5f7;
-    --surface: #ffffff;
-    --surface-2: #eef1f5;
-    --ink: #161b22;
-    --ink-2: #3a434f;
-    --muted: #56616e;
-    --rule: #d8dce2;
-    --rule-strong: #c2c8d0;
-    --accent: #2c6e63;
-    --accent-soft: #e6efed;
-
-    --st-proven: #2e7d5b;
-    --st-proven-bg: #e4f1ea;
-    --st-partial: #9a6a12;
-    --st-partial-bg: #f6ecd9;
-    --st-direction: #3b5bdb;
-    --st-direction-bg: #e6ebfb;
-    --st-notyet: #6b7684;
-    --st-notyet-bg: #eceef1;
-
-    --shadow: 0 1px 2px rgba(20,30,45,.06), 0 4px 14px rgba(20,30,45,.05);
+:root{
+  --bg:#f4f6f7; --surface:#ffffff; --surface2:#edf1f2;
+  --ink:#172022; --ink2:#39484b; --muted:#657477; --rule:#d6dfe0;
+  --accent:#216b61; --accent2:#174b45; --soft:#e5f0ee;
+  --proven:#246d51; --proven-bg:#e4f2eb;
+  --partial:#8b6517; --partial-bg:#f7efd9;
+  --direction:#355bc2; --direction-bg:#e8edfb;
+  --shadow:0 1px 2px rgba(20,35,38,.06),0 12px 34px rgba(20,35,38,.07);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#111719; --surface:#182124; --surface2:#202b2e;
+    --ink:#edf4f3; --ink2:#c4d0ce; --muted:#91a09e; --rule:#304043;
+    --accent:#68b9ad; --accent2:#8dd0c6; --soft:#18312e;
+    --proven:#76c6a0; --proven-bg:#18352b;
+    --partial:#e0bb61; --partial-bg:#352c17;
+    --direction:#91a9ff; --direction-bg:#202c50;
+    --shadow:0 1px 2px rgba(0,0,0,.25),0 14px 36px rgba(0,0,0,.22);
   }
-  :root:not([data-theme="light"]) {
-    --ground: #14181d;
-    --surface: #1b212a;
-    --surface-2: #232a35;
-    --ink: #e6e9ef;
-    --ink-2: #c2c8d2;
-    --muted: #9aa4b2;
-    --rule: #2c333d;
-    --rule-strong: #3a424d;
-    --accent: #5bb0a6;
-    --accent-soft: #1c2a2c;
-
-    --st-proven: #4fbf8f;
-    --st-proven-bg: #18302a;
-    --st-partial: #e0b341;
-    --st-partial-bg: #2c2317;
-    --st-direction: #7c9cff;
-    --st-direction-bg: #1a2138;
-    --st-notyet: #9aa4b2;
-    --st-notyet-bg: #23282f;
-
-    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.28);
-  }
-  :root[data-theme="dark"] {
-    --ground: #14181d;
-    --surface: #1b212a;
-    --surface-2: #232a35;
-    --ink: #e6e9ef;
-    --ink-2: #c2c8d2;
-    --muted: #9aa4b2;
-    --rule: #2c333d;
-    --rule-strong: #3a424d;
-    --accent: #5bb0a6;
-    --accent-soft: #1c2a2c;
-
-    --st-proven: #4fbf8f;
-    --st-proven-bg: #18302a;
-    --st-partial: #e0b341;
-    --st-partial-bg: #2c2317;
-    --st-direction: #7c9cff;
-    --st-direction-bg: #1a2138;
-    --st-notyet: #9aa4b2;
-    --st-notyet-bg: #23282f;
-
-    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.28);
-  }
-
-  * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
-  body {
-    margin: 0;
-    background: var(--ground);
-    color: var(--ink);
-    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-    font-size: 17px;
-    line-height: 1.62;
-    font-feature-settings: "kern" 1, "liga" 1;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ---- layout shells ---- */
-  .page-shell {
-    max-width: 1150px;
-    margin: 0 auto;
-    padding: 56px 32px 96px;
-  }
-  .prose {
-    max-width: 750px;
-    margin: 0 auto;
-  }
-  .prose section { margin: 0 0 56px; }
-  .map-section { margin: 0 0 56px; }
-  .proof-section { max-width: 840px; margin: 0 auto; }
-
-  /* ---- typography ---- */
-  .eyebrow {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin: 0 0 18px;
-  }
-  h1.proposition {
-    font-family: "Iowan Old Style", "Apple Garamond", "Baskerville", "Hoefler Text", Georgia, serif;
-    font-weight: 600;
-    font-size: clamp(30px, 5.4vw, 44px);
-    line-height: 1.16;
-    letter-spacing: -.01em;
-    margin: 0 0 16px;
-    text-wrap: balance;
-    color: var(--ink);
-  }
-  .lede {
-    font-size: 18px;
-    line-height: 1.6;
-    color: var(--ink-2);
-    margin: 0 0 8px;
-  }
-  h2 {
-    font-family: "Iowan Old Style", "Apple Garamond", "Baskerville", "Hoefler Text", Georgia, serif;
-    font-weight: 600;
-    font-size: 25px;
-    line-height: 1.25;
-    margin: 0 0 22px;
-    letter-spacing: -.005em;
-    text-wrap: balance;
-    color: var(--ink);
-  }
-  h2 .num {
-    font-family: "Segoe UI", system-ui, sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .14em;
-    color: var(--accent);
-    vertical-align: .32em;
-    margin-right: 10px;
-  }
-  p { margin: 0 0 14px; }
-  p, li { color: var(--ink-2); }
-  strong { color: var(--ink); font-weight: 600; }
-
-  .callout {
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-left: 3px solid var(--accent);
-    border-radius: 8px;
-    padding: 20px 22px;
-    margin: 22px 0;
-    box-shadow: var(--shadow);
-  }
-  .callout p { margin: 0; color: var(--ink-2); }
-  .callout .q { color: var(--ink); font-weight: 600; font-style: italic; font-family: "Iowan Old Style", Georgia, serif; }
-
-  /* ---- journey ---- */
-  ol.journey {
-    list-style: none;
-    counter-reset: step;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  ol.journey > li {
-    counter-increment: step;
-    position: relative;
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 8px;
-    padding: 16px 18px 16px 58px;
-  }
-  ol.journey > li::before {
-    content: counter(step, decimal-leading-zero);
-    position: absolute;
-    left: 16px; top: 17px;
-    font-family: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
-    font-size: 13px; font-weight: 700;
-    color: var(--accent); letter-spacing: .02em;
-  }
-  ol.journey h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; color: var(--ink); }
-  ol.journey p { margin: 0; font-size: 15px; line-height: 1.55; }
-
-  /* ---- benefits ---- */
-  .benefits { display: grid; grid-template-columns: 1fr; gap: 12px; }
-  .benefit {
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 8px;
-    padding: 15px 18px;
-  }
-  .benefit h3 { margin: 0 0 4px; font-size: 15.5px; font-weight: 600; color: var(--ink); }
-  .benefit p { margin: 0; font-size: 15px; line-height: 1.55; }
-  .benefit .status {
-    font-size: 12px; font-weight: 600; letter-spacing: .03em;
-    color: var(--accent); margin-top: 8px; display: block;
-  }
-
-  /* ---- proof ledger ---- */
-  .legend {
-    display: flex; flex-wrap: wrap; gap: 10px 18px;
-    margin: 0 0 22px; padding: 14px 18px;
-    background: var(--surface); border: 1px solid var(--rule); border-radius: 8px;
-  }
-  .legend .item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
-  .legend .item strong { color: var(--ink-2); font-weight: 600; }
-  .proof-group { margin: 0 0 26px; }
-  .proof-group > h3 {
-    font-size: 14px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-    margin: 0 0 12px; display: flex; align-items: center; gap: 10px;
-  }
-  .chip {
-    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .04em;
-    padding: 3px 9px; border-radius: 999px; white-space: nowrap; line-height: 1.4;
-  }
-  .chip.proven { color: var(--st-proven); background: var(--st-proven-bg); }
-  .chip.partial { color: var(--st-partial); background: var(--st-partial-bg); }
-  .chip.direction { color: var(--st-direction); background: var(--st-direction-bg); }
-  .chip.notyet { color: var(--st-notyet); background: var(--st-notyet-bg); }
-  .claim {
-    border: 1px solid var(--rule); border-radius: 8px; background: var(--surface);
-    padding: 14px 16px 12px; margin: 0 0 10px;
-    display: grid; grid-template-columns: 1fr; gap: 8px;
-  }
-  .claim .head { display: flex; align-items: flex-start; gap: 10px; }
-  .claim .head .chip { margin-top: 2px; flex: 0 0 auto; }
-  .claim .text { color: var(--ink); font-weight: 500; font-size: 15.5px; line-height: 1.5; }
-  .claim .proof {
-    font-family: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
-    font-size: 12.5px; line-height: 1.5; color: var(--muted);
-    background: var(--surface-2); border-radius: 6px; padding: 9px 11px;
-    margin: 2px 0 0; overflow-x: auto; white-space: pre; font-variant-numeric: tabular-nums;
-  }
-  .claim .proof .lab { color: var(--accent); }
-
-  /* ---- translation table ---- */
-  .trans-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); }
-  .trans { width: 100%; border-collapse: collapse; font-size: 15px; }
-  .trans th, .trans td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--rule); }
-  .trans thead th { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1.5px solid var(--rule-strong); }
-  .trans .from { font-family: "Iowan Old Style", Georgia, serif; font-style: italic; color: var(--ink-2); width: 42%; }
-  .trans .to { color: var(--ink); }
-  .trans tbody tr:last-child td { border-bottom: none; }
-
-  /* ---- map ---- */
-  .map-frame {
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 10px;
-    padding: 18px 18px 14px;
-    box-shadow: var(--shadow);
-  }
-  .map-caption {
-    font-size: 13px; color: var(--muted);
-    margin: 0 0 12px; line-height: 1.5;
-  }
-  .map-caption strong { color: var(--ink-2); font-weight: 600; }
-  .map-legend {
-    display: flex; flex-wrap: wrap; gap: 8px 18px;
-    padding: 10px 12px; margin: 0 0 12px;
-    background: var(--surface-2); border-radius: 7px;
-    font-size: 12.5px; color: var(--muted);
-  }
-  .map-legend .item { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
-  .map-legend .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
-  .map-legend .dash { width: 22px; height: 0; border-top: 2.5px dashed; display: inline-block; flex: 0 0 auto; }
-  .map-legend .solid { width: 22px; height: 0; border-top: 2.5px solid; display: inline-block; flex: 0 0 auto; }
-  .map-svg-wrap {
-    width: 100%; overflow-x: auto;
-    background: var(--map-bg, #fbfbf9);
-    border-radius: 7px;
-  }
-  :root:not([data-theme="light"]) .map-svg-wrap { --map-bg: #1a2027; }
-  :root[data-theme="dark"] .map-svg-wrap { --map-bg: #1a2027; }
-  .map-svg { display: block; width: 100%; height: auto; min-width: 760px; }
-  .map-svg .node { cursor: pointer; }
-  .map-svg .node circle { transition: stroke-width .1s; }
-  .map-svg .node.selected circle { stroke-width: 4; }
-  .map-svg .node-label { font: 12px/1.25 "Segoe UI", system-ui, sans-serif; fill: #1A1B16; text-anchor: middle; pointer-events: none; }
-  :root:not([data-theme="light"]) .map-svg .node-label { fill: #e6e9ef; }
-  :root[data-theme="dark"] .map-svg .node-label { fill: #e6e9ef; }
-  .map-svg .edge-label { font: 10px/1 "Segoe UI", system-ui, sans-serif; fill: #6A6A62; text-anchor: middle; pointer-events: none; }
-  :root:not([data-theme="light"]) .map-svg .edge-label { fill: #9aa4b2; }
-  :root[data-theme="dark"] .map-svg .edge-label { fill: #9aa4b2; }
-  .map-svg .col-head { font: 11px/1 "Segoe UI", system-ui, sans-serif; fill: #8a94a0; text-anchor: middle; letter-spacing: .08em; text-transform: uppercase; pointer-events: none; }
-  :root:not([data-theme="light"]) .map-svg .col-head { fill: #6b7684; }
-  :root[data-theme="dark"] .map-svg .col-head { fill: #6b7684; }
-
-  .map-detail {
-    margin-top: 12px;
-    background: var(--surface-2);
-    border: 1px solid var(--rule);
-    border-left: 3px solid var(--accent);
-    border-radius: 7px;
-    padding: 14px 16px;
-    min-height: 64px;
-  }
-  .map-detail .dt { display: grid; grid-template-columns: 1fr; gap: 6px; }
-  .map-detail .dt-row { display: grid; grid-template-columns: 132px 1fr; gap: 10px; font-size: 14px; }
-  .map-detail .k { color: var(--muted); font-weight: 600; font-size: 12px; letter-spacing: .03em; text-transform: uppercase; padding-top: 2px; }
-  .map-detail .v { color: var(--ink-2); line-height: 1.5; }
-  .map-detail .v strong { color: var(--ink); }
-  .map-detail .title { font-family: "Iowan Old Style", Georgia, serif; font-weight: 600; font-size: 17px; color: var(--ink); margin: 0 0 10px; }
-  .map-detail .empty { color: var(--muted); font-size: 14px; }
-
-  .note {
-    font-size: 13.5px; color: var(--muted);
-    border-top: 1px solid var(--rule); padding-top: 18px; margin-top: 40px; line-height: 1.55;
-  }
-  .note code, code.inline {
-    font-family: "SFMono-Regular", "Consolas", monospace; font-size: .9em;
-    background: var(--surface-2); padding: 1px 5px; border-radius: 4px; color: var(--ink-2);
-  }
-  hr.divider { border: none; border-top: 1px solid var(--rule); margin: 48px 0; }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent);text-underline-offset:3px}
+.shell{max-width:1120px;margin:0 auto;padding:48px 28px 92px}
+.prose{max-width:790px;margin:0 auto}
+.hero{padding:26px 0 52px}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.15em;font-weight:750;color:var(--accent);margin-bottom:16px}
+h1,h2{font-family:"Iowan Old Style","Baskerville","Hoefler Text",Georgia,serif;color:var(--ink)}
+h1{font-size:clamp(38px,6vw,66px);line-height:1.04;letter-spacing:-.025em;margin:0 0 22px;font-weight:600;max-width:980px}
+h2{font-size:clamp(27px,3.5vw,37px);line-height:1.18;margin:0 0 18px;font-weight:600;letter-spacing:-.012em}
+h3{font-size:17px;margin:0 0 7px;color:var(--ink)}
+p{margin:0 0 15px;color:var(--ink2)}
+.lede{font-size:21px;line-height:1.5;max-width:820px;color:var(--ink2)}
+.hero-note{margin-top:26px;padding:16px 18px;border-left:3px solid var(--accent);background:var(--surface);border-radius:8px;box-shadow:var(--shadow)}
+section{margin:0 0 64px}
+.rule{height:1px;background:var(--rule);margin:0 0 64px}
+.kicker{font-size:12px;text-transform:uppercase;letter-spacing:.14em;font-weight:750;color:var(--accent);margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:19px 20px;box-shadow:var(--shadow)}
+.card p:last-child{margin-bottom:0}
+.card .mini{font-size:13px;color:var(--muted);margin-top:8px}
+.quote{font-family:"Iowan Old Style",Georgia,serif;font-size:23px;line-height:1.45;color:var(--ink);border-left:4px solid var(--accent);padding:7px 0 7px 22px;margin:28px 0}
+.flow{
+  border:1px solid var(--rule);border-radius:12px;background:var(--surface);
+  padding:22px;box-shadow:var(--shadow);overflow-x:auto
+}
+.flow-row{display:flex;align-items:stretch;gap:9px;min-width:800px}
+.node{
+  flex:1;min-width:130px;border:1px solid var(--rule);border-radius:9px;
+  padding:13px 12px;background:var(--surface2);text-align:center
+}
+.node strong{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+.node span{font-size:12.5px;color:var(--muted);line-height:1.35;display:block}
+.arrow{display:flex;align-items:center;color:var(--muted);font-weight:700}
+.split{
+  display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:stretch
+}
+.split .divider{width:1px;background:var(--rule)}
+.list{margin:8px 0 0;padding-left:20px}
+.list li{margin:6px 0;color:var(--ink2)}
+.steps{counter-reset:step;display:grid;gap:10px}
+.step{
+  counter-increment:step;position:relative;padding:16px 18px 16px 58px;
+  border:1px solid var(--rule);background:var(--surface);border-radius:9px
+}
+.step:before{
+  content:counter(step,decimal-leading-zero);position:absolute;left:17px;top:17px;
+  font:700 12px/1.4 "Consolas","SFMono-Regular",monospace;color:var(--accent)
+}
+.step strong{display:block;color:var(--ink);margin-bottom:3px}
+.step span{color:var(--ink2);font-size:15px}
+.status-row{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0}
+.chip{font-size:11px;font-weight:800;letter-spacing:.04em;border-radius:999px;padding:4px 9px}
+.proven{color:var(--proven);background:var(--proven-bg)}
+.partial{color:var(--partial);background:var(--partial-bg)}
+.direction{color:var(--direction);background:var(--direction-bg)}
+.example{
+  background:linear-gradient(135deg,var(--surface),var(--soft));
+  border:1px solid var(--rule);border-radius:12px;padding:24px;box-shadow:var(--shadow)
+}
+.example .ask{font-family:"Iowan Old Style",Georgia,serif;font-size:22px;color:var(--ink);margin-bottom:20px}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check{border:1px solid var(--rule);border-radius:8px;background:var(--surface);padding:10px 12px;font-size:14px;color:var(--ink2)}
+.check b{color:var(--ink)}
+.code{
+  font-family:"SFMono-Regular","Consolas","Liberation Mono",monospace;
+  font-size:13px;white-space:pre-wrap;color:var(--ink2);
+  background:var(--surface2);border:1px solid var(--rule);
+  padding:17px 18px;border-radius:9px;overflow:auto
+}
+.callout{
+  border:1px solid var(--rule);border-left:4px solid var(--accent);
+  background:var(--surface);border-radius:9px;padding:18px 20px;box-shadow:var(--shadow)
+}
+.pilot{
+  border:1px solid var(--accent);background:var(--soft);border-radius:14px;padding:28px;
+  box-shadow:var(--shadow)
+}
+.pilot h2{margin-bottom:12px}
+.small{font-size:14px;color:var(--muted)}
+footer{border-top:1px solid var(--rule);padding-top:26px;color:var(--muted);font-size:13px}
+@media(max-width:760px){
+  .shell{padding:32px 18px 70px}.grid,.grid.three,.split,.checks{grid-template-columns:1fr}
+  .split .divider{height:1px;width:100%}.flow-row{min-width:720px}
+  h1{font-size:42px}.lede{font-size:19px}
+}
 </style>
+</head>
+<body>
+<main class="shell">
 
-<div class="page-shell">
-
-  <div class="prose">
-    <header>
-      <p class="eyebrow">Client-facing proposition · internal proof ledger</p>
-      <h1 class="proposition">We help companies turn messy data flows into understandable, controlled automation.</h1>
-      <p class="lede">A small consultancy's pitch, grounded only in what we can actually demonstrate today. The point of this document is the last section: every claim below is tied to a concrete test, file, or run that exists in the repository right now — and the things we <em>cannot</em> yet show are labelled as such.</p>
-    </header>
-
-    <section>
-      <h2><span class="num">01</span>The one-sentence proposition</h2>
-      <div class="callout">
-        <p><span class="q">We help companies turn messy data flows into understandable, controlled automation.</span></p>
-      </div>
-      <p>What we actually sell first is not software, and not a platform. It is <strong>understanding a piece of work well enough to automate it safely</strong>. The software is the instrument that holds that understanding and runs the work the same way every time — and shows you, in plain terms, where each result came from and where the AI is and isn't allowed to act.</p>
-    </section>
+<header class="hero">
+  <div class="eyebrow">Learning Lab · experimental architecture</div>
+  <h1>From messy company work to verified, reusable operations.</h1>
+  <p class="lede">
+    Learning Lab explores a simple but ambitious idea: let people describe real work in normal language,
+    let an LLM help understand the data and ask the missing questions, and turn what is learned into
+    explicit deterministic processes that can be reused, verified and improved over time.
+  </p>
+  <div class="hero-note">
+    <p><strong>The LLM does not need to own the system.</strong> It can be the conversational layer between people and a verified operational model, while deterministic software owns established meaning, authority, execution and trace.</p>
   </div>
+</header>
 
-  <!-- ============ COMPANY MAP ============ -->
-  <div class="map-section">
-    <div class="prose" style="margin-bottom:18px">
-      <h2>The company map, in one picture</h2>
-      <p class="map-caption"><strong>Example company map — built from demonstrated processes.</strong> This combines the real demonstration flows (Acme-style reconciliation, Fazerish-style enrichment, and the room-reservation effect) onto one map so several processes are visible at once. It is <em>not</em> a real customer deployment, and no imaginary SAP/PIM/finance connectors have been added to make it impressive. Click any node to read what it is, what work happens, where the result belongs, and whether the process has authority to make a real change.</p>
-    </div>
+<div class="rule"></div>
 
-    <div class="map-frame">
-      <div class="map-legend">
-        <span class="item"><span class="dot" style="background:#7FA05C"></span>Input</span>
-        <span class="item"><span class="dot" style="background:#3E6B89"></span>Automated work</span>
-        <span class="item"><span class="dot" style="background:#5E7C8C"></span>Intended destination · review only</span>
-        <span class="item"><span class="solid" style="border-color:#5E7C8C"></span>Actual effect · committed</span>
-        <span class="item"><span class="dot" style="background:#B23B2E"></span>Needs attention — produced by the work</span>
-        <span class="item"><span class="dash" style="border-color:#7A5B8C; border-top-style:dotted"></span>Available for investigation — AI, on request (not automatic)</span>
-      </div>
+<section class="prose">
+  <div class="kicker">The problem</div>
+  <h2>Companies already have processes. Much of the real process lives between the systems.</h2>
+  <p>
+    A business process may cross Excel files, ERP exports, product systems, webshop imports, emails,
+    campaign plans, warehouse decisions and the knowledge of several people. The technical systems
+    contain fields. People know why those fields need to be correct.
+  </p>
+  <p>
+    Traditional automation often starts from the outside: document the process, build a workflow,
+    and maintain that workflow when the world changes. Learning Lab starts from the work itself.
+  </p>
+  <div class="quote">The process is also the data mine.</div>
+  <p>
+    Each useful task can reveal a little more about product identities, source ownership, pricing,
+    availability, campaign logic, responsibilities, mappings, constraints and system limitations.
+    Verified knowledge can then be reused instead of rediscovered in every new automation.
+  </p>
+</section>
 
-      <div class="map-svg-wrap">
-        <svg class="map-svg" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Example company map: inputs, automated work, intended destinations, one actual effect, and one needs-attention path to the AI investigator.">
-          <defs>
-            <marker id="ah-data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7FA05C"/></marker>
-            <marker id="ah-intended" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6A5ACD"/></marker>
-            <marker id="ah-effect" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5E7C8C"/></marker>
-            <marker id="ah-exception" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#B23B2E"/></marker>
-          </defs>
-
-          <!-- column headers -->
-          <text class="col-head" x="80" y="22">Company</text>
-          <text class="col-head" x="250" y="22">Incoming files</text>
-          <text class="col-head" x="470" y="22">Automated work</text>
-          <text class="col-head" x="720" y="22">Result &amp; authority</text>
-
-          <g id="edges"></g>
-          <g id="nodes"></g>
-        </svg>
-      </div>
-
-      <div class="map-detail" id="map-detail">
-        <div class="empty">Click a node in the map to read what it is, what work happens, where the result belongs, and whether the process has authority to make a real change.</div>
-      </div>
+<section>
+  <div class="flow">
+    <div class="flow-row">
+      <div class="node"><strong>Human intent</strong><span>“Put these products on campaign next month.”</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><strong>LLM / Work</strong><span>interpret · inspect · ask · explain · propose</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><strong>Verified model</strong><span>facts · rules · ownership · capabilities · authority</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><strong>Deterministic operations</strong><span>validate · transform · refuse · execute · trace</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><strong>Business systems</strong><span>ERP · PIM · webshop · files · APIs</span></div>
     </div>
   </div>
-  <!-- ============ /COMPANY MAP ============ -->
+</section>
 
+<section class="prose">
+  <div class="kicker">The boundary</div>
+  <h2>Conversation can define work. Conversation is not authority.</h2>
+  <div class="split">
+    <div class="card">
+      <h3>LLM / Work layer</h3>
+      <ul class="list">
+        <li>inspect permitted material</li>
+        <li>interpret unfamiliar data</li>
+        <li>ask load-bearing business questions</li>
+        <li>explain exceptions and state</li>
+        <li>propose a process or change</li>
+        <li>compose established capabilities</li>
+        <li>suggest improvements and experiments</li>
+      </ul>
+    </div>
+    <div class="divider"></div>
+    <div class="card">
+      <h3>Learning Lab / deterministic layer</h3>
+      <ul class="list">
+        <li>preserve established facts</li>
+        <li>validate structural contracts</li>
+        <li>version process definitions</li>
+        <li>hold effect authority</li>
+        <li>execute repeatable operations</li>
+        <li>refuse ambiguity instead of guessing</li>
+        <li>record provenance and verify effects</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="prose">
+  <div class="kicker">How work becomes reusable</div>
+  <h2>Compile once, run many.</h2>
+  <div class="steps">
+    <div class="step"><strong>Bring a real task.</strong><span>Files, exports, a reporting need, an upload problem, a reconciliation, a campaign setup or another bounded operational task.</span></div>
+    <div class="step"><strong>Observe the data mechanically.</strong><span>Structure, headers, relationships, coverage and other measurable facts stay separate from inferred business meaning.</span></div>
+    <div class="step"><strong>Discuss only what actually needs human meaning.</strong><span>What identifies the same product? Which source owns price? What result is wanted? Which system may be changed?</span></div>
+    <div class="step"><strong>Create a structural Work Definition.</strong><span>The LLM proposes explicit source roles, task semantics, outputs, unresolved questions and requested destination — not an authority-bearing paragraph.</span></div>
+    <div class="step"><strong>Validate, preview and establish.</strong><span>Deterministic validators catch contradictions. Human confirmation remains explicit where business meaning or authority is load-bearing.</span></div>
+    <div class="step"><strong>Run without rediscovering the task.</strong><span>Once established, recurring work executes deterministically. The LLM comes back for exceptions, investigation, explanation and change.</span></div>
+  </div>
+</section>
+
+<section class="prose">
+  <div class="kicker">Modularity</div>
+  <h2>Input, work, output, destination and authority are different things.</h2>
+  <div class="grid">
+    <div class="card"><h3>Source contract</h3><p>What is this data? What stable role does it play? Which structural facts are established?</p></div>
+    <div class="card"><h3>Task contract</h3><p>What should happen? Reconcile, enrich, aggregate, report, update, reserve, publish or another task-specific operation.</p></div>
+    <div class="card"><h3>Output contract</h3><p>What constitutes the result? A discrepancy report, a summary, a proposed change set, an upload artifact or another explicit result.</p></div>
+    <div class="card"><h3>Destination contract</h3><p>Where can the result go? Review screen, file, API, ERP, PIM, webshop, database or another system-specific adapter.</p></div>
+    <div class="card"><h3>Effect authority</h3><p>What may actually be changed? Read-only, draft, selected fields, publish, commit or explicit refusal.</p></div>
+    <div class="card"><h3>Verified effect</h3><p>Did the target system really reach the desired state? “Upload accepted” is not the same as “business change confirmed.”</p></div>
+  </div>
+</section>
+
+<section class="prose">
+  <div class="kicker">System integration</div>
+  <h2>Upload files are adapters, not the business truth.</h2>
+  <p>
+    Many real systems do not want constant ad-hoc uploads. The canonical result should therefore
+    describe the desired business change independently of transport.
+  </p>
+  <div class="code">Canonical Change Set
+────────────────────────────────
+SKU 123
+  SalePrice        19.90 → 14.90
+  Availability     Oct 04 → Oct 01
+  Campaign         none  → Guest Specials
+
+SKU 456
+  ...
+
+Then adapt the same verified change to:
+  → Excel / CSV import
+  → API
+  → staging database
+  → SFTP batch
+  → human-reviewed manual upload</div>
+  <p style="margin-top:16px">
+    If the webshop later replaces its upload format with an API, product identity, campaign meaning,
+    availability rules and pricing knowledge should survive. Replace and reverify the adapter — not
+    the whole conceptual process.
+  </p>
+</section>
+
+<section>
   <div class="prose">
-    <section>
-      <h2><span class="num">02</span>The client journey</h2>
-      <p>The engagement reads as a sequence — each step earns its place because the next one depends on it:</p>
-      <ol class="journey">
-        <li>
-          <h3>Understand</h3>
-          <p>The company brings the messy files as they are — supplier statements, ledger exports, product sheets, old reports. We do not assume we know which files matter, which sheets are real, or what the columns mean. The program measures structure; together we work out meaning.</p>
-        </li>
-        <li>
-          <h3>Map</h3>
-          <p>We draw what comes in, what work happens, where the result belongs, and what authority exists. This map becomes the operator's main mental model of the company's data work — not a diagram we draw once and forget, but a live view that updates as work runs.</p>
-        </li>
-        <li>
-          <h3>Model</h3>
-          <p>For one real process, we turn the understanding into an explicit, versioned definition of the work — which file fills which role, what the task is, what the expected shape of each input is. AI helps propose the model; a person confirms it.</p>
-        </li>
-        <li>
-          <h3>Automate</h3>
-          <p>Once approved, the process runs on its own — the same way every time, without an AI re-interpreting the task each run. It reads the next month's files, does the work, and records the result.</p>
-        </li>
-        <li>
-          <h3>Control</h3>
-          <p>It refuses before it guesses. A file with the wrong shape is rejected, not silently mis-read. Work that needs two inputs waits until both are present. Declaring a result belongs "in Finance" is a statement of intent, not permission to write there.</p>
-        </li>
-        <li>
-          <h3>Trace</h3>
-          <p>Every run records exactly which source files produced it, down to the byte-level signature of each file. "Show me the exact statement that produced this discrepancy report" resolves to a concrete file on disk.</p>
-        </li>
-        <li>
-          <h3>Improve</h3>
-          <p>When something changes or recurs, the AI helps investigate and suggests improvements — but durable change goes through a human gate. The understanding accumulates as explicit, versioned machinery rather than as tribal knowledge.</p>
-        </li>
-      </ol>
-    </section>
-
-    <section>
-      <h2><span class="num">03</span>Benefits &amp; differentiation, in plain language</h2>
-      <p>We do not claim to replace SAP, UiPath, MuleSoft, or Power Platform. Large platforms are the right answer when a company needs a large platform. We are useful at a different moment: <strong>when a company first needs a handful of important data flows understood and automated, without committing to a multi-year transformation programme.</strong></p>
-
-      <div class="benefits">
-        <div class="benefit">
-          <h3>Start with the files you already have</h3>
-          <p>We begin from the spreadsheets and exports you already exchange today — no need to replace your ERP, PIM, or finance system first. Automation is layered onto existing flows rather than gated behind a stack replacement.</p>
-          <span class="status">Demonstrated for Excel workbooks · direction for other systems</span>
-        </div>
-        <div class="benefit">
-          <h3>Lower recurring AI dependence</h3>
-          <p>Once a process is set up, routine operation does not require an AI to re-interpret the task every time. AI is used where it earns its keep — understanding, modelling, investigating, improving — not to re-discover known work each month.</p>
-          <span class="status">Demonstrated for the recurring run</span>
-        </div>
-        <div class="benefit">
-          <h3>It refuses before it guesses</h3>
-          <p>When an input changes shape, is incomplete, or has been edited in a way that breaks trust, the process stops and tells you — rather than silently producing a confidently wrong result.</p>
-          <span class="status">Demonstrated across several refuse points</span>
-        </div>
-        <div class="benefit">
-          <h3>Complete-input control</h3>
-          <p>Work that needs several inputs waits until all the required evidence is present. A reconciliation that needs both a supplier statement and a ledger will not run on the statement alone.</p>
-          <span class="status">Demonstrated</span>
-        </div>
-        <div class="benefit">
-          <h3>Traceability to the source file</h3>
-          <p>A run identifies exactly which source files and versions produced it, with a byte-level signature for each. You can trace any result back to the exact file that was used.</p>
-          <span class="status">Demonstrated</span>
-        </div>
-        <div class="benefit">
-          <h3>Crash safety — exactly once</h3>
-          <p>If the process is interrupted in the dangerous moment — after it has recorded the work but before it has cleaned up — recovery resumes without running the work a second time and without losing it. This is deliberately stress-tested, not assumed.</p>
-          <span class="status">Demonstrated (deliberate crash test)</span>
-        </div>
-        <div class="benefit">
-          <h3>Explicit, separate authority</h3>
-          <p>Declaring that a result belongs in Finance, the PIM, or the calendar is a statement of intent — it is not permission to write there. What the system is actually allowed to do is tracked separately and visible on the map.</p>
-          <span class="status">Demonstrated</span>
-        </div>
-        <div class="benefit">
-          <h3>Gradual automation</h3>
-          <p>You can start with review-only output, move to approval-gated, and only go fully automatic when the authority for it is justified — on a per-process basis, not all-or-nothing.</p>
-          <span class="status">Partially demonstrated — spectrum modelled, endpoints proven</span>
-        </div>
-      </div>
-
-      <div class="callout">
-        <p><strong>The commercial entry point.</strong> One or two real processes → map the data flow → automate one process → measure the result → decide together whether to expand. We are willing to conclude that an established enterprise product is the right implementation target once the work is understood. The valuable thing sold first is understanding the work well enough to automate it safely — not forcing our runtime into every problem.</p>
-      </div>
-    </section>
+    <div class="kicker">Example</div>
+    <h2>A campaign request is really a chain of commitments.</h2>
   </div>
-
-  <div class="proof-section">
-    <section>
-      <h2><span class="num">04</span>Proof ledger</h2>
-      <p>For every important client-facing claim, the exact implementation, test, or demo that supports it — verified running on <strong>2026-08-18</strong>. Architectural intentions are <em>not</em> promoted to marketing claims.</p>
-
-      <div class="legend">
-        <div class="item"><span class="chip proven">PROVEN NOW</span><span><strong>Runs today</strong> — a test/demo passes</span></div>
-        <div class="item"><span class="chip partial">PARTIALLY PROVEN</span><span>Core shown; some scope open</span></div>
-        <div class="item"><span class="chip direction">DIRECTION</span><span>Designed, not yet demonstrated as product</span></div>
-        <div class="item"><span class="chip notyet">NOT YET PROVEN</span><span>Explicitly not built — do not claim</span></div>
-      </div>
-
-      <div class="proof-group">
-        <h3><span class="chip proven">Proven now</span></h3>
-
-        <div class="claim">
-          <div class="head"><span class="chip proven">Proven</span><span class="text">An established process runs again without re-doing the modelling — the recurring run needs no LLM.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  python fleet/accept_v06.py --self-test
-  POSITIVE probe: September Acme reconciliation runs end-to-end
-  with NO modeller invocation. Also fleet/input_set.py --self-test.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip proven">Proven</span><span class="text">Incomplete input does not run — it waits for the rest.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  accept_v06.py: supplier statement stages (1/2) -> runs == 0,
-  "a partial September set fires NO run". Complete-input control.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip proven">Proven</span><span class="text">A changed Excel structure is refused, not silently guessed.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  accept_v06.py NEGATIVE probe: October statement with the
-  header moved to row 4 -> exception, no run, no binding.
-  Also input_set.py shape-mismatch refuses; adapters refuse
-  uncalculated formulas at the convert() boundary.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip proven">Proven</span><span class="text">Crash recovery runs the work exactly once — no duplicate, no lost work.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  accept_v06.py CRASH canary 3: crash after record_run,
-  then recovery -> the input-set fingerprint appears in
-  runs.jsonl EXACTLY ONCE across crash + recovery.
-  input_set.py canaries 1/2/3; inbox.py crash-before-effect
-  and crash-after-effect recovery.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip proven">Proven</span><span class="text">Every run records exactly which source files produced it, down to the byte.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  accept_v06.py: the single runs.jsonl line carries
-  run_input = {model, input_contract, input_set, fingerprint,
-  slots:{role:{document,digest,sheet,header_row,materialized_as}}}.
-  Raw arrivals retained by digest; run -> slot -> digest ->
-  retained bytes resolves to the exact file used.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip proven">Proven</span><span class="text">Fail-closed is the default: wrong shape, incomplete input, uncalculated formulas, and edited authority are all refused.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  accept_v06.py (shape refusal, partial-no-run);
-  fleet/inbox.py XLSX GATE (refuses uncalculated formulas);
-  worker/worker.py --self-test (established worker refuses
-  a digest-pin mismatch / edited authority; exception packet
-  is measured, not interpreted).</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip proven">Proven</span><span class="text">An established worker runs unattended — routine operation uses no LLM at runtime.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  The entire accept_v06.py acceptance run executes
-  without the modeller/LLM. worker/worker.py established path.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip proven">Proven</span><span class="text">Declaring a destination is not permission to write there — authority is explicit and separate.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  fleet/system_map.py D canary + supervisor/test_app.py:
-  a worker with destination=Finance and delivery=automatic
-  still shows "Automated effect authority: none" when it
-  commits no effect. Authority sourced from committing/effect,
-  never from the delivery mode.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip proven">Proven</span><span class="text">Versioned workers: a new model version can be promoted while the prior version's model, runs, and history stay byte-identical.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  fleet/fleet.py --self-test: promotion leaves v1
-  model/runs/history byte-identical; v2 inherits authority;
-  an older version renders as it was.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip proven">Proven</span><span class="text">A workbook is discovered, validated, and materialized with durable provenance (workbook + sheet + header row) surviving to the established model.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  supervisor/define.py --self-test v0.4 spine:
-  discover -> validate (refuses uncalculated formula) ->
-  materialize -> attach_origin stamps workbook+sheet+header_row,
-  survives verbatim to v1.json.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip proven">Proven</span><span class="text">A multi-document input set works — one process fed by several files (e.g. statement + ledger).</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  accept_v06.py: Acme reconciliation binds statement
-  + transactions as two roles in ONE input set; both required,
-  completes and runs. (Multiple roles in one set = solved.)</p>
-        </div>
-      </div>
-
-      <div class="proof-group">
-        <h3><span class="chip partial">Partially proven</span></h3>
-
-        <div class="claim">
-          <div class="head"><span class="chip partial">Partial</span><span class="text">The company map shows what comes in → what work happens → where the result belongs → what authority exists.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  fleet/system_map.py + supervisor/test_app.py: the
-  read-only map renders inbox / company / source / destination
-  / worker panels from authoritative fleet state. CAVEAT: a
-  pre-existing map self-test fails on a customer-colouring
-  case (Demo/Lab) — a known bug, outside this surface.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip partial">Partial</span><span class="text">Gradual automation: review-only → approval-gated → automatic only when authority is justified.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  Committing vs noncommitting workers + delivery
-  modes (view/export/approval/automatic) on worker.json; the
-  two endpoints are demonstrated. The middle approval-gated
-  UI flow is modelled but less exercised.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip partial">Partial</span><span class="text">The supervisor interprets beside the map and points to the evidence behind each finding.</span></div>
-          <p class="proof"><span class="lab">PROOF</span>  supervisor/ harness, current-assessment filing, and
-  memory/rulebook are built and self-tested. Not yet exercised
-  on the real model in live recurring use — that is the point
-  of the "start using" phase now beginning.</p>
-        </div>
-      </div>
-
-      <div class="proof-group">
-        <h3><span class="chip direction">Direction</span></h3>
-
-        <div class="claim">
-          <div class="head"><span class="chip direction">Direction</span><span class="text">One unified company workspace converging the map, the incoming-data browser, and the supervisor.</span></div>
-          <p class="proof"><span class="lab">SOURCE</span>  PRODUCT.md "The central workspace": explicitly labelled
-  "a product direction, not a claim that the integrated shell
-  already exists." Do not present as shipped.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip direction">Direction</span><span class="text">Institutional learning — recurring investigations become durable, human-gated system improvements.</span></div>
-          <p class="proof"><span class="lab">SOURCE</span>  Improvement backlog + Rulebook (S11–S15 sequence,
-  closed) are built and self-tested. Their value in real
-  recurring use is the open question, not yet shown.</p>
-        </div>
-      </div>
-
-      <div class="proof-group">
-        <h3><span class="chip notyet">Not yet proven — do not claim</span></h3>
-
-        <div class="claim">
-          <div class="head"><span class="chip notyet">Not yet</span><span class="text">Production connectors to SAP, PIM, finance, ERP, or extranet systems.</span></div>
-          <p class="proof"><span class="lab">FACT</span>  No connector framework exists. v0.5 non-goals list
-  this explicitly. Only Excel + JSON input adapters are built.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip notyet">Not yet</span><span class="text">Enterprise IAM, multi-tenant auth, or multi-company scale.</span></div>
-          <p class="proof"><span class="lab">FACT</span>  Single workspace; no auth/multi-tenancy layer built.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip notyet">Not yet</span><span class="text">A complete governance product.</span></div>
-          <p class="proof"><span class="lab">FACT</span>  The rulebook lab is closed research evidence, not a
-  governance suite. Do not claim "complete governance".</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip notyet">Not yet</span><span class="text">Cost savings measured in a real customer.</span></div>
-          <p class="proof"><span class="lab">FACT</span>  No real customer yet. All evidence is synthetic /
-  sanitised fixtures (Acme, Fazerish). No measured outcome.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip notyet">Not yet</span><span class="text">Handling several input sets in flight at once (e.g. September and October both waiting on one process).</span></div>
-          <p class="proof"><span class="lab">FACT</span>  v0.6 allows one open input set per worker. Overlapping
-  periods are an explicitly unsolved case, by design.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip notyet">Not yet</span><span class="text">Several files filling the same role in one run (e.g. April + May + June sales → one quarterly report).</span></div>
-          <p class="proof"><span class="lab">FACT</span>  One source instance per role per run. Not yet modelled;
-  a known future canary, deliberately not built speculatively.</p>
-        </div>
-
-        <div class="claim">
-          <div class="head"><span class="chip notyet">Not yet</span><span class="text">Safe handling of real customer data through the intake path.</span></div>
-          <p class="proof"><span class="lab">FACT</span>  Worker-runtime hygiene is done; the data/ intake
-  boundary is deliberately not yet established. Keep intake
-  synthetic/sanitised until that boundary is decided.</p>
-        </div>
-      </div>
-    </section>
+  <div class="example">
+    <div class="ask">“Put these products on Guest Specials from 1–14 October.”</div>
+    <div class="checks">
+      <div class="check"><b>Product identity</b> — known</div>
+      <div class="check"><b>Market participation</b> — known / confirmed</div>
+      <div class="check"><b>Campaign pricing capability</b> — known</div>
+      <div class="check"><b>Webshop mapping</b> — known</div>
+      <div class="check"><b>Warehouse readiness</b> — 28 September</div>
+      <div class="check"><b>Availability dates</b> — 5 products start 4 October</div>
+    </div>
+    <div class="callout" style="margin-top:18px">
+      <p><strong>Useful answer:</strong> Five products cannot participate for the full campaign period. Warehouse readiness is already confirmed before launch, so the system availability dates are the blocking condition. A prerequisite availability update can be proposed before campaign setup.</p>
+    </div>
   </div>
+</section>
 
-  <div class="prose">
-    <section>
-      <h2><span class="num">05</span>Language: research → client</h2>
-      <p>The README and PRODUCT docs speak to researchers. These are the terms a client should never hear untranslated. We are not rewriting the architecture — only how we talk about it across the table.</p>
-      <div class="trans-wrap">
-        <table class="trans">
-          <thead><tr><th>As written in the repo</th><th>Say this to a client</th></tr></thead>
-          <tbody>
-            <tr><td class="from">"A working research system for turning messy data work into explicit deterministic workers"</td><td class="to">"We turn repetitive data work into automated processes you can see and trust."</td></tr>
-            <tr><td class="from">"The AI designs, supervises, investigates and improves the workers. The workers do the work."</td><td class="to">"AI helps us understand and improve your work. Once a process is set up, it runs the same way every time — no AI guessing each time."</td></tr>
-            <tr><td class="from">"It is a research lab, not a production framework"</td><td class="to">"We've built and stress-tested the core engine on realistic sample data; we'd apply it to your process as a pilot." (Keep the first phrasing internal.)</td></tr>
-            <tr><td class="from">"deterministic worker" / "established worker"</td><td class="to">"an automated process we've set up and approved" / "a process that runs the same way every time"</td></tr>
-            <tr><td class="from">"falsification ledger"</td><td class="to">"a record of what we tested and the cases that could break it" (internal term — don't use with clients)</td></tr>
-            <tr><td class="from">"task-model envelopes"</td><td class="to">"a clear, written definition of what a piece of work does"</td></tr>
-            <tr><td class="from">"input_contracts" / "source roles" / "slots"</td><td class="to">"the expected shape of each incoming file" / "which file fills which part of the job"</td></tr>
-            <tr><td class="from">"fingerprint" / "canary"</td><td class="to">"a unique signature for each set of inputs" / "a deliberate stress test"</td></tr>
-            <tr><td class="from">"noncommitting / committing"</td><td class="to">"review-only / takes a real effect"</td></tr>
-            <tr><td class="from">"provenance" / "materialized_as"</td><td class="to">"where each result came from" / "the cleaned data the process actually used"</td></tr>
-            <tr><td class="from">"S1–S15 Rulebook laboratory"</td><td class="to">(internal research history — do not mention to clients)</td></tr>
-            <tr><td class="from">"PROGRAM / SOURCE / LLM / HUMAN" authority boundary</td><td class="to">"the program owns observed facts; the AI interprets and proposes; a person decides what goes live"</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+<section class="prose">
+  <div class="kicker">Organizational model</div>
+  <h2>A field can be the final projection of several people's decisions.</h2>
+  <p>
+    Product availability may involve campaign planning, European purchasing, warehouse readiness,
+    local market participation, sales responsibility and local marketing before one date finally
+    appears in a product system.
+  </p>
+  <div class="code">campaign period
+  owned by campaign planning
+        ↓
+supply feasibility
+  owned by purchasing
+        ↓
+warehouse readiness
+  owned by warehouse
+        ↓
+local participation
+  owned by market
+        ↓
+system availability date
+  implemented by product-data operation</div>
+  <p style="margin-top:16px">
+    The long-term company model is therefore not just columns and schemas. It can become a graph of
+    <strong>facts, decisions, owners, dependencies, constraints and effects</strong>.
+  </p>
+</section>
+
+<section class="prose">
+  <div class="kicker">Process development</div>
+  <h2>System limitations should not quietly become company policy.</h2>
+  <p>
+    “We only run 20% mass discounts” may be a real commercial rule — or it may simply be the workaround
+    created because individual prices are painful to maintain in the current system.
+  </p>
+  <div class="grid">
+    <div class="card"><h3>Business requirement</h3><p>What the company actually wants to achieve.</p></div>
+    <div class="card"><h3>Operating practice</h3><p>What people currently do.</p></div>
+    <div class="card"><h3>Technical limitation</h3><p>What the destination system makes difficult.</p></div>
+    <div class="card"><h3>Improvement opportunity</h3><p>A repeated workaround can become a candidate new verified capability.</p></div>
   </div>
+  <p style="margin-top:18px">
+    The same system that executes work can therefore expose where the process itself deserves development.
+  </p>
+</section>
 
-  <hr class="divider">
-
-  <div class="prose">
-    <p class="note">
-      <strong>How to use this.</strong> If we walked into a company tomorrow: lead with the proposition and the map; walk the journey; explain the eight benefits in plain language; when a claim is challenged, open the proof ledger and point at the test that runs today — and be the first to say which things are direction, not shipped. The two things that most distinguish us from a boxed platform — <em>fail-closed behaviour</em> and <em>traceability to the exact source file</em> — are also the two we can demonstrate on the spot with <code>python fleet/accept_v06.py --self-test</code>. The two things we must <em>not</em> overclaim — production connectors and measured customer savings — are listed plainly at the bottom of the ledger.
-    </p>
+<section class="prose">
+  <div class="kicker">Analysis and improvement</div>
+  <h2>The operational model gives analytics context.</h2>
+  <p>
+    Once the system knows what a campaign intended, what was really published, what failed,
+    what was available and what later sold, “How did the campaign go?” becomes richer than a sales query.
+  </p>
+  <div class="grid">
+    <div class="card"><h3>Intent</h3><p>Products, prices, dates, markets, flyer promises, expected availability.</p></div>
+    <div class="card"><h3>Operation</h3><p>What actually published, partial effects, exceptions, late availability.</p></div>
+    <div class="card"><h3>Outcome</h3><p>Units, sales, margin, sell-through, stock-outs, returns.</p></div>
+    <div class="card"><h3>Next hypothesis</h3><p>For example: two products are often bought together and may be worth testing as a bundle.</p></div>
   </div>
+  <div class="quote">The same verified model used to make work reliable can also make analysis more meaningful.</div>
+</section>
 
-</div>
+<section class="prose">
+  <div class="kicker">Current evidence</div>
+  <h2>This is ambitious, but it is not starting from zero.</h2>
+  <p>
+    The current Learning Lab research has already demonstrated several small pieces of the boundary
+    between a conversational agent and a deterministic operational system.
+  </p>
+  <div class="grid">
+    <div class="card">
+      <h3>Local conversational definition</h3>
+      <p>A local Qwen model in Goose can inspect bounded sample data, discuss a business task and produce a durable process-definition artifact.</p>
+      <div class="status-row"><span class="chip proven">PROVEN IN LAB</span></div>
+    </div>
+    <div class="card">
+      <h3>Conversation independence</h3>
+      <p>A fresh session could understand the proposed process from the artifact rather than the original conversation.</p>
+      <div class="status-row"><span class="chip proven">PROVEN IN LAB</span></div>
+    </div>
+    <div class="card">
+      <h3>Deterministic Work Definition gate</h3>
+      <p>Free-form prose is refused. Structural proposals can be validated and passed into the existing modelling/preview path without becoming established.</p>
+      <div class="status-row"><span class="chip proven">PROVEN IN LAB</span></div>
+    </div>
+    <div class="card">
+      <h3>First-pass structural reliability</h3>
+      <p>Three isolated skill-delivery runs adopted the structural form; two passed immediately and one was refused for named deterministic reasons after skipping the expected human-question step.</p>
+      <div class="status-row"><span class="chip partial">PARTIAL / ACTIVE RESEARCH</span></div>
+    </div>
+    <div class="card">
+      <h3>Recurring deterministic runtime</h3>
+      <p>Existing Learning Lab work already includes explicit task models, source contracts, provenance, versioned workers, deterministic execution, refusal and recovery machinery.</p>
+      <div class="status-row"><span class="chip proven">PROVEN IN LAB</span></div>
+    </div>
+    <div class="card">
+      <h3>Company-scale capability graph</h3>
+      <p>Ownership, cross-process dependencies, destination change sets, verified read-back and commercial suggestion loops are architectural direction, not completed product claims.</p>
+      <div class="status-row"><span class="chip direction">DIRECTION</span></div>
+    </div>
+  </div>
+</section>
 
-<script>
-(function () {
-  "use strict";
+<section class="prose">
+  <div class="kicker">What a real proof case could look like</div>
+  <h2>Start with one annoying process, not with “digital transformation.”</h2>
+  <p>
+    A useful real-world case should be bounded enough to understand but messy enough to contain genuine
+    company meaning. The goal would be to prove value on one process and preserve everything learned so
+    a second process can reuse it.
+  </p>
+  <div class="grid">
+    <div class="card"><h3>Data reconciliation</h3><p>Two or more sources that should agree but currently require manual comparison.</p></div>
+    <div class="card"><h3>Reporting</h3><p>A recurring report that combines operational data and business rules from several places.</p></div>
+    <div class="card"><h3>Product / master data</h3><p>Validation, enrichment, mapping, campaign readiness or preparation of approved system updates.</p></div>
+    <div class="card"><h3>Import preparation</h3><p>An ERP, PIM or webshop upload currently assembled manually from multiple data sources.</p></div>
+  </div>
+</section>
 
-  // --- the same visual language as fleet/system_map.py ---
-  var PALETTE = {
-    scope: "#8C7A5B", worker: "#3E6B89", input: "#6F8F6A",
-    source: "#7FA05C", executor: "#B07C3A", effect: "#5E7C8C",
-    exception: "#B23B2E", capability: "#7A5B8C"
-  };
-  var EDGE = {
-    data:       { color: "#7FA05C", dash: false, arrow: true,  width: 2,   opacity: 0.92 },
-    owns:       { color: "#8C7A5B", dash: false, arrow: false, width: 1.4, opacity: 0.4 },
-    intended:   { color: "#6A5ACD", dash: true,  dashpat: "7 5", arrow: true,  width: 2, opacity: 0.92 },
-    effect:     { color: "#5E7C8C", dash: false, arrow: true,  width: 2,   opacity: 0.92 },
-    exception:  { color: "#B23B2E", dash: true,  dashpat: "7 5", arrow: true,  width: 2, opacity: 0.92 },
-    // "available" is deliberately NOT a data-flow edge: dotted (finer than the
-    // dashed exception/intended edges), thinner, lower opacity, NO arrowhead.
-    // It reads as "an AI investigator is available to look at this, on request"
-    // -- never as "the exception is routed to the AI and handled". The
-    // deterministic refusal is the red dashed 'refused' arrow above; this edge
-    // only says AI *may* help interpret it afterward, invoked by a person.
-    available:  { color: "#7A5B8C", dash: true,  dashpat: "2 5", arrow: false, width: 1.4, opacity: 0.75 }
-  };
-  var STATUS = {
-    healthy:   { color: "#4C8C5A", glyph: "+", w: 2 },
-    attention: { color: "#B23B2E", glyph: "!", w: 5 },
-    never_run: { color: "#8A8A82", glyph: "o", w: 3 },
-    blocked:   { color: "#C58A22", glyph: "?", w: 4 }
-  };
+<section class="prose pilot">
+  <div class="kicker">Seeking a real business case</div>
+  <h2>Six-month proof case — no consulting fee.</h2>
+  <p>
+    I am looking for a company interested in testing this idea on a real operational process as a
+    proof case connected to my Saranen LLM training.
+  </p>
+  <p>
+    The collaboration would start with one narrow process and existing company tools. The aim is not
+    to replace ERP, PIM, RPA or workflow platforms. It is to understand one real piece of work,
+    make its meaning explicit, automate the repeatable parts safely, and see whether the resulting
+    company knowledge can be reused in the next piece of work.
+  </p>
+  <p><strong>The proof case would be free for six months.</strong> The interesting return is evidence:
+    does this architecture actually make real company work easier, safer and more reusable?</p>
+  <p class="small">
+    A sensible first case should avoid unnecessary production risk. Preview, review-only outputs and
+    synthetic/anonymized data can be used before any real write authority is considered.
+  </p>
+</section>
 
-  var NODES = [
-    { id: "company", label: "Example\ncompany", kind: "scope", x: 80, y: 280, r: 24,
-      detail: {
-        title: "Example company",
-        rows: [
-          ["What this is", "One example company with three demonstrated processes drawn on a single map."],
-          ["Built from", "The real Acme-style reconciliation, Fazerish-style enrichment, and room-reservation effect flows. Combined here for illustration."],
-          ["Not a deployment", "This is not a real customer. No imaginary SAP/PIM/finance connectors have been added."],
-          ["Authority", "The company owns these processes; nothing here implies the system writes anywhere on the company's behalf."]
-        ]
-      }
-    },
+<section class="prose">
+  <div class="kicker">The north star</div>
+  <h2>The LLM can be the interface without being the system.</h2>
+  <div class="code">HUMANS DO BUSINESS
+        ↕
+LLM MAKES THE PROCESS CONVERSATIONAL
+        ↕
+LEARNING LAB MAKES IT EXPLICIT AND TRUSTWORTHY
+        ↕
+DETERMINISTIC CAPABILITIES MAKE IT REPEATABLE
+        ↕
+ADAPTERS CONNECT IT TO REAL SYSTEMS
+        ↕
+VERIFIED EFFECTS CREATE HISTORY
+        ↕
+HISTORY IMPROVES THE COMPANY MODEL
+        ↕
+LLM HELPS PEOPLE UNDERSTAND AND IMPROVE WHAT TO DO NEXT</div>
+  <div class="quote">Do not model the whole company first and then automate it. Model the company as people automate real work.</div>
+</section>
 
-    { id: "s-stmt", label: "Supplier\nstatement", kind: "source", x: 250, y: 80, r: 13,
-      detail: {
-        title: "Supplier statement",
-        rows: [
-          ["What the input is", "An Excel workbook: a supplier's monthly statement of invoices."],
-          ["Fills which role", "The 'statement' role of the Reconciliation process. A sole slot — only this file can fill it."],
-          ["Feeds", "Reconciliation."],
-          ["Authority", "Input only — it changes nothing."],
-          ["Health", "Healthy: the September statement was accepted and matched."]
-        ]
-      }
-    },
-    { id: "s-ledger", label: "Ledger\ntransactions", kind: "source", x: 250, y: 160, r: 13,
-      detail: {
-        title: "Ledger transactions",
-        rows: [
-          ["What the input is", "An Excel workbook: the company's own ledger export."],
-          ["Fills which role", "The 'transactions' role of the Reconciliation process. Sole slot."],
-          ["Feeds", "Reconciliation."],
-          ["Authority", "Input only."],
-          ["Health", "Healthy: the September ledger was accepted and completed the set."]
-        ]
-      }
-    },
-    { id: "recon", label: "Reconciliation", kind: "worker", x: 470, y: 120, r: 20, status: "attention",
-      detail: {
-        title: "Supplier reconciliation",
-        rows: [
-          ["What work happens", "Matches supplier invoices to ledger entries by invoice number and compares the amounts. Produces a discrepancy report."],
-          ["Where the result belongs", "Intended destination: Finance / Reskontra — review only."],
-          ["Authority to change", "None. This process is review-only — it writes nothing and makes no change. Declaring the destination is intent, not permission."],
-          ["Health", "Needs attention: the October statement arrived with its header on a different row and was refused (shown as 'needs attention' below). The September run succeeded."]
-        ]
-      }
-    },
-    { id: "dest-recon", label: "Finance / Reskontra\nreview only", kind: "effect", x: 720, y: 120, r: 16,
-      detail: {
-        title: "Intended destination: Finance / Reskontra",
-        rows: [
-          ["Where the result belongs", "Finance / Reskontra — declared by the operator as where the discrepancy report should land."],
-          ["Delivery", "Review only."],
-          ["Authority to change", "None. The destination is a statement of intent. The dashed edge reads as 'intended, not landed' — this process makes no change."],
-          ["Why this matters", "Declaring a destination is not permission to write there. Authority is tracked separately and is visible on the map."]
-        ]
-      }
-    },
-    { id: "exc-stmt", label: "Shape changed\n— refused", kind: "exception", x: 720, y: 215, r: 14, status: "attention",
-      detail: {
-        title: "Needs attention: statement shape changed — refused",
-        rows: [
-          ["What happened", "An October supplier statement arrived with its header on a different row than the process expects."],
-          ["What the system did", "Refused it rather than guessing. No work ran; nothing was changed. The refusal is produced by the ordinary, deterministic operation of the process — not by the AI."],
-          ["Authority", "None — no work ran and nothing was changed."],
-          ["What happens next", "A person re-models the new shape as a separate, explicit, approved step. An AI investigator may help propose that — on request, afterward. It is not triggered automatically."]
-        ]
-      }
-    },
+<footer class="prose">
+  <strong>Learning Lab</strong> · experimental project by Perttu Leinonen<br>
+  Current status: research architecture and working deterministic prototypes. This page deliberately separates demonstrated laboratory evidence from longer-term direction.
+</footer>
 
-    { id: "s-orders", label: "Order lines", kind: "source", x: 250, y: 260, r: 13,
-      detail: {
-        title: "Order lines",
-        rows: [
-          ["What the input is", "An Excel workbook: order lines (quantity per article)."],
-          ["Fills which role", "A shared slot — one upload fills both 'order lines' and 'price list' for this process."],
-          ["Feeds", "Order enrichment."],
-          ["Authority", "Input only."],
-          ["Health", "Healthy."]
-        ]
-      }
-    },
-    { id: "s-price", label: "Price list", kind: "source", x: 250, y: 330, r: 13,
-      detail: {
-        title: "Price list",
-        rows: [
-          ["What the input is", "An Excel workbook: the article price list."],
-          ["Fills which role", "Shared slot with order lines."],
-          ["Feeds", "Order enrichment."],
-          ["Authority", "Input only."],
-          ["Health", "Healthy."]
-        ]
-      }
-    },
-    { id: "enrich", label: "Order\nenrichment", kind: "worker", x: 470, y: 295, r: 20, status: "healthy",
-      detail: {
-        title: "Order enrichment",
-        rows: [
-          ["What work happens", "Costs each order line (quantity × unit price) and computes the line total."],
-          ["Where the result belongs", "Intended destination: Finance / Invoicing — review only."],
-          ["Authority to change", "None. Review-only — it writes nothing."],
-          ["Health", "Healthy: the last run completed."]
-        ]
-      }
-    },
-    { id: "dest-enrich", label: "Finance / Invoicing\nreview only", kind: "effect", x: 720, y: 295, r: 16,
-      detail: {
-        title: "Intended destination: Finance / Invoicing",
-        rows: [
-          ["Where the result belongs", "Finance / Invoicing — review only."],
-          ["Authority to change", "None. Intended, not landed. The dashed edge distinguishes intent from the solid 'applies' edge of a real change."],
-          ["Why this matters", "Same distinction as Reskontra: declaring where it belongs is not permission to write there."]
-        ]
-      }
-    },
-
-    { id: "s-date", label: "Date request", kind: "source", x: 250, y: 440, r: 13,
-      detail: {
-        title: "Date request",
-        rows: [
-          ["What the input is", "A JSON work item: a requested date for the room."],
-          ["Fills which role", "The single input of the Room reservation process."],
-          ["Feeds", "Room reservation."],
-          ["Authority", "Input only."],
-          ["Health", "Healthy."]
-        ]
-      }
-    },
-    { id: "reserve", label: "Room\nreservation", kind: "worker", x: 470, y: 440, r: 20, status: "healthy",
-      detail: {
-        title: "Room reservation",
-        rows: [
-          ["What work happens", "Accepts a requested date unless it is malformed, a holiday, or already reserved."],
-          ["Where the result belongs", "The reservation list — this worker's own state."],
-          ["Authority to change", "Yes — this process is allowed to make a real change: accepted dates are appended to the reservation list. The solid 'applies' edge marks that real authority."],
-          ["Health", "Healthy: the last run completed."]
-        ]
-      }
-    },
-    { id: "effect-reserve", label: "Reservation\nconfirmed", kind: "effect", x: 720, y: 440, r: 17, status: "healthy",
-      detail: {
-        title: "Actual effect: reservation confirmed",
-        rows: [
-          ["What this is", "A committed effect — the reservation was actually recorded."],
-          ["Authority to change", "Yes. Unlike the review-only destinations above, this process is authorised to make a real change. The solid edge reads 'applies'."],
-          ["Why this is different", "The two review-only processes show intent with dashed edges; this one shows real authority with a solid edge. That is the intended-vs-actual-authority distinction on one map."]
-        ]
-      }
-    },
-
-    { id: "investigator", label: "AI investigator\n(on request)", kind: "capability", x: 900, y: 215, r: 17,
-      detail: {
-        title: "AI investigator (on request)",
-        rows: [
-          ["What this is", "A supporting layer, not a production worker. An AI that may help interpret a problem and propose a fix — brought in only by a person, only when something needs attention."],
-          ["When it runs", "Never on the normal processing path, and never automatically. The exception itself is produced by the ordinary deterministic operation of the process; the AI may help interpret it afterward, on request."],
-          ["Authority", "It may interpret, investigate, and propose — for example, proposing how to re-model the refused statement. It cannot, on its own, change established work, write results, or put a change live; a person approves any real change."],
-          ["Why it is drawn outside the lane", "It is not a production worker — it supports the people who run the company, so it sits outside the operational flow. The dotted line to 'needs attention' reads as 'available', not 'routed to'."]
-        ]
-      }
-    }
-  ];
-
-  var EDGES = [
-    // company owns each process (faint, behind)
-    { from: "company", to: "recon",   kind: "owns" },
-    { from: "company", to: "enrich",  kind: "owns" },
-    { from: "company", to: "reserve", kind: "owns" },
-
-    // inputs -> work
-    { from: "s-stmt",   to: "recon",   kind: "data" },
-    { from: "s-ledger",  to: "recon",   kind: "data" },
-    { from: "s-orders",  to: "enrich",  kind: "data" },
-    { from: "s-price",   to: "enrich",  kind: "data" },
-    { from: "s-date",    to: "reserve", kind: "data" },
-
-    // work -> intended destination (dashed) for review-only processes
-    { from: "recon",  to: "dest-recon",  kind: "intended", label: "review only" },
-    { from: "enrich", to: "dest-enrich", kind: "intended", label: "review only" },
-
-    // work -> actual effect (solid) for the committing process
-    { from: "reserve", to: "effect-reserve", kind: "effect", label: "applies" },
-
-    // exception path: the work refuses the changed statement (deterministic,
-    // directed). The investigator is only AVAILABLE to look at it afterward,
-    // on request -- a dotted, arrowless edge, distinct from any data flow.
-    { from: "recon",      to: "exc-stmt",     kind: "exception", label: "refused" },
-    { from: "exc-stmt",   to: "investigator", kind: "available", label: "can be investigated" }
-  ];
-
-  var byId = {};
-  NODES.forEach(function (n) { byId[n.id] = n; });
-
-  var SVGNS = "http://www.w3.org/2000/svg";
-  function el(tag, attrs) {
-    var e = document.createElementNS(SVGNS, tag);
-    if (attrs) for (var k in attrs) e.setAttribute(k, attrs[k]);
-    return e;
-  }
-
-  // edge endpoint trimmed so an arrowhead lands just outside the target node
-  function trim(from, to, pad) {
-    var dx = to.x - from.x, dy = to.y - from.y;
-    var len = Math.sqrt(dx * dx + dy * dy) || 1;
-    var ux = dx / len, uy = dy / len;
-    return { x: to.x - ux * (to.r + (pad || 6)), y: to.y - uy * (to.r + (pad || 6)) };
-  }
-
-  // draw edges first (behind nodes)
-  var edgeLayer = document.getElementById("edges");
-  // owns edges behind everything; keep order: owns, data, intended, effect, exception
-  EDGES.sort(function (a, b) {
-    var order = { owns: 0, data: 1, intended: 2, effect: 3, exception: 4, available: 5 };
-    return order[a.kind] - order[b.kind];
-  });
-  EDGES.forEach(function (e) {
-    var a = byId[e.from], b = byId[e.to];
-    if (!a || !b) return;
-    var st = EDGE[e.kind];
-    var end = st.arrow ? trim(a, b, 4) : { x: b.x, y: b.y };
-    var line = el("line", {
-      x1: a.x, y1: a.y, x2: end.x, y2: end.y,
-      stroke: st.color, "stroke-width": st.width || 2,
-      "stroke-dasharray": st.dash ? (st.dashpat || "7 5") : "",
-      "stroke-linecap": "round",
-      opacity: st.opacity == null ? 0.92 : st.opacity
-    });
-    if (st.arrow) line.setAttribute("marker-end", "url(#ah-" + e.kind + ")");
-    edgeLayer.appendChild(line);
-
-    if (e.label) {
-      var mx = (a.x + end.x) / 2, my = (a.y + end.y) / 2 - 6;
-      var t = el("text", { class: "edge-label", x: mx, y: my });
-      t.textContent = e.label;
-      edgeLayer.appendChild(t);
-    }
-  });
-
-  // draw nodes
-  var nodeLayer = document.getElementById("nodes");
-  var selectedId = null;
-
-  NODES.forEach(function (n) {
-    var g = el("g", { class: "node", "data-id": n.id, tabindex: "0", role: "button",
-                      "aria-label": n.label.replace(/\n/g, " ") });
-    var st = n.status ? STATUS[n.status] : null;
-    var fill = PALETTE[n.kind];
-    var stroke = st ? st.color : PALETTE[n.kind];
-    var sw = st ? st.w : 1.5;
-    var c = el("circle", { cx: n.x, cy: n.y, r: n.r, fill: fill, stroke: stroke, "stroke-width": sw });
-    g.appendChild(c);
-
-    // status glyph inside the node
-    if (st) {
-      var glyph = el("text", {
-        x: n.x, y: n.y + 4.5, "text-anchor": "middle",
-        "font-size": n.r > 18 ? 13 : 11, "font-weight": 700,
-        fill: "#fff", "pointer-events": "none",
-        "font-family": "Segoe UI, system-ui, sans-serif"
-      });
-      glyph.textContent = st.glyph;
-      g.appendChild(glyph);
-    }
-
-    // label below the circle
-    var lines = n.label.split("\n");
-    var ly = n.y + n.r + 13;
-    lines.forEach(function (ln, i) {
-      var t = el("text", { class: "node-label", x: n.x, y: ly + i * 13 });
-      t.textContent = ln;
-      g.appendChild(t);
-    });
-
-    g.addEventListener("click", function () { select(n.id); });
-    g.addEventListener("keydown", function (ev) {
-      if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); select(n.id); }
-    });
-    nodeLayer.appendChild(g);
-  });
-
-  var detailEl = document.getElementById("map-detail");
-
-  function select(id) {
-    selectedId = id;
-    // highlight
-    var gs = nodeLayer.querySelectorAll(".node");
-    for (var i = 0; i < gs.length; i++) {
-      gs[i].classList.toggle("selected", gs[i].getAttribute("data-id") === id);
-    }
-    var n = byId[id];
-    if (!n || !n.detail) { detailEl.innerHTML = '<div class="empty">No detail for this node.</div>'; return; }
-    var d = n.detail;
-    var html = '<div class="title">' + esc(d.title) + '</div><div class="dt">';
-    d.rows.forEach(function (r) {
-      html += '<div class="dt-row"><div class="k">' + esc(r[0]) + '</div><div class="v">' + esc(r[1]) + '</div></div>';
-    });
-    html += '</div>';
-    detailEl.innerHTML = html;
-  }
-
-  function esc(s) {
-    return String(s).replace(/[&<>"']/g, function (ch) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
-    });
-  }
-})();
-</script>
+</main>
+</body>
+</html>
