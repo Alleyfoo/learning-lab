@@ -3,21 +3,135 @@
   "runs": [
     {
       "run": "L1",
-      "status": "NO_ARTIFACT",
+      "status": "FIDELITY PASS",
       "findings": [],
-      "confirmations": {}
+      "confirmations": {
+        "Q_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_compare_amount": {
+          "rows": [
+            1
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_currency_role": {
+          "rows": [
+            2
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_source_of_truth": {
+          "rows": [
+            3
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_report_columns": {
+          "rows": [
+            4
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_context_columns": {
+          "rows": [
+            5
+          ],
+          "verdict": "normal",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "432155b667b6aa714d38a6a692036df722ad903ea66eeb4f0a12528c29ae6fdc"
     },
     {
       "run": "L2",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-1 UNCITED_HUMAN_FACT",
+          "where": "body.compare[Amount]",
+          "row": 1,
+          "detail": "confirmation 'Q_compare_amount_within_tolerance' is FID-6 NONVERBATIM_CONFIRMATION rows=[1]; provenance must be exclusive and byte-exact"
+        },
+        {
+          "finding": "FID-6 NONVERBATIM_CONFIRMATION",
+          "where": "human_confirmations[Q_compare_amount_within_tolerance]",
+          "row": null,
+          "detail": "rows=[1] subreason=TRAILING_CONTENT"
+        },
+        {
+          "finding": "FID-2 BUNDLED_CONFIRMATION",
+          "where": "human_confirmations[Q_report_fields]",
+          "row": null,
+          "detail": "rows=[4, 5]"
+        }
+      ],
+      "confirmations": {
+        "Q_match_key_invoice_number": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_compare_amount_within_tolerance": {
+          "rows": [
+            1
+          ],
+          "verdict": "FID-6 NONVERBATIM_CONFIRMATION",
+          "subreason": "TRAILING_CONTENT"
+        },
+        "Q_source_of_truth": {
+          "rows": [
+            3
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_report_fields": {
+          "rows": [
+            4,
+            5
+          ],
+          "verdict": "FID-2 BUNDLED_CONFIRMATION",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "e0f2300a263d4f28e59e8289d5b76c17935fd7fddfc67987c13ee2d8fbc1d9f6"
     },
     {
       "run": "L3",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-1 UNCITED_HUMAN_FACT",
+          "where": "body.match_on",
+          "row": 0,
+          "detail": "basis=None, not 'human_confirmed'"
+        },
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 4,
+          "detail": "delivered canonical recorded nowhere"
+        },
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 5,
+          "detail": "delivered canonical recorded nowhere"
+        }
+      ],
+      "confirmations": {},
+      "artifact_sha256": "3c2353d746b8d4ce3812e3edaa33948113d4ad3d6ca2a067be210bc9bd578744"
     }
   ]
 }

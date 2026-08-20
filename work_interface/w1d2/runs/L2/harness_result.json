@@ -1,0 +1,47 @@
+{
+  "run": "L2",
+  "outcome": "COMPLETED",
+  "reason": "artifact written; session terminated immediately",
+  "turns": 2,
+  "artifact": true,
+  "blocks_delivered": 1,
+  "continuations_sent": 0,
+  "silent_turns": 0,
+  "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+  "lifecycle_revision": "r2_single_block",
+  "fs_authority_mode": "SHADOW_DEFERRED",
+  "fs_snapshot_before": {
+    "PROMPT.md": {
+      "sha256": "4560bc7fbe6826cb5bbce6894cef3035448234cc75d82ce6791e98173ec13f4c",
+      "size": 2469
+    },
+    "SKILL.md": {
+      "sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "size": 12093
+    }
+  },
+  "turn_log": [
+    {
+      "turn": 1,
+      "lifecycle": "DIALOGUE",
+      "silent_streak": 0,
+      "sent": "BLOCK",
+      "sent_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+      "agent_turn_text": "I'll start by reading the SKILL.md file to understand the `define-lab-process` skill requirements.Thank you for sharing the skill requirements and the fixture files. Let me analyze what I see:\n\n**Source A (supplier-statement.txt):**\n- Header: `Date, Supplier Name, InvoiceNumber, Amount, Currency, Status`\n- Contains 6 records from various suppliers with invoice numbers like `ACC-INV-001`, `BSI-2047`, etc.\n\n**Source B (ledger-book.txt):**\n- Header: `Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes`  \n- Contains the same 6 records but with different statuses (`CLEARED`, `PENDING`) vs supplier statement (`PAID`, `UNPAID`)\n- Has an extra `ReferenceNumber` and `Notes` columns not in supplier-statement\n\nNow I need to ask you only the load-bearing business questions to define this reconciliation:\n\n1. **Match key question**: What field should identify the same record across both files? The options are:\n   - `Date` (identical for matched records, but could have duplicates over time)\n   - `InvoiceNumber` (unique identifier like `ACC-INV-001`)\n   \n   Which one should we use as the **single match key** (`match_on`) for this reconciliation?\n\n2. **Comparison question**: Looking at the data, all matched records have identical amounts. Which field(s) should be in the `compare[]` array?\n   - Should we compare only `Amount` (exact string comparison)?\n   - Should we also compare `Status` or leave it for observation without a comparison rule?\n   \n   Is `Amount` with `comparison: exact` sufficient, or do you want additional comparison rules?\n\n3. **Output question**: Which fields should appear in the report (`reports_fields`) versus context (`context_fields`)? Consider which are essential to show versus which are supplementary.\n\nOnce you answer these three load-bearing questions, I'll construct the work_definition.json artifact."
+    }
+  ],
+  "hashes_before": {
+    "PROMPT.md": "4560bc7fbe6826cb5bbce6894cef3035448234cc75d82ce6791e98173ec13f4c",
+    "SKILL.md": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  },
+  "hashes_after": {
+    "PROMPT.md": "4560bc7fbe6826cb5bbce6894cef3035448234cc75d82ce6791e98173ec13f4c",
+    "SKILL.md": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  }
+}

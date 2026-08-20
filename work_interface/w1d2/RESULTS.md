@@ -13,24 +13,20 @@ safe to enter the existing modelling/preview path*, NOT *established*.
 
 | run | status | skill_match | codes (if refused) | authority | override keys | sha256 |
 |---|---|---|---|---|---|---|
-| L1 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| L2 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| L3 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
+| L1 | **PASS** | yes |  | None |  | `432155b667b6` |
+| L2 | **PASS** | yes |  | None |  | `e0f2300a263d` |
+| L3 | **REFUSED** | yes | match_key_not_declared, missing_source_fixture, unknown_task_family, unknown_work_definition_version | None |  | `3c2353d746b8` |
 
 ## Detail
 
-### L1 -- NO_ARTIFACT
+### L3 -- REFUSED
 
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### L2 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### L3 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
+- `unknown_work_definition_version` @ `<work_definition>` -- None
+- `unknown_task_family` @ `<work_definition>` -- None; supported: ['reconciliation']
+- `missing_source_fixture` @ `<work_definition>:sources.supplier_statement` -- no fixture reference
+- `missing_source_fixture` @ `<work_definition>:sources.ledger_book` -- no fixture reference
+- `match_key_not_declared` @ `<work_definition>` -- body missing; task semantics are not declared
 
 ## Pass rate
 
-**0/3 PASS** (primary W1-D2 success criterion: 3/3).
+**2/3 PASS** (primary W1-D2 success criterion: 3/3).

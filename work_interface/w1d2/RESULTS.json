@@ -8,8 +8,14 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1d2\\runs\\L1\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "432155b667b6aa714d38a6a692036df722ad903ea66eeb4f0a12528c29ae6fdc",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "L2",
@@ -18,8 +24,14 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1d2\\runs\\L2\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "e0f2300a263d4f28e59e8289d5b76c17935fd7fddfc67987c13ee2d8fbc1d9f6",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "L3",
@@ -28,8 +40,45 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1d2\\runs\\L3\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "3c2353d746b8d4ce3812e3edaa33948113d4ad3d6ca2a067be210bc9bd578744",
+      "status": "REFUSED",
+      "codes": [
+        "match_key_not_declared",
+        "missing_source_fixture",
+        "unknown_task_family",
+        "unknown_work_definition_version"
+      ],
+      "problems": [
+        {
+          "code": "unknown_work_definition_version",
+          "where": "<work_definition>",
+          "detail": "None"
+        },
+        {
+          "code": "unknown_task_family",
+          "where": "<work_definition>",
+          "detail": "None; supported: ['reconciliation']"
+        },
+        {
+          "code": "missing_source_fixture",
+          "where": "<work_definition>:sources.supplier_statement",
+          "detail": "no fixture reference"
+        },
+        {
+          "code": "missing_source_fixture",
+          "where": "<work_definition>:sources.ledger_book",
+          "detail": "no fixture reference"
+        },
+        {
+          "code": "match_key_not_declared",
+          "where": "<work_definition>",
+          "detail": "body missing; task semantics are not declared"
+        }
+      ],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": null,
+      "task_family": null
     }
   ]
 }

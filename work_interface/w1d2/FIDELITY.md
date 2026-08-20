@@ -11,21 +11,38 @@ Reported INDEPENDENTLY of the structural grader.
 
 | run | fidelity | findings | artifact sha256 |
 |---|---|---|---|
-| L1 | **NO_ARTIFACT** | 0 | `-` |
-| L2 | **NO_ARTIFACT** | 0 | `-` |
-| L3 | **NO_ARTIFACT** | 0 | `-` |
+| L1 | **FIDELITY PASS** | 0 | `432155b667b6` |
+| L2 | **FIDELITY FINDINGS** | 3 | `e0f2300a263d` |
+| L3 | **FIDELITY FINDINGS** | 3 | `3c2353d746b8` |
 
 ## Detail
 
-### L1 — NO_ARTIFACT
+### L1 — FIDELITY PASS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_compare_amount` rows=[1] normal
+- confirmation `Q_currency_role` rows=[2] normal
+- confirmation `Q_source_of_truth` rows=[3] normal
+- confirmation `Q_report_columns` rows=[4] normal
+- confirmation `Q_context_columns` rows=[5] normal
+- no findings
 
-### L2 — NO_ARTIFACT
+### L2 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key_invoice_number` rows=[0] normal
+- confirmation `Q_compare_amount_within_tolerance` rows=[1] FID-6 NONVERBATIM_CONFIRMATION [TRAILING_CONTENT]
+- confirmation `Q_source_of_truth` rows=[3] normal
+- confirmation `Q_report_fields` rows=[4, 5] FID-2 BUNDLED_CONFIRMATION
+- `FID-1 UNCITED_HUMAN_FACT` @ `body.compare[Amount]` — confirmation 'Q_compare_amount_within_tolerance' is FID-6 NONVERBATIM_CONFIRMATION rows=[1]; provenance must be exclusive and byte-exact
+- `FID-6 NONVERBATIM_CONFIRMATION` @ `human_confirmations[Q_compare_amount_within_tolerance]` — rows=[1] subreason=TRAILING_CONTENT
+- `FID-2 BUNDLED_CONFIRMATION` @ `human_confirmations[Q_report_fields]` — rows=[4, 5]
 
-### L3 — NO_ARTIFACT
+### L3 — FIDELITY FINDINGS
 
+- `FID-1 UNCITED_HUMAN_FACT` @ `body.match_on` — basis=None, not 'human_confirmed'
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
 
 ## Fidelity rate
 
-**0/3 FIDELITY PASS** (0 finding(s) across graded runs).
+**1/3 FIDELITY PASS** (6 finding(s) across graded runs).

@@ -1,0 +1,74 @@
+{
+  "process_name": "define-lab-process",
+  "version": "1.0.0",
+  "description": "Supplier Statement vs Internal Ledger Book Reconciliation Process",
+  
+  "sources": {
+    "supplier_statement": {
+      "file_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1a\\fixtures\\supplier-statement.txt",
+      "header_description": "Date, Supplier Name, InvoiceNumber, Amount, Currency, Status"
+    },
+    "ledger_book": {
+      "file_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1a\\fixtures\\ledger-book.txt",
+      "header_description": "Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes"
+    }
+  },
+  
+  "match_key": {
+    "field_name": "InvoiceNumber",
+    "case_sensitive": false,
+    "description": "Unique identifier for each invoice record in both sources"
+  },
+  
+  "comparison_fields": [
+    {
+      "field_name": "Amount",
+      "data_type": "numeric",
+      "tolerance": 0.01,
+      "include_currency": false,
+      "description": "Account amount to compare between sources (Currency not compared as all samples are GBP)"
+    }
+  ],
+  
+  "source_of_truth": {
+    "type": "peer",
+    "description": "Both sources are peer documents. Report records missing from either side and report differences in compared fields."
+  },
+  
+  "report_structure": {
+    "rows": [
+      {
+        "match_key_field": "InvoiceNumber",
+        "compared_field": "Amount"
+      }
+    ],
+    "context_fields_per_row": ["Date", "Supplier Name / SupplierName", "Status"]
+  },
+  
+  "reconciliation_rules": [
+    {
+      "rule_name": "Match by InvoiceNumber",
+      "description": "Identify records from both sources using InvoiceNumber as the unique key"
+    },
+    {
+      "rule_name": "Amount Comparison",
+      "description": "Compare Amount values numerically, allowing difference up to 0.01"
+    },
+    {
+      "rule_name": "Missing Records Detection",
+      "description": "Report InvoiceNumbers present in only one source (missing from other)"
+    },
+    {
+      "rule_name": "Amount Differences",
+      "description": "Report records where Amount differs between sources (difference > 0.01 tolerance)"
+    }
+  ],
+  
+  "status_codes_supplier_statement": ["PAID", "UNPAID"],
+  "status_codes_ledger_book": ["CLEARED", "PENDING"],
+  
+  "output_format": {
+    "type": "json",
+    "file_path": "work_definition.json"
+  }
+}
