@@ -1,0 +1,67 @@
+========================================================================
+SURFACE B -- single-block lifecycle self-test (no Goose, no model)
+========================================================================
+
+[R1] H1 reproduction: questions, silent, query, query, artifact
+        turns=5 sent=['BLOCK', 'CONTINUATION', 'CONTINUATION', 'CONTINUATION'] blocks=1 continuations=3
+  PASS  R1 -> COMPLETED  -- artifact written; session terminated immediately
+  PASS  terminated on the artifact turn  -- 5
+  PASS  block once, then three continuations  -- ['BLOCK', 'CONTINUATION', 'CONTINUATION', 'CONTINUATION']
+  PASS  THE BLOCK WAS EMITTED EXACTLY ONCE  -- 1
+  PASS  every activation after the block is byte-identical 'Continue.'
+  PASS  exactly one distinct activation string  -- {'Continue.'}
+  PASS  turn 1 sent the run prompt
+  PASS  turn 2 sent the canonical block verbatim
+  PASS  the block never appears again in any later message
+  PASS  post-block question text recorded VERBATIM
+
+[R2] immediate artifact on turn 1 -- block never sent
+  PASS  R2 -> COMPLETED  -- artifact written; session terminated immediately
+  PASS  no block was delivered  -- 0
+  PASS  only the run prompt was ever sent  -- 1
+
+[R3] artifact on turn 2, immediately after the block
+  PASS  R3 -> COMPLETED  -- artifact written; session terminated immediately
+  PASS  exactly one block, zero continuations  -- 1/0
+  PASS  the block was the second and last message
+
+[R4] repeated silent turns reach the retry limit
+  PASS  R4 -> CONTESTED  -- CONTESTED
+  PASS  labelled QUIESCENT_RETRY_LIMIT  -- QUIESCENT_RETRY_LIMIT: no user-visible content after 2 consecutive re-
+  PASS  three silent turns before the stop  -- 3
+  PASS  the first silent turn still earned the block exactly once  -- 1
+  PASS  then exactly one continuation before the limit  -- 1
+
+[R5] visible content resets the silent streak
+  PASS  two silences, visible content, two more silences -> survives  -- artifact written; session terminated immediately
+        silent_streak per turn: [0, 1, 2, 0, 1, 2]
+  PASS  visible content reset the streak to 0  -- [0, 1, 2, 0, 1, 2]
+  PASS  still exactly one block  -- 1
+
+[R5b] a visible POST-BLOCK QUESTION resets the streak but earns only 'Continue.'
+  PASS  the question reset the streak  -- [0, 1, 2, 0, 1, 2]
+  PASS  and it received a continuation, not information
+  PASS  the message sent was exactly 'Continue.'  -- 'Continue.'
+
+[R6] post-block questions NEVER cause information delivery
+  PASS  four question turns, still exactly one block  -- 1
+  PASS  every reply to a question was 'Continue.'  -- {'Continue.'}
+  PASS  the block string appears exactly once across the whole session
+
+[INV] lifecycle invariants
+  PASS  the activation is exactly 'Continue.'  -- 'Continue.'
+  PASS  at most two consecutive re-entries
+  PASS  silent budget: continue, continue, limit
+  PASS  tool activity has no path to reset the streak
+  PASS  next_message depends ONLY on whether the block was already sent
+  PASS  next_message cannot see the agent's text at all  -- ['block_sent', 'block']
+
+[A4] the filesystem backstop still contests, independently
+  PASS  clean run completes  -- artifact written; session terminated immediately
+  PASS  and reports CLEAN filesystem authority
+  PASS  a stray write contests the run even though the lifecycle succeeded  -- CONTESTED: FILESYSTEM_AUTHORITY_VIOLATION: CREATED 'temp_skill.txt' (sha256=7832dbcae32ee9
+  PASS  the exact offending path is named
+  PASS  offending file preserved
+
+========================================================================
+SURFACE B SELF-TEST PASSED
