@@ -163,6 +163,46 @@ def main() -> int:
               "machine record is complete and untruncated")
         check((d / "temp.txt").is_file() and (d / "SKILL.md").is_file(),
               "nothing was cleaned up by the check itself")
+
+        # --- 7. W1-E regression: symmetric harness-owned exclusion ------
+        print("\n[7] W1-E regression: harness-owned files, both snapshots")
+        d = fresh_run(tmp, "R7")
+        # Reproduce the W1-E ordering exactly: the harness opens its transcript
+        # BEFORE the pre-run snapshot is taken, so the empty file is in `before`.
+        (d / "acp_transcript.jsonl").write_text("", encoding="utf-8", newline="\n")
+        before = A.snapshot(d)
+        check("acp_transcript.jsonl" in before,
+              "the 0-byte transcript really is in the pre-run snapshot")
+        (d / "work_definition.json").write_text("{}", encoding="utf-8", newline="\n")
+        (d / "acp_transcript.jsonl").write_text('{"x":1}\n', encoding="utf-8",
+                                                newline="\n")
+        (d / "harness_result.json").write_text("{}", encoding="utf-8", newline="\n")
+        after = A.snapshot(d)
+
+        # the W1-E defect: filter only the AFTER side
+        asymmetric = A.verdict(before, A.filter_harness_owned(after))
+        check(asymmetric.violated,
+              "ASYMMETRIC filtering invents a mutation (the W1-E defect)",
+              asymmetric.reason[:80])
+        check(any(m.kind == A.DELETED and m.path == "acp_transcript.jsonl"
+                  for m in asymmetric.mutations),
+              "and it is exactly the spurious DELETED acp_transcript.jsonl")
+
+        # the fix
+        v = A.worker_verdict(before, after)
+        check(not v.violated, "worker_verdict() filters BOTH sides -> CLEAN",
+              v.reason)
+        check(len(v.allowed) == 1 and v.allowed[0].path == "work_definition.json",
+              "the only judged mutation is the designated artifact",
+              str([str(m) for m in v.allowed]))
+
+        print("\n[7b] a real worker violation is still caught alongside them")
+        (d / "todo.md").write_text("side effect\n", encoding="utf-8", newline="\n")
+        v = A.worker_verdict(before, A.snapshot(d))
+        check(v.violated and any(m.path == "todo.md" for m in v.mutations),
+              "worker-created todo.md still CONTESTS", v.reason[:90])
+        check(not any(m.path in A.HARNESS_OWNED for m in v.mutations),
+              "and no harness-owned file appears among the violations")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

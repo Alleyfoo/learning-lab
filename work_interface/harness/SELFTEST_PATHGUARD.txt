@@ -39,6 +39,14 @@ No Goose, no model. Transcripts are read, never modified.
   PASS  own skill bare: 'SKILL.md' -> allowed  -- c:/users/pertt/learning-lab/work_interface/w1d/runs/k1/skill.md
   PASS  own artifact: 'work_definition.json' -> allowed  -- c:/users/pertt/learning-lab/work_interface/w1d/runs/k1/work_definition.json
 
+[6b] W1-E regression: file:// URIs are paths, not relative strings
+  PASS  the exact M2 request canonicalizes to the real path  -- _interface/w1a/fixtures/supplier-statement.txt
+  PASS  triple slash canonicalizes to the real path  -- _interface/w1a/fixtures/supplier-statement.txt
+  PASS  localhost authority canonicalizes to the real path  -- _interface/w1a/fixtures/supplier-statement.txt
+  PASS  upper-case scheme canonicalizes to the real path  -- _interface/w1a/fixtures/supplier-statement.txt
+  PASS  percent-encoded canonicalizes to the real path  -- _interface/w1a/fixtures/supplier-statement.txt
+  PASS  a file:// URI naming a forbidden resource still VIOLATES
+
 [7] case-insensitivity on Windows
   PASS  upper-cased forbidden path still violates
 

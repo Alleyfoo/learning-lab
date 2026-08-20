@@ -38,6 +38,33 @@ from pathlib import Path
 
 DESIGNATED_ARTIFACT = "work_definition.json"
 
+# Files the HARNESS writes, not the worker. They must be excluded from BOTH
+# snapshots or the asymmetry invents a mutation.
+#
+# W1-E reported AUTHORITY CONTESTED on all three runs because its reporter
+# filtered only the `after` snapshot: the batch constructed the session -- which
+# opens the transcript -- before the pre-run snapshot, so a 0-byte
+# acp_transcript.jsonl sat in `before`, was filtered out of `after`, and was
+# reported as DELETED (`work_interface/w1e/CLOSURE.md`).
+HARNESS_OWNED = ("acp_transcript.jsonl", "harness_result.json")
+
+
+def filter_harness_owned(snapshot: dict[str, dict],
+                         owned: tuple[str, ...] = HARNESS_OWNED) -> dict[str, dict]:
+    """Drop harness-written files from a snapshot. Apply to BOTH sides."""
+    return {k: v for k, v in (snapshot or {}).items()
+            if Path(k).name not in owned}
+
+
+def worker_verdict(before: dict[str, dict], after: dict[str, dict],
+                   designated: str = DESIGNATED_ARTIFACT,
+                   owned: tuple[str, ...] = HARNESS_OWNED) -> "Verdict":
+    """The verdict every reporter should use: harness-owned files excluded
+    SYMMETRICALLY, so only worker-caused mutations are judged."""
+    return verdict(filter_harness_owned(before, owned),
+                   filter_harness_owned(after, owned),
+                   designated=designated)
+
 CREATED = "CREATED"
 DELETED = "DELETED"
 MODIFIED = "MODIFIED"

@@ -44,5 +44,16 @@ No Goose, no model. Synthetic mutations only.
   PASS  machine record is complete and untruncated
   PASS  nothing was cleaned up by the check itself
 
+[7] W1-E regression: harness-owned files, both snapshots
+  PASS  the 0-byte transcript really is in the pre-run snapshot
+  PASS  ASYMMETRIC filtering invents a mutation (the W1-E defect)  -- FILESYSTEM_AUTHORITY_VIOLATION: DELETED 'acp_transcript.jsonl' (was sha256=e3b0c
+  PASS  and it is exactly the spurious DELETED acp_transcript.jsonl
+  PASS  worker_verdict() filters BOTH sides -> CLEAN  -- no unauthorized filesystem mutation
+  PASS  the only judged mutation is the designated artifact  -- ["CREATED 'work_definition.json' (sha256=44136fa355b3678a, 2 bytes)"]
+
+[7b] a real worker violation is still caught alongside them
+  PASS  worker-created todo.md still CONTESTS  -- FILESYSTEM_AUTHORITY_VIOLATION: CREATED 'todo.md' (sha256=7832dbcae32ee983, 12 bytes)
+  PASS  and no harness-owned file appears among the violations
+
 ======================================================================
 A4 SELF-TEST PASSED

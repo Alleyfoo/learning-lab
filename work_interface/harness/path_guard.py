@@ -79,10 +79,39 @@ def extract_paths(update: dict) -> list[str]:
     return [p for p in out if p]
 
 
+_FILE_URI = re.compile(r"^file:/{2,3}(?:localhost)?/?", re.IGNORECASE)
+
+
+def _strip_file_uri(s: str) -> str:
+    """`file://` URIs are paths. Parse the scheme BEFORE Windows normalization.
+
+    W1-E M2 requested a structured read of an AUTHORIZED fixture as
+    `file://C:/.../supplier-statement.txt`. Without this, the value was treated
+    as relative, joined to the run directory, and the policy denied an operation
+    it is specified to allow (`work_interface/w1e/CLOSURE.md`).
+
+    Handles `file://C:/x`, `file:///C:/x`, `file://localhost/C:/x`, and
+    percent-encoding.
+    """
+    if not s.lower().startswith("file:"):
+        return s
+    from urllib.parse import unquote
+    out = _FILE_URI.sub("", s)
+    out = unquote(out)
+    # `file:///C:/x` and `file://localhost/C:/x` can leave a leading slash in
+    # front of a drive letter.
+    if re.match(r"^/[A-Za-z]:", out):
+        out = out[1:]
+    return out
+
+
 def canonicalize(p: str, cwd: Path) -> str:
-    """Absolute/relative resolution against the session cwd, slash direction,
-    `.` and `..`, and case-folding on Windows."""
+    """Absolute/relative resolution against the session cwd, `file://` scheme,
+    slash direction, `.` and `..`, and case-folding on Windows."""
     s = (p or "").strip().strip("'\"")
+    if not s:
+        return ""
+    s = _strip_file_uri(s)
     if not s:
         return ""
     s = s.replace("\\", "/")

@@ -153,6 +153,34 @@ def main() -> int:
               f"{label}: {raw!r} -> {'VIOLATION' if should else 'allowed'}",
               canonicalize(raw, run_dir))
 
+    print("\n[6b] W1-E regression: file:// URIs are paths, not relative strings")
+    # The EXACT request W1-E M2 made, which the policy wrongly denied.
+    m2_run = WI / "w1e" / "runs" / "M2"
+    fixture = WI / "w1a" / "fixtures" / "supplier-statement.txt"
+    want = canonicalize(str(fixture), m2_run)
+    variants = [
+        ("the exact M2 request", "file://C:/Users/pertt/learning-lab/"
+                                 "work_interface/w1a/fixtures/supplier-statement.txt"),
+        ("triple slash", "file:///C:/Users/pertt/learning-lab/"
+                         "work_interface/w1a/fixtures/supplier-statement.txt"),
+        ("localhost authority", "file://localhost/C:/Users/pertt/learning-lab/"
+                                "work_interface/w1a/fixtures/supplier-statement.txt"),
+        ("upper-case scheme", "FILE://C:/Users/pertt/learning-lab/"
+                              "work_interface/w1a/fixtures/supplier-statement.txt"),
+        ("percent-encoded", "file:///C:/Users/pertt/learning-lab/"
+                            "work_interface/w1a/fixtures/supplier%2Dstatement.txt"),
+    ]
+    for label, raw in variants:
+        check(canonicalize(raw, m2_run) == want,
+              f"{label} canonicalizes to the real path",
+              canonicalize(raw, m2_run)[-46:])
+    # and a file:// URI pointing at a FORBIDDEN resource must still violate
+    bad = {"sessionUpdate": "tool_call",
+           "rawInput": {"source": "file:///" + str(WI / "w1a" / "human_answers.md")
+                        .replace("\\", "/")}}
+    check(bool(guard_for("K1").check_all([bad])),
+          "a file:// URI naming a forbidden resource still VIOLATES")
+
     print("\n[7] case-insensitivity on Windows")
     upper = {"sessionUpdate": "tool_call",
              "rawInput": {"path": str(WI / "w1a" / "human_answers.md").upper()}}
