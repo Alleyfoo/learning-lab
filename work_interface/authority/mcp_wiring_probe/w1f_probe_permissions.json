@@ -1,0 +1,11 @@
+[
+ {
+  "title": "authorized-reader: read authorized resource",
+  "rawInput": {
+   "resource_id": "skill"
+  },
+  "verdict": "ALLOW",
+  "kind": "READ",
+  "reason": "authorized reader, resource_id='skill'"
+ }
+]
