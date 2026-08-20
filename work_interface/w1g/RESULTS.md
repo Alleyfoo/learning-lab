@@ -13,24 +13,16 @@ safe to enter the existing modelling/preview path*, NOT *established*.
 
 | run | status | skill_match | codes (if refused) | authority | override keys | sha256 |
 |---|---|---|---|---|---|---|
-| O1 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| O2 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| O3 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
+| O1 | **PASS** | yes |  | None |  | `fabd167cbf79` |
+| O2 | **REFUSED** | yes | observed_field_not_in_source | None |  | `ebd5e05de932` |
+| O3 | **PASS** | yes |  | None |  | `67358d055d7f` |
 
 ## Detail
 
-### O1 -- NO_ARTIFACT
+### O2 -- REFUSED
 
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### O2 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### O3 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
+- `observed_field_not_in_source` @ `<work_definition>:sources.statement` -- ' Supplier Name' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']
 
 ## Pass rate
 
-**0/3 PASS** (primary W1-G success criterion: 3/3).
+**2/3 PASS** (primary W1-G success criterion: 3/3).

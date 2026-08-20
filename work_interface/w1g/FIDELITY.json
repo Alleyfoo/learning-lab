@@ -3,21 +3,168 @@
   "runs": [
     {
       "run": "O1",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-3 PHANTOM_CONFIRMATION",
+          "where": "human_confirmations[Q4_source_of_truth]",
+          "row": null,
+          "detail": "rows=[]"
+        }
+      ],
+      "confirmations": {
+        "Q1_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q2_amount_comparison": {
+          "rows": [
+            1
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q3_currency": {
+          "rows": [
+            2
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q4_source_of_truth": {
+          "rows": [],
+          "verdict": "FID-3 PHANTOM_CONFIRMATION",
+          "subreason": null
+        },
+        "Q5_report_fields": {
+          "rows": [
+            4
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q6_context_fields": {
+          "rows": [
+            5
+          ],
+          "verdict": "normal",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "fabd167cbf79a3a221cf9cfd3056c39ba2c5038b891f11cc8bd14e05d21bb899"
     },
     {
       "run": "O2",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-3 PHANTOM_CONFIRMATION",
+          "where": "human_confirmations[Q_source_of_truth]",
+          "row": null,
+          "detail": "rows=[]"
+        }
+      ],
+      "confirmations": {
+        "Q_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_compare_field": {
+          "rows": [
+            1
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_currency_excluded": {
+          "rows": [
+            2
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_source_of_truth": {
+          "rows": [],
+          "verdict": "FID-3 PHANTOM_CONFIRMATION",
+          "subreason": null
+        },
+        "Q_reports_fields": {
+          "rows": [
+            4
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_context_fields": {
+          "rows": [
+            5
+          ],
+          "verdict": "normal",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "ebd5e05de9323b11abba584c23552fbfd92d4118724f5ae1cde101c9857db9bf"
     },
     {
       "run": "O3",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-3 PHANTOM_CONFIRMATION",
+          "where": "human_confirmations[Q_source_of_truth]",
+          "row": null,
+          "detail": "rows=[]"
+        }
+      ],
+      "confirmations": {
+        "Q_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_compare_amount": {
+          "rows": [
+            1
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_currency_inclusive": {
+          "rows": [
+            2
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_source_of_truth": {
+          "rows": [],
+          "verdict": "FID-3 PHANTOM_CONFIRMATION",
+          "subreason": null
+        },
+        "Q_reports_fields": {
+          "rows": [
+            4
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_context_fields": {
+          "rows": [
+            5
+          ],
+          "verdict": "normal",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "67358d055d7f29608af9c35f287dcdc1d61313b9812b1afce7f69aaf1e1c406d"
     }
   ]
 }

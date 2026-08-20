@@ -11,21 +11,42 @@ Reported INDEPENDENTLY of the structural grader.
 
 | run | fidelity | findings | artifact sha256 |
 |---|---|---|---|
-| O1 | **NO_ARTIFACT** | 0 | `-` |
-| O2 | **NO_ARTIFACT** | 0 | `-` |
-| O3 | **NO_ARTIFACT** | 0 | `-` |
+| O1 | **FIDELITY FINDINGS** | 1 | `fabd167cbf79` |
+| O2 | **FIDELITY FINDINGS** | 1 | `ebd5e05de932` |
+| O3 | **FIDELITY FINDINGS** | 1 | `67358d055d7f` |
 
 ## Detail
 
-### O1 — NO_ARTIFACT
+### O1 — FIDELITY FINDINGS
 
+- confirmation `Q1_match_key` rows=[0] normal
+- confirmation `Q2_amount_comparison` rows=[1] normal
+- confirmation `Q3_currency` rows=[2] normal
+- confirmation `Q4_source_of_truth` rows=[] FID-3 PHANTOM_CONFIRMATION
+- confirmation `Q5_report_fields` rows=[4] normal
+- confirmation `Q6_context_fields` rows=[5] normal
+- `FID-3 PHANTOM_CONFIRMATION` @ `human_confirmations[Q4_source_of_truth]` — rows=[]
 
-### O2 — NO_ARTIFACT
+### O2 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_compare_field` rows=[1] normal
+- confirmation `Q_currency_excluded` rows=[2] normal
+- confirmation `Q_source_of_truth` rows=[] FID-3 PHANTOM_CONFIRMATION
+- confirmation `Q_reports_fields` rows=[4] normal
+- confirmation `Q_context_fields` rows=[5] normal
+- `FID-3 PHANTOM_CONFIRMATION` @ `human_confirmations[Q_source_of_truth]` — rows=[]
 
-### O3 — NO_ARTIFACT
+### O3 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_compare_amount` rows=[1] normal
+- confirmation `Q_currency_inclusive` rows=[2] normal
+- confirmation `Q_source_of_truth` rows=[] FID-3 PHANTOM_CONFIRMATION
+- confirmation `Q_reports_fields` rows=[4] normal
+- confirmation `Q_context_fields` rows=[5] normal
+- `FID-3 PHANTOM_CONFIRMATION` @ `human_confirmations[Q_source_of_truth]` — rows=[]
 
 ## Fidelity rate
 
-**0/3 FIDELITY PASS** (0 finding(s) across graded runs).
+**0/3 FIDELITY PASS** (3 finding(s) across graded runs).
