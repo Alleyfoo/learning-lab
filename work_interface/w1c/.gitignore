@@ -1,0 +1,8 @@
+# W1-C keeps everything, as W1-A3/4/5 and W1-B do. Nothing here is ignored.
+#
+# Tracked as evidence, exactly as the harness, grader and fidelity gate leave them:
+#   runs/H*/work_definition.json   the agent artifact, where one is produced
+#   runs/H*/acp_transcript.jsonl   append-only ACP transcript + lifecycle records
+#   runs/H*/harness_result.json    outcome, COMPLETE reason, per-turn log, hashes
+#   RESULTS.md / RESULTS.json      the STRUCTURAL grader's record
+#   FIDELITY.md / FIDELITY.json    the FIDELITY gate's record, reported independently
