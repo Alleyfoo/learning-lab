@@ -1,0 +1,1487 @@
+[
+ {
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+   "protocolVersion": 1,
+   "agentCapabilities": {
+    "loadSession": true,
+    "promptCapabilities": {
+     "image": true,
+     "audio": false,
+     "embeddedContext": true
+    },
+    "mcpCapabilities": {
+     "http": true,
+     "sse": false,
+     "acp": false
+    },
+    "sessionCapabilities": {
+     "list": {},
+     "close": {}
+    },
+    "auth": {},
+    "_meta": {
+     "goose": {
+      "localInference": {}
+     }
+    }
+   },
+   "authMethods": [
+    {
+     "id": "goose-provider",
+     "name": "Configure Provider",
+     "description": "Run `goose configure` to set up your AI provider and API key"
+    }
+   ],
+   "agentInfo": {
+    "name": "goose",
+    "version": "1.46.0"
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+   "sessionId": "20260820_8",
+   "modes": {
+    "currentModeId": "auto",
+    "availableModes": [
+     {
+      "id": "auto",
+      "name": "auto",
+      "description": "Automatically approve tool calls"
+     },
+     {
+      "id": "approve",
+      "name": "approve",
+      "description": "Ask before every tool call"
+     },
+     {
+      "id": "smart_approve",
+      "name": "smart_approve",
+      "description": "Ask only for sensitive tool calls"
+     },
+     {
+      "id": "chat",
+      "name": "chat",
+      "description": "Chat only, no tool calls"
+     }
+    ]
+   },
+   "configOptions": [
+    {
+     "id": "provider",
+     "name": "Provider",
+     "type": "select",
+     "currentValue": "ollama",
+     "options": [
+      {
+       "value": "goose",
+       "name": "Goose (Default)"
+      },
+      {
+       "value": "alibaba",
+       "name": "Alibaba (Qwen)"
+      },
+      {
+       "value": "amp-acp",
+       "name": "Amp"
+      },
+      {
+       "value": "anthropic",
+       "name": "Anthropic"
+      },
+      {
+       "value": "atomic_chat",
+       "name": "Atomic Chat"
+      },
+      {
+       "value": "avian",
+       "name": "Avian"
+      },
+      {
+       "value": "aws_bedrock",
+       "name": "Amazon Bedrock"
+      },
+      {
+       "value": "azure_foundry",
+       "name": "Azure AI Foundry"
+      },
+      {
+       "value": "azure_openai",
+       "name": "Azure OpenAI"
+      },
+      {
+       "value": "celeris",
+       "name": "Celeris"
+      },
+      {
+       "value": "cerebras",
+       "name": "Cerebras"
+      },
+      {
+       "value": "chatgpt_codex",
+       "name": "ChatGPT Codex"
+      },
+      {
+       "value": "claude-acp",
+       "name": "Claude Code"
+      },
+      {
+       "value": "claude-code",
+       "name": "Claude Code CLI"
+      },
+      {
+       "value": "codex",
+       "name": "OpenAI Codex CLI"
+      },
+      {
+       "value": "codex-acp",
+       "name": "Codex CLI"
+      },
+      {
+       "value": "copilot-acp",
+       "name": "GitHub Copilot CLI (ACP)"
+      },
+      {
+       "value": "cursor-agent",
+       "name": "Cursor Agent"
+      },
+      {
+       "value": "custom_deepseek",
+       "name": "DeepSeek"
+      },
+      {
+       "value": "custom_tensorix",
+       "name": "Tensorix"
+      },
+      {
+       "value": "databricks",
+       "name": "Databricks"
+      },
+      {
+       "value": "databricks_v2",
+       "name": "Databricks AI Gateway"
+      },
+      {
+       "value": "empiriolabs",
+       "name": "EmpirioLabs AI"
+      },
+      {
+       "value": "fireworks-ai",
+       "name": "Fireworks AI"
+      },
+      {
+       "value": "friendli",
+       "name": "Friendli AI"
+      },
+      {
+       "value": "futurmix",
+       "name": "FuturMix"
+      },
+      {
+       "value": "gcp_vertex_ai",
+       "name": "GCP Vertex AI"
+      },
+      {
+       "value": "gemini-cli",
+       "name": "Gemini CLI"
+      },
+      {
+       "value": "gemini_oauth",
+       "name": "Gemini"
+      },
+      {
+       "value": "github_copilot",
+       "name": "GitHub Copilot"
+      },
+      {
+       "value": "google",
+       "name": "Google Gemini (API Key)"
+      },
+      {
+       "value": "groq",
+       "name": "Groq (d)"
+      },
+      {
+       "value": "huggingface",
+       "name": "Hugging Face"
+      },
+      {
+       "value": "iflytek",
+       "name": "iFlytek Spark"
+      },
+      {
+       "value": "iflytek_astron",
+       "name": "iFlytek Astron MaaS"
+      },
+      {
+       "value": "inception",
+       "name": "Inception"
+      },
+      {
+       "value": "kimi_code",
+       "name": "Kimi Code"
+      },
+      {
+       "value": "litellm",
+       "name": "LiteLLM"
+      },
+      {
+       "value": "llama_swap",
+       "name": "Llama Swap"
+      },
+      {
+       "value": "lmstudio",
+       "name": "LM Studio"
+      },
+      {
+       "value": "local",
+       "name": "Local Inference"
+      },
+      {
+       "value": "meta",
+       "name": "Meta"
+      },
+      {
+       "value": "minimax",
+       "name": "MiniMax"
+      },
+      {
+       "value": "mistral",
+       "name": "Mistral AI"
+      },
+      {
+       "value": "moonshot",
+       "name": "Moonshot"
+      },
+      {
+       "value": "nano-gpt",
+       "name": "NanoGPT"
+      },
+      {
+       "value": "nearai",
+       "name": "NEAR AI Cloud"
+      },
+      {
+       "value": "novita",
+       "name": "Novita AI"
+      },
+      {
+       "value": "nvidia",
+       "name": "NVIDIA"
+      },
+      {
+       "value": "ollama",
+       "name": "Ollama"
+      },
+      {
+       "value": "ollama_cloud",
+       "name": "Ollama Cloud"
+      },
+      {
+       "value": "omlx",
+       "name": "oMLX"
+      },
+      {
+       "value": "openai",
+       "name": "OpenAI"
+      },
+      {
+       "value": "opencode_go",
+       "name": "OpenCode Go"
+      },
+      {
+       "value": "openrouter",
+       "name": "OpenRouter"
+      },
+      {
+       "value": "orcarouter",
+       "name": "OrcaRouter"
+      },
+      {
+       "value": "ovhcloud",
+       "name": "OVHcloud"
+      },
+      {
+       "value": "perplexity",
+       "name": "Perplexity"
+      },
+      {
+       "value": "pi-acp",
+       "name": "Pi"
+      },
+      {
+       "value": "routstr",
+       "name": "Routstr"
+      },
+      {
+       "value": "sagemaker_tgi",
+       "name": "Amazon SageMaker TGI"
+      },
+      {
+       "value": "sakana",
+       "name": "Sakana AI"
+      },
+      {
+       "value": "saladcloud",
+       "name": "SaladCloud AI Gateway"
+      },
+      {
+       "value": "scaleway",
+       "name": "Scaleway"
+      },
+      {
+       "value": "snowflake",
+       "name": "Snowflake"
+      },
+      {
+       "value": "tanzu_ai",
+       "name": "VMware Tanzu Platform"
+      },
+      {
+       "value": "tetrate",
+       "name": "Tetrate Agent Router Service"
+      },
+      {
+       "value": "together",
+       "name": "Together AI"
+      },
+      {
+       "value": "venice",
+       "name": "Venice.ai"
+      },
+      {
+       "value": "vercel_ai_gateway",
+       "name": "Vercel AI Gateway"
+      },
+      {
+       "value": "xai",
+       "name": "xAI"
+      },
+      {
+       "value": "xai_oauth",
+       "name": "xAI (SuperGrok Subscription)"
+      },
+      {
+       "value": "zai",
+       "name": "Z.AI"
+      },
+      {
+       "value": "zhipu",
+       "name": "Zhipu AI"
+      }
+     ]
+    },
+    {
+     "id": "mode",
+     "name": "Mode",
+     "category": "mode",
+     "type": "select",
+     "currentValue": "auto",
+     "options": [
+      {
+       "value": "auto",
+       "name": "auto",
+       "description": "Automatically approve tool calls"
+      },
+      {
+       "value": "approve",
+       "name": "approve",
+       "description": "Ask before every tool call"
+      },
+      {
+       "value": "smart_approve",
+       "name": "smart_approve",
+       "description": "Ask only for sensitive tool calls"
+      },
+      {
+       "value": "chat",
+       "name": "chat",
+       "description": "Chat only, no tool calls"
+      }
+     ]
+    },
+    {
+     "id": "model",
+     "name": "Model",
+     "category": "model",
+     "type": "select",
+     "currentValue": "qwen3.5:9b",
+     "options": [
+      {
+       "value": "codestral:latest",
+       "name": "codestral:latest"
+      },
+      {
+       "value": "devstral:latest",
+       "name": "devstral:latest"
+      },
+      {
+       "value": "gemma3:4b",
+       "name": "gemma3:4b"
+      },
+      {
+       "value": "gemma4:latest",
+       "name": "gemma4:latest"
+      },
+      {
+       "value": "glm-5.1:cloud",
+       "name": "glm-5.1:cloud"
+      },
+      {
+       "value": "glm-5.2:cloud",
+       "name": "glm-5.2:cloud"
+      },
+      {
+       "value": "llama3.1:8b",
+       "name": "llama3.1:8b"
+      },
+      {
+       "value": "llama3.2:latest",
+       "name": "llama3.2:latest"
+      },
+      {
+       "value": "ornith:9b",
+       "name": "ornith:9b"
+      },
+      {
+       "value": "qwen3.5:9b",
+       "name": "qwen3.5:9b"
+      }
+     ]
+    },
+    {
+     "id": "thinking_effort",
+     "name": "Thinking effort",
+     "description": "Controls reasoning effort for models that support extended thinking.",
+     "category": "thought_level",
+     "type": "select",
+     "currentValue": "off",
+     "options": [
+      {
+       "value": "off",
+       "name": "off"
+      }
+     ]
+    }
+   ],
+   "_meta": {
+    "extensionResults": [
+     {
+      "name": "skills",
+      "success": true
+     },
+     {
+      "name": "analyze",
+      "success": true
+     },
+     {
+      "name": "todo",
+      "success": true
+     },
+     {
+      "name": "developer",
+      "success": true
+     },
+     {
+      "name": "summon",
+      "success": true
+     },
+     {
+      "name": "Extension Manager",
+      "success": true
+     },
+     {
+      "name": "apps",
+      "success": true
+     },
+     {
+      "name": "scheduler",
+      "success": true
+     },
+     {
+      "name": "tom",
+      "success": true
+     }
+    ],
+    "workingDir": "C:\\Users\\pertt\\AppData\\Local\\Temp\\acp_mt_a1thivg9"
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "usage_update",
+    "used": 0,
+    "size": 128000
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "available_commands_update",
+    "availableCommands": [
+     {
+      "name": "prompts",
+      "description": "List available prompts, optionally filtered by extension",
+      "_meta": {
+       "commandType": "Builtin"
+      }
+     },
+     {
+      "name": "prompt",
+      "description": "Execute a prompt or show its info with --info",
+      "_meta": {
+       "commandType": "Builtin"
+      }
+     },
+     {
+      "name": "compact",
+      "description": "Compact the conversation history",
+      "_meta": {
+       "commandType": "Builtin"
+      }
+     },
+     {
+      "name": "clear",
+      "description": "Clear the conversation history",
+      "_meta": {
+       "commandType": "Builtin"
+      }
+     },
+     {
+      "name": "skills",
+      "description": "List installed skills and other available sources",
+      "_meta": {
+       "commandType": "Builtin"
+      }
+     },
+     {
+      "name": "doctor",
+      "description": "Check that your Goose setup is working",
+      "_meta": {
+       "commandType": "Builtin"
+      }
+     },
+     {
+      "name": "goal",
+      "description": "Set a goal the agent must satisfy before finishing, or clear with /goal off",
+      "_meta": {
+       "commandType": "Builtin"
+      }
+     },
+     {
+      "name": "grind",
+      "description": "Set a goal the agent pursues relentlessly until max_turns, or clear with /grind off",
+      "_meta": {
+       "commandType": "Builtin"
+      }
+     },
+     {
+      "name": "status",
+      "description": "Show session status: model, provider, mode, and token usage",
+      "_meta": {
+       "commandType": "Builtin"
+      }
+     },
+     {
+      "name": "code-review",
+      "description": "Review code changes for correctness, security, performance, and code quality. Use when the user asks to review a diff, review code changes, review commits, or perform a code review. Input can be: (1) a text diff pasted directly, (2) one or more git commit hashes to extract the diff from, or (3) a git range like abc123..def456. The user may also provide task description or requirements that motivated the change.",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "comprehensive-review",
+      "description": "Comprehensive code review using parallel specialized subagents. If a PR URL is provided, fetches PR details and can post comments. If no PR is provided, reviews the diff between the current branch and its base branch plus any uncommitted changes. CRITICAL: this skill is costly, don't use it unless user explicitly requested to use it.",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "cross-review",
+      "description": "Cross review code using a subagent with a specified model. Use when the user asks to review code changes AND specifies a model to use (e.g., 'review with opus', 'use sonnet to review', 'review changes with gemini'). The key differentiator from the regular code-review skill is that the user explicitly specifies which model should perform the review. The root agent reconstructs what changed from its own conversation history \u2014 no git commands are used.",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "frontend-design",
+      "description": "Design distinctive, production-grade frontend interfaces \u2014 mockups as HTML pages or working application pages. Use when the user asks to design a web page, landing page, UI mockup, dashboard, application page, or any visual HTML interface. Supports single designs, multiple variant generation, and integration with existing project frameworks.",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "goose-ads",
+      "description": "GooseWorks ads skill \u2014 create, edit, AND analyze ad creative. Turn an approved source ad into a branded ad for the user's product, edit/re-roll an existing creative, research a brand for ads, OR analyze ad performance (Meta/Google campaign diagnostics, creative fatigue, CAC & lead quality, competitor ad intelligence, ad angles & hooks). Use when the user says \"remix this ad\", references a static ad template id/slug, asks to \"make an ad\", \"edit this ad\", \"research my brand\", or asks to analyze/diagnose ad campaigns. Generation runs through the GooseWorks backend's single cloud workflow (the same one the ads app uses) \u2014 credits are reserved and billed server-side. Analytics recipes are fetched from goose-skills on demand.\n",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "goose-video",
+      "description": "GooseWorks video ads \u2014 remix a video ad template (iMessage chat-reveal, more coming) into a branded video ad for the user's product. Renders LOCALLY on the user's machine (Playwright + ffmpeg + GooseWorks media proxies) and saves the finished MP4 back to the project over MCP. Use when the user says \"make the video for project <id>\", \"for video batch <id>\", references a video ad project/batch or template, or asks to remix a video ad. Unlike goose-ads (static images, generated server-side), video renders locally and reports progress + the result back through the gooseworks MCP tools.\n",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "gooseworks",
+      "description": "GooseWorks growth coworker and specialist-skill router. Research brands, customers, competitors, creators, markets, and prospects; analyze ads and performance; create ads, product photos, graphics, and video; search and scrape public web and social data; find and enrich leads. Use it as the single GooseWorks entry point for brand growth, B2B, sales, research, and GTM work.\n",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "init",
+      "description": "Use when the user asks to initialize a repo, create AGENTS.md, generate contributor guidelines, or set up agent-oriented documentation for a codebase.",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "plan",
+      "description": "Planning agent for task breakdown and implementation planning. Use via spawn_subagent with skill='plan' when you need to explore a codebase and design an implementation approach before writing code.",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "playwright-cli",
+      "description": "Automate browser interactions, test web pages and work with Playwright tests.",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "playwright-trace",
+      "description": "Inspect Playwright trace files from the command line \u2014 list actions, view requests, console, errors, snapshots and screenshots.",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "playwright",
+      "description": "Browser automation with Playwright. Use when the user asks to test a website, take screenshots, check responsive design, test login flows, fill forms, check broken links, or automate any browser task.",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "research",
+      "description": "Fast agent specialized for exploring codebases and searching for code patterns. Use via spawn_subagent with skill='research' for read-only exploration tasks.",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "skill-creator",
+      "description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     },
+     {
+      "name": "goose-doc-guide",
+      "description": "Reference goose documentation to create, configure, or explain goose-specific features like recipes, extensions, sessions, and providers. You MUST read the relevant goose docs before answering. You MUST NOT rely on training data or assumptions for any goose-specific fields, values, names, syntax, or commands.",
+      "_meta": {
+       "commandType": "Skill"
+      }
+     }
+    ]
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "current_mode_update",
+    "currentModeId": "auto"
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {}
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "session_info_update",
+    "_meta": {
+     "goose": {
+      "activeRunId": "run_3ef4710d-fbba-4348-8bb3-4bf98f20ebef"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "session_info_update",
+    "title": "Create probe.txt file",
+    "updatedAt": "2026-08-20T10:51:28+00:00",
+    "_meta": {
+     "messageCount": 1,
+     "userSetName": false
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": "The"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " task"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " is"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " straightforward"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " -"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " I"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " need"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " to"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " create"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " a"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " file"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " called"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " probe"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": ".txt"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " containing"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " exactly"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " OK"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": ","
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " then"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " tell"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " the"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " user"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " the"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " word"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " DONE"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": "."
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " Let"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " me"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " do"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " this"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": " efficiently"
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "agent_thought_chunk",
+    "content": {
+     "type": "text",
+     "text": "."
+    },
+    "messageId": "chatcmpl-425",
+    "_meta": {
+     "goose": {
+      "created": 1787223090,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "tool_call",
+    "toolCallId": "call_4s59jgby",
+    "title": "write \u00b7 probe.txt",
+    "rawInput": {
+     "path": "probe.txt",
+     "content": "OK"
+    },
+    "_meta": {
+     "goose": {
+      "toolCall": {
+       "toolName": "write",
+       "extensionName": "developer"
+      },
+      "created": 1787223091,
+      "messageId": "chatcmpl-425"
+     }
+    }
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+   "sessionId": "20260820_8",
+   "update": {
+    "sessionUpdate": "tool_call_update",
+    "toolCallId": "call_4s59jgby",
+    "kind": "edit",
+    "locations": [
+     {
+      "path": "C:\\Users\\pertt\\AppData\\Local\\Temp\\acp_mt_a1thivg9\\probe.txt"
+     }
+    ]
+   }
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "id": "9ca23834-7de1-4879-8c39-ff6569c86ac3",
+  "method": "fs/write_text_file",
+  "params": {
+   "sessionId": "20260820_8",
+   "path": "C:\\Users\\pertt\\AppData\\Local\\Temp\\acp_mt_a1thivg9\\probe.txt",
+   "content": "OK"
+  }
+ },
+ {
+  "jsonrpc": "2.0",
+  "id": 5,
+  "error": {
+   "code": -32602,
+   "message": "Invalid params",
+   "data": "session already has active run `run_3ef4710d-fbba-4348-8bb3-4bf98f20ebef`; use _goose/unstable/session/steer"
+  }
+ }
+]

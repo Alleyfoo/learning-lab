@@ -9,3 +9,6 @@ runs/C*/work_definition.json
 runs/C*/operator_notes.md
 runs/C*/supplier-statement.txt
 runs/C*/ledger-book.txt
+# NOT ignored, deliberately: per-run ACP transcripts and harness results are the
+# evidence W1-A2 lacked. `acp_transcript.jsonl` and `harness_result.json` must be
+# committed after each run, exactly as the harness left them.
