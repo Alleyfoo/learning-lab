@@ -8,8 +8,22 @@
       "skill_sha256": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1b\\runs\\F1\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "75991a38caef796e5edc1965724aafe1843900a9beb1b8f50bb75bdae248c42c",
+      "status": "REFUSED",
+      "codes": [
+        "load_bearing_unresolved"
+      ],
+      "problems": [
+        {
+          "code": "load_bearing_unresolved",
+          "where": "<work_definition>:open_questions",
+          "detail": "'Q_authority' is load-bearing and 'resolved_to_peers'; a load-bearing unresolved fact blocks entry to modelling"
+        }
+      ],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "F2",
@@ -18,8 +32,14 @@
       "skill_sha256": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1b\\runs\\F2\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "9f2d8631cc788cdaa42764b2ccb047addf75e132be2849a9a3880258f101fe8b",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "F3",
@@ -28,8 +48,14 @@
       "skill_sha256": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1b\\runs\\F3\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "ccb26f83ebdf96cbfc2e60f881c8965642b00e06ea766dc569aafb8549a5e8dd",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     }
   ]
 }

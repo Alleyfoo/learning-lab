@@ -1,0 +1,84 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "supplier-ledger-recon-F1",
+  "provenance": {
+    "producer": "goose-f1",
+    "skill": "define-lab-process",
+    "produced_at": "2026-08-20"
+  },
+  "purpose": "Reconcile supplier statements with internal ledger to identify unmatched invoices and amount discrepancies per invoice number",
+  "sources": {
+    "supplier-statement": {
+      "role_label": "Supplier Statement Feed",
+      "fixture": "supplier-statement.txt",
+      "observed_fields": ["Date", "Supplier Name", "InvoiceNumber", "Amount", "Currency", "Status"],
+      "basis": "observed"
+    },
+    "ledger-book": {
+      "role_label": "Internal Ledger Book",
+      "fixture": "ledger-book.txt",
+      "observed_fields": ["Date", "ReferenceNumber", "SupplierName", "InvoiceNumber", "Amount", "Status", "Notes"],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "supplier-statement",
+    "right": "ledger-book",
+    "match_on": {
+      "left_field": "InvoiceNumber",
+      "right_field": "InvoiceNumber",
+      "basis": "observed",
+      "confirmation": null
+    },
+    "compare": [
+      {
+        "field": "Amount",
+        "comparison": "within",
+        "tolerance": "0.01",
+        "basis": "human_confirmed",
+        "confirmation": "Q_compare_amount"
+      }
+    ],
+    "classify": {
+      "both_same": "matched",
+      "both_different": "discrepancy",
+      "only_left": "statement_only",
+      "only_right": "ledger_only"
+    },
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_run",
+    "on_non_numeric": "refuse_run"
+  },
+  "output": {
+    "reports_fields": ["InvoiceNumber", "Amount"],
+    "context_fields": ["Date", "Supplier Name", "SupplierName", "Status"]
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_compare_amount",
+      "question": "Should Amount be compared, and if so, how and with what tolerance?",
+      "answer": "Yes, compare Amount numerically, within 0.01.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "Q_match_key_field",
+      "question": "Which field identifies the same record/invoice in both files?",
+      "load_bearing": false,
+      "status": "resolved_by_producer"
+    },
+    {
+      "id": "Q_authority",
+      "question": "Which file is the source of truth for matching when records don't match exactly?",
+      "load_bearing": true,
+      "status": "resolved_to_peers"
+    }
+  ],
+  "requested_destination": "review_only",
+  "requested_delivery": {
+    "format": "json_discrepancy_report"
+  },
+  "requested_authority": null
+}

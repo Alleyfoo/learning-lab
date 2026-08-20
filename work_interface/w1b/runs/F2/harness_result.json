@@ -1,0 +1,36 @@
+{
+  "run": "F2",
+  "outcome": "COMPLETED",
+  "reason": "artifact written; session terminated immediately",
+  "turns": 2,
+  "artifact": true,
+  "blocks_delivered": 1,
+  "silent_turns": 0,
+  "questions_after_block": 0,
+  "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+  "turn_log": [
+    {
+      "turn": 1,
+      "silent": false,
+      "interrogative_lines": 5,
+      "questions_after_block_so_far": 0,
+      "block_delivered": true,
+      "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+      "agent_turn_text": "Looking at the two fixture files, I need to ask the business only required questions before writing the artifact.\n\n**File observations:**\n\n*supplier-statement.txt:*\n- Header: `Date`, `Supplier Name`, `InvoiceNumber`, `Amount`, `Currency`, `Status`\n- Six invoice records\n\n*ledger-book.txt:*\n- Header: `Date`, `ReferenceNumber`, `SupplierName`, `InvoiceNumber`, `Amount`, `Status`, `Notes`\n- Same six invoices identified by InvoiceNumber (with corresponding ReferenceNumbers)\n\n---\n\n**Required questions for you:**\n\n1. **Match key choice**: Should records be matched on which field(s)?\n   - Option A: Use `InvoiceNumber` from both files (both have it)\n   - Option B: Need multi-key match (e.g., `Date` + `SupplierName`/`Supplier Name` + `InvoiceNumber`)\n   \n2. **Comparison**: Should we compare the `Amount` field? If so, with what comparison rule (`exact`, `within <tolerance>`)?\n\n3. **Source of truth**: Which file is authoritative (source of truth) for status—both have a `Status` field but possibly different meanings (statement says PAID/UNPAID, ledger says CLEARED/PENDING/Verified match), or are they peer sources?\n\n4. **Report fields**: What fields should appear in the output report row?\n\n5. **Duplicate handling policy**: If both files have same InvoiceNumber appearing twice, what should happen? (`refuse_run` vs `refuse_key`)\n\nPlease answer these five questions so I can assemble the work_definition.json artifact."
+    }
+  ],
+  "hashes_before": {
+    "PROMPT.md": "56e705bc1f262e4fb073307dff0ac8af829c13d9a37fb646c0f18aaadd21c65a",
+    "SKILL.md": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  },
+  "hashes_after": {
+    "PROMPT.md": "56e705bc1f262e4fb073307dff0ac8af829c13d9a37fb646c0f18aaadd21c65a",
+    "SKILL.md": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  }
+}

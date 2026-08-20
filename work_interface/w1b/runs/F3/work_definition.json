@@ -1,0 +1,111 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "F3-reconcile-statement-ledger",
+  "provenance": {
+    "producer": "goose-local",
+    "skill": "define-lab-process",
+    "produced_at": "2026-08-20"
+  },
+  "purpose": "Reconcile supplier statement against internal ledger by matching on InvoiceNumber and comparing Amount within £0.01 tolerance",
+  "sources": {
+    "statement": {
+      "role_label": "Supplier Statement",
+      "fixture": "supplier-statement.txt",
+      "observed_fields": [
+        "Date",
+        "Supplier Name",
+        "InvoiceNumber",
+        "Amount",
+        "Currency",
+        "Status"
+      ],
+      "basis": "observed"
+    },
+    "ledger": {
+      "role_label": "Internal Ledger Book",
+      "fixture": "ledger-book.txt",
+      "observed_fields": [
+        "Date",
+        "ReferenceNumber",
+        "SupplierName",
+        "InvoiceNumber",
+        "Amount",
+        "Status",
+        "Notes"
+      ],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "statement",
+    "right": "ledger",
+    "match_on": {
+      "left_field": "InvoiceNumber",
+      "right_field": "InvoiceNumber",
+      "basis": "human_confirmed",
+      "confirmation": "Q_match_key"
+    },
+    "compare": [
+      {
+        "field": "Amount",
+        "comparison": "within",
+        "tolerance": "0.01",
+        "basis": "human_confirmed",
+        "confirmation": "Q_compare_policy"
+      }
+    ],
+    "classify": {
+      "both_same": "matched_record",
+      "both_different": "discrepancy_record",
+      "only_left": "missing_in_ledger",
+      "only_right": "missing_in_statement"
+    },
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_run",
+    "on_non_numeric": "refuse_key"
+  },
+  "output": {
+    "reports_fields": [
+      "InvoiceNumber",
+      "Amount"
+    ],
+    "context_fields": [
+      "Date",
+      "Supplier Name/SupplierName",
+      "Status"
+    ]
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_match_key",
+      "question": "Which field identifies the same record/invoice in both files?",
+      "answer": "InvoiceNumber",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_compare_policy",
+      "question": "Should Amount be compared, and if so, how and with what tolerance? Is Currency part of the rule?",
+      "answer": "Yes, compare Amount numerically, within 0.01. No, Currency is not part of the reconciliation rule.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_source_of_truth",
+      "question": "Which file is the source of truth?",
+      "answer": "Neither — both are peer sources. Report what is missing from either side and differences in the compared field.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_report_fields",
+      "question": "Which fields should appear in the report row, and which are context?",
+      "answer": "The match key (InvoiceNumber) and the compared field (Amount) in report rows. Date, Supplier Name, and Status as context.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [],
+  "requested_destination": "review_only",
+  "requested_delivery": {
+    "format": "json_discrepancy_report"
+  },
+  "requested_authority": null
+}

@@ -13,24 +13,16 @@ safe to enter the existing modelling/preview path*, NOT *established*.
 
 | run | status | skill_match | codes (if refused) | authority | override keys | sha256 |
 |---|---|---|---|---|---|---|
-| F1 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| F2 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| F3 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
+| F1 | **REFUSED** | yes | load_bearing_unresolved | None |  | `75991a38caef` |
+| F2 | **PASS** | yes |  | None |  | `9f2d8631cc78` |
+| F3 | **PASS** | yes |  | None |  | `ccb26f83ebdf` |
 
 ## Detail
 
-### F1 -- NO_ARTIFACT
+### F1 -- REFUSED
 
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### F2 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### F3 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
+- `load_bearing_unresolved` @ `<work_definition>:open_questions` -- 'Q_authority' is load-bearing and 'resolved_to_peers'; a load-bearing unresolved fact blocks entry to modelling
 
 ## Pass rate
 
-**0/3 PASS** (primary W1-B success criterion: 3/3).
+**2/3 PASS** (primary W1-B success criterion: 3/3).
