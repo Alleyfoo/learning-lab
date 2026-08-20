@@ -100,3 +100,78 @@ w1a3/
 
 Fixtures and the answer table are **referenced, not copied**:
 `work_interface/w1a/fixtures/` and `work_interface/w1a/human_answers.md`.
+
+---
+
+## Execution: the ACP harness (supersedes the manual protocol above)
+
+The manual operator protocol is retained as the specification of intent. In
+practice W1-A3 is executed by `harness/acp_harness.py`, which removes the human
+operator entirely — the defect W1-A2 actually died of.
+
+```bash
+python work_interface/w1a3/harness/selftest.py          # must pass first
+python work_interface/w1a3/harness/acp_harness.py --run all
+python work_interface/w1a3/grade.py
+```
+
+One fresh `goose.exe acp` subprocess per run, same shared Goose/Ollama config and
+`qwen3.5:9b` as the desktop sessions.
+
+### What the harness enforces structurally
+
+```text
+prompt as TEXT          PROMPT.md is read by the harness and its contents sent via
+                        session/prompt. Goose never receives the path, so B2's
+                        edit-the-prompt-as-a-reader failure cannot recur.
+no client fs capability initialize declares fs.readTextFile/writeTextFile = false,
+                        so Goose's own `developer` extension does all file I/O --
+                        the same stimulus as the desktop runs.
+cwd = the run directory session/new is created with the run dir as cwd.
+mode = auto             tool calls are auto-approved; no human in the loop.
+turn-synchronous        the next message is sent only after the previous
+                        session/prompt returns a stopReason. Steering is never used.
+stop at first artifact  the artifact is checked after every tool update and at every
+                        turn end. The instant it exists the session is terminated --
+                        no further model turn, review, repair or edit. B3's
+                        post-write self-correction cannot recur.
+append-only transcript  every ACP message, in and out, lands in the run's
+                        acp_transcript.jsonl as it arrives.
+```
+
+### CONTESTED conditions
+
+A run is CONTESTED, never rescued, if any of these hold:
+
+```text
+a controlled input's sha256 changes across the run
+   (PROMPT.md, SKILL.md, both fixtures, human_answers.md -- hashed before and after)
+a tool call names another run directory, human_answers.md, the validator,
+   the oracle cases, prior W1-A/W1-A2 outputs, or the grader results
+a question does not resolve to exactly one frozen intent
+the clarification turn limit or the turn timeout is reached
+the agent sends a client-bound request we never offered a capability for
+```
+
+### The matcher
+
+Closed and deterministic; no model is involved. The frozen intents are derived
+mechanically from `w1a/human_answers.md`: each row's `**bold**` spans are its
+discriminating term groups, and a `/` inside a span is the author's own
+alternation. An intent matches only if every group is satisfied.
+
+```text
+UNIQUE_MATCH      send exactly the frozen canonical answer
+NO_MATCH          stop the run as CONTESTED
+MULTIPLE_MATCHES  stop the run as CONTESTED
+```
+
+Several questions in one assistant message are supported: the message is split
+into question units and each is matched independently, so distinct frozen intents
+are each answered with their own canonical string. Two units resolving to the
+same intent is itself ambiguity and stops the run. Answers are never invented,
+combined, paraphrased or supplemented — one answer is sent bare; several are sent
+in the frozen numbered format, one per line, in the order asked.
+
+The frozen skill is not modified to carry question IDs. W1-A3 still tests the
+existing skill.
