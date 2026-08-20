@@ -205,17 +205,29 @@ class Probe:
                 {"protocolVersion": 1,
                  "clientCapabilities": {"fs": {"readTextFile": False,
                                                "writeTextFile": False}}}, 60)
-        params: dict = {"cwd": str(self.run)}
+        # The key is ALWAYS sent, empty in the control arm, exactly as the real
+        # harness does it (single_block_harness.py:199 -- list(mcp_servers or
+        # [])). Omitting it entirely made Goose reject session/new outright and
+        # voided round 1's arm A.
+        mcp_servers: list = []
         if self.attach_mcp:
-            params["mcpServers"] = [{
+            mcp_servers = [{
                 "name": "authorized-reader",
                 "command": sys.executable,
                 "args": [str(WI / "authority" / "authorized_reader.py"),
                          str(self.run)],
                 "env": []}]
+        params: dict = {"cwd": str(self.run), "mcpServers": mcp_servers}
         r = self.rq("session/new", params, 180)
         sid = (r or {}).get("result", {}).get("sessionId")
         print(f"  session: {sid}")
+        if not sid:
+            # Round 1 lost arm A to a silent session/new rejection. An arm with
+            # no session is VOID and must say so, not emit an empty record that
+            # reads like a negative result.
+            raise SystemExit(
+                f"PROBE {self.arm} VOID: session/new returned no sessionId -> "
+                f"{json.dumps(r)[:300]}")
         self.rq("session/set_mode", {"sessionId": sid, "modeId": "approve"}, 60)
 
         turns = []

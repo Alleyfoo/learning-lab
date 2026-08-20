@@ -1,0 +1,164 @@
+[
+ {
+  "dir": "out",
+  "msg": {
+   "jsonrpc": "2.0",
+   "id": 101,
+   "method": "initialize",
+   "params": {
+    "protocolVersion": 1,
+    "clientCapabilities": {
+     "fs": {
+      "readTextFile": false,
+      "writeTextFile": false
+     }
+    }
+   }
+  }
+ },
+ {
+  "dir": "in",
+  "msg": {
+   "jsonrpc": "2.0",
+   "id": 101,
+   "result": {
+    "protocolVersion": 1,
+    "agentCapabilities": {
+     "loadSession": true,
+     "promptCapabilities": {
+      "image": true,
+      "audio": false,
+      "embeddedContext": true
+     },
+     "mcpCapabilities": {
+      "http": true,
+      "sse": false,
+      "acp": false
+     },
+     "sessionCapabilities": {
+      "list": {},
+      "close": {}
+     },
+     "auth": {},
+     "_meta": {
+      "goose": {
+       "localInference": {}
+      }
+     }
+    },
+    "authMethods": [
+     {
+      "id": "goose-provider",
+      "name": "Configure Provider",
+      "description": "Run `goose configure` to set up your AI provider and API key"
+     }
+    ],
+    "agentInfo": {
+     "name": "goose",
+     "version": "1.46.0"
+    }
+   }
+  }
+ },
+ {
+  "dir": "out",
+  "msg": {
+   "jsonrpc": "2.0",
+   "id": 102,
+   "method": "session/new",
+   "params": {
+    "cwd": "C:\\Users\\pertt\\AppData\\Local\\Temp\\toolsurface_A_ifq49ji2\\probe"
+   }
+  }
+ },
+ {
+  "dir": "in",
+  "msg": {
+   "jsonrpc": "2.0",
+   "id": 102,
+   "error": {
+    "code": -32602,
+    "message": "Invalid params",
+    "data": {
+     "error": "missing field `mcpServers`",
+     "json": {
+      "cwd": "C:\\Users\\pertt\\AppData\\Local\\Temp\\toolsurface_A_ifq49ji2\\probe"
+     },
+     "phase": "deserialization"
+    }
+   }
+  }
+ },
+ {
+  "dir": "out",
+  "msg": {
+   "jsonrpc": "2.0",
+   "id": 103,
+   "method": "session/set_mode",
+   "params": {
+    "sessionId": null,
+    "modeId": "approve"
+   }
+  }
+ },
+ {
+  "dir": "in",
+  "msg": {
+   "jsonrpc": "2.0",
+   "id": 103,
+   "error": {
+    "code": -32602,
+    "message": "Invalid params",
+    "data": {
+     "error": "invalid type: null, expected a string",
+     "json": {
+      "sessionId": null,
+      "modeId": "approve"
+     },
+     "phase": "deserialization"
+    }
+   }
+  }
+ },
+ {
+  "dir": "out",
+  "msg": {
+   "jsonrpc": "2.0",
+   "id": 104,
+   "method": "session/prompt",
+   "params": {
+    "sessionId": null,
+    "prompt": [
+     {
+      "type": "text",
+      "text": "Use the write tool to create work_definition.json containing {}. Do not use shell."
+     }
+    ]
+   }
+  }
+ },
+ {
+  "dir": "in",
+  "msg": {
+   "jsonrpc": "2.0",
+   "id": 104,
+   "error": {
+    "code": -32602,
+    "message": "Invalid params",
+    "data": {
+     "error": "invalid type: null, expected a string",
+     "json": {
+      "sessionId": null,
+      "prompt": [
+       {
+        "type": "text",
+        "text": "Use the write tool to create work_definition.json containing {}. Do not use shell."
+       }
+      ]
+     },
+     "phase": "deserialization"
+    }
+   }
+  }
+ }
+]

@@ -1,0 +1,46 @@
+{
+ "arm": "A",
+ "mcp_attached": false,
+ "write_instruction": "Use the write tool to create work_definition.json containing {}. Do not use shell.",
+ "reader_instruction": null,
+ "turns": [
+  {
+   "instruction": "Use the write tool to create work_definition.json containing {}. Do not use shell.",
+   "seconds": 0,
+   "result": {
+    "jsonrpc": "2.0",
+    "id": 104,
+    "error": {
+     "code": -32602,
+     "message": "Invalid params",
+     "data": {
+      "error": "invalid type: null, expected a string",
+      "json": {
+       "sessionId": null,
+       "prompt": [
+        {
+         "type": "text",
+         "text": "Use the write tool to create work_definition.json containing {}. Do not use shell."
+        }
+       ]
+      },
+      "phase": "deserialization"
+     }
+    }
+   }
+  }
+ ],
+ "tool_calls": [],
+ "permissions": [],
+ "artifact_exists_after_write_turn": false,
+ "artifact_exists": false,
+ "artifact_bytes": null,
+ "run_dir_contents": [
+  "SKILL.md"
+ ],
+ "offered_tools": {
+  "captured": false,
+  "reason": "traffic captured but no tools array present"
+ },
+ "agent_text": ""
+}
