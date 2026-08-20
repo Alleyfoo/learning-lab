@@ -206,6 +206,59 @@ def main() -> int:
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
+    # --- W1-F regression: the asymmetric-filtering defect ----------------
+    # w1f/authority_report.py filtered harness-owned files from `after` only,
+    # so the transcript the harness itself had opened looked DELETED and every
+    # run came back CONTESTED. Reproduces the exact W1-F shape: an empty
+    # acp_transcript.jsonl present at snapshot time, nothing worker-caused.
+    tmp = Path(tempfile.mkdtemp(prefix="a4_w1f_regression_"))
+    try:
+        d = tmp / "N1"
+        d.mkdir()
+        (d / "PROMPT.md").write_text("task", encoding="utf-8")
+        (d / "SKILL.md").write_text("skill", encoding="utf-8")
+        (d / "acp_transcript.jsonl").write_text("", encoding="utf-8")
+        before = A.snapshot(d)
+        check(before["acp_transcript.jsonl"]["sha256"].startswith("e3b0c442"),
+              "W1-F shape: transcript is empty at snapshot time")
+        # the harness then fills the transcript and writes its result file
+        (d / "acp_transcript.jsonl").write_text('{"a":1}\n', encoding="utf-8")
+        (d / "harness_result.json").write_text("{}", encoding="utf-8")
+        after = A.snapshot(d)
+
+        broken = A.verdict(before,
+                           {k: v for k, v in after.items()
+                            if k not in A.HARNESS_OWNED})
+        check(broken.violated,
+              "the W1-F defect still reproduces with one-sided filtering",
+              "(guards the regression itself)")
+
+        fixed = A.worker_verdict(before, after)
+        check(not fixed.violated,
+              "worker_verdict is CLEAN: no worker touched anything",
+              fixed.reason[:90])
+        check(fixed.mutations == [],
+              "and reports no mutations at all")
+
+        # it must still catch a real worker mutation in the same shape
+        (d / "SKILL.md").write_text("tampered", encoding="utf-8")
+        real = A.worker_verdict(before, A.snapshot(d))
+        check(real.violated
+              and any(m.path == "SKILL.md" for m in real.mutations),
+              "yet a genuine mutation in that same shape still CONTESTS")
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+    # No reporter may call the unfiltered entry point on raw snapshots again.
+    live = [Path(__file__).resolve().parents[1] / "harness"
+            / "single_block_harness.py",
+            Path(__file__).resolve().parents[1] / "w1f" / "authority_report.py"]
+    for src in live:
+        if src.is_file():
+            body = src.read_text(encoding="utf-8")
+            check("A4.verdict(" not in body and "A.verdict(" not in body,
+                  f"{src.name} uses worker_verdict, not the raw entry point")
+
     print("\n" + "=" * 70)
     if FAILS:
         print(f"A4 SELF-TEST FAILED: {len(FAILS)} check(s)")

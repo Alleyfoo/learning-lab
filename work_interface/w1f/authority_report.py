@@ -94,8 +94,11 @@ def main() -> int:
         data = json.loads(hr.read_text(encoding="utf-8"))
         plog = data.get("permission_log") or []
         before = data.get("fs_snapshot_before") or {}
-        after = {k: v for k, v in A4.snapshot(d).items() if k not in HARNESS_OWNED}
-        v = A4.verdict(before, after, designated=ARTIFACT)
+        # worker_verdict filters harness-owned files from BOTH sides. Filtering
+        # `after` only made the growing acp_transcript.jsonl look DELETED and
+        # produced W1-F's false 3/3 CONTESTED (see CLOSURE.md §3). The frozen
+        # AUTHORITY.md at commit eeba7de preserves that defective output.
+        v = A4.worker_verdict(before, A4.snapshot(d), designated=ARTIFACT)
         status = CONTESTED if v.violated else CLEAN
         if v.violated:
             contested += 1

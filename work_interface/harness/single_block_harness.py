@@ -295,8 +295,10 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
                      "agent_turn_text": text}
             if fs_watch:
                 # Independent post-turn observation. Recorded, never acted on.
-                wv = A4.verdict(fs_before, A4.snapshot(run_dir),
-                                designated=artifact_name)
+                # worker_verdict, not verdict: harness-owned files (the growing
+                # acp_transcript.jsonl) must be filtered from BOTH sides.
+                wv = A4.worker_verdict(fs_before, A4.snapshot(run_dir),
+                                       designated=artifact_name)
                 entry["fs_watch"] = A4.record(wv)
             res.turn_log.append(entry)
             s.record_lifecycle({k: v for k, v in entry.items()
@@ -310,9 +312,8 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
                             if v.exists()}
         # --- A4: independent, non-lifecycle -----------------------------
         if fs_enforcing:
-            res.fs_authority = A4.record(A4.verdict(fs_before,
-                                                    A4.snapshot(run_dir),
-                                                    designated=artifact_name))
+            res.fs_authority = A4.record(A4.worker_verdict(
+                fs_before, A4.snapshot(run_dir), designated=artifact_name))
         else:
             # SHADOW: recorded, never decided here.
             res.fs_authority = {"filesystem_authority": "SHADOW_DEFERRED"}
