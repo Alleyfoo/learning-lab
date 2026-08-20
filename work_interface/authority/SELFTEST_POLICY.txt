@@ -1,0 +1,56 @@
+========================================================================
+FAIL-CLOSED PERMISSION POLICY -- self-test (no Goose, no model)
+========================================================================
+
+[1] the three ALLOW clauses
+  PASS  read authorized SKILL.md  -- structured read of an authorized resource
+  PASS  read fixture 1  -- structured read of an authorized resource
+  PASS  read fixture 2  -- structured read of an authorized resource
+  PASS  read via 'source' field  -- structured read of an authorized resource
+  PASS  relative read of own SKILL.md  -- structured read of an authorized resource
+  PASS  write the designated artifact  -- structured write of the designated artifact
+
+[2] shell is denied unconditionally
+  PASS  harmless read via shell  -- shell execution is denied unconditionally (field 'command')
+  PASS  the L1 recovery route  -- shell execution is denied unconditionally (field 'command')
+  PASS  powershell read  -- shell execution is denied unconditionally (field 'command')
+  PASS  shell writing the artifact  -- shell execution is denied unconditionally (field 'command')
+
+[3] arbitrary writes are denied
+  PASS  write todo.md (the L3 shape)  -- write to a path that is not the designated artifact
+  PASS  write temp_skill.txt (the H2 shape)  -- write to a path that is not the designated artifact
+  PASS  edit SKILL.md  -- write to a path that is not the designated artifact
+  PASS  edit via after-payload  -- write to a path that is not the designated artifact
+
+[4] reads of undeclared resources are denied
+  PASS  human_answers.md  -- read of an undeclared resource
+  PASS  the validator  -- read of an undeclared resource
+  PASS  a sibling run  -- read of an undeclared resource
+  PASS  prior pack output  -- read of an undeclared resource
+  PASS  traversal to the answer file  -- read of an undeclared resource
+
+[5] unknown / unparseable requests are denied
+  PASS  no rawInput  -- request has no parseable toolCall.rawInput
+  PASS  no params  -- request has no parseable toolCall.rawInput
+  PASS  rawInput with no path at all  -- expected exactly one path-bearing field, found 0: []
+  PASS  two path fields  -- expected exactly one path-bearing field, found 2: ['C:\\Users\\pertt\\learning-lab\\work_interface\\w1e\\runs\\M1\\SKILL.md', 'C:\\Users\\pertt\\learning-lab\\work_interface\\w1e\\runs\\M1\\work_definition.json']
+  PASS  empty path  -- expected exactly one path-bearing field, found 0: []
+
+[6] title and prose can never grant permission
+  PASS  an allow-sounding title does not allow a shell call  -- shell execution is denied unconditionally (field 'command')
+  PASS  a misleading title does not allow a forbidden read  -- read of an undeclared resource
+
+[7] option selection uses the agent's own offered options
+  PASS  allow -> allow_once, never allow_always
+  PASS  deny -> reject_once, never reject_always
+  PASS  no options offered -> no identifier is invented
+
+[8] the policy teaches nothing
+  PASS  policy source never names a tool or a route ('read_image')
+  PASS  policy source never names a tool or a route ('text_editor')
+  PASS  policy source never names a tool or a route ('developer')
+  PASS  policy source never names a tool or a route ('use tool')
+  PASS  policy source never names a tool or a route ('instead try')
+
+========================================================================
+PERMISSION POLICY SELF-TEST PASSED

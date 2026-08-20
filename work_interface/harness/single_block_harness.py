@@ -144,7 +144,9 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
             controlled: dict[str, Path] | None = None,
             all_runs: list[str] | None = None,
             forbidden_extra: list | None = None,
-            fs_enforcing: bool = True) -> RunResult:
+            fs_enforcing: bool = True,
+            session_mode: str = "auto",
+            fs_watch: bool = False) -> RunResult:
     """Drive one worker session under the r2 lifecycle.
 
     `session_factory` returns an object exposing request/drain_agent_text/
@@ -156,6 +158,14 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
     can never terminate, alter, rescue or otherwise influence the run. An
     experiment that wants A4 descriptive rather than binding uses this and
     audits after the complete batch.
+
+    `session_mode` selects the ACP mode -- "auto" (no permission channel) or
+    "approve" (every tool call raises session/request_permission, which the
+    SESSION object must handle).
+
+    `fs_watch=True` records a per-turn A4 verdict into the turn log as an
+    independent post-turn observation. It NEVER influences the lifecycle: the
+    AUTHORITY layer is reported separately from COMPLETION.
     """
     run_dir = Path(run_dir).resolve()
     artifact = run_dir / artifact_name
@@ -189,10 +199,12 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
             res.outcome, res.reason = HARNESS_ERROR, f"session/new failed: {r}"
             return res
         sid = r["result"]["sessionId"]
-        r = s.request("session/set_mode", {"sessionId": sid, "modeId": "auto"},
+        r = s.request("session/set_mode",
+                      {"sessionId": sid, "modeId": session_mode},
                       timeout=60)
         if r is None or "error" in r:
-            res.outcome, res.reason = HARNESS_ERROR, f"set_mode failed: {r}"
+            res.outcome, res.reason = (HARNESS_ERROR,
+                                       f"set_mode {session_mode} failed: {r}")
             return res
 
         message, sent_kind = prompt_text, SENT_PROMPT
@@ -278,6 +290,11 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
                      "sent": sent_kind,
                      "sent_sha256": hashlib.sha256(message.encode("utf-8")).hexdigest(),
                      "agent_turn_text": text}
+            if fs_watch:
+                # Independent post-turn observation. Recorded, never acted on.
+                wv = A4.verdict(fs_before, A4.snapshot(run_dir),
+                                designated=artifact_name)
+                entry["fs_watch"] = A4.record(wv)
             res.turn_log.append(entry)
             s.record_lifecycle({k: v for k, v in entry.items()
                                 if k != "agent_turn_text"})

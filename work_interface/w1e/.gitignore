@@ -1,0 +1,8 @@
+# W1-E keeps everything. Nothing here is ignored.
+#
+#   runs/M*/work_definition.json   the agent artifact, where one is produced
+#   runs/M*/acp_transcript.jsonl   append-only ACP transcript + lifecycle records
+#   runs/M*/harness_result.json    outcome, reason, per-turn log, pre-run snapshot
+#   RESULTS.md / RESULTS.json      the STRUCTURAL grader's record   (primary)
+#   FIDELITY.md / FIDELITY.json    the FIDELITY gate's record       (primary)
+#   A4_SHADOW.md / A4_SHADOW.json  descriptive shadow audit         (NOT a verdict)
