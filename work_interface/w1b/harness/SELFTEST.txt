@@ -1,0 +1,58 @@
+W1-B harness self-test (no Goose, no model execution)
+
+[A/B] the canonical block
+  PASS  frozen table reads 9 rows  -- got 9
+  PASS  human_answers.md matches the frozen hash
+  PASS  mandated rows are 0-5  -- (0, 1, 2, 3, 4, 5)
+  PASS  excluded rows are 6-8  -- (6, 7, 8)
+  PASS  row 0 question and answer both present verbatim
+  PASS  row 1 question and answer both present verbatim
+  PASS  row 2 question and answer both present verbatim
+  PASS  row 3 question and answer both present verbatim
+  PASS  row 4 question and answer both present verbatim
+  PASS  row 5 question and answer both present verbatim
+  PASS  answers appear in FROZEN TABLE ORDER  -- [68, 154, 250, 389, 552, 661]
+  PASS  excluded row 6 answer does NOT leak into the block  -- Refuse the run — do not silently pick or
+  PASS  excluded row 7 answer does NOT leak into the block  -- Refuse the run — do not coerce.
+  PASS  excluded row 8 answer does NOT leak into the block  -- It is not load-bearing for now; leave it
+  PASS  no duplicate-key / non-numeric policy in the block
+  PASS  worker-owned term 'left_then_right' absent from the block
+  PASS  worker-owned term 'sorted_by_key' absent from the block
+  PASS  worker-owned term 'output order' absent from the block
+  PASS  worker-owned term 'output_order' absent from the block
+  PASS  worker-owned term 'both_same' absent from the block
+  PASS  worker-owned term 'only_left' absent from the block
+  PASS  worker-owned term 'classify' absent from the block
+  PASS  worker-owned term 'purpose' absent from the block
+  PASS  worker-owned term 'refuse_run' absent from the block
+  PASS  worker-owned term 'refuse_key' absent from the block
+  PASS  worker-owned term 'notes' absent from the block
+  PASS  every block line is verbatim from human_answers.md  -- []
+        block: 693 bytes, sha256 46158afa4b7e682a
+
+[C] the ablation property -- delivery is unconditional
+  PASS  a message was sent after every non-artifact turn  -- 12 sends
+  PASS  EVERY message after the prompt is the identical canonical block
+  PASS  exactly one distinct outgoing message across all worker inputs  -- 1 distinct
+  PASS  turn 1 sends the prompt text, not the block
+  PASS  every lifecycle record carries the same block digest
+  PASS  the silent turn is recorded as behaviour  -- 1
+  PASS  harness has no classify_turn()
+  PASS  harness has no intents_in()
+  PASS  harness has no segment_fragments()
+  PASS  harness has no match_message()
+  PASS  harness has no load_answer_table()
+
+[D/E/F] stop rule, continued questioning, blocking
+  PASS  artifact run reaches COMPLETED  -- artifact written; session terminated immediately
+  PASS  terminates on the turn the artifact appears  -- turns=3
+  PASS  no further prompt after the artifact exists  -- 3 sends
+  PASS  block delivered once per applicable turn  -- 2
+  PASS  asking again after the block does NOT fail the run  -- artifact written; session terminated immediately
+  PASS  question-bearing lines after the block are counted separately  -- 2
+  PASS  never-writing run ends CONTESTED  -- CONTESTED
+  PASS  and is labelled BLOCKED_WITH_COMPLETE_INFORMATION  -- BLOCKED_WITH_COMPLETE_INFORMATION: the worker did not produce an artifact within
+  PASS  the block was demonstrably held while it blocked  -- blocks=12 q_after=12
+
+============================================================
+SELF-TEST PASSED

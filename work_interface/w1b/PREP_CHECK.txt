@@ -1,0 +1,85 @@
+======================================================================
+W1-B preparation verification
+======================================================================
+
+[1] Run directories exist and contain only frozen inputs
+PASS  F1: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+PASS  F2: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+PASS  F3: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+
+[2] All three SKILL.md match the frozen W1-A skill sha256
+PASS  F1: SKILL.md sha256=4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55 (frozen=4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55)
+PASS  F2: SKILL.md sha256=4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55 (frozen=4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55)
+PASS  F3: SKILL.md sha256=4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55 (frozen=4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55)
+
+[3] Operator prompts point to distinct absolute run paths
+PASS  F1: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  F2: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  F3: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  distinct artifact targets: ['w1b\\runs\\F1\\work_definition.json', 'w1b\\runs\\F2\\work_definition.json', 'w1b\\runs\\F3\\work_definition.json']
+
+[4] Fixtures unchanged from W1-A (sha256 match)
+PASS  supplier-statement.txt: sha256=d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb (expected d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb)
+PASS  ledger-book.txt: sha256=284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e (expected 284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e)
+
+[5] Human answers unchanged from W1-A (sha256 match)
+PASS  human_answers.md sha256=5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd (expected 5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd)
+
+[6] W0D validator self-test + W1-A test suite still pass
+PASS  work_definition.py --self-test exit=0 (SELF-TEST PASSED (all 26 Work-Definition codes exercised / malformed external shape refused by name / authority invariant independent of self-claims / observed fields cross-checked against fixtures / valid proposal strips to taskmodel shape))
+PASS  pytest test_work_definition.py exit=0 (14 passed in 0.04s)
+
+[7] Grader on empty F1-F3 returns three NO_ARTIFACT without mutation
+PASS  grader exit=0, statuses={'F1': 'NO_ARTIFACT', 'F2': 'NO_ARTIFACT', 'F3': 'NO_ARTIFACT'}, mutated=[]
+
+[8] Known-good W0D oracle still grades PASS (temp copy, no mutation)
+PASS  oracle valid=True codes=[]
+
+[9] No unrelated or protected files staged in git
+PASS  protected files staged: []
+
+[10] F1/F2/F3 cannot reach the old matcher
+PASS  no code defines or calls 'classify_turn' (docstrings may mention it)
+PASS  no code defines or calls 'intents_in' (docstrings may mention it)
+PASS  no code defines or calls 'segment_fragments' (docstrings may mention it)
+PASS  no code defines or calls 'match_message' (docstrings may mention it)
+PASS  no code defines or calls 'next_silent_action' (docstrings may mention it)
+PASS  no code defines or calls 'UNIQUE_MATCH' (docstrings may mention it)
+PASS  no code defines or calls 'MULTIPLE_MATCHES' (docstrings may mention it)
+PASS  no code defines or calls 'load_answer_table' (docstrings may mention it)
+PASS  imports no W1-A harness module ['__future__', 'argparse', 'dataclasses', 'hashlib', 'json', 'os', 'pathlib', 're', 'subprocess', 'sys', 'threading', 'time']
+PASS  imported module exposes no classify_turn()
+PASS  imported module exposes no intents_in()
+PASS  imported module exposes no segment_fragments()
+PASS  imported module exposes no match_message()
+PASS  imported module exposes no load_answer_table()
+PASS  imported module exposes no next_silent_action()
+PASS  no W1-A harness module is loaded ([])
+
+[11] Canonical block integrity
+PASS  frozen table reads 9 rows (got 9)
+      block: 693 bytes, sha256=46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330
+PASS  mandated rows are (0, 1, 2, 3, 4, 5)
+PASS  row 0: question and answer present verbatim
+PASS  row 1: question and answer present verbatim
+PASS  row 2: question and answer present verbatim
+PASS  row 3: question and answer present verbatim
+PASS  row 4: question and answer present verbatim
+PASS  row 5: question and answer present verbatim
+PASS  answers in frozen table order [68, 154, 250, 389, 552, 661]
+PASS  excluded row 6 does not leak into the block
+PASS  excluded row 7 does not leak into the block
+PASS  excluded row 8 does not leak into the block
+PASS  worker-owned term 'refuse_run' absent from the block
+PASS  worker-owned term 'refuse_key' absent from the block
+PASS  worker-owned term 'left_then_right' absent from the block
+PASS  worker-owned term 'sorted_by_key' absent from the block
+PASS  worker-owned term 'output_order' absent from the block
+PASS  worker-owned term 'both_same' absent from the block
+PASS  worker-owned term 'only_left' absent from the block
+PASS  worker-owned term 'classify' absent from the block
+PASS  worker-owned term 'purpose' absent from the block
+PASS  every block line is verbatim from human_answers.md []
+
+======================================================================
+PREP VERIFICATION PASSED (all 11 checks).
