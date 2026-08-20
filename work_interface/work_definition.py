@@ -149,9 +149,18 @@ WORK_DEFINITION_PROBLEM_CODES = (
     "confirmation_missing",
     "output_field_not_declared",
     "load_bearing_unresolved",
+    "open_question_status_invalid",
     "authority_requested",
     "prose_override_attempt",
 )
+
+# The sole accepted value for open_questions[].status. `open_questions` holds
+# only UNRESOLVED facts: a settled human-supplied fact belongs in
+# `human_confirmations`, not here. There is deliberately no "resolved"
+# open-question state -- W1-B F1 invented "resolved_to_peers" for a state the
+# validator silently accepted but the producer contract never taught
+# (work_interface/w1b/F1_ANALYSIS.md, accepted at dd9f7c6).
+OPEN_QUESTION_STATUS_VOCABULARY = ("unresolved",)
 
 
 # ---------------------------------------------------------------------------
@@ -466,10 +475,20 @@ def validate(artifact: Any, evidence_dir: Optional[Path] = None) -> Report:
     for q in raw.get("open_questions") or []:
         if not isinstance(q, dict):
             continue
-        if q.get("load_bearing") and q.get("status") != "resolved":
+        status = q.get("status")
+        if status not in OPEN_QUESTION_STATUS_VOCABULARY:
+            problems.append(Problem(
+                "open_question_status_invalid", f"{where}:open_questions",
+                f"{q.get('id', '?')!r} has status {status!r}; open_questions holds "
+                f"only unresolved facts, so the sole accepted value is 'unresolved'. "
+                f"A settled fact belongs in human_confirmations, not here"))
+        # Any load-bearing open question refuses, whatever its status claims. A
+        # settled load-bearing fact must be REMOVED from open_questions and
+        # represented in human_confirmations; it cannot be marked settled in place.
+        if q.get("load_bearing"):
             problems.append(Problem(
                 "load_bearing_unresolved", f"{where}:open_questions",
-                f"{q.get('id', '?')!r} is load-bearing and {q.get('status')!r}; "
+                f"{q.get('id', '?')!r} is a load-bearing open question; "
                 f"a load-bearing unresolved fact blocks entry to modelling"))
 
     return Report(problems=problems)
@@ -793,6 +812,33 @@ def _self_test() -> int:
         r = run(blocked, base)
         check("load_bearing_unresolved" in r.codes(),
               f"load-bearing unresolved: {sorted(r.codes())}")
+
+        # --- open_questions has no "settled in place" state ----------------
+        # A settled fact must MOVE to human_confirmations. Marking it resolved
+        # where it stands is refused by name, whether or not it is load-bearing.
+        settled_in_place = {**good}
+        settled_in_place["open_questions"] = [
+            {"id": "Q_auth", "question": "source of truth?",
+             "load_bearing": True, "status": "resolved"}]
+        r = run(settled_in_place, base)
+        check("open_question_status_invalid" in r.codes(),
+              f"'resolved' is not an open-question state: {sorted(r.codes())}")
+        check("load_bearing_unresolved" in r.codes(),
+              f"a load-bearing open question refuses whatever its status claims: "
+              f"{sorted(r.codes())}")
+
+        # ... and the same holds for an invented status on a NON-load-bearing
+        # question, which the previous contract could not see at all.
+        invented = {**good}
+        invented["open_questions"] = [
+            {"id": "Q_notes", "question": "notes?",
+             "load_bearing": False, "status": "resolved_by_producer"}]
+        r = run(invented, base)
+        check("open_question_status_invalid" in r.codes(),
+              f"invented status on a non-load-bearing question: {sorted(r.codes())}")
+        check("load_bearing_unresolved" not in r.codes(),
+              f"non-load-bearing question does not raise the load-bearing code: "
+              f"{sorted(r.codes())}")
 
         # --- classify/compare pairing (reuse reconciliation discipline) ----
         nosplit = {**good}

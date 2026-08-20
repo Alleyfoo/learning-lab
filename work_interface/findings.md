@@ -189,7 +189,7 @@ header. One decision with multiple bases is refused.
 
 ## 4. Deterministic validator / refusal vocabulary
 
-Closed vocabulary of 26 codes (`WORK_DEFINITION_PROBLEM_CODES`), every one exercised
+Closed vocabulary of 27 codes (`WORK_DEFINITION_PROBLEM_CODES`), every one exercised
 by the self-test (mirroring `task_model`'s "no declared-but-unexercised code" rule):
 
 **Envelope / shape:** `malformed_work_definition`, `unknown_work_definition_version`,
@@ -222,7 +222,7 @@ Two runnable suites, both green:
 
 ```
 python work_interface/work_definition.py --self-test
-  -> SELF-TEST PASSED (all 26 Work-Definition codes exercised ...)
+  -> SELF-TEST PASSED (all 27 Work-Definition codes exercised ...)
 
 python work_interface/test_work_definition.py --self-test
   -> WORK DEFINITION TESTS PASSED (14 tests)
@@ -389,7 +389,7 @@ Three, recorded here; the roadmap document is updated separately (below).
 ## Run
 
 ```
-python work_interface/work_definition.py --self-test      # 26 codes exercised
+python work_interface/work_definition.py --self-test      # 27 codes exercised
 python work_interface/test_work_definition.py --self-test # A / B / canaries
 ```
 

@@ -157,7 +157,7 @@ Result (research only, no product integration):
   W0B artifact with **four named reasons** (`malformed_sources`,
   `match_key_not_declared`, `unknown_task_family`, `unknown_work_definition_version`)
   and refuses malformed external shapes by name rather than crashing. It exercises
-  a closed vocabulary of 26 refusal codes; every code is exercised by self-test.
+  a closed vocabulary of 27 refusal codes; every code is exercised by self-test.
 - A minimally corrected candidate (case B) passes the boundary, then **strips
   cleanly into the existing floor** (`task_model` envelope + reconciliation body +
   `constructs()`), carrying no new authority and needing no second conversation.

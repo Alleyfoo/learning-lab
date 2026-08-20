@@ -186,6 +186,54 @@ def test_canary_load_bearing_unresolved() -> None:
           "load-bearing unresolved canary")
 
 
+def test_canary_open_question_status_invalid() -> None:
+    """`open_questions` holds only unresolved facts.
+
+    There is no "settled in place" state: a settled human-supplied fact must be
+    REMOVED from open_questions and represented in human_confirmations. W1-B F1
+    invented "resolved_to_peers" for a state the old validator silently accepted
+    but the producer contract never taught (w1b/F1_ANALYSIS.md, dd9f7c6).
+    """
+    a = _good()
+    a["open_questions"] = [{"id": "Q_auth", "question": "source of truth?",
+                            "load_bearing": True, "status": "resolved"}]
+    codes = wd.validate(a, FIXTXT).codes()
+    check("open_question_status_invalid" in codes,
+          f"'resolved' is not an accepted open-question status: {sorted(codes)}")
+    check("load_bearing_unresolved" in codes,
+          f"a load-bearing open question refuses whatever its status claims: "
+          f"{sorted(codes)}")
+
+
+def test_canary_open_question_invented_status_not_load_bearing() -> None:
+    """An invented status is caught even when the question is not load-bearing.
+
+    The previous contract gated the status check behind `load_bearing`, so an
+    invented value on a non-load-bearing question was undetectable -- F1 carried
+    exactly such an entry ("resolved_by_producer") alongside its refusal.
+    """
+    a = _good()
+    a["open_questions"] = [{"id": "Q_notes", "question": "notes?",
+                            "load_bearing": False,
+                            "status": "resolved_by_producer"}]
+    codes = wd.validate(a, FIXTXT).codes()
+    check("open_question_status_invalid" in codes,
+          f"invented status on a non-load-bearing question: {sorted(codes)}")
+    check("load_bearing_unresolved" not in codes,
+          f"non-load-bearing question must not raise the load-bearing code: "
+          f"{sorted(codes)}")
+
+
+def test_open_question_unresolved_is_accepted() -> None:
+    """The one accepted shape still passes: unresolved and not load-bearing."""
+    a = _good()
+    a["open_questions"] = [{"id": "Q_notes", "question": "notes?",
+                            "load_bearing": False, "status": "unresolved"}]
+    r = wd.validate(a, FIXTXT)
+    check(r.valid, f"unresolved non-load-bearing question is accepted: "
+                   f"{sorted(r.codes())}")
+
+
 def test_canary_unknown_source_role() -> None:
     """Unknown source role / missing required source information."""
     a = _good()
