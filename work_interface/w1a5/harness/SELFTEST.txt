@@ -37,7 +37,8 @@ W1-A5 harness self-test
   PASS  first silent turn -> continue
   PASS  second silent turn -> continue
   PASS  third consecutive silent turn -> limit
-  PASS  externally observable progress resets the streak
+  PASS  next_silent_action takes ONLY the streak; no progress/tool-call input  -- ['silent_streak']
+  PASS  a turn with tool calls but no visible text is still QUIESCENT
   PASS  the continuation carries no business/task content
 
 [D] regression against captured fixtures
@@ -55,14 +56,20 @@ W1-A5 harness self-test
   PASS  D2 silent-turn fixture present
   PASS  fixture carries the REAL silent state; no assistant message fabricated
   PASS  D2's captured turn classifies QUIESCENT, not CONTESTED  -- QUIESCENT
-  PASS  D2 would receive a continuation rather than terminating the run  -- tool_calls=4 -> streak=0
+  PASS  D2 would receive a continuation rather than terminating the run  -- tool_calls=4 -> streak=1
+        tool-calling silent sequence (tool calls must not reset):
+          step 1: tool_calls_total=4 -> CONTINUE (streak=1)
+          step 2: tool_calls_total=7 -> CONTINUE (streak=2)
+          step 3: tool_calls_total=9 -> QUIESCENT_RETRY_LIMIT (streak=2)
+  PASS  exactly two `Continue.` re-entries are permitted  -- got 2
+  PASS  third silent turn WITH tool calls hits QUIESCENT_RETRY_LIMIT  -- QUIESCENT_RETRY_LIMIT
 
 [E] live ACP session in a temporary directory
-  temp run dir: C:\Users\pertt\AppData\Local\Temp\w1a5_selftest_j_8_9_al\runs\E1
+  temp run dir: C:\Users\pertt\AppData\Local\Temp\w1a5_selftest_3nfhryhm\runs\E1
   outcome=COMPLETED turns=1 artifact=True silent_continuations=0
   PASS  session reached COMPLETED  -- artifact written; session terminated immediately
   PASS  artifact detected; first-artifact hard stop preserved
-  PASS  append-only transcript captured  -- 60 messages
+  PASS  append-only transcript captured  -- 78 messages
   PASS  the prompt was sent as TEXT, not as a filepath
   PASS  no session/prompt message names PROMPT.md
   PASS  controlled inputs unchanged across the run

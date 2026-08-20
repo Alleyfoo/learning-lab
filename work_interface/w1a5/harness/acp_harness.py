@@ -26,9 +26,11 @@ W1-A5 changes ONLY those two things.
      rather than CONTESTED, and exactly `Continue.` is sent into the same
      session. That string carries no business or task information; it is a
      lifecycle trigger only. At most two CONSECUTIVE silent continuations are
-     allowed; the counter resets when the agent emits user-visible content or
-     makes externally observable task progress (a new tool call). When the budget
-     is exhausted the run ends CONTESTED: QUIESCENT_RETRY_LIMIT.
+     allowed; the counter resets ONLY when the agent emits non-empty user-visible
+     assistant content. Tool calls do NOT reset it -- activity is not a
+     mechanically established dialogue advance -- so silent turns full of tool
+     calls stay consecutive and reach CONTESTED: QUIESCENT_RETRY_LIMIT. Artifact
+     existence still terminates immediately as COMPLETED.
 
 Unchanged and still enforced: SKILL.md, the fixtures, human_answers.md, the
 validator, the intent table and the answer rendering; the first-artifact hard
@@ -233,14 +235,19 @@ def classify_lifecycle(visible_text: str, artifact_present: bool,
     return DIALOGUE
 
 
-def next_silent_action(silent_streak: int, progress_observed: bool) -> tuple[str, int]:
+def next_silent_action(silent_streak: int) -> tuple[str, int]:
     """Decide what to do about a QUIESCENT turn.
 
-    Externally observable task progress -- a new tool call -- resets the streak,
-    because the agent is working even though it is not speaking. Without progress
-    at most MAX_CONSECUTIVE_SILENT continuations are sent before the run ends."""
-    if progress_observed:
-        return "CONTINUE", 0
+    **Tool calls do NOT reset the streak.** Activity is not a mechanically
+    established completion or dialogue advance: an agent can call tools
+    indefinitely without ever producing an actionable question, which is exactly
+    what W1-A4's D2 did. The streak resets only when the agent emits non-empty
+    user-visible assistant content (handled by the caller, in the DIALOGUE
+    branch); artifact existence terminates the run as COMPLETED before this
+    function is ever reached.
+
+    So a sequence of silent turns -- tool calls or not -- stays consecutive and
+    reaches QUIESCENT_RETRY_LIMIT after MAX_CONSECUTIVE_SILENT continuations."""
     if silent_streak >= MAX_CONSECUTIVE_SILENT:
         return "QUIESCENT_RETRY_LIMIT", silent_streak
     return "CONTINUE", silent_streak + 1
@@ -503,11 +510,14 @@ def run_one(run: str, runs_dir: Path = RUNS_DIR, goose_exe: Path = GOOSE_EXE,
             state = classify_lifecycle(text, artifact.exists(), False)
 
             if state == QUIESCENT:
-                action, silent_streak = next_silent_action(silent_streak, progress)
+                # `progress` is recorded as observation only; it does NOT reset
+                # the streak. Tool calls are activity, not dialogue advance.
+                action, silent_streak = next_silent_action(silent_streak)
                 entry = {"turn": turn + 1, "status": QUIESCENT,
                          "visible_chars": 0,
-                         "progress_observed": progress,
+                         "tool_calls_observed": progress,
                          "tool_calls_total": tools_now,
+                         "streak_reset_by_tool_calls": False,
                          "silent_streak": silent_streak,
                          "action": action}
                 if action == "QUIESCENT_RETRY_LIMIT":
@@ -515,9 +525,11 @@ def run_one(run: str, runs_dir: Path = RUNS_DIR, goose_exe: Path = GOOSE_EXE,
                     s.record_lifecycle(entry)
                     res.outcome = CONTESTED
                     res.reason = ("QUIESCENT_RETRY_LIMIT: the completed turn carried no "
-                                  "user-visible assistant content and no externally "
-                                  f"observable progress after {MAX_CONSECUTIVE_SILENT} "
-                                  "consecutive continuations")
+                                  "user-visible assistant content after "
+                                  f"{MAX_CONSECUTIVE_SILENT} consecutive `Continue.` "
+                                  "re-entries. Tool calls during those turns are "
+                                  "activity, not dialogue advance, and do not reset "
+                                  "the streak")
                     break
                 entry["continuation_sent"] = CONTINUATION
                 res.turn_log.append(entry)

@@ -49,10 +49,25 @@ only, and it is not a canonical answer.
 
 ```text
 at most 2 CONSECUTIVE silent continuations
-the counter RESETS when the agent emits user-visible content, or makes
-    externally observable task progress (a new tool call)
+the counter RESETS ONLY when the agent emits non-empty user-visible content
+tool calls DO NOT reset it -- activity is not a mechanically established
+    completion or dialogue advance
 budget exhausted -> CONTESTED: QUIESCENT_RETRY_LIMIT
 ```
+
+So a sequence of silent turns containing tool calls stays consecutive:
+
+```text
+silent + tool calls        -> Continue. #1
+silent + different tools   -> Continue. #2
+silent + more tools        -> CONTESTED: QUIESCENT_RETRY_LIMIT
+```
+
+Artifact existence still terminates immediately as COMPLETED, before any of this
+is reached. Tool-call counts are still recorded per turn as observation, and the
+record carries `streak_reset_by_tool_calls: false` so the rule is visible in the
+evidence itself. `next_silent_action()` takes only the streak — there is no
+parameter through which activity could reset it.
 
 Every silent re-entry is recorded explicitly in `harness_result.json` **and** in
 the ACP transcript as a `lifecycle` record, so a reader can see exactly why a
@@ -74,10 +89,10 @@ Evaluated after every `session/prompt` returns, in this order:
 5  session/prompt returned an error           -> HARNESS_ERROR
 6  clarification turn limit reached           -> CONTESTED
 7  classify_lifecycle(visible, artifact, infra):
-     QUIESCENT   next_silent_action(streak, progress)
-                   CONTINUE               -> send "Continue.", loop
+     QUIESCENT   next_silent_action(streak)        <- streak only; tools ignored
+                   CONTINUE               -> send "Continue.", streak += 1, loop
                    QUIESCENT_RETRY_LIMIT  -> CONTESTED
-     DIALOGUE    classify_turn(text)
+     DIALOGUE    classify_turn(text)               <- the ONLY streak reset
                    NO_MATCH               -> CONTESTED
                    RECOGNIZED             -> send frozen answers, reset streak
 ```

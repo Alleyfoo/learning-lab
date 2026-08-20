@@ -120,12 +120,19 @@ def part_c() -> None:
           "the continuation is exactly `Continue.`", repr(H.CONTINUATION))
     check(H.MAX_CONSECUTIVE_SILENT == 2, "at most two consecutive continuations")
 
-    check(H.next_silent_action(0, False) == ("CONTINUE", 1), "first silent turn -> continue")
-    check(H.next_silent_action(1, False) == ("CONTINUE", 2), "second silent turn -> continue")
-    a, _ = H.next_silent_action(2, False)
+    check(H.next_silent_action(0) == ("CONTINUE", 1), "first silent turn -> continue")
+    check(H.next_silent_action(1) == ("CONTINUE", 2), "second silent turn -> continue")
+    a, _ = H.next_silent_action(2)
     check(a == "QUIESCENT_RETRY_LIMIT", "third consecutive silent turn -> limit")
-    check(H.next_silent_action(2, True) == ("CONTINUE", 0),
-          "externally observable progress resets the streak")
+
+    # Tool calls must NOT reset the streak: activity is not dialogue advance.
+    import inspect
+    sig = list(inspect.signature(H.next_silent_action).parameters)
+    check(sig == ["silent_streak"],
+          "next_silent_action takes ONLY the streak; no progress/tool-call input",
+          str(sig))
+    check(H.classify_lifecycle("", False, False) == H.QUIESCENT,
+          "a turn with tool calls but no visible text is still QUIESCENT")
 
     canon = {i.canonical for i in H.load_answer_table()}
     check(H.CONTINUATION not in canon and "?" not in H.CONTINUATION,
@@ -168,10 +175,35 @@ def part_d() -> None:
                                  st["infrastructure_failure"])
     check(state == H.QUIESCENT,
           "D2's captured turn classifies QUIESCENT, not CONTESTED", state)
-    action, streak = H.next_silent_action(0, st["tool_calls"] > 0)
+    action, streak = H.next_silent_action(0)
     check(action == "CONTINUE",
           "D2 would receive a continuation rather than terminating the run",
           f"tool_calls={st['tool_calls']} -> streak={streak}")
+
+    # --- the corrected budget, end to end -------------------------------
+    # silent + tool calls -> Continue #1 -> silent + DIFFERENT tool calls ->
+    # Continue #2 -> silent + MORE tool calls -> QUIESCENT_RETRY_LIMIT.
+    # Each step reuses D2's real silent state (empty visible text); only the
+    # tool-call counts vary, and they must not rescue the run.
+    print("        tool-calling silent sequence (tool calls must not reset):")
+    streak, continuations, tool_totals, final = 0, 0, [4, 7, 9], None
+    for step, tools_total in enumerate(tool_totals, 1):
+        state = H.classify_lifecycle(st["agent_visible_text"], False, False)
+        if state != H.QUIESCENT:
+            final = f"unexpected lifecycle state {state}"
+            break
+        action, streak = H.next_silent_action(streak)
+        print(f"          step {step}: tool_calls_total={tools_total} "
+              f"-> {action} (streak={streak})")
+        if action == "CONTINUE":
+            continuations += 1
+        else:
+            final = action
+            break
+    check(continuations == 2,
+          "exactly two `Continue.` re-entries are permitted", f"got {continuations}")
+    check(final == "QUIESCENT_RETRY_LIMIT",
+          "third silent turn WITH tool calls hits QUIESCENT_RETRY_LIMIT", str(final))
 
 
 def part_e() -> None:
