@@ -1,190 +1,176 @@
-# Fidelity / traceability slice 1 — preregistration (CORRECTED, NOT YET IMPLEMENTED)
+# Fidelity / traceability slice 1 — preregistration (REVISED, frozen before implementation)
 
-**Status: corrected per roundtable, and BLOCKED on two mechanical decisions
-(§7).** No checker exists. No calibration has been run. Nothing in
-`work_interface/w1b/` has been touched.
+> ## THIS IS A CALIBRATION, NOT A BLIND WORKER EXPERIMENT
+>
+> The corpus is F1/F2/F3 — three artifacts **already inspected in detail** during
+> the W1-B analysis. The expectations in §5 were **hand-derived from the frozen
+> bytes before the checker was written**. The run therefore falsifies **the
+> instrument**, not the workers. It cannot tell us anything new about
+> `define-lab-process`, and no fidelity claim about worker quality may be drawn
+> from it. A blind application requires a corpus not yet inspected.
 
-Authority: `work_interface/w1b/F1_ANALYSIS.md`, accepted at `dd9f7c6`.
+Authority: `work_interface/w1b/F1_ANALYSIS.md` (accepted `dd9f7c6`) and the
+roundtable decisions recorded in `work_interface/W1A_DISPOSITION.md` lineage.
+No Goose or model execution at any point.
 
-## 1. What this slice measures
+---
 
-The structural validator checks shape, not faithfulness to what the human
-actually supplied. W1-B produced three observations no refusal could see. This
-slice asks, mechanically and without any model:
+## 1. Operation 1 — deterministic attribution
 
-> **Can every Work Definition decision that a delivered human answer governs be
-> traced back to that answer?**
-
-## 2. Mechanism
-
-A deterministic referent checker over two inputs: the **delivered block** (a
-known row→canonical-string map, byte-identical and recorded per run in
-`harness_result.json.block_sha256`) and the **artifact**. Every test is string
-equality or declared-span containment against frozen bytes. **No semantic
-judging, no LLM, no synonym list.**
-
-## 3. Finding types
+Which frozen canonical row(s) a confirmation derives from. **No semantic
+matching, no LLM, no synonyms.**
 
 ```text
-FID-1  UNCITED_HUMAN_FACT      a decision slot that HAS v0 provenance machinery
-                               (`basis` + `confirmation`) and whose governing
-                               canonical answer was delivered, but whose basis is
-                               not `human_confirmed`, or whose `confirmation` does
-                               not resolve to a record carrying that canonical
-                               string
-FID-2  BUNDLED_CONFIRMATION    one human_confirmations[].answer carries TWO OR MORE
-                               distinct delivered canonical answers
-FID-3  PHANTOM_CONFIRMATION    a confirmation answer carrying ZERO delivered
-                               canonical answers
-FID-5  UNRECORDED_HUMAN_ANSWER a delivered canonical answer with no preserving
-                               human_confirmations record anywhere in the artifact
-FID-4  CONTRADICTED_DECISION   a slot value that contradicts its delivered
-                               canonical answer
+normalization (ATTRIBUTION ONLY -- never used to judge byte-exactness)
+    collapse all whitespace runs to a single space; strip ends
+    remove terminal sentence punctuation  [.!?]  from the canonical and the answer
+
+complete attribution
+    for each canonical, LONGEST NORMALIZED FORM FIRST:
+        find its first occurrence in the normalized answer that does not overlap
+        an already-claimed span
+        on success: claim that span, attribute the row
+    a span once claimed cannot be claimed again by a nested shorter canonical
+
+partial attribution -- ONLY when zero complete rows were attributed
+    if the normalized answer is a STRICT PREFIX of exactly one normalized
+    canonical -> attribute that row (partial)
+    if it is a strict prefix of two or more -> UNATTRIBUTED (ambiguous)
 ```
 
-**FID-2 / FID-3 are exclusive**, per roundtable: each confirmation record is
-classified by its canonical count — exactly one → normal, two or more → FID-2,
-zero → FID-3. Every record receives exactly one classification.
+The longest-first + span-claiming rule exists for one observed reason: row 0's
+entire canonical is the string `InvoiceNumber`, which is nested inside row 4's
+canonical. Without it, row 4's text spuriously attributes to row 0.
+
+## 2. Operation 2 — exclusive fidelity classification
+
+Every confirmation record receives **exactly one** classification:
+
+```text
+0 attributable rows                              -> FID-3 PHANTOM_CONFIRMATION
+>= 2 attributable rows                           -> FID-2 BUNDLED_CONFIRMATION
+exactly 1 + answer byte-exact to that canonical  -> normal
+exactly 1 + answer NOT byte-exact                -> FID-6 NONVERBATIM_CONFIRMATION
+```
+
+Byte-exactness is tested on **raw bytes**, never on the normalized form.
+
+`FID-6` carries a deterministic subreason from a closed set:
+
+```text
+TRUNCATED_PREFIX   the answer is a strict prefix of the canonical (content lost)
+TRAILING_CONTENT   the canonical is a strict prefix of the answer (content added)
+EMBEDDED           the canonical appears complete, with text on both sides
+ALTERED            attributed only partially, or present only after normalization
+```
+
+`FID-3` means *invented human speech*. Truncation is **not** invention: a
+truncated answer attributes via the strict-prefix rule and lands in FID-6 with
+`TRUNCATED_PREFIX`. This is the correction that removes the mislabel.
+
+## 3. Findings
+
+```text
+FID-1  UNCITED_HUMAN_FACT       a decision slot WITH v0 provenance machinery
+                                (`basis` + `confirmation`) whose governing canonical
+                                row was delivered, but whose basis is not
+                                `human_confirmed`, or whose `confirmation` does not
+                                resolve to a confirmation attributing EXCLUSIVELY and
+                                BYTE-EXACTLY to that governing row.
+                                A BUNDLED or NONVERBATIM confirmation is NOT
+                                sufficient provenance.
+FID-2  BUNDLED_CONFIRMATION     see §2
+FID-3  PHANTOM_CONFIRMATION     see §2
+FID-4  CONTRADICTED_DECISION    a slot value contradicting its delivered canonical
+FID-5  UNRECORDED_HUMAN_ANSWER  a delivered row whose v0 decision has NO provenance
+                                slot, and which no confirmation attributes to
+                                anywhere in the artifact. It asks whether the
+                                canonical authority was RECORDED at all -- not
+                                whether an output slot cites it, because v0 gives
+                                those slots nothing to cite with.
+FID-6  NONVERBATIM_CONFIRMATION see §2
+```
 
 ### FID-1 is a PROPOSED invariant, not current law
 
-**The requirement that a delivered governing answer must yield
-`basis = "human_confirmed"` is a new fidelity invariant proposed by this slice.
-The current structural validator does not require it and deliberately declines
-to** — `work_definition.py:24-29`:
+The structural validator does not require `basis = "human_confirmed"` when a
+human answer was delivered, and deliberately declines to —
+`work_definition.py:24-29`:
 
 > *"It does not judge whether a `basis` label is the right epistemic label…
 > Whether 'observed' is actually appropriate for a given decision stays with the
 > human/modeller."*
 
-An FID-1 finding is therefore a **measurement**, not a refusal, and must never be
-reported as a validator violation.
+FID-1 is a **measurement**, never a validator violation.
 
-## 4. Slot bindings — only where v0 has provenance machinery
-
-```text
-row 0  match key        -> body.match_on           basis + confirmation   FID-1 eligible
-row 1  Amount/tolerance -> body.compare[Amount]    basis + confirmation   FID-1 eligible
-row 2  currency         -> negative assertion: Currency absent from compare[]   FID-4 only
-row 4  report row       -> output.reports_fields   NO basis/confirmation  FID-5 only
-row 5  context          -> output.context_fields   NO basis/confirmation  FID-5 only
-row 3  source of truth  -> NO v0 slot binding                             OUT OF SCOPE
-rows 6,7 policies       -> not delivered in W1-B                          OUT OF SCOPE
-```
-
-`output.reports_fields` and `output.context_fields` carry **no `basis` and no
-`confirmation`** in v0. FID-1 does not apply to them; FID-5 does. The schema has
-no slot-level provenance there and this slice does not pretend otherwise.
-
-**Row 3 is out of scope for slice 1**, per roundtable — it has no v0
-decision-slot binding. Noted for the roundtable: row 3 *would* be FID-5-checkable
-(does any confirmation preserve the source-of-truth canonical string?), and that
-is deliberately deferred rather than silently dropped. F2 and F3 both produced a
-`Q_source_of_truth` record, so slice 2 could measure it if wanted.
-
-**Rows 6/7 stay out of slice 1.** `on_non_numeric` therefore remains an **observed
-divergence**, reported non-refusing, and is *not* a mechanically judgeable
-contradiction in this corpus: the block deliberately withheld the authoritative
-answer, so there is nothing delivered to contradict.
-
-## 5. Corpus and honesty constraint
-
-Static, over already-frozen artifacts: **F1, F2, F3** primarily; D3/E2/E3
-secondary. **No Goose. No new runs. N unchanged.**
-
-**The expectations in §6 were derived from inspection already performed during
-the W1-B analysis.** The first execution is therefore a **calibration of the
-instrument against hand-derived expectations — not a blind prediction.** It
-falsifies the checker, not the workers. A blind application requires a corpus not
-yet inspected.
-
-## 6. Frozen expectations (pending §7 resolution)
+## 4. Slot bindings
 
 ```text
-F1  FID-1  body.match_on            basis "observed", confirmation null, row 0 delivered
-F1  FID-5  row 4                    no confirmation preserves it
-F1  FID-5  row 5                    no confirmation preserves it
-F1  normal Q_compare_amount         carries exactly row 1
-F2  FID-2  Q_compare_rule           carries rows 1,2,3,4,5 -- five decisions, one record
-F2  normal Q_match_key              carries exactly row 0
-F2  no FID-1 on match_on            basis human_confirmed, confirmation resolves to row 0
-F3  normal Q_match_key              carries exactly row 0
-F3  normal Q_source_of_truth        carries exactly row 3
-all no FID-4                        no slot contradicts a delivered answer
-pass criterion: the checker reproduces this table exactly. Missed and surplus
-                findings cost the same, as in every prior gate.
+row 0  match key        -> body.match_on          basis+confirmation   FID-1 eligible
+row 1  Amount/tolerance -> body.compare[Amount]   basis+confirmation   FID-1 eligible
+row 2  currency         -> negative assertion: Currency absent from compare[]  FID-4
+row 4  report row       -> output.reports_fields  no provenance slot   FID-5 only
+row 5  context          -> output.context_fields  no provenance slot   FID-5 only
+row 3  source of truth  -> NO bound v0 decision slot        OUT of slot-level FID-1
+rows 6,7  policies      -> not delivered in W1-B            OUT of scope entirely
 ```
 
-## 7. BLOCKING — two premises that do not survive contact with the bytes
+**Row 3 stays out of slot-level FID-1** because v0 has no bound decision slot for
+it. It still participates in *attribution* — a confirmation may attribute to row
+3 and be classified — it simply has no slot whose provenance could be checked.
 
-Implementation must not begin until the roundtable settles these.
+**Rows 6/7 stay out.** `on_non_numeric` therefore remains an **observed
+divergence**, reported non-refusing: the block withheld the authoritative answer,
+so there is nothing delivered to contradict.
 
-### 7.1 The stated canary is factually wrong for F3
+## 5. Frozen expectations — hand-derived from the bytes, before implementation
 
-The correction asked to *"preserve the longest-first/non-overlapping-span canary
-so F3 `Q_report_fields` resolves to row 4 only."* It cannot, under exact
-full-string matching:
+### Confirmation classification
 
 ```text
-row 4 canonical : 'The match key (InvoiceNumber) and the compared field (Amount).'
-row 5 canonical : 'Date, Supplier Name, and Status.'
-F3 answer       : 'The match key (InvoiceNumber) and the compared field (Amount) in
-                   report rows. Date, Supplier Name, and Status as context.'
-
-row 4 present in full?  False   <- terminal "." replaced by " in report rows."
-row 5 present in full?  False   <- terminal "." replaced by " as context."
-row 0 present in full?  True    <- "InvoiceNumber", nested inside row 4's phrasing
+F1  Q_compare_amount    rows {1}        byte-exact              normal
+F2  Q_match_key         rows {0}        byte-exact              normal
+F2  Q_compare_rule      rows {1,2,3,4,5}                        FID-2 BUNDLED
+F2  Q_source_of_truth   rows {3} partial, strict prefix         FID-6 TRUNCATED_PREFIX
+F3  Q_match_key         rows {0}        byte-exact              normal
+F3  Q_compare_policy    rows {1}        canonical is a prefix   FID-6 TRAILING_CONTENT
+F3  Q_source_of_truth   rows {3}        byte-exact              normal
+F3  Q_report_fields     rows {4,5}                              FID-2 BUNDLED
 ```
 
-F3 spliced text over both terminal periods. Two candidate normalizations, with
-what each yields:
+Two corrections against the previous draft, both forced by the actual bytes:
+
+- **F3 `Q_report_fields` attributes to rows 4+5, not row 0.** F3 spliced text
+  over both terminal periods (`…(Amount) in report rows.`, `…and Status as
+  context.`), so the rows attach only after terminal-punctuation normalization,
+  and row 0 is discounted as nested inside row 4's claimed span. → FID-2.
+- **F2 `Q_source_of_truth` attributes to row 3 and is FID-6, not FID-3.**
+  `"Neither — both are peer sources."` is a strict prefix of row 3's canonical.
+
+### Slot-level findings
 
 ```text
-(a) exact full-string        -> {row 0} only. Semantically wrong: the record
-                                actually carries spliced rows 4 and 5, and the
-                                row-0 hit is the nesting artifact the canary
-                                exists to suppress. Classified "normal".
-(b) terminal-punctuation-    -> {row 4, row 5} after longest-first span claiming;
-    tolerant                    row 0 falls inside row 4's claimed span and is
-                                discounted. Classified FID-2.
+F1  FID-1  body.match_on          basis "observed" (not human_confirmed)
+F1  FID-5  row 4                  no confirmation attributes to it
+F1  FID-5  row 5                  no confirmation attributes to it
+F2  FID-1  body.compare[Amount]   cites Q_compare_rule, which is BUNDLED
+F3  FID-1  body.compare[Amount]   cites Q_compare_policy, which is NONVERBATIM
+no FID-1 on F2/F3 body.match_on   both cite an exclusive byte-exact confirmation
+no FID-5 on F2 or F3              rows 4 and 5 are attributed somewhere in both
+no FID-4 anywhere                 no slot contradicts a delivered canonical
 ```
 
-**(b) satisfies the canary's intent** — row 0 must not spuriously win — but the
-outcome is rows 4 **and** 5, not "row 4 only". The preregistration cannot be
-frozen until one normalization is chosen and the expected value corrected.
+**Pass criterion:** the checker reproduces this table exactly. Missed and surplus
+findings cost the same, as in every prior gate.
 
-### 7.2 Exclusive classification mislabels a truncated answer
+## 6. Declared limits
 
-```text
-row 3 canonical : 'Neither — both are peer sources. Report what is missing from
-                   either side and differences in the compared field.'
-F2 Q_source_of_truth.answer : 'Neither — both are peer sources.'
-row 3 present in full? False
-```
-
-F2 **truncated** the canonical answer, dropping the half that specifies what to
-report. Under §3's exclusive rule this scores zero canonicals →
-`FID-3 PHANTOM_CONFIRMATION`, i.e. *invented human speech* — which mislabels the
-defect. Truncation is not invention, and the distinction matters: one fabricates
-authority, the other loses instruction.
-
-Options for the roundtable: accept the mislabel; add a distinct truncation
-finding; or define a prefix rule. **Not decided here.**
-
-## 8. Explicitly out of scope for slice 1
-
-- Any judgement of whether a `basis` label is epistemically *right*
-  (`work_definition.py:24-29` places that with the human).
-- Row 3, rows 6/7 (§4).
-- Paraphrase detection. F3's `Q_compare_policy` carries row 1 verbatim and a
-  **paraphrase** of row 2 (*"No, Currency is…"* against canonical *"No. All sample
-  amounts are GBP; …"*). Exact matching sees one canonical and scores it normal.
-  **Paraphrased answers are invisible to this instrument**, and that limit is
-  declared rather than patched — closing it would require semantic judging, which
-  this slice forbids.
-
-## 9. What slice 1 cannot conclude
-
-That a clean result means high fidelity. It measures only whether delivered
-canonical strings are traceable into the artifact's provenance machinery, over
-four rows, on three artifacts, with paraphrase invisible.
+- **Paraphrase is invisible.** F3's `Q_compare_policy` also carries a paraphrase
+  of row 2 (*"No, Currency is not part of the reconciliation rule."* against
+  canonical *"No. All sample amounts are GBP; …"*). Attribution sees one row, not
+  two. Closing this would require semantic judging, which this slice forbids.
+- The checker never judges whether a `basis` label is epistemically right (§3).
+- Rows 3, 6, 7 per §4.
+- A clean result would mean only that delivered canonical strings are traceable
+  into v0's provenance machinery over four rows on three already-inspected
+  artifacts.

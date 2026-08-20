@@ -1,0 +1,23 @@
+
+=== F1 ===
+  Q_compare_amount     rows=[1]  normal
+  FID-1 UNCITED_HUMAN_FACT         body.match_on                basis='observed', not 'human_confirmed'
+  FID-5 UNRECORDED_HUMAN_ANSWER    human_confirmations          delivered canonical recorded nowhere
+  FID-5 UNRECORDED_HUMAN_ANSWER    human_confirmations          delivered canonical recorded nowhere
+
+=== F2 ===
+  Q_match_key          rows=[0]  normal
+  Q_compare_rule       rows=[1, 2, 3, 4, 5]  FID-2 BUNDLED_CONFIRMATION
+  Q_source_of_truth    rows=[3]  FID-6 NONVERBATIM_CONFIRMATION [TRUNCATED_PREFIX]
+  FID-1 UNCITED_HUMAN_FACT         body.compare[Amount]         confirmation 'Q_compare_rule' is FID-2 BUNDLED_CONFIRMATION rows=[1, 2, 3, 4, 5]; provenance must be exclusive and byte-exact
+  FID-2 BUNDLED_CONFIRMATION       human_confirmations[Q_compare_rule] rows=[1, 2, 3, 4, 5]
+  FID-6 NONVERBATIM_CONFIRMATION   human_confirmations[Q_source_of_truth] rows=[3] subreason=TRUNCATED_PREFIX
+
+=== F3 ===
+  Q_match_key          rows=[0]  normal
+  Q_compare_policy     rows=[1]  FID-6 NONVERBATIM_CONFIRMATION [TRAILING_CONTENT]
+  Q_source_of_truth    rows=[3]  normal
+  Q_report_fields      rows=[4, 5]  FID-2 BUNDLED_CONFIRMATION
+  FID-1 UNCITED_HUMAN_FACT         body.compare[Amount]         confirmation 'Q_compare_policy' is FID-6 NONVERBATIM_CONFIRMATION rows=[1]; provenance must be exclusive and byte-exact
+  FID-6 NONVERBATIM_CONFIRMATION   human_confirmations[Q_compare_policy] rows=[1] subreason=TRAILING_CONTENT
+  FID-2 BUNDLED_CONFIRMATION       human_confirmations[Q_report_fields] rows=[4, 5]
