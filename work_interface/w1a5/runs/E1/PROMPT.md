@@ -1,0 +1,43 @@
+This is W1-A5 run E1.
+
+Your run directory is:
+C:\Users\pertt\learning-lab\work_interface\w1a5\runs\E1
+
+First read:
+C:\Users\pertt\learning-lab\work_interface\w1a5\runs\E1\SKILL.md
+
+That file IS the `define-lab-process` skill; you do not need to call `load_skill`. Follow
+that skill for this entire run.
+
+The frozen business-data fixtures are at these absolute paths (read them directly):
+- C:\Users\pertt\learning-lab\work_interface\w1a\fixtures\supplier-statement.txt
+- C:\Users\pertt\learning-lab\work_interface\w1a\fixtures\ledger-book.txt
+
+If your file reader returns empty or errors on these files, use either of these Windows-safe
+read commands (substitute the other fixture path as needed):
+  powershell -Command "Get-Content -Raw 'C:\Users\pertt\learning-lab\work_interface\w1a\fixtures\supplier-statement.txt'"
+  type "C:\Users\pertt\learning-lab\work_interface\w1a\fixtures\supplier-statement.txt"
+
+Discuss the process with me and ask only the business questions required by the skill.
+
+When the definition is complete, write exactly one artifact to:
+C:\Users\pertt\learning-lab\work_interface\w1a5\runs\E1\work_definition.json
+
+Do not inspect Learning Lab validators (`work_interface\work_definition.py`), corrected/oracle
+examples (`work_interface\cases\`), the W0B corrected example, previous W1-A outputs
+(`work_interface\w1a\runs\`), W1-A grader results (`work_interface\w1a\RESULTS.*`), previous
+W1-A2 outputs (`work_interface\w1a2\runs\`), W1-A2 grader results
+(`work_interface\w1a2\RESULTS.*`), the W1-A2 postmortem (`work_interface\w1a2\POSTMORTEM.md`),
+previous W1-A3 outputs (`work_interface\w1a3\`), previous W1-A4 outputs
+(`work_interface\w1a4\`), the frozen human-answer script
+(`work_interface\w1a\human_answers.md`), or the other W1-A5 run directories (`E2`, `E3`). You
+may inspect only: your own `SKILL.md`, the two frozen fixture files above, and information I
+give you during this conversation.
+
+Do not execute the reconciliation itself. The desired artifact is a process definition
+(`work_definition.json`), not reconciliation output or matched/flagged records.
+
+Do not modify `SKILL.md`, the fixtures, repository code, tests, the roadmap, `PRODUCT.md`, or
+any existing evidence.
+
+Stop immediately after `work_definition.json` has been written.

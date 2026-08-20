@@ -1,0 +1,21 @@
+Thank you! Let me clarify based on your answers:
+
+**Summary of what we confirmed:**
+1. **Match key**: `InvoiceNumber` (both sources)
+2. **Compare**: Only `Amount` with `within` comparison and tolerance `"0.01"`
+3. **Currency**: Not compared to reconciliation logic
+4. **Report fields**: `Date`, `Supplier Name`, `Status`
+
+## One clarification I need from you:
+
+The `reports_fields` must be: the match key (`InvoiceNumber`), a field declared in `compare` (`Amount`), or a field listed in `context_fields`. Since you specified `Date`, `Supplier Name`, and `Status` as report fields, but only `Amount` is in `compare`, I need to confirm:
+
+**Q5: Should `InvoiceNumber` also appear in the report (since it's the match key), or should it be excluded?**
+
+And separately:
+
+**Q6: Where do `Date` and `SupplierName` belong — context_fields or compare()?** 
+- If they're in `context_fields`, that makes them valid for `reports_fields`
+- If you want to also compare `Status` (between "UNPAID"/"PAID" in statement and "PENDING"/"CLEARED" in ledger), please confirm
+
+Please answer Q5 and Q6, and I'll write the final `work_definition.json`.

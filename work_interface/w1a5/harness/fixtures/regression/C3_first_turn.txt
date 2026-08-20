@@ -1,0 +1,27 @@
+Let me analyze the fixtures and identify what needs to be confirmed:
+
+## Summary of Observed Fields
+
+**supplier-statement.txt:**
+- `["Date", "Supplier Name", "InvoiceNumber", "Amount", "Currency", "Status"]`
+
+**ledger-book.txt:**
+- `["Date", "ReferenceNumber", "SupplierName", "InvoiceNumber", "Amount", "Status", "Notes"]`
+
+## Questions for you:
+
+1. **Match key**: Looking at the data, both files contain `InvoiceNumber` with identical values (e.g., `ACC-INV-001`). Should I use `InvoiceNumber` as the matching key? Or do you want to match on `Date + InvoiceNumber` combination? The ledger also has a unique `ReferenceNumber` - should that be involved in the match logic?
+
+2. **Compare fields & semantics**: 
+   - For `Amount`: Should this be compared with `exact`, `casefold`, or `within` some tolerance like `"0.01"`?
+   - For `Status`: Should this be compared as `exact` (CLEARED vs PAID might differ)?
+
+3. **Source of truth / classify labels**: Looking at the data, we have `Currency` only in supplier-statement and `ReferenceNumber`, `Notes` only in ledger. Should both sources be treated as peers (neither is authoritative), or is one the source of truth? This determines classification labels like "both_same", "only_left", "only_right".
+
+4. **Output**: Which fields should appear in reports (match key + compared field at minimum)? And what output order (`left_then_right` vs `sorted_by_key`)?
+
+5. **Duplicate key / non-numeric handling**: What behavior if:
+   - Duplicate keys are found?
+   - The amount is non-numeric (should reject the run, or skip that record only)?
+
+Please answer these questions so I can ask just these human_confirmations and write the `work_definition.json`.

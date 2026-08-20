@@ -1,0 +1,16 @@
+{
+  "source": "W1-A4 run D2, turn 1 (captured, not fabricated)",
+  "agent_message_chunks": 0,
+  "agent_visible_text": "",
+  "agent_thought_chunks": 393,
+  "tool_calls": 4,
+  "tool_call_titles": [
+    "read image · C:\\Users\\pertt\\learning-lab\\work_interface\\w1a4\\runs\\D...…",
+    "shell · type \"C:\\Users\\pertt\\learning-lab\\work_interface\\w1a4\\...…",
+    "shell · type \"C:\\Users\\pertt\\learning-lab\\work_interface\\w1a\\f...…",
+    "shell · type \"C:\\Users\\pertt\\learning-lab\\work_interface\\w1a\\f...…"
+  ],
+  "artifact_present": false,
+  "infrastructure_failure": false,
+  "stop_reason_reached": true
+}

@@ -1,0 +1,71 @@
+W1-A5 harness self-test
+
+[A] turn-level matcher (unchanged semantics)
+  PASS  answer table parses 9 intents  -- got 9
+  PASS  human_answers.md matches the frozen hash
+  PASS  single question -> RECOGNIZED {0}
+  PASS  trailing conversational fragment recorded, not fatal
+  PASS  answers emitted in FROZEN TABLE ORDER
+  PASS  zero recognized intents -> NO_MATCH
+  PASS  single answer sent bare (rendering unchanged)
+  PASS  multiple answers use the frozen numbered format (unchanged)
+
+[B] CHANGE 1 -- question presentation normalization
+  PASS  bold-wrapped   `?**` is interrogative
+  PASS  bold-wrapped   `?**` yields a fragment
+  PASS  italic-wrapped `?*` is interrogative
+  PASS  italic-wrapped `?*` yields a fragment
+  PASS  backticked is interrogative
+  PASS  backticked yields a fragment
+  PASS  trailing whitespace is interrogative
+  PASS  trailing whitespace yields a fragment
+  PASS  bold + numbered is interrogative
+  PASS  bold + numbered yields a fragment
+  PASS  `?**` and `?` classify identically  -- [1] vs [1]
+  PASS  emphasis mid-line does not swallow the next question  -- [1, 2]
+  PASS  normalization does not make a statement interrogative
+  PASS  narration still yields no answer
+
+[C] CHANGE 2 -- lifecycle state machine
+  PASS  no visible content, no artifact, no infra failure -> QUIESCENT
+  PASS  whitespace-only content -> QUIESCENT
+  PASS  visible content -> DIALOGUE
+  PASS  artifact present wins over silence -> COMPLETED
+  PASS  infrastructure failure wins -> HARNESS_ERROR
+  PASS  the continuation is exactly `Continue.`  -- 'Continue.'
+  PASS  at most two consecutive continuations
+  PASS  first silent turn -> continue
+  PASS  second silent turn -> continue
+  PASS  third consecutive silent turn -> limit
+  PASS  externally observable progress resets the streak
+  PASS  the continuation carries no business/task content
+
+[D] regression against captured fixtures
+  PASS  W1-A3 C1 still RECOGNIZED incl. intent 0  -- intents=[0, 1, 3, 5]
+  PASS  W1-A3 C2 still RECOGNIZED incl. intent 0  -- intents=[0, 1, 4, 5]
+  PASS  W1-A3 C3 still RECOGNIZED incl. intent 0  -- intents=[0, 1, 2, 3, 8]
+  PASS  D1 failing-turn fixture present
+        D1 detected fragments (2):
+          - Q5: Should `InvoiceNumber` also appear in the report (since it's the match key), or should it be exc
+          - Q6: Where do `Date` and `SupplierName` belong — context_fields or compare()?
+  PASS  D1's TWO markdown-wrapped questions are detected  -- got 2
+  PASS  both detected fragments normalize to a terminal '?'
+  PASS  D1's failing turn no longer scores NO_MATCH  -- intents=[0, 5]
+  PASS  D1 emits only frozen canonical answers
+  PASS  D2 silent-turn fixture present
+  PASS  fixture carries the REAL silent state; no assistant message fabricated
+  PASS  D2's captured turn classifies QUIESCENT, not CONTESTED  -- QUIESCENT
+  PASS  D2 would receive a continuation rather than terminating the run  -- tool_calls=4 -> streak=0
+
+[E] live ACP session in a temporary directory
+  temp run dir: C:\Users\pertt\AppData\Local\Temp\w1a5_selftest_j_8_9_al\runs\E1
+  outcome=COMPLETED turns=1 artifact=True silent_continuations=0
+  PASS  session reached COMPLETED  -- artifact written; session terminated immediately
+  PASS  artifact detected; first-artifact hard stop preserved
+  PASS  append-only transcript captured  -- 60 messages
+  PASS  the prompt was sent as TEXT, not as a filepath
+  PASS  no session/prompt message names PROMPT.md
+  PASS  controlled inputs unchanged across the run
+
+============================================================
+SELF-TEST PASSED

@@ -1,0 +1,35 @@
+I've analyzed both fixtures. Here are the observations:
+
+**supplier-statement.txt:**
+- Header: `Date, Supplier Name, InvoiceNumber, Amount, Currency, Status`
+- Fields: 6 columns
+
+**ledger-book.txt:**
+- Header: `Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes`
+- Fields: 7 columns (includes `ReferenceNumber` and `Notes`)
+
+**Key observations:**
+1. **Potential match keys:** Both have `InvoiceNumber`, `Date`, and supplier names (`Supplier Name` vs `SupplierName` - case/metric difference)
+2. **Compare candidates:** Both have `Amount` field
+3. **Status vocabularies differ:** Statement uses `PAID/UNPAID`; Ledger uses `CLEARED/PENDING`
+
+I need to ask the human only the load-bearing questions required by the skill:
+
+---
+
+**Load-bearing questions for the human:**
+
+1. **Match key question:** Which field(s) identify the *same record* in both files?
+   - Option A: `InvoiceNumber` (e.g., `ACC-INV-001` matches between both)
+   - Option B: `Date` + `SupplierName/Supplier` 
+   - Or something else you observe?
+
+2. **Comparison question:** Which field(s) should be compared, and with what comparison/tolerance?
+   - Candidate: `Amount` — compare as exact decimal match?
+   - Is there any other apparent compare field (e.g., status)?
+
+3. **Output question:** Which fields should appear in the report rows, which can be context?
+
+4. **Status question:** Should we reconcile by matching ledger `CLEARED/PENDING` with statement `PAID/UNPAID`, or is status not a comparison field at all?
+
+Please answer these questions and provide your verbatim answers so I can create the `work_definition.json`.

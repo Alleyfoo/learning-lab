@@ -1,0 +1,34 @@
+I've analyzed both fixture files here is what I observe and need the human's confirmation on load-bearing decisions:
+
+## Observed Fields (mechanical reading)
+
+**supplier-statement.txt:**
+```
+Date, Supplier Name, InvoiceNumber, Amount, Currency, Status
+```
+
+**ledger-book.txt:**
+```
+Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes
+```
+
+## Questions for human confirmation
+
+Per the skill procedure, I need to ask only these minimum load-bearing questions:
+
+1. **Match key**: Should we match records by `InvoiceNumber` (identical string in both files)? Any other field is a better candidate?
+
+2. **Compare fields**: For `Amount`, use `exact` comparison or `within tolerance`? Which specific value should be included in the compare array? (`Amount` appears only in statement/ledger—what about Status since they have different semantics/labels?)
+
+3. **Report fields**: Which exact columns should appear as row names in the output report? (Must match key, compare field, or a context field we declare.)
+
+4. **Context fields**: Any additional fields to carry that become "declared" for reporting purposes?
+
+5. **Authority model**: Are both files peers (neither is source of truth), or is one authoritative over the other?
+
+**Additional semantic check**: The `Status` column has different values in each file:
+- Statement: `PAID`, `UNPAID`
+- Ledger: `CLEARED`, `PENDING`
+— Should we treat Status as a compare field, pass through both as context, or ignore for the reconciliation rule itself?
+
+Please answer these 5 questions verbatim, and I'll synthesize them into `work_definition.json` with proper `human_confirmed` basis citations.
