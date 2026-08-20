@@ -1,0 +1,217 @@
+{
+  "run": "E2",
+  "outcome": "COMPLETED",
+  "reason": "artifact written; session terminated immediately",
+  "turns": 4,
+  "artifact": true,
+  "silent_continuations": 0,
+  "turn_log": [
+    {
+      "turn": 1,
+      "status": "RECOGNIZED",
+      "lifecycle": "DIALOGUE",
+      "recognized_intents": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        8
+      ],
+      "answers_sent": [
+        "InvoiceNumber",
+        "Yes, compare Amount numerically, within 0.01.",
+        "No. All sample amounts are GBP; Currency is not compared and is not part of the rule.",
+        "Neither — both are peer sources. Report what is missing from either side and differences in the compared field.",
+        "The match key (InvoiceNumber) and the compared field (Amount).",
+        "Date, Supplier Name, and Status.",
+        "It is not load-bearing for now; leave it as an open, non-load-bearing question. Do not make it part of the rule."
+      ],
+      "unmatched_fragments": [
+        "Compare fields**: Which fields should be compared between matched records?",
+        "Status` clearly has different textual values (PAID vs CLEARED/PENDING). Should this be compared, and if so, how?",
+        "Are there any other load-bearing differences to compare?",
+        "Classification labels**: For `classify`, I need: `both_same`, `both_different`, `only_left`, `only_right` — are these standard reconciliations (matched records with match/no-match) or something else?"
+      ],
+      "fragments": [
+        {
+          "fragment": "Match key**: The skill requires which field identifies the \"same record\" in both files?",
+          "intents": [
+            0
+          ]
+        },
+        {
+          "fragment": "Is it `InvoiceNumber` alone (since each appears exactly once per supplier, and matches perfectly on InvoiceNumber)?",
+          "intents": [
+            0
+          ]
+        },
+        {
+          "fragment": "Should I combine fields like `(Date + SupplierName + InvoiceNumber)` for more robust matching?",
+          "intents": [
+            0
+          ]
+        },
+        {
+          "fragment": "Compare fields**: Which fields should be compared between matched records?",
+          "intents": []
+        },
+        {
+          "fragment": "Status` clearly has different textual values (PAID vs CLEARED/PENDING). Should this be compared, and if so, how?",
+          "intents": []
+        },
+        {
+          "fragment": "Amount` appears identical in both. Should it be compared with exact, or is that incidental?",
+          "intents": [
+            1
+          ]
+        },
+        {
+          "fragment": "Are there any other load-bearing differences to compare?",
+          "intents": []
+        },
+        {
+          "fragment": "Source of truth**: Is there a clear \"source of truth\" file, or should they be treated as peers?",
+          "intents": [
+            3
+          ]
+        },
+        {
+          "fragment": "Report fields**: Which fields should appear in the `reports_fields` array of the final report row?",
+          "intents": [
+            4
+          ]
+        },
+        {
+          "fragment": "Match key (`InvoiceNumber`)?",
+          "intents": [
+            0
+          ]
+        },
+        {
+          "fragment": "Compared field(s) like `Status` or `Amount`?",
+          "intents": [
+            1
+          ]
+        },
+        {
+          "fragment": "Context fields (`Currency`, `ReferenceNumber`, `Notes`)?",
+          "intents": [
+            2,
+            5,
+            8
+          ]
+        },
+        {
+          "fragment": "Classification labels**: For `classify`, I need: `both_same`, `both_different`, `only_left`, `only_right` — are these standard reconciliations (matched records with match/no-match) or something else?",
+          "intents": []
+        }
+      ],
+      "agent_turn_text": "I've read both fixture files and understand the skill requirements. Let me analyze the observed data before asking my business questions:\n\n**Observed from fixtures:**\n\n| supplier-statement.txt | ledger-book.txt |\n|------------------------|-----------------|\n| Date, Supplier Name, InvoiceNumber, Amount, Currency, Status | Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes |\n\n**Common fields (in both):** `Date`, `SupplierName`, `InvoiceNumber`, `Amount`, `Status`\n**supplier only:** `Currency`\n**ledger only:** `ReferenceNumber`, `Notes`\n\nFrom the data I can see:\n- When InvoiceNumber matches from supplier to ledger, Status shows different values (PAID vs CLEARED/PENDING)\n- All 6 records from supplier have matching InvoiceNumbers in ledger\n\nNow, per the skill instructions, I need to ask only the **load-bearing questions** — those that would change the resulting process:\n\n---\n\n## Questions for you to settle:\n\n1. **Match key**: The skill requires which field identifies the \"same record\" in both files? \n   - Is it `InvoiceNumber` alone (since each appears exactly once per supplier, and matches perfectly on InvoiceNumber)?\n   - Should I combine fields like `(Date + SupplierName + InvoiceNumber)` for more robust matching?\n\n2. **Compare fields**: Which fields should be compared between matched records?\n   - `Status` clearly has different textual values (PAID vs CLEARED/PENDING). Should this be compared, and if so, how?\n   - `Amount` appears identical in both. Should it be compared with exact, or is that incidental?\n   - Are there any other load-bearing differences to compare?\n\n3. **Source of truth**: Is there a clear \"source of truth\" file, or should they be treated as peers? (e.g., if one record exists only in supplier but not ledger)\n\n4. **Report fields**: Which fields should appear in the `reports_fields` array of the final report row?\n   - Match key (`InvoiceNumber`)?\n   - Compared field(s) like `Status` or `Amount`?\n   - Context fields (`Currency`, `ReferenceNumber`, `Notes`)?\n\n5. **Classification labels**: For `classify`, I need: `both_same`, `both_different`, `only_left`, `only_right` — are these standard reconciliations (matched records with match/no-match) or something else?\n\nPlease answer these questions so I can build the correct `work_definition.json`."
+    },
+    {
+      "turn": 2,
+      "status": "RECOGNIZED",
+      "lifecycle": "DIALOGUE",
+      "recognized_intents": [
+        0,
+        1
+      ],
+      "answers_sent": [
+        "InvoiceNumber",
+        "Yes, compare Amount numerically, within 0.01."
+      ],
+      "unmatched_fragments": [
+        "Is that correct?"
+      ],
+      "fragments": [
+        {
+          "fragment": "Records where Amounts match within 0.01?",
+          "intents": [
+            1
+          ]
+        },
+        {
+          "fragment": "Records where Amounts differ by >0.01 but InvoiceNumber matches?",
+          "intents": [
+            0,
+            1
+          ]
+        },
+        {
+          "fragment": "Is that correct?",
+          "intents": []
+        }
+      ],
+      "agent_turn_text": "Let me clarify my understanding of your answers:\n\n- **Match key**: `InvoiceNumber` (from both sources, human_confirmed)\n- **Compare**: `Amount` with comparison=`within`, tolerance=`\"0.01\"` (human_confirmed)\n- **Currency**: Not compared, open question (non-load-bearing as you asked)\n- **Sources**: Peer/equals (no source of truth)\n- **reports_fields**: [InvoiceNumber, Amount] (the match key + the compared field)\n- **context_fields**: Date, SupplierName, Status (to carry forward for context)\n- **Status differences** (PAID↔CLEARED or PAID/PENDING): Open non-load-bearing question\n- **output_order**: `sorted_by_key` (all records exist in both files)\n\nOne quick question before I build the artifact:\n\nFor `classify`, since you're comparing `Amount` with tolerance, what label should be applied for:\n- Records where Amounts match within 0.01? → `both_same`\n- Records where Amounts differ by >0.01 but InvoiceNumber matches? → `both_different`\n\nIs that correct? (This assumes all records exist in both files per the data, so only `only_left` and `only_right` would apply if missing records are ever detected.)"
+    },
+    {
+      "turn": 3,
+      "status": "RECOGNIZED",
+      "lifecycle": "DIALOGUE",
+      "recognized_intents": [
+        0,
+        1,
+        4,
+        5
+      ],
+      "answers_sent": [
+        "InvoiceNumber",
+        "Yes, compare Amount numerically, within 0.01.",
+        "The match key (InvoiceNumber) and the compared field (Amount).",
+        "Date, Supplier Name, and Status."
+      ],
+      "unmatched_fragments": [
+        "Options: `refuse_run` or `refuse_key`. Given your data, there's no duplication—what's the desired behavior anyway?",
+        "Open question**: Is \"Status\" difference between PAID/CLEARED/PENDING a non-load-bearing open question to record?"
+      ],
+      "fragments": [
+        {
+          "fragment": "output_order`**: Since both sources are peers with all records existing in both, should the output be `left_then_right` (preserve supplier order) or `sorted_by_key` (sort by InvoiceNumber)?",
+          "intents": [
+            0
+          ]
+        },
+        {
+          "fragment": "on_duplicate_key` policy**: What should happen if the same InvoiceNumber appears multiple times in one source but not the other?",
+          "intents": [
+            0
+          ]
+        },
+        {
+          "fragment": "Options: `refuse_run` or `refuse_key`. Given your data, there's no duplication—what's the desired behavior anyway?",
+          "intents": []
+        },
+        {
+          "fragment": "Should the report row show just the match key and compared field (`[InvoiceNumber, Amount]`) or include Date/SupplierName/Status as context?",
+          "intents": [
+            0,
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "fragment": "Open question**: Is \"Status\" difference between PAID/CLEARED/PENDING a non-load-bearing open question to record?",
+          "intents": []
+        }
+      ],
+      "agent_turn_text": "Thank you for clarifying questions 1 and 2. A few more load-bearing details I need before building the artifact:\n\n1. **`output_order`**: Since both sources are peers with all records existing in both, should the output be `left_then_right` (preserve supplier order) or `sorted_by_key` (sort by InvoiceNumber)?\n\n2. **`on_duplicate_key` policy**: What should happen if the same InvoiceNumber appears multiple times in one source but not the other? Options: `refuse_run` or `refuse_key`. Given your data, there's no duplication—what's the desired behavior anyway?\n\n3. **`reported_fields` vs `context_fields`**: \n   - You mentioned \"Date, SupplierName, and Status\" should be reported in #6.\n   - But you also asked about comparing `Amount` and missing records in both sources (#4).\n   - Should the report row show just the match key and compared field (`[InvoiceNumber, Amount]`) or include Date/SupplierName/Status as context? (These can't appear in `reports_fields` unless declared in `context_fields`.)\n\n4. **Open question**: Is \"Status\" difference between PAID/CLEARED/PENDING a non-load-bearing open question to record?"
+    }
+  ],
+  "hashes_before": {
+    "PROMPT.md": "0901a0c4376441765af5b9df9868bee3d173643845c8a6e6d8fb7e6a3ae6550e",
+    "SKILL.md": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  },
+  "hashes_after": {
+    "PROMPT.md": "0901a0c4376441765af5b9df9868bee3d173643845c8a6e6d8fb7e6a3ae6550e",
+    "SKILL.md": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  }
+}

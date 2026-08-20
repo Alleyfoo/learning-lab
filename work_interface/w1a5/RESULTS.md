@@ -14,8 +14,8 @@ safe to enter the existing modelling/preview path*, NOT *established*.
 | run | status | skill_match | codes (if refused) | authority | override keys | sha256 |
 |---|---|---|---|---|---|---|
 | E1 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| E2 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| E3 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
+| E2 | **PASS** | yes |  | None |  | `2b7b424233dd` |
+| E3 | **REFUSED** | yes | observed_field_not_in_source, output_field_not_declared | None |  | `0b187989a642` |
 
 ## Detail
 
@@ -23,14 +23,13 @@ safe to enter the existing modelling/preview path*, NOT *established*.
 
 no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
 
-### E2 -- NO_ARTIFACT
+### E3 -- REFUSED
 
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### E3 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
+- `observed_field_not_in_source` @ `<work_definition>:sources.statement` -- ' Supplier Name' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']
+- `output_field_not_declared` @ `<work_definition>:output` -- 'Date' is named in the output but is neither the match key, a compared field, nor declared context
+- `output_field_not_declared` @ `<work_definition>:output` -- ' Supplier Name' is named in the output but is neither the match key, a compared field, nor declared context
+- `output_field_not_declared` @ `<work_definition>:output` -- 'Status' is named in the output but is neither the match key, a compared field, nor declared context
 
 ## Pass rate
 
-**0/3 PASS** (primary W1-A5 success criterion: 3/3).
+**1/3 PASS** (primary W1-A5 success criterion: 3/3).

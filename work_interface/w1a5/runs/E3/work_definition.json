@@ -1,0 +1,87 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "supplier-ledger-reconcile",
+  "provenance": {
+    "producer": "goose-w1a5-e3",
+    "skill": "define-lab-process",
+    "produced_at": "2026-08-20"
+  },
+  "purpose": "Reconcile supplier statement with internal ledger using InvoiceNumber as the unique identifier, comparing Amount within currency tolerance.",
+  "sources": {
+    "statement": {
+      "role_label": "Supplier Statement",
+      "fixture": "supplier-statement.txt",
+      "observed_fields": ["Date", " Supplier Name", "InvoiceNumber", "Amount", "Currency", "Status"],
+      "basis": "observed"
+    },
+    "ledger": {
+      "role_label": "Internal Ledger Book",
+      "fixture": "ledger-book.txt",
+      "observed_fields": ["Date", "ReferenceNumber", "SupplierName", "InvoiceNumber", "Amount", "Status", "Notes"],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "statement",
+    "right": "ledger",
+    "match_on": {
+      "left_field": "InvoiceNumber",
+      "right_field": "InvoiceNumber",
+      "basis": "human_confirmed",
+      "confirmation": "C_match_key"
+    },
+    "compare": [
+      {
+        "field": "Amount",
+        "comparison": "within",
+        "tolerance": "0.01",
+        "basis": "human_confirmed",
+        "confirmation": "C_compare_method"
+      }
+    ],
+    "classify": {
+      "both_same": "match",
+      "both_different": "discrepancy",
+      "only_left": "statement_only",
+      "only_right": "ledger_only"
+    },
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_run",
+    "on_non_numeric": "refuse_key"
+  },
+  "output": {
+    "reports_fields": ["Date", " Supplier Name", "InvoiceNumber", "Amount", "Status"],
+    "context_fields": ["Currency", "ReferenceNumber", "Notes"]
+  },
+  "human_confirmations": [
+    {
+      "id": "C_match_key",
+      "question": "Which field identifies the same record in both files?",
+      "answer": "InvoiceNumber",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "C_compare_method",
+      "question": "For the Amount field, should we use exact comparison or within tolerance, and if within, what tolerance value?",
+      "answer": "Yes, compare Amount numerically, within 0.01.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "C_source_truth",
+      "question": "If a record exists on both sides but statuses differ, which source is the authority for classification?",
+      "answer": "Neither — both are peer sources. Report what is missing from either side and differences in the compared field.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "C_reports_fields",
+      "question": "Which fields should appear in the reconciled output report rows?",
+      "answer": "Date, Supplier Name, Status.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [],
+  "requested_destination": "review_only",
+  "requested_delivery": { "format": "json_discrepancy_report" },
+  "requested_authority": null
+}

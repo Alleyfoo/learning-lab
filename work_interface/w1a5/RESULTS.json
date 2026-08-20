@@ -18,8 +18,14 @@
       "skill_sha256": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1a5\\runs\\E2\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "2b7b424233dd472f554f6e3e828f4336cdb648230520076f03f5ad967932df39",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "E3",
@@ -28,8 +34,38 @@
       "skill_sha256": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1a5\\runs\\E3\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "0b187989a6428626e6797593af4989223bedf96c86c41038fb589048c3b646e6",
+      "status": "REFUSED",
+      "codes": [
+        "observed_field_not_in_source",
+        "output_field_not_declared"
+      ],
+      "problems": [
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.statement",
+          "detail": "' Supplier Name' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']"
+        },
+        {
+          "code": "output_field_not_declared",
+          "where": "<work_definition>:output",
+          "detail": "'Date' is named in the output but is neither the match key, a compared field, nor declared context"
+        },
+        {
+          "code": "output_field_not_declared",
+          "where": "<work_definition>:output",
+          "detail": "' Supplier Name' is named in the output but is neither the match key, a compared field, nor declared context"
+        },
+        {
+          "code": "output_field_not_declared",
+          "where": "<work_definition>:output",
+          "detail": "'Status' is named in the output but is neither the match key, a compared field, nor declared context"
+        }
+      ],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     }
   ]
 }
