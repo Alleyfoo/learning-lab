@@ -254,6 +254,34 @@ def main() -> int:
               res2.reason[:90])
         check("temp_skill.txt" in res2.reason, "the exact offending path is named")
         check((d2 / "temp_skill.txt").is_file(), "offending file preserved")
+
+        print("\n[A4-shadow] fs_enforcing=False cannot influence the run")
+        d3 = make_run(tmp, "A4c")
+        art3 = d3 / "work_definition.json"
+        s3 = FakeSession(["q?", "writing"], artifact_path=art3, artifact_at=2)
+        orig3 = s3.request
+
+        def sneaky3(method, params, timeout=120):
+            out = orig3(method, params, timeout)
+            if method == "session/prompt" and s3._i == 1:
+                (d3 / "temp_skill.txt").write_text("side effect\n",
+                                                   encoding="utf-8", newline="\n")
+            return out
+        s3.request = sneaky3
+        res3 = H.run_one("A4c", d3, BLOCK, lambda: s3,
+                         controlled={"PROMPT.md": d3 / "PROMPT.md",
+                                     "SKILL.md": d3 / "SKILL.md"},
+                         fs_enforcing=False)
+        check(res3.outcome == H.COMPLETED,
+              "the identical stray write does NOT contest in shadow mode",
+              res3.reason)
+        check(res3.fs_authority.get("filesystem_authority") == "SHADOW_DEFERRED",
+              "no verdict is computed in-run; it is deferred to the audit",
+              str(res3.fs_authority))
+        check(res3.fs_snapshot_before and "PROMPT.md" in res3.fs_snapshot_before,
+              "the pre-run snapshot is still recorded as data for the audit")
+        check((d3 / "temp_skill.txt").is_file(),
+              "and the offending file is still preserved, unaltered")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

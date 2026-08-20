@@ -127,6 +127,7 @@ class RunResult:
     silent_turns: int = 0
     turn_log: list = field(default_factory=list)
     fs_authority: dict = field(default_factory=dict)
+    fs_snapshot_before: dict = field(default_factory=dict)
     hashes_before: dict = field(default_factory=dict)
     hashes_after: dict = field(default_factory=dict)
 
@@ -135,12 +136,19 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
             artifact_name: str = "work_definition.json",
             controlled: dict[str, Path] | None = None,
             all_runs: list[str] | None = None,
-            forbidden_extra: list[str] | None = None) -> RunResult:
+            forbidden_extra: list[str] | None = None,
+            fs_enforcing: bool = True) -> RunResult:
     """Drive one worker session under the r2 lifecycle.
 
     `session_factory` returns an object exposing request/drain_agent_text/
     record_lifecycle/close plus `tool_payloads` and `unoffered_requests`, so the
     lifecycle is testable offline with a scripted transport.
+
+    `fs_enforcing=False` puts A4 in SHADOW mode: the pre-run snapshot is
+    recorded as data, no verdict is computed in-run, and the filesystem state
+    can never terminate, alter, rescue or otherwise influence the run. An
+    experiment that wants A4 descriptive rather than binding uses this and
+    audits after the complete batch.
     """
     run_dir = Path(run_dir).resolve()
     artifact = run_dir / artifact_name
@@ -155,6 +163,7 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
 
     res.hashes_before = {k: sha256_file(v) for k, v in controlled.items()}
     fs_before = A4.snapshot(run_dir)
+    res.fs_snapshot_before = fs_before
     prompt_text = (run_dir / "PROMPT.md").read_text(encoding="utf-8")
 
     s = session_factory()
@@ -272,8 +281,13 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
         res.hashes_after = {k: sha256_file(v) for k, v in controlled.items()
                             if v.exists()}
         # --- A4: independent, non-lifecycle -----------------------------
-        res.fs_authority = A4.record(A4.verdict(fs_before, A4.snapshot(run_dir),
-                                                designated=artifact_name))
+        if fs_enforcing:
+            res.fs_authority = A4.record(A4.verdict(fs_before,
+                                                    A4.snapshot(run_dir),
+                                                    designated=artifact_name))
+        else:
+            # SHADOW: recorded, never decided here.
+            res.fs_authority = {"filesystem_authority": "SHADOW_DEFERRED"}
 
     if res.outcome == COMPLETED:
         changed = [k for k in res.hashes_before
@@ -281,7 +295,8 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
         if changed:
             res.outcome = CONTESTED
             res.reason = f"controlled input mutated during the run: {changed}"
-        elif res.fs_authority.get("filesystem_authority") != "CLEAN":
+        elif fs_enforcing and \
+                res.fs_authority.get("filesystem_authority") != "CLEAN":
             res.outcome = CONTESTED
             res.reason = f"CONTESTED: {res.fs_authority['reason']}"
     return res

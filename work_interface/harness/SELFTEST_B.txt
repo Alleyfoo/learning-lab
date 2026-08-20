@@ -63,5 +63,11 @@ SURFACE B -- single-block lifecycle self-test (no Goose, no model)
   PASS  the exact offending path is named
   PASS  offending file preserved
 
+[A4-shadow] fs_enforcing=False cannot influence the run
+  PASS  the identical stray write does NOT contest in shadow mode  -- artifact written; session terminated immediately
+  PASS  no verdict is computed in-run; it is deferred to the audit  -- {'filesystem_authority': 'SHADOW_DEFERRED'}
+  PASS  the pre-run snapshot is still recorded as data for the audit
+  PASS  and the offending file is still preserved, unaltered
+
 ========================================================================
 SURFACE B SELF-TEST PASSED

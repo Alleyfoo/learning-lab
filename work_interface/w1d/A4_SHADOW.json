@@ -1,0 +1,17 @@
+{
+  "binding": false,
+  "runs": [
+    {
+      "run": "K1",
+      "a4_shadow": "NO_RUN_RECORD"
+    },
+    {
+      "run": "K2",
+      "a4_shadow": "NO_RUN_RECORD"
+    },
+    {
+      "run": "K3",
+      "a4_shadow": "NO_RUN_RECORD"
+    }
+  ]
+}

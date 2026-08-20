@@ -1,0 +1,107 @@
+======================================================================
+W1-D preparation verification
+======================================================================
+
+[1] Run directories exist and contain only frozen inputs
+PASS  K1: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+PASS  K2: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+PASS  K3: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+
+[2] All three SKILL.md match the frozen define-lab-process r2 skill sha256
+PASS  K1: SKILL.md sha256=0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a (frozen=0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a)
+PASS  K2: SKILL.md sha256=0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a (frozen=0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a)
+PASS  K3: SKILL.md sha256=0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a (frozen=0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a)
+
+[3] Operator prompts point to distinct absolute run paths
+PASS  K1: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  K2: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  K3: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  distinct artifact targets: ['w1d\\runs\\K1\\work_definition.json', 'w1d\\runs\\K2\\work_definition.json', 'w1d\\runs\\K3\\work_definition.json']
+
+[4] Fixtures unchanged from W1-A (sha256 match)
+PASS  supplier-statement.txt: sha256=d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb (expected d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb)
+PASS  ledger-book.txt: sha256=284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e (expected 284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e)
+
+[5] Human answers unchanged from W1-A (sha256 match)
+PASS  human_answers.md sha256=5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd (expected 5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd)
+
+[6] W0D validator self-test + W1-A test suite still pass
+PASS  work_definition.py --self-test exit=0 (SELF-TEST PASSED (all 27 Work-Definition codes exercised / malformed external shape refused by name / authority invariant independent of self-claims / observed fields cross-checked against fixtures / valid proposal strips to taskmodel shape))
+PASS  pytest test_work_definition.py exit=0 (17 passed in 0.04s)
+
+[7] Grader on empty K1-K3 returns three NO_ARTIFACT without mutation
+PASS  grader exit=0, statuses={'K1': 'NO_ARTIFACT', 'K2': 'NO_ARTIFACT', 'K3': 'NO_ARTIFACT'}, mutated=[]
+
+[8] Known-good W0D oracle still grades PASS (temp copy, no mutation)
+PASS  oracle valid=True codes=[]
+
+[9] No unrelated or protected files staged in git
+PASS  protected files staged: []
+
+[10] K1/K2/K3 cannot reach the old matcher
+PASS  no code defines or calls 'classify_turn' (docstrings may mention it)
+PASS  no code defines or calls 'intents_in' (docstrings may mention it)
+PASS  no code defines or calls 'segment_fragments' (docstrings may mention it)
+PASS  no code defines or calls 'match_message' (docstrings may mention it)
+PASS  no code defines or calls 'UNIQUE_MATCH' (docstrings may mention it)
+PASS  no code defines or calls 'MULTIPLE_MATCHES' (docstrings may mention it)
+PASS  no code defines or calls 'load_answer_table' (docstrings may mention it)
+PASS  imports no W1-A harness module ['__future__', 'dataclasses', 'fs_backstop', 'hashlib', 'json', 'os', 'pathlib', 'subprocess', 'sys', 'threading', 'time']
+PASS  imported module exposes no classify_turn()
+PASS  imported module exposes no intents_in()
+PASS  imported module exposes no segment_fragments()
+PASS  imported module exposes no match_message()
+PASS  imported module exposes no load_answer_table()
+PASS  no W1-A harness module is loaded ([])
+
+[11] Canonical block integrity
+PASS  frozen table reads 9 rows (got 9)
+      block: 693 bytes, sha256=46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330
+PASS  mandated rows are (0, 1, 2, 3, 4, 5)
+PASS  row 0: question and answer present verbatim
+PASS  row 1: question and answer present verbatim
+PASS  row 2: question and answer present verbatim
+PASS  row 3: question and answer present verbatim
+PASS  row 4: question and answer present verbatim
+PASS  row 5: question and answer present verbatim
+PASS  answers in frozen table order [68, 154, 250, 389, 552, 661]
+PASS  excluded row 6 does not leak into the block
+PASS  excluded row 7 does not leak into the block
+PASS  excluded row 8 does not leak into the block
+PASS  worker-owned term 'refuse_run' absent from the block
+PASS  worker-owned term 'refuse_key' absent from the block
+PASS  worker-owned term 'left_then_right' absent from the block
+PASS  worker-owned term 'sorted_by_key' absent from the block
+PASS  worker-owned term 'output_order' absent from the block
+PASS  worker-owned term 'both_same' absent from the block
+PASS  worker-owned term 'only_left' absent from the block
+PASS  worker-owned term 'classify' absent from the block
+PASS  worker-owned term 'purpose' absent from the block
+PASS  every block line is verbatim from human_answers.md []
+
+[12] Frozen fidelity checker is pinned and intact
+PASS  fidelity_gate.py present
+PASS  frozen fidelity_check.py present
+PASS  fidelity_gate.py pins a checker sha256
+PASS  frozen checker matches the pin: 11984c096b8fd74f vs 11984c096b8fd74f
+PASS  frozen checker imports no dialogue harness ['__future__', 'argparse', 'block_harness', 'dataclasses', 'json', 'pathlib', 're', 'sys']
+
+[13] Fidelity gate on empty K1-K3 returns three NO_ARTIFACT
+PASS  fidelity_gate exit=0
+PASS  statuses={'K1': 'NO_ARTIFACT', 'K2': 'NO_ARTIFACT', 'K3': 'NO_ARTIFACT'}
+PASS  gate mutated nothing: []
+
+[14] Surface-B lifecycle adopted; A4 shadow is non-binding
+PASS  the activation is exactly 'Continue.' 'Continue.'
+PASS  next_message cannot see the agent text
+PASS  block once, then continuations
+PASS  tool activity cannot reset the silent streak
+PASS  silent budget is two
+PASS  the batch runs A4 in SHADOW mode (fs_enforcing=False)
+PASS  session mode is auto -- same worker capability environment as W1-C
+PASS  the fail-closed permission policy is NOT adopted in W1-D
+PASS  the canonical block is pinned to the W1-B/W1-C value
+PASS  skill r2 is pinned
+
+======================================================================
+PREP VERIFICATION PASSED (all 14 checks).

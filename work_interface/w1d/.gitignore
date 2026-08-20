@@ -1,0 +1,10 @@
+# W1-D keeps everything. Nothing here is ignored.
+#
+# Tracked as evidence, exactly as the tools leave them:
+#   runs/K*/work_definition.json   the agent artifact, where one is produced
+#   runs/K*/acp_transcript.jsonl   append-only ACP transcript + lifecycle records
+#   runs/K*/harness_result.json    outcome, reason, per-turn log with what was sent,
+#                                  pre-run filesystem snapshot, controlled hashes
+#   RESULTS.md / RESULTS.json      the STRUCTURAL grader's record   (primary)
+#   FIDELITY.md / FIDELITY.json    the FIDELITY gate's record       (primary)
+#   A4_SHADOW.md / A4_SHADOW.json  the descriptive shadow audit     (NOT a verdict)
