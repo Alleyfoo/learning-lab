@@ -1,0 +1,35 @@
+{
+  "frozen_skill_sha256": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
+  "runs": [
+    {
+      "run": "D1",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1a4\\runs\\D1",
+      "skill_present": true,
+      "skill_sha256": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1a4\\runs\\D1\\work_definition.json",
+      "status": "NO_ARTIFACT",
+      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+    },
+    {
+      "run": "D2",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1a4\\runs\\D2",
+      "skill_present": true,
+      "skill_sha256": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1a4\\runs\\D2\\work_definition.json",
+      "status": "NO_ARTIFACT",
+      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+    },
+    {
+      "run": "D3",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1a4\\runs\\D3",
+      "skill_present": true,
+      "skill_sha256": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1a4\\runs\\D3\\work_definition.json",
+      "status": "NO_ARTIFACT",
+      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+# W1-A4 keeps everything, as W1-A3 does. Nothing here is ignored.
+#
+# Tracked as evidence, exactly as the harness and grader leave them:
+#   runs/D*/work_definition.json   the agent artifact, where one is produced
+#   runs/D*/acp_transcript.jsonl   append-only ACP transcript, in and out
+#   runs/D*/harness_result.json    outcome, COMPLETE reason, per-turn matcher log,
+#                                  controlled-input hashes before and after
+#   RESULTS.md / RESULTS.json      the grader's record

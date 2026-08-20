@@ -1,0 +1,47 @@
+W1-A4 harness self-test
+
+[A] turn-level matcher (no model)
+  PASS  answer table parses 9 intents  -- got 9
+  PASS  human_answers.md matches the frozen hash
+  PASS  single question -> RECOGNIZED {0}  -- ['InvoiceNumber']
+  PASS  two distinct intents -> both, once each  -- [1, 2]
+  PASS  load-bearing question + trailing conversational fragment -> RECOGNIZED
+  PASS  the trailing fragment is RECORDED as unmatched  -- ['Any other field is a better candidate?']
+  PASS  the unmatched fragment receives no invented response
+  PASS  two formulations of one intent collapse to one intent+answer
+  PASS  one fragment spanning two intents recognizes both  -- [1, 2]
+  PASS  answers are emitted in FROZEN TABLE ORDER, not question order
+  PASS  zero recognized intents -> NO_MATCH
+  PASS  turn with no question -> NO_MATCH
+  PASS  a single answer is sent bare
+  PASS  several answers use the frozen numbered format
+  PASS  every emitted answer is verbatim from the frozen table
+  PASS  every emitted answer is verbatim from the frozen table
+
+[B] regression: the exact turns W1-A3 died on
+  PASS  C1 first turn -> RECOGNIZED  -- status=RECOGNIZED
+  PASS  C1 resolves the match key to intent 0  -- intents=[0, 1, 3, 5]
+        C1: intents=[0, 1, 3, 5]  unmatched_fragments=3
+  PASS  C1 emits only frozen canonical answers
+  PASS  C2 first turn -> RECOGNIZED  -- status=RECOGNIZED
+  PASS  C2 resolves the match key to intent 0  -- intents=[0, 1, 4, 5]
+        C2: intents=[0, 1, 4, 5]  unmatched_fragments=4
+  PASS  C2 emits only frozen canonical answers
+  PASS  C3 first turn -> RECOGNIZED  -- status=RECOGNIZED
+  PASS  C3 resolves the match key to intent 0  -- intents=[0, 1, 2, 3, 8]
+        C3: intents=[0, 1, 2, 3, 8]  unmatched_fragments=5
+  PASS  C3 emits only frozen canonical answers
+
+[C] live ACP session in a temporary directory
+  temp run dir: C:\Users\pertt\AppData\Local\Temp\w1a4_selftest__x2se_z3\runs\D1
+  outcome=COMPLETED turns=1 artifact=True
+  reason=artifact written; session terminated immediately
+  PASS  session reached COMPLETED  -- artifact written; session terminated immediately
+  PASS  artifact detected and present on disk
+  PASS  append-only transcript captured  -- 78 messages
+  PASS  the prompt was sent as TEXT, not as a filepath
+  PASS  no session/prompt message names PROMPT.md
+  PASS  controlled inputs unchanged across the run
+
+============================================================
+SELF-TEST PASSED
