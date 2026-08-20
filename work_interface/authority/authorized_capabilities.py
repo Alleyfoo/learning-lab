@@ -191,6 +191,13 @@ def main(argv=None) -> int:
         print("usage: authorized_capabilities.py <run_dir>", file=sys.stderr)
         return 2
     run_dir = Path(argv[0]).resolve()
+    # MCP stdio is UTF-8. sys.stdin defaults to the console codepage on Windows
+    # (cp1252 here), which silently mangles every non-ASCII byte on the INPUT
+    # path -- an em dash arrived as three characters and was written back
+    # double-encoded, voiding W1-G's FIDELITY layer (see ../w1g/CLOSURE.md §3).
+    # Responses were never affected because json.dumps escapes non-ASCII.
+    if getattr(sys.stdin, "reconfigure", None) is not None:
+        sys.stdin.reconfigure(encoding="utf-8", errors="strict")
     for line in sys.stdin:
         line = line.strip()
         if not line:

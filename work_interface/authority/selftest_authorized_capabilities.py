@@ -180,6 +180,38 @@ def main() -> int:
         finally:
             proc.terminate()
 
+        print("\n[9b] W1-G regression: non-ASCII survives the stdio round trip")
+        # The em dash in canonical block row 3 arrived as UTF-8, was decoded by
+        # a cp1252 sys.stdin, and was written back double-encoded -- voiding
+        # W1-G's FIDELITY layer (../w1g/CLOSURE.md 3). Reads never showed it
+        # because json.dumps escapes non-ASCII on the way out.
+        run_u = fixture_run_dir()
+        payload = ('{"answer": "Neither — both are peer sources.", '
+                   '"note": "äöü € ’"}')
+        proc2 = subprocess.Popen(
+            [sys.executable, str(HERE / "authorized_capabilities.py"),
+             str(run_u)],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL, bufsize=0)
+        try:
+            req = {"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                   "params": {"name": "write_work_definition",
+                              "arguments": {"content": payload}}}
+            # written as real UTF-8 bytes, exactly as Goose sends them
+            proc2.stdin.write(
+                (json.dumps(req, ensure_ascii=False) + "\n").encode("utf-8"))
+            proc2.stdin.flush()
+            proc2.stdout.readline()
+        finally:
+            proc2.terminate()
+        on_disk = (run_u / "work_definition.json").read_text(encoding="utf-8")
+        check(on_disk == payload,
+              "non-ASCII content is written byte-identical over stdio",
+              f"{on_disk[:34]!r}")
+        check("—" in on_disk and "â" not in on_disk,
+              "the em dash survives and is NOT double-encoded")
+        shutil.rmtree(run_u.parent, ignore_errors=True)
+
         print("\n[10] policy: the writer clause is opt-in and cannot be widened")
 
         def rq(raw):
