@@ -1,0 +1,32 @@
+{
+  "run": "D2",
+  "outcome": "CONTESTED",
+  "reason": "NO_MATCH: zero frozen intents recognized in the completed turn. fragments=[]",
+  "turns": 1,
+  "artifact": false,
+  "turn_log": [
+    {
+      "turn": 1,
+      "status": "NO_MATCH",
+      "recognized_intents": [],
+      "answers_sent": [],
+      "unmatched_fragments": [],
+      "fragments": [],
+      "agent_turn_text": ""
+    }
+  ],
+  "hashes_before": {
+    "PROMPT.md": "7799a22c2af999323f281cdb0ede52fc7f2466ea14bdb125d03e40709561d9c8",
+    "SKILL.md": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  },
+  "hashes_after": {
+    "PROMPT.md": "7799a22c2af999323f281cdb0ede52fc7f2466ea14bdb125d03e40709561d9c8",
+    "SKILL.md": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  }
+}

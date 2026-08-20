@@ -15,7 +15,7 @@ safe to enter the existing modelling/preview path*, NOT *established*.
 |---|---|---|---|---|---|---|
 | D1 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
 | D2 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| D3 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
+| D3 | **PASS** | yes |  | None |  | `6e419d2d7f88` |
 
 ## Detail
 
@@ -27,10 +27,6 @@ no work_definition.json in the run directory (Goose wrote elsewhere or stopped e
 
 no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
 
-### D3 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
 ## Pass rate
 
-**0/3 PASS** (primary W1-A4 success criterion: 3/3).
+**1/3 PASS** (primary W1-A4 success criterion: 3/3).
