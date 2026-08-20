@@ -1,0 +1,75 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "h2-invoice-reconciliation",
+  "provenance": {
+    "producer": "goose-run-H2",
+    "skill": "define-lab-process",
+    "produced_at": "2026-08-20T17:14:00+03:00"
+  },
+  "purpose": "Reconcile supplier statements and internal ledger by matching on InvoiceNumber and comparing Amount within GBP currency tolerance.",
+  "sources": {
+    "supplier-statement": {
+      "role_label": "Acme Supplier Statement",
+      "fixture": "supplier-statement.txt",
+      "observed_fields": ["Date", "Supplier Name", "InvoiceNumber", "Amount", "Currency", "Status"],
+      "basis": "observed"
+    },
+    "ledger-book": {
+      "role_label": "Internal Ledger Book",
+      "fixture": "ledger-book.txt",
+      "observed_fields": ["Date", "ReferenceNumber", "SupplierName", "InvoiceNumber", "Amount", "Status", "Notes"],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "supplier-statement",
+    "right": "ledger-book",
+    "match_on": {
+      "left_field": "InvoiceNumber",
+      "right_field": "InvoiceNumber",
+      "basis": "human_confirmed",
+      "confirmation": "Q_match_key"
+    },
+    "compare": [
+      {
+        "field": "Amount",
+        "comparison": "within",
+        "tolerance": "0.01",
+        "basis": "human_confirmed",
+        "confirmation": "Q_amount_compare"
+      }
+    ],
+    "classify": {
+      "both_same": "matched",
+      "both_different": "discrepancy",
+      "only_left": "ledger_only",
+      "only_right": "statement_only"
+    },
+    "output_order": "sorted_by_key",
+    "on_duplicate_key": "refuse_run",
+    "on_non_numeric": "refuse_run"
+  },
+  "output": {
+    "reports_fields": ["InvoiceNumber", "Amount"],
+    "context_fields": ["Date", "Supplier Name", "Status"]
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_match_key",
+      "question": "Which field identifies the same record / invoice in both files?",
+      "answer": "InvoiceNumber",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_amount_compare",
+      "question": "Should Amount be compared, and if so, how and with what tolerance?\nIs Currency part of the reconciliation rule?\nWhich file is the source of truth?",
+      "answer": "Yes, compare Amount numerically, within 0.01.\nNo. All sample amounts are GBP; Currency is not compared and is not part of the rule.\nNeither — both are peer sources.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [],
+  "requested_destination": "review_only",
+  "requested_delivery": { "format": "json_discrepancy_report" },
+  "requested_authority": null
+}

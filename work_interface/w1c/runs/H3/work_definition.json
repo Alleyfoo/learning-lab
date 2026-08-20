@@ -1,0 +1,83 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "invoice-reconciliation",
+  "provenance": {
+    "producer": "goose-session-H3",
+    "skill": "define-lab-process",
+    "produced_at": "2026-08-20"
+  },
+  "purpose": "reconcile supplier statement with internal ledger by matching invoices and comparing amounts within tolerance",
+  "sources": {
+    "statement": {
+      "role_label": "Supplier Statement",
+      "fixture": "supplier-statement.txt",
+      "observed_fields": ["Date", "Supplier Name", "InvoiceNumber", "Amount", "Currency", "Status"],
+      "basis": "observed"
+    },
+    "ledger": {
+      "role_label": "Internal Ledger Book",
+      "fixture": "ledger-book.txt",
+      "observed_fields": ["Date", "ReferenceNumber", "SupplierName", "InvoiceNumber", "Amount", "Status", "Notes"],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "statement",
+    "right": "ledger",
+    "match_on": {
+      "left_field": "InvoiceNumber",
+      "right_field": "InvoiceNumber",
+      "basis": "human_confirmed",
+      "confirmation": "Q_match_key"
+    },
+    "compare": [
+      {
+        "field": "Amount",
+        "comparison": "within",
+        "tolerance": "0.01",
+        "basis": "human_confirmed",
+        "confirmation": "Q_compare_method"
+      }
+    ],
+    "classify": {
+      "both_same": "matched",
+      "both_different": "discrepancy",
+      "only_left": "ledger_orphan",
+      "only_right": "statement_orphan"
+    },
+    "output_order": "sorted_by_key",
+    "on_duplicate_key": "refuse_key",
+    "on_non_numeric": "refuse_key"
+  },
+  "output": {
+    "reports_fields": ["InvoiceNumber", "Amount"],
+    "context_fields": ["Date", "SupplierName", "Status", "ReferenceNumber", "Currency", "Notes"]
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_match_key",
+      "question": "Which field identifies the same record in both files?",
+      "answer": "InvoiceNumber",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_compare_method",
+      "question": "Should Amount be compared, and if so, how and with what tolerance?",
+      "answer": "Yes, compare Amount numerically, within 0.01.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_peering",
+      "question": "Which file is the source of truth for matching?",
+      "answer": "Neither — both are peer sources. Report what is missing from either side and differences in the compared field.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [],
+  "requested_destination": "review_only",
+  "requested_delivery": {
+    "format": "json_discrepancy_report"
+  },
+  "requested_authority": null
+}

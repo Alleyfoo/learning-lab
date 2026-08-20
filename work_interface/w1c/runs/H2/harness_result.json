@@ -1,0 +1,36 @@
+{
+  "run": "H2",
+  "outcome": "COMPLETED",
+  "reason": "artifact written; session terminated immediately",
+  "turns": 2,
+  "artifact": true,
+  "blocks_delivered": 1,
+  "silent_turns": 0,
+  "questions_after_block": 0,
+  "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+  "turn_log": [
+    {
+      "turn": 1,
+      "silent": false,
+      "interrogative_lines": 8,
+      "questions_after_block_so_far": 0,
+      "block_delivered": true,
+      "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+      "agent_turn_text": "I'll follow the `define-lab-process` skill as outlined in `SKILL.md`. Let me start by reading that file to understand the process requirements.I've read both fixture files and understood the skill requirements. Let me summarize what I've observed and then ask the required load-bearing questions.\n\n## Observations from the fixtures:\n\n**Supplier Statement (supplier-statement.txt):**\n- Header: `Date, Supplier Name, InvoiceNumber, Amount, Currency, Status`\n- Fields: Date, Supplier Name, InvoiceNumber, Amount, Currency, Status\n\n**Ledger Book (ledger-book.txt):**\n- Header: `Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes`\n- Fields: Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes\n\n**Key observations:**\n1. Both files have `InvoiceNumber` - a clear candidate for the match key\n2. Common fields in both sources: `Date`, `InvoiceNumber`, `Amount`, `Status`\n3. Note field name difference: `Supplier Name` (with space) vs `SupplierName` (without space)\n4. Statement has `Currency` which ledger doesn't have\n5. Ledger has `ReferenceNumber` and `Notes` which statement doesn't have\n\n## Load-bearing questions for you:\n\nBefore I can write the `work_definition.json`, I need your confirmation on these minimum decisions:\n\n1. **Match key**: Does `InvoiceNumber` identify the same record in both files? If yes, what is it called in each source (`InvoiceNumber` appears in both)?\n\n2. **Comparison fields**: Which field(s) should be compared between matched records?\n   - Should I compare `Amount` with which comparison (exact/trim/casefold/within)?\n   - Should I also compare `Status` and how?\n\n3. **Source of truth**: Is there one source that is authoritative, or are both peers? What does that mean for the classification labels?\n\n4. **Report fields**: Which fields should appear in the report row (must be from match key, compared fields, or context)?\n\n5. **Tolerance**: If comparing `Amount` with `within`, what tolerance value (e.g., \"0.01\")?\n\n6. **Duplicate/non-numeric policy**: Are there any duplicate keys expected or non-numeric values that need handling?\n\nPlease answer these questions so I can construct the definition artifact."
+    }
+  ],
+  "hashes_before": {
+    "PROMPT.md": "40b2f11649a13aabdebe3919b43c44a56fad3169115f10c22d18abfaf3b3c6e9",
+    "SKILL.md": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  },
+  "hashes_after": {
+    "PROMPT.md": "40b2f11649a13aabdebe3919b43c44a56fad3169115f10c22d18abfaf3b3c6e9",
+    "SKILL.md": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  }
+}

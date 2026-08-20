@@ -1,0 +1,63 @@
+{
+  "run": "H1",
+  "outcome": "COMPLETED",
+  "reason": "artifact written; session terminated immediately",
+  "turns": 5,
+  "artifact": true,
+  "blocks_delivered": 4,
+  "silent_turns": 1,
+  "questions_after_block": 3,
+  "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+  "turn_log": [
+    {
+      "turn": 1,
+      "silent": false,
+      "interrogative_lines": 8,
+      "questions_after_block_so_far": 0,
+      "block_delivered": true,
+      "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+      "agent_turn_text": "Thank you for sharing the skill and fixtures. I've read both files and understand their structure.\n\n**Summary of observed fields (verbatim from headers):**\n\n| Source | Fields (exact header order) |\n|--------|-----------------------------|\n| supplier-statement.txt | `Date, Supplier Name, InvoiceNumber, Amount, Currency, Status` |\n| ledger-book.txt | `Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes` |\n\nBefore writing the `work_definition.json`, I need to ask you **only the load-bearing business questions** required by the skill:\n\n1. **Match key**: Which field(s) identify the *same record* in both files?\n   - Options could be `InvoiceNumber` alone, or `Date + InvoiceNumber`, etc.\n   - Which one should I use?\n\n2. **Compare fields & comparison method**:\n   - Is `Amount` a field to compare between matched records? If so, with what method (`exact`, `trim`, `casefold`, `within`) and tolerance (if `within`)?\n   - Should the `Status` field be compared as well? Note: the values differ (`PAID/UNPAID` vs `CLEARED/PENDING`).\n\n3. **Source of truth / classification**:\n   - Which file, if either, is more authoritative? Or are they peers?\n   - This affects how we classify records (both_same, both_different, etc.)\n\n4. **Report output**:\n   - Which fields should appear in the final report rows? (Should include the match key and any compared fields at minimum.)\n\n5. **Duplicate policy** (`on_duplicate_key`): What if duplicate keys exist based on the chosen match key?\n\n6. **Non-numeric policy** (`on_non_numeric`): Required if we use `within` comparison—what should happen if a compare field is non-numeric?\n\nPlease answer these questions so I can derive the artifact with the proper `human_confirmed` basis and stable confirmation IDs."
+    },
+    {
+      "turn": 2,
+      "silent": true,
+      "interrogative_lines": 0,
+      "questions_after_block_so_far": 0,
+      "block_delivered": true,
+      "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+      "agent_turn_text": ""
+    },
+    {
+      "turn": 3,
+      "silent": false,
+      "interrogative_lines": 0,
+      "questions_after_block_so_far": 0,
+      "block_delivered": true,
+      "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+      "agent_turn_text": "Based on your answers and the skill requirements, I've derived most of `work_definition.json`. However, there are three policy fields in the JSON contract that affect execution semantics (`output_order`, `on_duplicate_key`, `on_non_numeric`) which you haven't settled yet. The specification says I must pick values from a closed vocabulary for these—otherwise the artifact will be refused by Learning Lab validation.\n\nI'll ask just these final **three load-bearing questions**:\n\n1. **`output_order`**: When listing matched and mismatched records in the report, should we:\n   - `left_then_right` — list left-side-only records first, then right-side-only, then matched (in match-key order)\n   - `sorted_by_key` — sort all output rows by the match key (`InvoiceNumber`) ascending\n\n2. **`on_duplicate_key`**: If duplicate keys appear in the combined dataset based on the chosen match field:\n   - `refuse_run` — skip such records entirely (the process will error or omit them)\n   - `refuse_key` — raise an error/failure rather than silently skipping\n\n3. **`on_non_numeric`**: Since we're using `within` comparison on `Amount`, if a compare field is non-numeric:\n   - `refuse_run` — skip the comparison and move on\n   - `refuse_key` — fail the run (error out) when encountering a non-numeric value\n\nPlease pick one value for each. I'll then write the complete JSON artifact to your run directory immediately."
+    },
+    {
+      "turn": 4,
+      "silent": false,
+      "interrogative_lines": 3,
+      "questions_after_block_so_far": 3,
+      "block_delivered": true,
+      "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+      "agent_turn_text": "Thank you for confirming the substantive reconciliation questions. Before writing the JSON artifact, please provide one value from each closed vocabulary below (these affect execution semantics):\n\n1. **`output_order`** — how should output rows be ordered?\n   - `left_then_right`: left-only records first, then right-only, then matched records\n   - `sorted_by_key`: all rows sorted by `InvoiceNumber` ascending\n\n2. **`on_duplicate_key`** — what if duplicate keys appear based on the match field?\n   - `refuse_run`: skip such records (omit them entirely)\n   - `refuse_key`: fail with an error rather than skipping\n\n3. **`on_non_numeric`** — since we're using `within` compare on `Amount`, what if that field is non-numeric?\n   - `refuse_run`: skip the comparison and continue\n   - `refuse_key`: fail the run when encountering a non-numeric value\n\nI'm awaiting these three choices to write the final artifact."
+    }
+  ],
+  "hashes_before": {
+    "PROMPT.md": "afb3d94d660157677a562c2477d5211d7be89336f33b6b31566aa8d5611ca4d5",
+    "SKILL.md": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  },
+  "hashes_after": {
+    "PROMPT.md": "afb3d94d660157677a562c2477d5211d7be89336f33b6b31566aa8d5611ca4d5",
+    "SKILL.md": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  }
+}

@@ -11,21 +11,38 @@ Reported INDEPENDENTLY of the structural grader.
 
 | run | fidelity | findings | artifact sha256 |
 |---|---|---|---|
-| H1 | **NO_ARTIFACT** | 0 | `-` |
-| H2 | **NO_ARTIFACT** | 0 | `-` |
-| H3 | **NO_ARTIFACT** | 0 | `-` |
+| H1 | **FIDELITY FINDINGS** | 4 | `0367d3a1f422` |
+| H2 | **FIDELITY FINDINGS** | 4 | `70e864e577c9` |
+| H3 | **FIDELITY FINDINGS** | 2 | `4b1cbbac1389` |
 
 ## Detail
 
-### H1 — NO_ARTIFACT
+### H1 — FIDELITY FINDINGS
 
+- confirmation `match_key_q` rows=[0] normal
+- confirmation `amount_compare_q` rows=[1] FID-6 NONVERBATIM_CONFIRMATION [TRAILING_CONTENT]
+- `FID-1 UNCITED_HUMAN_FACT` @ `body.compare[Amount]` — confirmation 'amount_compare_q' is FID-6 NONVERBATIM_CONFIRMATION rows=[1]; provenance must be exclusive and byte-exact
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-6 NONVERBATIM_CONFIRMATION` @ `human_confirmations[amount_compare_q]` — rows=[1] subreason=TRAILING_CONTENT
 
-### H2 — NO_ARTIFACT
+### H2 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_amount_compare` rows=[1, 2] FID-2 BUNDLED_CONFIRMATION
+- `FID-1 UNCITED_HUMAN_FACT` @ `body.compare[Amount]` — confirmation 'Q_amount_compare' is FID-2 BUNDLED_CONFIRMATION rows=[1, 2]; provenance must be exclusive and byte-exact
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-2 BUNDLED_CONFIRMATION` @ `human_confirmations[Q_amount_compare]` — rows=[1, 2]
 
-### H3 — NO_ARTIFACT
+### H3 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_compare_method` rows=[1] normal
+- confirmation `Q_peering` rows=[3] normal
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
 
 ## Fidelity rate
 
-**0/3 FIDELITY PASS** (0 finding(s) across graded runs).
+**0/3 FIDELITY PASS** (10 finding(s) across graded runs).

@@ -1,0 +1,36 @@
+{
+  "run": "H3",
+  "outcome": "COMPLETED",
+  "reason": "artifact written; session terminated immediately",
+  "turns": 2,
+  "artifact": true,
+  "blocks_delivered": 1,
+  "silent_turns": 0,
+  "questions_after_block": 0,
+  "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+  "turn_log": [
+    {
+      "turn": 1,
+      "silent": false,
+      "interrogative_lines": 15,
+      "questions_after_block_so_far": 0,
+      "block_delivered": true,
+      "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+      "agent_turn_text": "I've read both fixture files and the skill document. Now I need to ask the human the minimum load-bearing questions required by the skill.\n\n**Current understanding:**\n\n**supplier-statement.txt:**\n- Source of what I'll call \"statement\"\n- Header: `Date, Supplier Name, InvoiceNumber, Amount, Currency, Status`\n\n**ledger-book.txt:**  \n- Source of what I'll call \"ledger\"\n- Header: `Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes`\n\nI need to ask for these decisions:\n\n1. **Match key**: Which field(s) identify the same record in both files? (likely `InvoiceNumber`, but could also include others?)\n2. **Compare fields**: Which fields should be compared and with what comparison/tolerance? (Amount? Status? Date?)\n3. **Source of truth**: Which file is authoritative, or are they peers?\n4. **Report fields**: What should appear in the report row vs context?\n\nLet me ask these questions:\n\n---\n\nI've examined both fixture files and am ready to define the reconciliation process. Before writing `work_definition.json`, I need your answers to these load-bearing questions:\n\n### 1. Match key (identifying same record)\nWhich field(s) identify the **same record** in the supplier statement AND the ledger?\n- Options I observe: `InvoiceNumber`, `SupplierName` / `Supplier Name`, `Date` (could support combination)?\n- Which should be the matching key?\n\n### 2. Compare fields & comparison method\nWhich field(s) should be **compared** between sources? What comparison method and tolerance?\n- Options: `Amount`, `Status`, `Date` (and/or others)?\n- Comparison types: `exact`, `trim`, `casefold`, `trim_casefold`, or `within` (with tolerance)?\n\n### 3. Source of truth / classification\nIf there's a discrepancy, which file(s) is/are the **source of truth**? Or are they peers? This affects the `classify` labels.\n\n### 4. Report row fields\nWhich fields should appear in the **report row** (`reports_fields`)? These must be the match-key field, a compared field, or a context field you declare.\n\n### 5. Other policies needed per skill spec:\n- `output_order`: `left_then_right` or `sorted_by_key`?\n- `on_duplicate_key`: `refuse_run` or `refuse_key`?\n- `on_non_numeric`: `refuse_run` or `refuse_key` (needed if using `within` comparison)?\n\n---\n\nPlease answer these questions so I can write a valid `work_definition.json` artifact."
+    }
+  ],
+  "hashes_before": {
+    "PROMPT.md": "4a0804cab0d76d12d66b620ef9e36258163c4d36cfe7de4a2d1a63fc1d228634",
+    "SKILL.md": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  },
+  "hashes_after": {
+    "PROMPT.md": "4a0804cab0d76d12d66b620ef9e36258163c4d36cfe7de4a2d1a63fc1d228634",
+    "SKILL.md": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  }
+}
