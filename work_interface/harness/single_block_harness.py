@@ -58,6 +58,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "authority"))
 import fs_backstop as A4  # noqa: E402
+sys.path.insert(0, str(HERE))
+from path_guard import PathGuard  # noqa: E402
 
 # --- lifecycle constants ---------------------------------------------------
 CONTINUATION = "Continue."          # neutral activation; carries no task content
@@ -106,13 +108,18 @@ def sha256_file(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
-def forbidden_markers(run: str, all_runs: list[str], extra: list[str]) -> list[str]:
-    marks = list(extra) + [os.path.join("runs", r) for r in all_runs if r != run]
-    out = []
-    for m in marks:
-        out.append(m.replace("\\", "/").lower())
-        out.append(m.replace("/", "\\").lower())
-    return sorted(set(out))
+def forbidden_roots(run_dir: Path, all_runs: list[str],
+                    extra: list) -> list[Path]:
+    """Path-shaped protected resources: sibling run roots plus whatever the pack
+    declares, as PATHS.
+
+    Never bare words. Lexical markers over serialized payloads are what voided
+    W1-D -- `authority` matched the authorized SKILL.md's own text
+    (`work_interface/w1d/CLOSURE.md`)."""
+    runs_parent = Path(run_dir).parent
+    own = Path(run_dir).name
+    roots = [runs_parent / r for r in all_runs if r != own]
+    return roots + [Path(e) for e in (extra or [])]
 
 
 @dataclass
@@ -136,7 +143,7 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
             artifact_name: str = "work_definition.json",
             controlled: dict[str, Path] | None = None,
             all_runs: list[str] | None = None,
-            forbidden_extra: list[str] | None = None,
+            forbidden_extra: list | None = None,
             fs_enforcing: bool = True) -> RunResult:
     """Drive one worker session under the r2 lifecycle.
 
@@ -154,7 +161,8 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
     artifact = run_dir / artifact_name
     res = RunResult(run=run)
     controlled = controlled or {}
-    marks = forbidden_markers(run, all_runs or [], forbidden_extra or [])
+    guard = PathGuard(run_dir, forbidden_roots(run_dir, all_runs or [],
+                                               forbidden_extra or []))
 
     if artifact.exists():
         res.outcome = HARNESS_ERROR
@@ -204,11 +212,11 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
                 res.reason = "artifact written; session terminated immediately"
                 break
 
-            blob = "\n".join(s.tool_payloads).replace("\\\\", "\\").lower()
-            hit = sorted({m for m in marks if m in blob})
-            if hit:
+            viol = guard.check_all(getattr(s, "tool_updates", []))
+            if viol:
                 res.outcome = CONTESTED
-                res.reason = f"tool call touched forbidden path(s): {hit}"
+                res.reason = ("tool call touched forbidden path(s): "
+                              + "; ".join(str(v) for v in viol))
                 break
             if s.unoffered_requests:
                 res.outcome = HARNESS_ERROR

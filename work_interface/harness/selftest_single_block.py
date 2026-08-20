@@ -41,6 +41,7 @@ class FakeSession:
         self.sent: list[str] = []
         self.lifecycle: list[dict] = []
         self.tool_payloads: list[str] = []
+        self.tool_updates: list[dict] = []
         self.unoffered_requests: list = []
         self._i = 0
         self.artifact_path = artifact_path

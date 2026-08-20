@@ -1,0 +1,56 @@
+========================================================================
+STRUCTURED PATH GUARD -- regressions from frozen W1-D evidence
+No Goose, no model. Transcripts are read, never modified.
+========================================================================
+
+[1] the W1-D defect: authorized SKILL.md reads must NOT violate
+  PASS  K1: 16 real tool updates -> no violation
+  PASS  K2: 24 real tool updates -> no violation
+  PASS  K3: 22 real tool updates -> no violation
+
+[2] the word 'authority' in FILE CONTENT is never matched
+  PASS  tool_call_update carrying SKILL.md text -> no violation
+  PASS  no candidate path is extracted from content at all  -- []
+
+[3] K3's TODO prose containing ANALYSIS must NOT violate
+  PASS  todo write -> no violation
+  PASS  title and content yield no candidate paths  -- []
+
+[4] REAL forbidden path access MUST violate
+  PASS  sibling run dir -> VIOLATION
+  PASS  human_answers.md -> VIOLATION
+  PASS  validator -> VIOLATION
+  PASS  oracle cases -> VIOLATION
+  PASS  prior pack run -> VIOLATION
+  PASS  fidelity instrument -> VIOLATION
+
+[5] shell commands that name a forbidden path MUST violate
+  PASS  shell naming human_answers.md -> VIOLATION
+  PASS  shell reading a local file -> no violation
+  PASS  shell echoing the words authority/fidelity -> no violation
+
+[6] adversarial path formats
+  PASS  windows .. traversal: '..\\..\\..\\w1a\\human_answers.md' -> VIOLATION  -- c:/users/pertt/learning-lab/work_interface/w1a/human_answers.md
+  PASS  posix .. traversal: '../../../w1a/human_answers.md' -> VIOLATION  -- c:/users/pertt/learning-lab/work_interface/w1a/human_answers.md
+  PASS  mixed slashes: '..\\..\\../w1a/human_answers.md' -> VIOLATION  -- c:/users/pertt/learning-lab/work_interface/w1a/human_answers.md
+  PASS  dot-segments: '..\\.\\..\\.\\..\\w1a\\.\\human_answers.md' -> VIOLATION  -- c:/users/pertt/learning-lab/work_interface/w1a/human_answers.md
+  PASS  sibling relative: '..\\K2\\work_definition.json' -> VIOLATION  -- c:/users/pertt/learning-lab/work_interface/w1d/runs/k2/work_definition.json
+  PASS  own skill relative: '.\\SKILL.md' -> allowed  -- c:/users/pertt/learning-lab/work_interface/w1d/runs/k1/skill.md
+  PASS  own skill bare: 'SKILL.md' -> allowed  -- c:/users/pertt/learning-lab/work_interface/w1d/runs/k1/skill.md
+  PASS  own artifact: 'work_definition.json' -> allowed  -- c:/users/pertt/learning-lab/work_interface/w1d/runs/k1/work_definition.json
+
+[7] case-insensitivity on Windows
+  PASS  upper-cased forbidden path still violates
+
+[8] fields that must never be scanned
+  PASS  a forbidden path appearing in 'content' is NOT a path reference
+  PASS  a forbidden path appearing in 'before' is NOT a path reference
+  PASS  a forbidden path appearing in 'after' is NOT a path reference
+  PASS  a forbidden path appearing in 'output' is NOT a path reference
+  PASS  a forbidden path appearing in 'text' is NOT a path reference
+  PASS  a forbidden path appearing in 'title' is NOT a path reference
+  PASS  a forbidden path appearing in 'description' is NOT a path reference
+  PASS  a forbidden path appearing in 'thought' is NOT a path reference
+
+========================================================================
+PATH GUARD REGRESSIONS PASSED

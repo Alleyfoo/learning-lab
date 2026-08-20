@@ -35,6 +35,7 @@ class ACPSession:
         self._next_id = 100
         self.unoffered_requests: list = []
         self.tool_payloads: list[str] = []
+        self.tool_updates: list[dict] = []
         self.proc = subprocess.Popen(
             [str(goose_exe), "acp"], cwd=str(cwd),
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
@@ -69,6 +70,7 @@ class ACPSession:
                     u = (msg.get("params") or {}).get("update") or {}
                     if u.get("sessionUpdate") in ("tool_call", "tool_call_update"):
                         self.tool_payloads.append(json.dumps(u, ensure_ascii=False))
+                        self.tool_updates.append(u)
             if "id" in msg and "method" in msg:
                 with self._lock:
                     self.unoffered_requests.append(msg.get("method"))
