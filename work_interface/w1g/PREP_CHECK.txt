@@ -1,0 +1,197 @@
+======================================================================
+W1-G preparation verification
+======================================================================
+
+[1] Run directories exist and contain only frozen inputs
+PASS  O1: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+PASS  O2: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+PASS  O3: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+
+[2] All three SKILL.md match the frozen define-lab-process r2 skill sha256
+PASS  O1: SKILL.md sha256=0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a (frozen=0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a)
+PASS  O2: SKILL.md sha256=0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a (frozen=0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a)
+PASS  O3: SKILL.md sha256=0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a (frozen=0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a)
+
+[3] Operator prompts point to distinct absolute run paths
+PASS  O1: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  O2: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  O3: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  distinct artifact targets: ['w1g\\runs\\O1\\work_definition.json', 'w1g\\runs\\O2\\work_definition.json', 'w1g\\runs\\O3\\work_definition.json']
+
+[4] Fixtures unchanged from W1-A (sha256 match)
+PASS  supplier-statement.txt: sha256=d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb (expected d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb)
+PASS  ledger-book.txt: sha256=284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e (expected 284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e)
+
+[5] Human answers unchanged from W1-A (sha256 match)
+PASS  human_answers.md sha256=5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd (expected 5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd)
+
+[6] W0D validator self-test + W1-A test suite still pass
+PASS  work_definition.py --self-test exit=0 (SELF-TEST PASSED (all 27 Work-Definition codes exercised / malformed external shape refused by name / authority invariant independent of self-claims / observed fields cross-checked against fixtures / valid proposal strips to taskmodel shape))
+PASS  pytest test_work_definition.py exit=0 (17 passed in 0.05s)
+
+[7] Grader on empty O1-O3 returns three NO_ARTIFACT without mutation
+PASS  grader exit=0, statuses={'O1': 'NO_ARTIFACT', 'O2': 'NO_ARTIFACT', 'O3': 'NO_ARTIFACT'}, mutated=[]
+
+[8] Known-good W0D oracle still grades PASS (temp copy, no mutation)
+PASS  oracle valid=True codes=[]
+
+[9] No unrelated or protected files staged in git
+PASS  protected files staged: []
+
+[10] O1/O2/O3 cannot reach the old matcher
+PASS  no code defines or calls 'classify_turn' (docstrings may mention it)
+PASS  no code defines or calls 'intents_in' (docstrings may mention it)
+PASS  no code defines or calls 'segment_fragments' (docstrings may mention it)
+PASS  no code defines or calls 'match_message' (docstrings may mention it)
+PASS  no code defines or calls 'UNIQUE_MATCH' (docstrings may mention it)
+PASS  no code defines or calls 'MULTIPLE_MATCHES' (docstrings may mention it)
+PASS  no code defines or calls 'load_answer_table' (docstrings may mention it)
+PASS  imports no W1-A harness module ['__future__', 'dataclasses', 'fs_backstop', 'hashlib', 'json', 'os', 'path_guard', 'pathlib', 'subprocess', 'sys', 'threading', 'time']
+PASS  imported module exposes no classify_turn()
+PASS  imported module exposes no intents_in()
+PASS  imported module exposes no segment_fragments()
+PASS  imported module exposes no match_message()
+PASS  imported module exposes no load_answer_table()
+PASS  no W1-A harness module is loaded ([])
+
+[11] Canonical block integrity
+PASS  frozen table reads 9 rows (got 9)
+      block: 693 bytes, sha256=46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330
+PASS  mandated rows are (0, 1, 2, 3, 4, 5)
+PASS  row 0: question and answer present verbatim
+PASS  row 1: question and answer present verbatim
+PASS  row 2: question and answer present verbatim
+PASS  row 3: question and answer present verbatim
+PASS  row 4: question and answer present verbatim
+PASS  row 5: question and answer present verbatim
+PASS  answers in frozen table order [68, 154, 250, 389, 552, 661]
+PASS  excluded row 6 does not leak into the block
+PASS  excluded row 7 does not leak into the block
+PASS  excluded row 8 does not leak into the block
+PASS  worker-owned term 'refuse_run' absent from the block
+PASS  worker-owned term 'refuse_key' absent from the block
+PASS  worker-owned term 'left_then_right' absent from the block
+PASS  worker-owned term 'sorted_by_key' absent from the block
+PASS  worker-owned term 'output_order' absent from the block
+PASS  worker-owned term 'both_same' absent from the block
+PASS  worker-owned term 'only_left' absent from the block
+PASS  worker-owned term 'classify' absent from the block
+PASS  worker-owned term 'purpose' absent from the block
+PASS  every block line is verbatim from human_answers.md []
+
+[12] Frozen fidelity checker is pinned and intact
+PASS  fidelity_gate.py present
+PASS  frozen fidelity_check.py present
+PASS  fidelity_gate.py pins a checker sha256
+PASS  frozen checker matches the pin: 11984c096b8fd74f vs 11984c096b8fd74f
+PASS  frozen checker imports no dialogue harness ['__future__', 'argparse', 'block_harness', 'dataclasses', 'json', 'pathlib', 're', 'sys']
+
+[13] Fidelity gate on empty O1-O3 returns three NO_ARTIFACT
+PASS  fidelity_gate exit=0
+PASS  statuses={'O1': 'NO_ARTIFACT', 'O2': 'NO_ARTIFACT', 'O3': 'NO_ARTIFACT'}
+PASS  gate mutated nothing: []
+
+[14] Surface-B lifecycle adopted; A4 shadow is non-binding
+PASS  the activation is exactly 'Continue.' 'Continue.'
+PASS  next_message cannot see the agent text
+PASS  block once, then continuations
+PASS  tool activity cannot reset the silent streak
+PASS  silent budget is two
+PASS  the batch runs A4 in SHADOW mode (fs_enforcing=False)
+PASS  session mode is approve -- Surface A enforcement IS adopted in W1-G
+PASS  the fail-closed permission handler IS wired into the batch
+PASS  the canonical block is pinned to the W1-B/W1-C value
+PASS  skill r2 is pinned
+
+[15] W1-D void anti-regression: structured path detection
+PASS  no bare lexical markers in FORBIDDEN_EXTRA []
+PASS  every forbidden entry anchors to a real resource []
+PASS  K1: 16 frozen tool updates -> no violation 
+PASS  K2: 24 frozen tool updates -> no violation 
+PASS  K3: 22 frozen tool updates -> no violation 
+PASS  replayed a meaningful number of updates: 62
+PASS  an actual human_answers.md access still VIOLATES
+PASS  an actual sibling-run access still VIOLATES
+
+[16] Surface A enforced: approve mode + fail-closed policy
+PASS  the batch requests approve mode
+PASS  the batch uses the permission session
+PASS  A4 runs as an independent post-turn watch
+PASS  A4 does not flip the lifecycle outcome; AUTHORITY is its own layer
+PASS  authorized SKILL.md read is ALLOWED
+PASS  designated artifact write is ALLOWED
+PASS  shell is DENIED even for an authorized file
+PASS  an arbitrary write is DENIED
+PASS  an undeclared read is DENIED
+PASS  an unparseable request is DENIED
+PASS  the prompt names no tool or route (read_image)
+PASS  the prompt names no tool or route (text_editor)
+PASS  the prompt names no tool or route (use the tool)
+PASS  the prompt names no tool or route (instead of shell)
+PASS  the W1-D2 shell hint is still present -- the prompt was NOT edited to compensate for the enforcement
+
+[17] the two-verb capability box
+PASS  the worker is offered exactly two verbs ['read_authorized_resource', 'write_work_definition']
+PASS  read authority is UNCHANGED from W1-F ('skill', 'supplier_statement', 'ledger_book')
+PASS  the reader takes ONE argument
+PASS  and it is a closed enum -- no path is representable
+PASS  reader rejects additional properties
+PASS  the writer takes ONE argument
+PASS  content is TEXT, not a parsed object -- malformed JSON must reach the structural gate
+PASS  writer rejects additional properties
+PASS  the writer has no 'path' argument
+PASS  the writer has no 'file' argument
+PASS  the writer has no 'filename' argument
+PASS  the writer has no 'destination' argument
+PASS  the writer has no 'dir' argument
+PASS  the writer has no 'target' argument
+PASS  the writer has no 'mode' argument
+PASS  the writer has no 'append' argument
+PASS  the writer has no 'encoding' argument
+PASS  the destination is fixed internally to work_definition.json
+PASS  resource skill resolves to a real file
+PASS  resource supplier_statement resolves to a real file
+PASS  resource ledger_book resolves to a real file
+PASS  the batch injects the CAPABILITY server per session
+PASS  per-session injection is wired
+PASS  the policy is given the same closed identifier set
+PASS  and the writer clause is explicitly enabled for this pack
+PASS  approve mode is unchanged
+PASS  A4 remains an independent post-turn watch
+PASS  reader call for skill is ALLOWED
+PASS  reader call for supplier_statement is ALLOWED
+PASS  reader call for ledger_book is ALLOWED
+PASS  the writer call is ALLOWED
+PASS  an unknown identifier is DENIED
+PASS  shell is STILL denied unconditionally
+PASS  undeclared reads are STILL denied
+PASS  arbitrary writes are STILL denied
+PASS  content + a path does NOT reach the writer clause
+PASS  non-string content is DENIED
+PASS  O1 prompt does not mention 'read_authorized_resource'
+PASS  O1 prompt does not mention 'write_work_definition'
+PASS  O1 prompt does not mention 'resource_id'
+PASS  O1 prompt does not mention 'authorized reader'
+PASS  O1 prompt does not mention 'capability'
+PASS  O1 prompt does not mention 'mcp'
+PASS  O1 prompt does not mention 'supplier_statement'
+PASS  O1 prompt does not mention 'ledger_book'
+PASS  O2 prompt does not mention 'read_authorized_resource'
+PASS  O2 prompt does not mention 'write_work_definition'
+PASS  O2 prompt does not mention 'resource_id'
+PASS  O2 prompt does not mention 'authorized reader'
+PASS  O2 prompt does not mention 'capability'
+PASS  O2 prompt does not mention 'mcp'
+PASS  O2 prompt does not mention 'supplier_statement'
+PASS  O2 prompt does not mention 'ledger_book'
+PASS  O3 prompt does not mention 'read_authorized_resource'
+PASS  O3 prompt does not mention 'write_work_definition'
+PASS  O3 prompt does not mention 'resource_id'
+PASS  O3 prompt does not mention 'authorized reader'
+PASS  O3 prompt does not mention 'capability'
+PASS  O3 prompt does not mention 'mcp'
+PASS  O3 prompt does not mention 'supplier_statement'
+PASS  O3 prompt does not mention 'ledger_book'
+
+======================================================================
+PREP VERIFICATION PASSED (all 17 checks).

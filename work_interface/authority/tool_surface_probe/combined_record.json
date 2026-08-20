@@ -1,0 +1,76 @@
+{
+ "coached": [
+  "Call read_authorized_resource with resource_id \"skill\".",
+  "Call write_work_definition with content \"{}\".",
+  "Call write_work_definition with content \"{}\" again."
+ ],
+ "offered_tools": {
+  "captured": true,
+  "first_request": [
+   "authorized-capabilities__read_authorized_resource",
+   "authorized-capabilities__write_work_definition"
+  ],
+  "union": [
+   "authorized-capabilities__read_authorized_resource",
+   "authorized-capabilities__write_work_definition"
+  ]
+ },
+ "permissions": [
+  {
+   "title": "authorized-capabilities: read authorized resource",
+   "rawInput": {
+    "resource_id": "skill"
+   },
+   "verdict": "ALLOW",
+   "kind": "READ",
+   "reason": "authorized reader, resource_id='skill'"
+  },
+  {
+   "title": "authorized-capabilities: write work definition",
+   "rawInput": {
+    "content": "{}"
+   },
+   "verdict": "ALLOW",
+   "kind": "WRITE",
+   "reason": "authorized writer, designated artifact (2 chars)"
+  },
+  {
+   "title": "authorized-capabilities: write work definition",
+   "rawInput": {
+    "content": "{}"
+   },
+   "verdict": "ALLOW",
+   "kind": "WRITE",
+   "reason": "authorized writer, designated artifact (2 chars)"
+  }
+ ],
+ "tool_result_hashes": [
+  {
+   "chars": 11979,
+   "sha256": "0230969ea7fd00ed",
+   "head": "# define-lab-process (W1-A frozen revision)\n\nA reusable Goos"
+  },
+  {
+   "chars": 37,
+   "sha256": "b27e81985bf093fb",
+   "head": "wrote 2 bytes to work_definition.json"
+  },
+  {
+   "chars": 144,
+   "sha256": "9ee1b7e87fdad3eb",
+   "head": "work_definition.json already exists for this run; write_work"
+  }
+ ],
+ "artifact_exists_per_turn": [
+  false,
+  true,
+  true
+ ],
+ "artifact_bytes": "{}",
+ "run_dir_contents": [
+  "SKILL.md",
+  "work_definition.json"
+ ],
+ "agent_text": "I've successfully retrieved the `skill` resource. This defines the **define-lab-process** skill — a reusable goose process for helping a human define a reconciliation process between two source files (typically supplier statement and internal ledger).\n\n### Summary of the Skill Definition:\n\nThe skill produces a **Work Definition v0** JSON artifact that Learning Lab validates. The artifact structure includes:\n\n- **Metadata**: version, task family, model ID, provenance\n- **Sources**: Two source roles with their observed fields (from fixture headers) and basis (`observed`)\n- **Body**: Reconciliation semantics including match-on fields, compare rules, classification labels, output order, duplicate key policy, and non-numeric policy\n- **Output**: Report fields and context fields\n- **Human Confirmations**: Questions asked and human answers with IDs for referencing\n- **Open Questions**: Unresolved facts (status must be `unresolved`)\n- **Intent**: Requested destination and delivery format\n\n### Key Constraints:\n- Only use closed vocabularies exactly as specified\n- `basis` can be `observed` (for fixture observations) or `human_confirmed` (for decisions settled by the human)\n- Never set `requested_authority` to anything other than `null`\n- Fields in headers must be copied verbatim (no normalization)\n\n### What's next?\n\nWould you like me to read the remaining authorized resources (`supplier_statement` and `ledger_book`) so I can inspect the sample fixture files, or do you have specific instructions for how you want to proceed with defining a reconciliation process?The `work_definition.json` artifact has been written successfully once - it now contains `{}`. As defined in the skill's procedures, **`write_work_definition` may only be called once per run** — any attempt to call it a second time is refused because the artifact already exists for this run. For this execution, no further modifications to `work_definition.json` are permitted; if you need a different content, that would require starting a new run with a fresh session.",
+ "failures": []
+}

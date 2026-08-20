@@ -1,0 +1,23 @@
+{
+  "frozen_fidelity_check_sha256": "11984c096b8fd74f40549d17f9300dc732f3dbe1d4e1112f3dc0f412036b41d4",
+  "runs": [
+    {
+      "run": "O1",
+      "status": "NO_ARTIFACT",
+      "findings": [],
+      "confirmations": {}
+    },
+    {
+      "run": "O2",
+      "status": "NO_ARTIFACT",
+      "findings": [],
+      "confirmations": {}
+    },
+    {
+      "run": "O3",
+      "status": "NO_ARTIFACT",
+      "findings": [],
+      "confirmations": {}
+    }
+  ]
+}
