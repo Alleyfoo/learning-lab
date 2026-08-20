@@ -1,0 +1,21 @@
+{
+  "run": "C3",
+  "outcome": "CONTESTED",
+  "reason": "matcher NO_MATCH: [{\"unit\": \"**Match key**: Looking at the data, both files contain `InvoiceNumber` with identical values (e.g., `ACC-INV-001`). Should I use `InvoiceNumber` as the matching key?\", \"status\": \"UNIQUE_MATCH\", \"intents\": [0]}, {\"unit\": \"Or do you want to match on `Date + InvoiceNumber` combination?\", \"status\": \"UNIQUE_MATCH\", \"intents\": [0]}, {\"unit\": \"The ledger also has a unique `ReferenceNumber` - s",
+  "turns": 1,
+  "artifact": false,
+  "hashes_before": {
+    "PROMPT.md": "780ce90fab1782ae030eaf83807841d94e23ac1e03396d4fac7876b2e2eba0a2",
+    "SKILL.md": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  },
+  "hashes_after": {
+    "PROMPT.md": "780ce90fab1782ae030eaf83807841d94e23ac1e03396d4fac7876b2e2eba0a2",
+    "SKILL.md": "4ff939d4810cb71c13364c5bb11a9bea83b0562fd25ae6fe0a8bf59bfe961d55",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  }
+}
