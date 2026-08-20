@@ -1,0 +1,2083 @@
+[
+ {
+  "run": "C1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Match key**: Should we match records by `InvoiceNumber` (identical string in both files)?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "S1_match_key",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "C1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Any other field is a better candidate?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S1_match_key",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "C1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Compare fields**: For `Amount`, use `exact` comparison or `within tolerance`?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "S2_compare",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "C1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Which specific value should be included in the compare array?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S2_compare",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "C1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Report fields**: Which exact columns should appear as row names in the output report?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S5_report_context",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "C1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Context fields**: Any additional fields to carry that become \"declared\" for reporting purposes?",
+  "routed": true,
+  "intents": [
+   5
+  ],
+  "matched_terms": [
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "W_worker_owned",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "C1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Authority model**: Are both files peers (neither is source of truth), or is one authoritative over the other?",
+  "routed": true,
+  "intents": [
+   3
+  ],
+  "matched_terms": [
+   [
+    3,
+    "source of truth"
+   ]
+  ],
+  "topic": "S4_source_of_truth",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "C1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "— Should we treat Status as a compare field, pass through both as context, or ignore for the reconciliation rule itself?",
+  "routed": true,
+  "intents": [
+   5
+  ],
+  "matched_terms": [
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S3_field_in_rule",
+  "verdict": "MISROUTED_WRONG_INTENT"
+ },
+ {
+  "run": "C2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Match key question:** Which field(s) identify the *same record* in both files?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "same record"
+   ]
+  ],
+  "topic": "S1_match_key",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "C2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Or something else you observe?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "Z_other",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "C2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Comparison question:** Which field(s) should be compared, and with what comparison/tolerance?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S2_compare",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "C2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Candidate: `Amount` — compare as exact decimal match?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "S2_compare",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "C2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Is there any other apparent compare field (e.g., status)?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S2_compare",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "C2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Output question:** Which fields should appear in the report rows, which can be context?",
+  "routed": true,
+  "intents": [
+   4,
+   5
+  ],
+  "matched_terms": [
+   [
+    4,
+    "report row"
+   ],
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "C2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Status question:** Should we reconcile by matching ledger `CLEARED/PENDING` with statement `PAID/UNPAID`, or is status not a comparison field at all?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S3_field_in_rule",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "C3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Match key**: Looking at the data, both files contain `InvoiceNumber` with identical values (e.g., `ACC-INV-001`). Should I use `InvoiceNumber` as the matching key?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "S1_match_key",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "C3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Or do you want to match on `Date + InvoiceNumber` combination?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "S1_match_key",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "C3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "The ledger also has a unique `ReferenceNumber` - should that be involved in the match logic?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S1_match_key",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "C3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "For `Amount`: Should this be compared with `exact`, `casefold`, or `within` some tolerance like `\"0.01\"`?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "S2_compare",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "C3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "For `Status`: Should this be compared as `exact` (CLEARED vs PAID might differ)?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S3_field_in_rule",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "C3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Source of truth / classify labels**: Looking at the data, we have `Currency` only in supplier-statement and `ReferenceNumber`, `Notes` only in ledger. Should both sources be treated as peers (neither is authoritative), or is one the source of truth?",
+  "routed": true,
+  "intents": [
+   2,
+   3,
+   8
+  ],
+  "matched_terms": [
+   [
+    2,
+    "currency"
+   ],
+   [
+    3,
+    "source of truth"
+   ],
+   [
+    8,
+    "notes"
+   ]
+  ],
+  "topic": "W_worker_owned",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "C3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Output**: Which fields should appear in reports (match key + compared field at minimum)?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S5_report_context",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "C3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "And what output order (`left_then_right` vs `sorted_by_key`)?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "C3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Duplicate keys are found?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "X_contested_ownership",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "C3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "The amount is non-numeric (should reject the run, or skip that record only)?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "X_contested_ownership",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "D1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q1: What is the primary key/identifier that matches the same record in both files?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "same record"
+   ]
+  ],
+  "topic": "S1_match_key",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "D1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Are there edge cases where InvoiceNumber exists in one but not the other?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "Z_other",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "D1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q2: Which fields should be compared, and with what comparison rules?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S2_compare",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "D1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Amount`: Should this use `exact` comparison?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "S2_compare",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "D1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Any tolerance expected (e.g., currency rounding)?",
+  "routed": true,
+  "intents": [
+   2
+  ],
+  "matched_terms": [
+   [
+    2,
+    "currency"
+   ]
+  ],
+  "topic": "S3_field_in_rule",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "D1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Status`: What's the intended comparison?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S3_field_in_rule",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "D1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q3: Which file is the source of truth / authority?",
+  "routed": true,
+  "intents": [
+   3
+  ],
+  "matched_terms": [
+   [
+    3,
+    "source of truth"
+   ]
+  ],
+  "topic": "S4_source_of_truth",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "D1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Is this a peer-to-peer reconciliation (both equally important)?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S4_source_of_truth",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "D1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Or is one file authoritative over the other?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S4_source_of_truth",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "D1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q4: What should appear in the report output?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S5_report_context",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "D1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Minimum required: match-key field (`InvoiceNumber`), compared fields (`Amount`, `Status`)?",
+  "routed": true,
+  "intents": [
+   0,
+   1
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ],
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "S2_compare",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "D1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Any additional context fields to carry through?",
+  "routed": true,
+  "intents": [
+   5
+  ],
+  "matched_terms": [
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "D1",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Q5: Should `InvoiceNumber` also appear in the report (since it's the match key), or should it be excluded?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "MISROUTED_WRONG_INTENT"
+ },
+ {
+  "run": "D1",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Q6: Where do `Date` and `SupplierName` belong — context_fields or compare()?",
+  "routed": true,
+  "intents": [
+   5
+  ],
+  "matched_terms": [
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "D3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Which field identifies the same record in both files?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "same record"
+   ]
+  ],
+  "topic": "S1_match_key",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "D3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Which field(s) should be compared, and with what comparison/tolerance?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S2_compare",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "D3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Amount is a numeric field present in both - would be \"exact\" or \"within X tolerance\"?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "S2_compare",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "D3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Status has different value sets (PAID/UNPAID vs CLEARED/PENDING) - should these be reconciled?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S3_field_in_rule",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "D3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Is any other apparent field part of the reconciliation rule, or is it incidental?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S3_field_in_rule",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "D3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Which file is the source of truth if there's a disagreement?",
+  "routed": true,
+  "intents": [
+   3
+  ],
+  "matched_terms": [
+   [
+    3,
+    "source of truth"
+   ]
+  ],
+  "topic": "S4_source_of_truth",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "D3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "These are the minimum load-bearing questions required by the skill. What would you like me to ask the human about these, or should I make assumptions where the data clearly dictates them?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "Z_other",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "D3",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "\"When reconciling discrepancies, which file acts as the source of truth, or should we treat them as peer sources where either can override?",
+  "routed": true,
+  "intents": [
+   3
+  ],
+  "matched_terms": [
+   [
+    3,
+    "source of truth"
+   ]
+  ],
+  "topic": "S4_source_of_truth",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "D3",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "\"Which fields should appear in the report row (`reports_fields`)?",
+  "routed": true,
+  "intents": [
+   4
+  ],
+  "matched_terms": [
+   [
+    4,
+    "report row"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "D3",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "The InvoiceNumber (match key) and/or Amount must be included. Should Status from either source also appear, or just the comparison result labels?",
+  "routed": true,
+  "intents": [
+   0,
+   1
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ],
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "S1_match_key",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q1:** Which field identifies the same record in both files?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "same record"
+   ]
+  ],
+  "topic": "S1_match_key",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q2:** Which fields should be **compared**?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S2_compare",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Is `Amount` part of the reconciliation rule?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "S3_field_in_rule",
+  "verdict": "MISROUTED_WRONG_INTENT"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "If so, with what comparison (`exact`, `within`?) and tolerance if applicable?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S2_compare",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Should we compare anything else?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S2_compare",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q3:** The file roles (left vs right) - which plays which role?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Does this matter for the classification labels?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q4:** What label names should be used for the four categories?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q5:** Which fields appear in the report row (`reports_fields`), and which are context-only (`context_fields`)?",
+  "routed": true,
+  "intents": [
+   4,
+   5
+  ],
+  "matched_terms": [
+   [
+    4,
+    "report row"
+   ],
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q6:** For output order: do we want results in left-source order or sorted by key?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q7:** Duplicate key policy: what if matching keys produce multiple records on one side?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "X_contested_ownership",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Use `refuse_run`, `refuse_key`?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "Z_other",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q8:** Non-numeric policy: required if using \"within\" comparison. Use `refuse_run` or `refuse_key`?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "X_contested_ownership",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Q9:** What is the purpose of this reconciliation (one sentence description)?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Q5:** You mentioned \"Date, Supplier Name, and Status\" - are these the `reports_fields` (appear in report rows), or are they something else?",
+  "routed": true,
+  "intents": [
+   4
+  ],
+  "matched_terms": [
+   [
+    4,
+    "report row"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Also, what about `InvoiceNumber`, `Amount`, `Currency` (supplier-statement), `ReferenceNumber`, and `Notes` (ledger)?",
+  "routed": true,
+  "intents": [
+   0,
+   1,
+   2,
+   8
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ],
+   [
+    1,
+    "amount"
+   ],
+   [
+    2,
+    "currency"
+   ],
+   [
+    8,
+    "notes"
+   ]
+  ],
+  "topic": "S3_field_in_rule",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Which fields appear in the report vs context-only?",
+  "routed": true,
+  "intents": [
+   5
+  ],
+  "matched_terms": [
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Q6:** For output order: do you want results ordered by `left_then_right` (left source order) or `sorted_by_key` (sorted by InvoiceNumber)?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "W_worker_owned",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E1",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Q7:** Duplicate key policy: if there are multiple ledger records for one invoice number (or vice versa), use `refuse_run` (don't run reconciliation) or `refuse_key` (skip this key)?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "X_contested_ownership",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E1",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Q8:** Non-numeric policy: since Amount will be compared with \"within\" tolerance, we need to specify. Use `refuse_run` (reject numeric fields?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "X_contested_ownership",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E1",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "that's odd) or `refuse_key` (skip matching if Amount is non-numeric)?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "X_contested_ownership",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E1",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Given that Amount is always numeric per the fixtures, you can use either - what makes sense?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "Z_other",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E1",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Q9:** What's a one-sentence purpose for this reconciliation (e.g., \"Identify discrepancies between supplier statements and internal ledger to detect unrecorded charges or payment errors\")?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 3,
+  "kind": "fragment",
+  "text": "Q5 (clarified):** You mentioned \"Date, Supplier Name, and Status\" - which of these go into `reports_fields` vs `context_fields`?",
+  "routed": true,
+  "intents": [
+   5
+  ],
+  "matched_terms": [
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 3,
+  "kind": "fragment",
+  "text": "What about the remaining fields (`InvoiceNumber`, `Amount`, `SupplierName`, `ReferenceNumber`, `Notes`)?",
+  "routed": true,
+  "intents": [
+   0,
+   1,
+   8
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ],
+   [
+    1,
+    "amount"
+   ],
+   [
+    8,
+    "notes"
+   ]
+  ],
+  "topic": "Z_other",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E1",
+  "turn": 3,
+  "kind": "fragment",
+  "text": "Also, you mentioned output_order is a non-load-bearing question - should I use `left_then_right` as the default value in the JSON (with understanding it can be refined later), or should we leave that field empty?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 4,
+  "kind": "fragment",
+  "text": "Q5 (which file plays which role):** Which source is `left` and which is `right`?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 4,
+  "kind": "fragment",
+  "text": "This affects `body.left/body.right`. The supplier statement or the ledger?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 4,
+  "kind": "fragment",
+  "text": "Q6 (reports_fields vs context_fields):** You mentioned \"Date, Supplier Name, and Status\" - are these the **report fields** (row names) or something else?",
+  "routed": true,
+  "intents": [
+   5
+  ],
+  "matched_terms": [
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 4,
+  "kind": "fragment",
+  "text": "Also what about `InvoiceNumber`, `Amount` (for comparison), `ReferenceNumber`, and `Notes`?",
+  "routed": true,
+  "intents": [
+   0,
+   1,
+   8
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ],
+   [
+    1,
+    "amount"
+   ],
+   [
+    8,
+    "notes"
+   ]
+  ],
+  "topic": "S2_compare",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 4,
+  "kind": "fragment",
+  "text": "Which appear in the report row vs. which are context-only?",
+  "routed": true,
+  "intents": [
+   4,
+   5
+  ],
+  "matched_terms": [
+   [
+    4,
+    "report row"
+   ],
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 4,
+  "kind": "fragment",
+  "text": "Q7 (duplicate key policy):** If InvoiceNumber matches but one side has multiple records, use `refuse_run` or `refuse_key`?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "X_contested_ownership",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E1",
+  "turn": 4,
+  "kind": "fragment",
+  "text": "Q8 (non-numeric policy):** Required since we're using \"within\" comparison for Amount. Use `refuse_run` or `refue_key`?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "X_contested_ownership",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E1",
+  "turn": 4,
+  "kind": "fragment",
+  "text": "Given both fixtures show numeric amounts, does it matter?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "Z_other",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E1",
+  "turn": 4,
+  "kind": "fragment",
+  "text": "Either will work - which do you prefer?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "Z_other",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 4,
+  "kind": "fragment",
+  "text": "Also - you said \"Date, Supplier Name, and Status\" are not compared. Are these fields meant to go into `reports_fields` or `context_fields`?",
+  "routed": true,
+  "intents": [
+   5
+  ],
+  "matched_terms": [
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 5,
+  "kind": "fragment",
+  "text": "Which file is `left` and which is `right`?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 5,
+  "kind": "fragment",
+  "text": "Full list of `reports_fields`:** You mentioned \"Date, Supplier Name, and Status\" - are these all the report fields?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S5_report_context",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 5,
+  "kind": "fragment",
+  "text": "Or should I also include `InvoiceNumber`, `Amount`, etc.?",
+  "routed": true,
+  "intents": [
+   0,
+   1
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ],
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "Z_other",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E1",
+  "turn": 5,
+  "kind": "fragment",
+  "text": "context_fields`:** Which extra fields (if any) should carry context only?",
+  "routed": true,
+  "intents": [
+   5
+  ],
+  "matched_terms": [
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 5,
+  "kind": "fragment",
+  "text": "E.g., `ReferenceNumber`, `Notes`, `Currency`?",
+  "routed": true,
+  "intents": [
+   2,
+   8
+  ],
+  "matched_terms": [
+   [
+    2,
+    "currency"
+   ],
+   [
+    8,
+    "notes"
+   ]
+  ],
+  "topic": "S3_field_in_rule",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 6,
+  "kind": "fragment",
+  "text": "Left/Right:** supplier-statement = left OR ledger-book = left?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 6,
+  "kind": "fragment",
+  "text": "reports_fields:** all fields to show in report (comma-separated)?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S5_report_context",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 6,
+  "kind": "fragment",
+  "text": "context_fields:** extra context fields only?",
+  "routed": true,
+  "intents": [
+   5
+  ],
+  "matched_terms": [
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 6,
+  "kind": "fragment",
+  "text": "Duplicate key policy:** refuse_run or refuse_key?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "X_contested_ownership",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 6,
+  "kind": "fragment",
+  "text": "Non-numeric policy:** refuse_run or refuse_key?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "X_contested_ownership",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 6,
+  "kind": "fragment",
+  "text": "Purpose:** one-sentence description?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 7,
+  "kind": "fragment",
+  "text": "left/right:** supplier-statement = left, ledger-book = right?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 7,
+  "kind": "fragment",
+  "text": "reports_fields:** \"Date, Supplier Name, and Status\" confirmed?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S5_report_context",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 7,
+  "kind": "fragment",
+  "text": "Any others?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "Z_other",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 7,
+  "kind": "fragment",
+  "text": "context_fields:** What extra fields if any?",
+  "routed": true,
+  "intents": [
+   5
+  ],
+  "matched_terms": [
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E1",
+  "turn": 7,
+  "kind": "fragment",
+  "text": "duplicate key policy:** `refuse_run` or `refuse_key`?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "X_contested_ownership",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 7,
+  "kind": "fragment",
+  "text": "non-numeric policy:** `refuse_run` or `refue_key`?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "X_contested_ownership",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 7,
+  "kind": "fragment",
+  "text": "purpose:** one-sentence description of reconciliation goal?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 8,
+  "kind": "fragment",
+  "text": "reports_fields: Date,Supplier Name,Status (confirmed?) + others?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S5_report_context",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E1",
+  "turn": 8,
+  "kind": "fragment",
+  "text": "context_fields: ReferenceNumber,Currency,Notes... or empty []?",
+  "routed": true,
+  "intents": [
+   2,
+   5,
+   8
+  ],
+  "matched_terms": [
+   [
+    2,
+    "currency"
+   ],
+   [
+    5,
+    "context"
+   ],
+   [
+    8,
+    "notes"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Match key**: The skill requires which field identifies the \"same record\" in both files?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "same record"
+   ]
+  ],
+  "topic": "S1_match_key",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Is it `InvoiceNumber` alone (since each appears exactly once per supplier, and matches perfectly on InvoiceNumber)?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "S2_compare",
+  "verdict": "MISROUTED_WRONG_INTENT"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Should I combine fields like `(Date + SupplierName + InvoiceNumber)` for more robust matching?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "S1_match_key",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Compare fields**: Which fields should be compared between matched records?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S2_compare",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Status` clearly has different textual values (PAID vs CLEARED/PENDING). Should this be compared, and if so, how?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S3_field_in_rule",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Amount` appears identical in both. Should it be compared with exact, or is that incidental?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "S3_field_in_rule",
+  "verdict": "MISROUTED_WRONG_INTENT"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Are there any other load-bearing differences to compare?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S2_compare",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Source of truth**: Is there a clear \"source of truth\" file, or should they be treated as peers?",
+  "routed": true,
+  "intents": [
+   3
+  ],
+  "matched_terms": [
+   [
+    3,
+    "source of truth"
+   ]
+  ],
+  "topic": "S4_source_of_truth",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Report fields**: Which fields should appear in the `reports_fields` array of the final report row?",
+  "routed": true,
+  "intents": [
+   4
+  ],
+  "matched_terms": [
+   [
+    4,
+    "report row"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Match key (`InvoiceNumber`)?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "S1_match_key",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Compared field(s) like `Status` or `Amount`?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "S2_compare",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Context fields (`Currency`, `ReferenceNumber`, `Notes`)?",
+  "routed": true,
+  "intents": [
+   2,
+   5,
+   8
+  ],
+  "matched_terms": [
+   [
+    2,
+    "currency"
+   ],
+   [
+    5,
+    "context"
+   ],
+   [
+    8,
+    "notes"
+   ]
+  ],
+  "topic": "S3_field_in_rule",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E2",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Classification labels**: For `classify`, I need: `both_same`, `both_different`, `only_left`, `only_right` — are these standard reconciliations (matched records with match/no-match) or something else?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "W_worker_owned",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E2",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Records where Amounts match within 0.01?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "S2_compare",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E2",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Records where Amounts differ by >0.01 but InvoiceNumber matches?",
+  "routed": true,
+  "intents": [
+   0,
+   1
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ],
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "Z_other",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E2",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Is that correct?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "Z_other",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E2",
+  "turn": 3,
+  "kind": "fragment",
+  "text": "output_order`**: Since both sources are peers with all records existing in both, should the output be `left_then_right` (preserve supplier order) or `sorted_by_key` (sort by InvoiceNumber)?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "W_worker_owned",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E2",
+  "turn": 3,
+  "kind": "fragment",
+  "text": "on_duplicate_key` policy**: What should happen if the same InvoiceNumber appears multiple times in one source but not the other?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ]
+  ],
+  "topic": "X_contested_ownership",
+  "verdict": "MISROUTED_OUT_OF_SCOPE"
+ },
+ {
+  "run": "E2",
+  "turn": 3,
+  "kind": "fragment",
+  "text": "Options: `refuse_run` or `refuse_key`. Given your data, there's no duplication—what's the desired behavior anyway?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "Z_other",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E2",
+  "turn": 3,
+  "kind": "fragment",
+  "text": "Should the report row show just the match key and compared field (`[InvoiceNumber, Amount]`) or include Date/SupplierName/Status as context?",
+  "routed": true,
+  "intents": [
+   0,
+   1,
+   4,
+   5
+  ],
+  "matched_terms": [
+   [
+    0,
+    "invoice"
+   ],
+   [
+    1,
+    "amount"
+   ],
+   [
+    4,
+    "report row"
+   ],
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S5_report_context",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E2",
+  "turn": 3,
+  "kind": "fragment",
+  "text": "Open question**: Is \"Status\" difference between PAID/CLEARED/PENDING a non-load-bearing open question to record?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "Z_other",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Match key**: Which field(s) identify the *same record* in both files?",
+  "routed": true,
+  "intents": [
+   0
+  ],
+  "matched_terms": [
+   [
+    0,
+    "same record"
+   ]
+  ],
+  "topic": "S1_match_key",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Compare fields**: Which fields should be compared?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S2_compare",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "The primary candidate appears to be `Amount`. Should `Status` be compared (noting the different value sets: PAID/UNPAID vs CLEARED/PENDING)?",
+  "routed": true,
+  "intents": [
+   1
+  ],
+  "matched_terms": [
+   [
+    1,
+    "amount"
+   ]
+  ],
+  "topic": "S3_field_in_rule",
+  "verdict": "MISROUTED_WRONG_INTENT"
+ },
+ {
+  "run": "E3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Output report**: Which fields should appear in the reconciled output's row names?",
+  "routed": false,
+  "intents": [],
+  "matched_terms": [],
+  "topic": "S5_report_context",
+  "verdict": "MISSED"
+ },
+ {
+  "run": "E3",
+  "turn": 1,
+  "kind": "fragment",
+  "text": "Source of truth**: If a match exists but statuses differ, which status is authoritative for classification (both_same vs both_different)?",
+  "routed": true,
+  "intents": [
+   3
+  ],
+  "matched_terms": [
+   [
+    3,
+    "source of truth"
+   ]
+  ],
+  "topic": "S4_source_of_truth",
+  "verdict": "ROUTED_CORRECT"
+ },
+ {
+  "run": "E3",
+  "turn": 2,
+  "kind": "fragment",
+  "text": "Or also source-specific context like the statement's `Currency`, ledger's `ReferenceNumber`, or combined status info?",
+  "routed": true,
+  "intents": [
+   2,
+   5
+  ],
+  "matched_terms": [
+   [
+    2,
+    "currency"
+   ],
+   [
+    5,
+    "context"
+   ]
+  ],
+  "topic": "S3_field_in_rule",
+  "verdict": "ROUTED_CORRECT"
+ }
+]
