@@ -8,8 +8,34 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1e\\runs\\M1\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "93e62e4f0b936d2f3a4f6572fc07f73330ba4581ff71a1cd2bf44df46408648c",
+      "status": "REFUSED",
+      "codes": [
+        "match_key_not_declared",
+        "unknown_task_family",
+        "unknown_work_definition_version"
+      ],
+      "problems": [
+        {
+          "code": "unknown_work_definition_version",
+          "where": "<work_definition>",
+          "detail": "None"
+        },
+        {
+          "code": "unknown_task_family",
+          "where": "<work_definition>",
+          "detail": "None; supported: ['reconciliation']"
+        },
+        {
+          "code": "match_key_not_declared",
+          "where": "<work_definition>",
+          "detail": "body missing; task semantics are not declared"
+        }
+      ],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": null,
+      "task_family": null
     },
     {
       "run": "M2",
@@ -18,8 +44,34 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1e\\runs\\M2\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "2c5e30c7fb04a1d69a06fd7b674c44e44bb777cc8df9fa61deffb35ccad906e2",
+      "status": "REFUSED",
+      "codes": [
+        "match_key_not_declared",
+        "unknown_task_family",
+        "unknown_work_definition_version"
+      ],
+      "problems": [
+        {
+          "code": "unknown_work_definition_version",
+          "where": "<work_definition>",
+          "detail": "None"
+        },
+        {
+          "code": "unknown_task_family",
+          "where": "<work_definition>",
+          "detail": "None; supported: ['reconciliation']"
+        },
+        {
+          "code": "match_key_not_declared",
+          "where": "<work_definition>",
+          "detail": "body missing; task semantics are not declared"
+        }
+      ],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": null,
+      "task_family": null
     },
     {
       "run": "M3",
@@ -28,8 +80,34 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1e\\runs\\M3\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "408741837e97b552a593563375f0fd36d52c33dad73ea9b19f40588cbddc19fa",
+      "status": "REFUSED",
+      "codes": [
+        "match_key_not_declared",
+        "unknown_task_family",
+        "unknown_work_definition_version"
+      ],
+      "problems": [
+        {
+          "code": "unknown_work_definition_version",
+          "where": "<work_definition>",
+          "detail": "None"
+        },
+        {
+          "code": "unknown_task_family",
+          "where": "<work_definition>",
+          "detail": "None; supported: ['reconciliation']"
+        },
+        {
+          "code": "match_key_not_declared",
+          "where": "<work_definition>",
+          "detail": "body missing; task semantics are not declared"
+        }
+      ],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": null,
+      "task_family": null
     }
   ]
 }

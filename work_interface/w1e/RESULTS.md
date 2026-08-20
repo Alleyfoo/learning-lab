@@ -13,23 +13,29 @@ safe to enter the existing modelling/preview path*, NOT *established*.
 
 | run | status | skill_match | codes (if refused) | authority | override keys | sha256 |
 |---|---|---|---|---|---|---|
-| M1 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| M2 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| M3 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
+| M1 | **REFUSED** | yes | match_key_not_declared, unknown_task_family, unknown_work_definition_version | None |  | `93e62e4f0b93` |
+| M2 | **REFUSED** | yes | match_key_not_declared, unknown_task_family, unknown_work_definition_version | None |  | `2c5e30c7fb04` |
+| M3 | **REFUSED** | yes | match_key_not_declared, unknown_task_family, unknown_work_definition_version | None |  | `408741837e97` |
 
 ## Detail
 
-### M1 -- NO_ARTIFACT
+### M1 -- REFUSED
 
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
+- `unknown_work_definition_version` @ `<work_definition>` -- None
+- `unknown_task_family` @ `<work_definition>` -- None; supported: ['reconciliation']
+- `match_key_not_declared` @ `<work_definition>` -- body missing; task semantics are not declared
 
-### M2 -- NO_ARTIFACT
+### M2 -- REFUSED
 
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
+- `unknown_work_definition_version` @ `<work_definition>` -- None
+- `unknown_task_family` @ `<work_definition>` -- None; supported: ['reconciliation']
+- `match_key_not_declared` @ `<work_definition>` -- body missing; task semantics are not declared
 
-### M3 -- NO_ARTIFACT
+### M3 -- REFUSED
 
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
+- `unknown_work_definition_version` @ `<work_definition>` -- None
+- `unknown_task_family` @ `<work_definition>` -- None; supported: ['reconciliation']
+- `match_key_not_declared` @ `<work_definition>` -- body missing; task semantics are not declared
 
 ## Pass rate
 

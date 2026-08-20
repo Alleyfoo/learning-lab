@@ -1,0 +1,29 @@
+{
+  "process_name": "supplier_ledger_reconciliation",
+  "description": "Match and compare supplier statement and ledger book records based on InvoiceNumber, comparing Amount within specified tolerance",
+  "match_criteria": {
+    "primary_key": "InvoiceNumber",
+    "compare_amount_numeric": true,
+    "amount_tolerance": 0.01,
+    "currency_comparison": false,
+    "peers_source_of_truth": true
+  },
+  "input_sources": [
+    {
+      "name": "supplier-statement.txt",
+      "role": "peer"
+    },
+    {
+      "name": "ledger-book.txt", 
+      "role": "peer"
+    }
+  ],
+  "report_specification": {
+    "report_fields": ["InvoiceNumber", "Amount"],
+    "context_fields": ["Date", "Supplier Name", "Status"]
+  },
+  "output_behavior": {
+    "missing_records": "flagged per source",
+    "amount_mismatches": "reported with details"
+  }
+}

@@ -11,21 +11,30 @@ Reported INDEPENDENTLY of the structural grader.
 
 | run | fidelity | findings | artifact sha256 |
 |---|---|---|---|
-| M1 | **NO_ARTIFACT** | 0 | `-` |
-| M2 | **NO_ARTIFACT** | 0 | `-` |
-| M3 | **NO_ARTIFACT** | 0 | `-` |
+| M1 | **FIDELITY FINDINGS** | 3 | `93e62e4f0b93` |
+| M2 | **FIDELITY FINDINGS** | 3 | `2c5e30c7fb04` |
+| M3 | **FIDELITY FINDINGS** | 3 | `408741837e97` |
 
 ## Detail
 
-### M1 — NO_ARTIFACT
+### M1 — FIDELITY FINDINGS
 
+- `FID-1 UNCITED_HUMAN_FACT` @ `body.match_on` — basis=None, not 'human_confirmed'
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
 
-### M2 — NO_ARTIFACT
+### M2 — FIDELITY FINDINGS
 
+- `FID-1 UNCITED_HUMAN_FACT` @ `body.match_on` — basis=None, not 'human_confirmed'
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
 
-### M3 — NO_ARTIFACT
+### M3 — FIDELITY FINDINGS
 
+- `FID-1 UNCITED_HUMAN_FACT` @ `body.match_on` — basis=None, not 'human_confirmed'
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
 
 ## Fidelity rate
 
-**0/3 FIDELITY PASS** (0 finding(s) across graded runs).
+**0/3 FIDELITY PASS** (9 finding(s) across graded runs).

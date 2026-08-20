@@ -3,21 +3,81 @@
   "runs": [
     {
       "run": "M1",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-1 UNCITED_HUMAN_FACT",
+          "where": "body.match_on",
+          "row": 0,
+          "detail": "basis=None, not 'human_confirmed'"
+        },
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 4,
+          "detail": "delivered canonical recorded nowhere"
+        },
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 5,
+          "detail": "delivered canonical recorded nowhere"
+        }
+      ],
+      "confirmations": {},
+      "artifact_sha256": "93e62e4f0b936d2f3a4f6572fc07f73330ba4581ff71a1cd2bf44df46408648c"
     },
     {
       "run": "M2",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-1 UNCITED_HUMAN_FACT",
+          "where": "body.match_on",
+          "row": 0,
+          "detail": "basis=None, not 'human_confirmed'"
+        },
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 4,
+          "detail": "delivered canonical recorded nowhere"
+        },
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 5,
+          "detail": "delivered canonical recorded nowhere"
+        }
+      ],
+      "confirmations": {},
+      "artifact_sha256": "2c5e30c7fb04a1d69a06fd7b674c44e44bb777cc8df9fa61deffb35ccad906e2"
     },
     {
       "run": "M3",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-1 UNCITED_HUMAN_FACT",
+          "where": "body.match_on",
+          "row": 0,
+          "detail": "basis=None, not 'human_confirmed'"
+        },
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 4,
+          "detail": "delivered canonical recorded nowhere"
+        },
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 5,
+          "detail": "delivered canonical recorded nowhere"
+        }
+      ],
+      "confirmations": {},
+      "artifact_sha256": "408741837e97b552a593563375f0fd36d52c33dad73ea9b19f40588cbddc19fa"
     }
   ]
 }

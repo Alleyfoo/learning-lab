@@ -1,0 +1,68 @@
+{
+  "process_name": "Supplier Ledger Reconciliation",
+  "version": "1.0",
+  "defined_on": "2026-08-20T22:50:00+03:00",
+  "run_id": "W1-E-M1",
+  
+  "matching_rules": {
+    "match_key": {
+      "field_name": "InvoiceNumber",
+      "case_sensitive": false,
+      "description": "Identifies the same invoice record across both files"
+    }
+  },
+  
+  "comparison_rules": [
+    {
+      "field_name": "Amount", 
+      "type": "numeric",
+      "compare": true,
+      "tolerance": 0.01,
+      "description": "Compare amounts numerically within tolerance of 0.01"
+    }
+  ],
+  
+  "ignored_fields": [
+    "Currency"
+  ],
+  
+  "source_relationship": {
+    "type": "peer",
+    "sources_equal_authority": true,
+    "description": "Both supplier-statement.txt and ledger-book.txt are independent peer sources. Report missing records from either side and differences in Amount field."
+  },
+  
+  "report_structure": {
+    "row_fields": [
+      {
+        "field_name": "InvoiceNumber", 
+        "role": "match_key"
+      },
+      {
+        "field_name": "Amount", 
+        "role": "compared_field"
+      }
+    ],
+    "context_fields": [
+      {
+        "field_name": "Date",
+        "source": "any"
+      },
+      {
+        "field_name": "Supplier Name", 
+        "source": "any"
+      },
+      {
+        "field_name": "Status",
+        "source": "any"
+      }
+    ]
+  },
+  
+  "discrepancies_to_report": [
+    "Invoice numbers present in one file but not the other",
+    "Amount differences exceeding tolerance when InvoiceNumber matches"
+  ],
+  
+  "notes": "This definition captures the business agreement: match on InvoiceNumber, compare Amount within 0.01 tolerance, Currency is ignored (all samples are GBP), both files have equal authority as peer sources."
+}
