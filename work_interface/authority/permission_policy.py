@@ -16,6 +16,7 @@ Calibrated against the real wire shape recorded in
 ALLOW  structured read  of the exact authorized SKILL.md
 ALLOW  structured read  of the exact declared fixtures
 ALLOW  structured write of the exact designated work_definition.json
+ALLOW  the single-shot authorized writer, when a pack opts in
 DENY   shell execution, unconditionally
 DENY   arbitrary writes
 DENY   reads of undeclared resources
@@ -62,13 +63,17 @@ class Decision:
 
 class PermissionPolicy:
     def __init__(self, cwd: Path, readable: list[Path], writable: list[Path],
-                 resource_ids: tuple[str, ...] = ()):
+                 resource_ids: tuple[str, ...] = (),
+                 writer_capability: bool = False):
         self.cwd = Path(cwd)
         self.readable = {canonicalize(str(p), self.cwd) for p in readable}
         self.writable = {canonicalize(str(p), self.cwd) for p in writable}
         # Closed identifier set for the purpose-built authorized reader. Empty
         # for packs that do not enable it -- W1-E's policy is unchanged.
         self.resource_ids = tuple(resource_ids)
+        # The single-shot authorized writer, opt-in per pack. Off by default,
+        # so W1-E's and W1-F's policies are bit-for-bit unchanged.
+        self.writer_capability = bool(writer_capability)
 
     # -- structural classification -------------------------------------
     @staticmethod
@@ -100,6 +105,22 @@ class PermissionPolicy:
             return Decision(DENY, KIND_READ,
                             f"authorized reader called with unknown "
                             f"resource_id {rid!r}")
+
+        # 0b. the single-shot authorized writer, if this pack enables it.
+        #     Recognised STRUCTURALLY -- rawInput is exactly {"content": <str>}
+        #     -- never by title. The destination is fixed inside the capability
+        #     server and is not expressible here, so there is no path to check.
+        #     Any extra key falls through to the path clauses below and is
+        #     therefore DENIED: this clause cannot be widened by the caller.
+        if self.writer_capability and set(raw.keys()) == {"content"}:
+            body = raw.get("content")
+            if isinstance(body, str):
+                return Decision(ALLOW, KIND_WRITE,
+                                "authorized writer, designated artifact "
+                                f"({len(body)} chars)")
+            return Decision(DENY, KIND_WRITE,
+                            f"authorized writer called with non-string "
+                            f"content ({type(body).__name__})")
 
         # 1. shell, unconditionally, before anything else
         for k in COMMAND_FIELDS:
