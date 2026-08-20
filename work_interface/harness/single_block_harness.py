@@ -146,7 +146,8 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
             forbidden_extra: list | None = None,
             fs_enforcing: bool = True,
             session_mode: str = "auto",
-            fs_watch: bool = False) -> RunResult:
+            fs_watch: bool = False,
+            mcp_servers: list | None = None) -> RunResult:
     """Drive one worker session under the r2 lifecycle.
 
     `session_factory` returns an object exposing request/drain_agent_text/
@@ -193,7 +194,9 @@ def run_one(run: str, run_dir: Path, block: str, session_factory,
         if not r or "result" not in r:
             res.outcome, res.reason = HARNESS_ERROR, f"initialize failed: {r}"
             return res
-        r = s.request("session/new", {"cwd": str(run_dir), "mcpServers": []},
+        r = s.request("session/new",
+                      {"cwd": str(run_dir),
+                       "mcpServers": list(mcp_servers or [])},
                       timeout=120)
         if not r or "result" not in r:
             res.outcome, res.reason = HARNESS_ERROR, f"session/new failed: {r}"

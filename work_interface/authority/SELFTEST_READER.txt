@@ -1,0 +1,84 @@
+========================================================================
+read_authorized_resource -- calibration (no Goose, no model)
+========================================================================
+
+[1] exact text and hashes for all three identifiers
+  PASS  skill -> frozen r2 bytes  -- 0230969ea7fd00ed
+  PASS  skill text is byte-identical to the file, untransformed
+  PASS  supplier_statement -> frozen fixture bytes  -- d0cb95ab5755bef3
+  PASS  supplier_statement text is byte-identical to the file, untransformed
+  PASS  ledger_book -> frozen fixture bytes  -- 284861d7d948dd6f
+  PASS  ledger_book text is byte-identical to the file, untransformed
+  PASS  the identifier set is exactly the three authorized resources  -- ('skill', 'supplier_statement', 'ledger_book')
+
+[2] unknown identifiers are refused
+  PASS  'human_answers' refused by name
+  PASS  'validator' refused by name
+  PASS  '' refused by name
+  PASS  'SKILL' refused by name
+  PASS  'skill ' refused by name
+  PASS  None refused by name
+  PASS  7 refused by name
+  PASS  '../../w1a/human_answers.md' refused by name
+  PASS  'skill;ledger_book' refused by name
+
+[3] there is no path input, so traversal is unrepresentable
+  PASS  the schema has exactly one property  -- ['resource_id']
+  PASS  and it is a closed enum, not a free string
+  PASS  additional properties are rejected by schema
+  PASS  no 'path' argument exists
+  PASS  no 'file' argument exists
+  PASS  no 'source' argument exists
+  PASS  no 'dir' argument exists
+  PASS  no 'glob' argument exists
+  PASS  no 'pattern' argument exists
+  PASS  an absolute path as resource_id is just an unknown id
+
+[4] no write route and no shell route -- checked by AST, not prose
+  PASS  the reader imports no 'subprocess'  -- ['__future__', 'hashlib', 'json', 'pathlib', 'sys']
+  PASS  the reader imports no 'os'  -- ['__future__', 'hashlib', 'json', 'pathlib', 'sys']
+  PASS  the reader imports no 'shutil'  -- ['__future__', 'hashlib', 'json', 'pathlib', 'sys']
+  PASS  the reader imports no 'socket'  -- ['__future__', 'hashlib', 'json', 'pathlib', 'sys']
+  PASS  the reader imports no 'urllib'  -- ['__future__', 'hashlib', 'json', 'pathlib', 'sys']
+  PASS  the reader imports no 'requests'  -- ['__future__', 'hashlib', 'json', 'pathlib', 'sys']
+  PASS  the reader never calls 'write_text'
+  PASS  the reader never calls 'write_bytes'
+  PASS  the reader never calls 'unlink'
+  PASS  the reader never calls 'rmdir'
+  PASS  the reader never calls 'mkdir'
+  PASS  the reader never calls 'system'
+  PASS  the reader never calls 'popen'
+  PASS  the reader never calls 'Popen'
+  PASS  the reader never calls 'rename'
+  PASS  the reader never calls 'replace'
+  PASS  the reader never calls open()
+  PASS  it reads, and only reads
+  PASS  it exposes exactly the MCP tool surface and nothing else
+  PASS  tools/list offers exactly one tool  -- ['read_authorized_resource']
+
+[5] the MCP server responds over stdio
+  PASS  initialize handshake  -- {"jsonrpc": "2.0", "id": 1, "result": {"protocolVersion": "2024-11-05", "capabilities": {"
+  PASS  tools/list over stdio
+  PASS  tools/call returns the exact frozen skill bytes
+  PASS  an unknown identifier returns isError, not content  -- {"content": [{"type": "text", "text": "unknown resource_id 'human_answers'; authorized ide
+  PASS  any other tool name is refused
+
+[6] the policy admits the reader and nothing more
+  PASS  reader call for 'skill' is ALLOWED  -- authorized reader, resource_id='skill'
+  PASS  reader call for 'supplier_statement' is ALLOWED  -- authorized reader, resource_id='supplier_statement'
+  PASS  reader call for 'ledger_book' is ALLOWED  -- authorized reader, resource_id='ledger_book'
+  PASS  reader call for an unknown id is DENIED  -- authorized reader called with unknown resource_id 'human_answers'
+  PASS  a reader call smuggling an extra key is NOT treated as a reader call  -- read of an undeclared resource
+  PASS  shell is still denied unconditionally  -- shell execution is denied unconditionally (field 'command')
+  PASS  undeclared reads are still denied  -- read of an undeclared resource
+
+[7] the reader still works after a denied shell request
+  PASS  shell denied first  -- shell execution is denied unconditionally (field 'command')
+  PASS  the reader is still ALLOWED afterwards -- a denial carries no state  -- authorized reader, resource_id='skill'
+  PASS  and it still returns the exact frozen bytes after the denial
+
+[8] a policy WITHOUT resource_ids is unchanged (W1-E behaviour)
+  PASS  packs that do not enable the reader are unaffected  -- expected exactly one path-bearing field, found 0: []
+
+========================================================================
+READER CALIBRATION PASSED

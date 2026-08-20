@@ -61,10 +61,14 @@ class Decision:
 
 
 class PermissionPolicy:
-    def __init__(self, cwd: Path, readable: list[Path], writable: list[Path]):
+    def __init__(self, cwd: Path, readable: list[Path], writable: list[Path],
+                 resource_ids: tuple[str, ...] = ()):
         self.cwd = Path(cwd)
         self.readable = {canonicalize(str(p), self.cwd) for p in readable}
         self.writable = {canonicalize(str(p), self.cwd) for p in writable}
+        # Closed identifier set for the purpose-built authorized reader. Empty
+        # for packs that do not enable it -- W1-E's policy is unchanged.
+        self.resource_ids = tuple(resource_ids)
 
     # -- structural classification -------------------------------------
     @staticmethod
@@ -83,6 +87,19 @@ class PermissionPolicy:
         if raw is None:
             return Decision(DENY, KIND_UNKNOWN,
                             "request has no parseable toolCall.rawInput")
+
+        # 0. the purpose-built authorized reader, if this pack enables it.
+        #    Grants NOTHING new: the same three resources, reachable only by a
+        #    closed identifier. Recognised STRUCTURALLY -- rawInput is exactly
+        #    {"resource_id": <member of the closed set>} -- never by title.
+        if self.resource_ids and set(raw.keys()) == {"resource_id"}:
+            rid = raw.get("resource_id")
+            if isinstance(rid, str) and rid in self.resource_ids:
+                return Decision(ALLOW, KIND_READ,
+                                f"authorized reader, resource_id={rid!r}")
+            return Decision(DENY, KIND_READ,
+                            f"authorized reader called with unknown "
+                            f"resource_id {rid!r}")
 
         # 1. shell, unconditionally, before anything else
         for k in COMMAND_FIELDS:
