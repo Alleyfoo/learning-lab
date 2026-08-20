@@ -1,0 +1,48 @@
+======================================================================
+A4 FILESYSTEM AUTHORITY BACKSTOP -- synthetic self-test
+No Goose, no model. Synthetic mutations only.
+======================================================================
+
+[0] a run that touches nothing
+  PASS  no mutation -> CLEAN  -- no unauthorized filesystem mutation
+
+[1] designated artifact creation
+  PASS  creating work_definition.json is permitted  -- no unauthorized filesystem mutation
+  PASS  the permitted mutation is recorded  -- CREATED 'work_definition.json' (sha256=6bc0da1f42f96fc3, 12 bytes)
+
+[1b] designated artifact re-write is also permitted
+  PASS  writing it again is permitted  -- no unauthorized filesystem mutation
+
+[2] temp file creation (the W1-C H2 shape)
+  PASS  temp file creation -> CONTESTED: FILESYSTEM_AUTHORITY_VIOLATION
+  PASS  exact path and mutation type recorded  -- CREATED 'temp_skill.txt' (sha256=7832dbcae32ee983, 12 bytes)
+  PASS  offending file PRESERVED as evidence, not cleaned up
+
+[2b] a nested temp file is caught too
+  PASS  nested creation reported with a relative posix path  -- CREATED 'scratch/notes.txt' (sha256=2d711642b726b044, 1 bytes)
+
+[3] frozen input modification
+  PASS  SKILL.md modification -> CONTESTED
+  PASS  reported as MODIFIED with before/after digests  -- MODIFIED 'SKILL.md' (16b57bb418a57f44 -> 92e78d0b032962f4)
+
+[4] deletion
+  PASS  deletion -> CONTESTED, reported as DELETED  -- DELETED 'PROMPT.md' (was sha256=fd1a34b6300cf537)
+
+[4b] deleting the designated artifact is NOT permitted
+  PASS  deleting work_definition.json -> CONTESTED  -- FILESYSTEM_AUTHORITY_VIOLATION: DELETED 'work_definition.json' (was sha256=44136fa355b3678a)
+
+[5] rename
+  PASS  rename -> CONTESTED
+  PASS  reported as a single RENAMED, not delete+create  -- RENAMED 'SKILL.md' -> 'SKILL_renamed.md'
+
+[5b] renaming another file INTO the designated path is contested
+  PASS  a rename into work_definition.json is not a permitted write  -- FILESYSTEM_AUTHORITY_VIOLATION: RENAMED 'draft.json' -> 'work_definition.json'
+
+[6] several mutations at once, all recorded
+  PASS  the artifact is permitted; the other two are violations  -- ["CREATED 'temp.txt' (sha256=e3b98a4da31a127d, 1 bytes)", "MODIFIED 'SKILL.md' (16b57bb418a57f44 -> 92e78d0b032962f4)"]
+  PASS  the permitted artifact write is still recorded separately
+  PASS  machine record is complete and untruncated
+  PASS  nothing was cleaned up by the check itself
+
+======================================================================
+A4 SELF-TEST PASSED
