@@ -94,10 +94,13 @@ A4 filtering defect for the same reason.
 
 **Status: open. Raised by W1-K.**
 
-The same fixed configuration -- same model, r2, v0, fixtures, canonical order,
-capability box -- produced:
+The same fixed configuration — same model, r2, v0, fixtures, canonical order,
+capability box — produced:
 
-
+```text
+W1-H   P1 = 6/6 rows EXACT   P2 = 2/6   P3 = 6/6
+W1-K   A1 = 1/6              A2 = 2/6   A3 = 1/6
+```
 
 Two perfect runs in one pack, none in the other, with **no declared variable
 between them**. Run-to-run variation is of the same order as the effects the
