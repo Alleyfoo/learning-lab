@@ -13,24 +13,30 @@ safe to enter the existing modelling/preview path*, NOT *established*.
 
 | run | status | skill_match | codes (if refused) | authority | override keys | sha256 |
 |---|---|---|---|---|---|---|
-| Q1 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| Q2 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| Q3 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
+| Q1 | **PASS** | yes |  | None |  | `dbf4447c5ed3` |
+| Q2 | **PASS** | yes |  | None |  | `d5393b64b89c` |
+| Q3 | **REFUSED** | yes | observed_field_not_in_source | None |  | `49adddb1a580` |
 
 ## Detail
 
-### Q1 -- NO_ARTIFACT
+### Q3 -- REFUSED
 
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### Q2 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### Q3 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
+- `observed_field_not_in_source` @ `<work_definition>:sources.statement` -- ' Supplier Name' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']
+- `observed_field_not_in_source` @ `<work_definition>:sources.statement` -- ' InvoiceNumber' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']
+- `observed_field_not_in_source` @ `<work_definition>:sources.statement` -- ' Amount' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']
+- `observed_field_not_in_source` @ `<work_definition>:sources.statement` -- ' Currency' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']
+- `observed_field_not_in_source` @ `<work_definition>:sources.statement` -- ' Status' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']
+- `observed_field_not_in_source` @ `<work_definition>:sources.ledger` -- ' ReferenceNumber' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']
+- `observed_field_not_in_source` @ `<work_definition>:sources.ledger` -- ' SupplierName' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']
+- `observed_field_not_in_source` @ `<work_definition>:sources.ledger` -- ' InvoiceNumber' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']
+- `observed_field_not_in_source` @ `<work_definition>:sources.ledger` -- ' Amount' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']
+- `observed_field_not_in_source` @ `<work_definition>:sources.ledger` -- ' Status' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']
+- `observed_field_not_in_source` @ `<work_definition>:sources.ledger` -- ' Notes' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']
+- `observed_field_not_in_source` @ `<work_definition>:body.match_on.left_field` -- 'InvoiceNumber' is the match key for 'statement' but is not in that source's observed_fields
+- `observed_field_not_in_source` @ `<work_definition>:body.match_on.right_field` -- 'InvoiceNumber' is the match key for 'ledger' but is not in that source's observed_fields
+- `observed_field_not_in_source` @ `<work_definition>:body` -- 'Amount' compared on 'statement' but not in that source's observed_fields
+- `observed_field_not_in_source` @ `<work_definition>:body` -- 'Amount' compared on 'ledger' but not in that source's observed_fields
 
 ## Pass rate
 
-**0/3 PASS** (primary W1-J success criterion: 3/3).
+**2/3 PASS** (primary W1-J success criterion: 3/3).

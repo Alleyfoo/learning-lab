@@ -56,26 +56,53 @@ A **cross-pack differential**, not simultaneously randomized arms: the packs ran
 
 ### Q1
 
-- NO_ARTIFACT
+| row | settles | delivery_position | provenance_slot | preservation |
+|---|---|---|---|---|
+| 5 | context fields | 1 | NO | **BUNDLED** |
+| 4 | report fields | 2 | NO | **BUNDLED** |
+| 3 | source of truth | 3 | NO | **ABSENT** |
+| 2 | currency | 4 | NO | **ABSENT** |
+| 1 | compare | 5 | YES | **NONVERBATIM** |
+| 0 | match key | 6 | YES | **EXACT_INDIVIDUAL** |
+
+`preserved_prefix_length` = **0** (counted from the start of delivery)
 
 ### Q2
 
-- NO_ARTIFACT
+| row | settles | delivery_position | provenance_slot | preservation |
+|---|---|---|---|---|
+| 5 | context fields | 1 | NO | **BUNDLED** |
+| 4 | report fields | 2 | NO | **ABSENT** |
+| 3 | source of truth | 3 | NO | **EXACT_INDIVIDUAL** |
+| 2 | currency | 4 | NO | **ABSENT** |
+| 1 | compare | 5 | YES | **ABSENT** |
+| 0 | match key | 6 | YES | **BUNDLED** |
+
+`preserved_prefix_length` = **0** (counted from the start of delivery)
 
 ### Q3
 
-- NO_ARTIFACT
+| row | settles | delivery_position | provenance_slot | preservation |
+|---|---|---|---|---|
+| 5 | context fields | 1 | NO | **EXACT_INDIVIDUAL** |
+| 4 | report fields | 2 | NO | **EXACT_INDIVIDUAL** |
+| 3 | source of truth | 3 | NO | **EXACT_INDIVIDUAL** |
+| 2 | currency | 4 | NO | **ABSENT** |
+| 1 | compare | 5 | YES | **NONVERBATIM** |
+| 0 | match key | 6 | YES | **EXACT_INDIVIDUAL** |
+
+`preserved_prefix_length` = **3** (counted from the start of delivery)
 
 ## Side by side, by delivery position
 
 | position | W1-H row | P1 | P2 | P3 | W1-J row | Q1 | Q2 | Q3 |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 0 (match key) | EXACT | EXACT | EXACT | 5 (context fields) | - | - | - |
-| 2 | 1 (compare) | EXACT | EXACT | EXACT | 4 (report fields) | - | - | - |
-| 3 | 2 (currency) | EXACT | ABS | EXACT | 3 (source of truth) | - | - | - |
-| 4 | 3 (source of truth) | EXACT | ABS | EXACT | 2 (currency) | - | - | - |
-| 5 | 4 (report fields) | EXACT | ABS | EXACT | 1 (compare) | - | - | - |
-| 6 | 5 (context fields) | EXACT | ABS | EXACT | 0 (match key) | - | - | - |
+| 1 | 0 (match key) | EXACT | EXACT | EXACT | 5 (context fields) | BUND | BUND | EXACT |
+| 2 | 1 (compare) | EXACT | EXACT | EXACT | 4 (report fields) | BUND | ABS | EXACT |
+| 3 | 2 (currency) | EXACT | ABS | EXACT | 3 (source of truth) | ABS | EXACT | EXACT |
+| 4 | 3 (source of truth) | EXACT | ABS | EXACT | 2 (currency) | ABS | ABS | ABS |
+| 5 | 4 (report fields) | EXACT | ABS | EXACT | 1 (compare) | NONVB | ABS | NONVB |
+| 6 | 5 (context fields) | EXACT | ABS | EXACT | 0 (match key) | EXACT | BUND | EXACT |
 
 ## preserved_prefix_length
 
@@ -83,6 +110,9 @@ A **cross-pack differential**, not simultaneously randomized arms: the packs ran
 W1-H P1  6
 W1-H P2  2
 W1-H P3  6
+W1-J Q1  0
+W1-J Q2  0
+W1-J Q3  3
 ```
 
 **Descriptive.** Three runs per pack. No percentages, no reliability estimate, and no statistical inference. The interpretation branches are fixed in `PREREGISTRATION.md` and are read off the six observations directly.

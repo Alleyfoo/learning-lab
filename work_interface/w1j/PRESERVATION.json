@@ -71,7 +71,7 @@
     {
       "pack": "W1-J",
       "run": "Q1",
-      "status": "NO_ARTIFACT",
+      "status": "GRADED",
       "order": [
         5,
         4,
@@ -79,12 +79,21 @@
         2,
         1,
         0
-      ]
+      ],
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "NONVERBATIM",
+        "2": "ABSENT",
+        "3": "ABSENT",
+        "4": "BUNDLED",
+        "5": "BUNDLED"
+      },
+      "preserved_prefix_length": 0
     },
     {
       "pack": "W1-J",
       "run": "Q2",
-      "status": "NO_ARTIFACT",
+      "status": "GRADED",
       "order": [
         5,
         4,
@@ -92,12 +101,21 @@
         2,
         1,
         0
-      ]
+      ],
+      "rows": {
+        "0": "BUNDLED",
+        "1": "ABSENT",
+        "2": "ABSENT",
+        "3": "EXACT_INDIVIDUAL",
+        "4": "ABSENT",
+        "5": "BUNDLED"
+      },
+      "preserved_prefix_length": 0
     },
     {
       "pack": "W1-J",
       "run": "Q3",
-      "status": "NO_ARTIFACT",
+      "status": "GRADED",
       "order": [
         5,
         4,
@@ -105,7 +123,16 @@
         2,
         1,
         0
-      ]
+      ],
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "NONVERBATIM",
+        "2": "ABSENT",
+        "3": "EXACT_INDIVIDUAL",
+        "4": "EXACT_INDIVIDUAL",
+        "5": "EXACT_INDIVIDUAL"
+      },
+      "preserved_prefix_length": 3
     }
   ],
   "provenance_slot": {

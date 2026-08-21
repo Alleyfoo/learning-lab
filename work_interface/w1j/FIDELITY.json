@@ -3,21 +3,179 @@
   "runs": [
     {
       "run": "Q1",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-1 UNCITED_HUMAN_FACT",
+          "where": "body.compare[Amount]",
+          "row": 1,
+          "detail": "confirmation 'Q_amount_comparison' is FID-6 NONVERBATIM_CONFIRMATION rows=[1]; provenance must be exclusive and byte-exact"
+        },
+        {
+          "finding": "FID-6 NONVERBATIM_CONFIRMATION",
+          "where": "human_confirmations[Q_amount_comparison]",
+          "row": null,
+          "detail": "rows=[1] subreason=TRAILING_CONTENT"
+        },
+        {
+          "finding": "FID-2 BUNDLED_CONFIRMATION",
+          "where": "human_confirmations[Q_report_fields]",
+          "row": null,
+          "detail": "rows=[4, 5]"
+        },
+        {
+          "finding": "FID-3 PHANTOM_CONFIRMATION",
+          "where": "human_confirmations[Q_source_of_truth]",
+          "row": null,
+          "detail": "rows=[]"
+        }
+      ],
+      "confirmations": {
+        "Q_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_amount_comparison": {
+          "rows": [
+            1
+          ],
+          "verdict": "FID-6 NONVERBATIM_CONFIRMATION",
+          "subreason": "TRAILING_CONTENT"
+        },
+        "Q_report_fields": {
+          "rows": [
+            4,
+            5
+          ],
+          "verdict": "FID-2 BUNDLED_CONFIRMATION",
+          "subreason": null
+        },
+        "Q_source_of_truth": {
+          "rows": [],
+          "verdict": "FID-3 PHANTOM_CONFIRMATION",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "dbf4447c5ed3a60c083e6096c4c5074998d22b5e5602cb906f49e2c1205a1056"
     },
     {
       "run": "Q2",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-1 UNCITED_HUMAN_FACT",
+          "where": "body.compare[Amount]",
+          "row": 1,
+          "detail": "confirmation 'Q_amount_compare' is FID-3 PHANTOM_CONFIRMATION rows=[]; provenance must be exclusive and byte-exact"
+        },
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 4,
+          "detail": "delivered canonical recorded nowhere"
+        },
+        {
+          "finding": "FID-3 PHANTOM_CONFIRMATION",
+          "where": "human_confirmations[Q_amount_compare]",
+          "row": null,
+          "detail": "rows=[]"
+        },
+        {
+          "finding": "FID-2 BUNDLED_CONFIRMATION",
+          "where": "human_confirmations[Q_report_fields]",
+          "row": null,
+          "detail": "rows=[0, 5]"
+        }
+      ],
+      "confirmations": {
+        "Q_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_amount_compare": {
+          "rows": [],
+          "verdict": "FID-3 PHANTOM_CONFIRMATION",
+          "subreason": null
+        },
+        "Q_source_truth": {
+          "rows": [
+            3
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_report_fields": {
+          "rows": [
+            0,
+            5
+          ],
+          "verdict": "FID-2 BUNDLED_CONFIRMATION",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "d5393b64b89cff760272b6fcc54b7f3ca7b10dc6ca45c43bee5102cce0208e52"
     },
     {
       "run": "Q3",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-1 UNCITED_HUMAN_FACT",
+          "where": "body.compare[Amount]",
+          "row": 1,
+          "detail": "confirmation 'Q_compare_field' is FID-6 NONVERBATIM_CONFIRMATION rows=[1]; provenance must be exclusive and byte-exact"
+        },
+        {
+          "finding": "FID-6 NONVERBATIM_CONFIRMATION",
+          "where": "human_confirmations[Q_compare_field]",
+          "row": null,
+          "detail": "rows=[1] subreason=TRAILING_CONTENT"
+        }
+      ],
+      "confirmations": {
+        "Q_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_compare_field": {
+          "rows": [
+            1
+          ],
+          "verdict": "FID-6 NONVERBATIM_CONFIRMATION",
+          "subreason": "TRAILING_CONTENT"
+        },
+        "Q_context_fields": {
+          "rows": [
+            5
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_reports_fields": {
+          "rows": [
+            4
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_source_of_truth": {
+          "rows": [
+            3
+          ],
+          "verdict": "normal",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "49adddb1a580d1bf4e6aa7a63ffb683e0aaf3572001a6db2871e17e745fdb0e2"
     }
   ]
 }

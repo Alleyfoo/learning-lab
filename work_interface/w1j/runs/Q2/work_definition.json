@@ -1,0 +1,89 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "W1-J-Q2-invoice-reconciliation",
+  "provenance": {
+    "producer": "goose Q2 session",
+    "skill": "define-lab-process",
+    "produced_at": "2026-08-21"
+  },
+  "purpose": "reconcile supplier statement and internal ledger to identify invoice mismatches and amount differences",
+  "sources": {
+    "supplier-statement": {
+      "role_label": "supplier-statement",
+      "fixture": "supplier-statement.txt",
+      "observed_fields": ["Date", "Supplier Name", "InvoiceNumber", "Amount", "Currency", "Status"],
+      "basis": "observed"
+    },
+    "internal-ledger": {
+      "role_label": "internal-ledger",
+      "fixture": "ledger-book.txt",
+      "observed_fields": ["Date", "ReferenceNumber", "SupplierName", "InvoiceNumber", "Amount", "Status", "Notes"],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "supplier-statement",
+    "right": "internal-ledger",
+    "match_on": {
+      "left_field": "InvoiceNumber",
+      "right_field": "InvoiceNumber",
+      "basis": "human_confirmed",
+      "confirmation": "Q_match_key"
+    },
+    "compare": [
+      {
+        "field": "Amount",
+        "comparison": "within",
+        "tolerance": "0.01",
+        "basis": "human_confirmed",
+        "confirmation": "Q_amount_compare"
+      }
+    ],
+    "classify": {
+      "both_same": "matched_invoice",
+      "both_different": "discrepant_invoice",
+      "only_left": "invoice_only_in_statement",
+      "only_right": "invoice_only_in_ledger"
+    },
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_key",
+    "on_non_numeric": "refuse_key"
+  },
+  "output": {
+    "reports_fields": ["InvoiceNumber", "Amount"],
+    "context_fields": ["Date", "Supplier Name", "ReferenceNumber", "Status", "Currency", "Notes"]
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_match_key",
+      "question": "Which field identifies the same record/invoice in both files?",
+      "answer": "InvoiceNumber",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_amount_compare",
+      "question": "Should Amount be compared, and if so, how and with what tolerance? Is Currency part of the reconciliation rule?",
+      "answer": "Yes, compare Amount numerically within 0.01. No, Currency is not compared and is not part of the rule.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_source_truth",
+      "question": "Which file is the source of truth for matching? Or are they peers?",
+      "answer": "Neither — both are peer sources. Report what is missing from either side and differences in the compared field.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_report_fields",
+      "question": "Which fields should appear in the report row? Which fields are context?",
+      "answer": "Date, Supplier Name, and Status are context. InvoiceNumber (match key) and Amount (compared field) are in report rows.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [],
+  "requested_destination": "review_only",
+  "requested_delivery": {
+    "format": "json_discrepancy_report"
+  },
+  "requested_authority": null
+}

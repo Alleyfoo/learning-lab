@@ -8,8 +8,14 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1j\\runs\\Q1\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "dbf4447c5ed3a60c083e6096c4c5074998d22b5e5602cb906f49e2c1205a1056",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "Q2",
@@ -18,8 +24,14 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1j\\runs\\Q2\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "d5393b64b89cff760272b6fcc54b7f3ca7b10dc6ca45c43bee5102cce0208e52",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "Q3",
@@ -28,8 +40,92 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1j\\runs\\Q3\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "49adddb1a580d1bf4e6aa7a63ffb683e0aaf3572001a6db2871e17e745fdb0e2",
+      "status": "REFUSED",
+      "codes": [
+        "observed_field_not_in_source"
+      ],
+      "problems": [
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.statement",
+          "detail": "' Supplier Name' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.statement",
+          "detail": "' InvoiceNumber' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.statement",
+          "detail": "' Amount' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.statement",
+          "detail": "' Currency' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.statement",
+          "detail": "' Status' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.ledger",
+          "detail": "' ReferenceNumber' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.ledger",
+          "detail": "' SupplierName' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.ledger",
+          "detail": "' InvoiceNumber' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.ledger",
+          "detail": "' Amount' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.ledger",
+          "detail": "' Status' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.ledger",
+          "detail": "' Notes' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:body.match_on.left_field",
+          "detail": "'InvoiceNumber' is the match key for 'statement' but is not in that source's observed_fields"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:body.match_on.right_field",
+          "detail": "'InvoiceNumber' is the match key for 'ledger' but is not in that source's observed_fields"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:body",
+          "detail": "'Amount' compared on 'statement' but not in that source's observed_fields"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:body",
+          "detail": "'Amount' compared on 'ledger' but not in that source's observed_fields"
+        }
+      ],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     }
   ]
 }
