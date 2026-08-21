@@ -1,0 +1,51 @@
+{
+  "canonical": {
+    "supplier_statement": [
+      "Charge Period",
+      "Client Ref",
+      "Net Value",
+      "Tax Band",
+      "Settlement State"
+    ],
+    "ledger_book": [
+      "Charge Period",
+      "Internal Key",
+      "Client Ref",
+      "Net Value",
+      "Settlement State",
+      "Remarks"
+    ]
+  },
+  "runs": [
+    {
+      "run": "U1",
+      "arm": "r2",
+      "status": "NO_ARTIFACT"
+    },
+    {
+      "run": "U2",
+      "arm": "r2",
+      "status": "NO_ARTIFACT"
+    },
+    {
+      "run": "U3",
+      "arm": "r2",
+      "status": "NO_ARTIFACT"
+    },
+    {
+      "run": "V1",
+      "arm": "r3",
+      "status": "NO_ARTIFACT"
+    },
+    {
+      "run": "V2",
+      "arm": "r3",
+      "status": "NO_ARTIFACT"
+    },
+    {
+      "run": "V3",
+      "arm": "r3",
+      "status": "NO_ARTIFACT"
+    }
+  ]
+}

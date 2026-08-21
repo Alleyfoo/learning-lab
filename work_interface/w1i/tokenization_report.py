@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+"""W1-I PRIMARY MEASURE — header-token boundary, reported per arm.
+
+Deliberately independent of the structural grader. **Overall structural PASS is
+not the tokenization measure**: an artifact can pass for reasons unrelated to
+field tokenization, or fail for reasons unrelated to it, and either would
+contaminate the comparison this pack exists to make.
+
+For every run this reports, mechanically:
+
+```text
+1  the canonical header-token set derived by the input contract
+2  every worker-declared observed_fields token
+3  whether delimiter-adjacent separator whitespace survives in any token
+4  whether legitimate INTERNAL whitespace is preserved
+```
+
+Read-only. It never edits, repairs or moves an artifact.
+
+Three outcomes are distinguished, because the fixture is built to separate them:
+
+```text
+EXACT        token == canonical                    'Client Ref'
+PADDED       separator whitespace retained          ' Client Ref'
+COLLAPSED    internal whitespace removed/altered    'ClientRef'
+OTHER        anything else (renamed, merged, absent)
+```
+
+    python work_interface/w1i/tokenization_report.py
+"""
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent))
+import work_definition as wd  # noqa: E402
+
+FIXTURES = HERE / "fixtures"
+ARTIFACT = "work_definition.json"
+ARM_OF = {"U": "r2", "V": "r3"}
+RUNS = ["U1", "U2", "U3", "V1", "V2", "V3"]
+
+EXACT, PADDED, COLLAPSED, OTHER = "EXACT", "PADDED", "COLLAPSED", "OTHER"
+
+
+def canonical_tokens() -> dict[str, list[str]]:
+    """(1) The canonical header-token set, derived by the input contract."""
+    mapping = json.loads((FIXTURES / "fixtures.json").read_text(encoding="utf-8"))
+    return {role: wd._fixture_headers(FIXTURES / name)
+            for role, name in mapping.items()}
+
+
+def classify(token: str, canon: list[str]) -> tuple[str, str | None]:
+    """Classify one declared token against the canonical set for its source."""
+    if token in canon:
+        return EXACT, token
+    stripped = token.strip()
+    if stripped in canon and stripped != token:
+        return PADDED, stripped
+    squashed = "".join(token.split())
+    for c in canon:
+        if "".join(c.split()) == squashed and c != token:
+            return COLLAPSED, c
+    return OTHER, None
+
+
+def analyse_run(run: str) -> dict:
+    d = HERE / "runs" / run
+    rec: dict = {"run": run, "arm": ARM_OF[run[0]]}
+    art = d / ARTIFACT
+    if not art.is_file():
+        rec["status"] = "NO_ARTIFACT"
+        return rec
+    try:
+        obj = json.loads(art.read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        rec["status"] = "UNPARSEABLE_JSON"
+        rec["error"] = f"{type(e).__name__}: {e}"
+        return rec
+
+    canon = canonical_tokens()
+    all_canon = sorted({c for v in canon.values() for c in (v or [])})
+    sources = obj.get("sources")
+    if not isinstance(sources, dict):
+        rec["status"] = "NO_SOURCES"
+        return rec
+
+    declared, verdicts = {}, []
+    for role, spec in sources.items():
+        if not isinstance(spec, dict):
+            continue
+        fields = spec.get("observed_fields")
+        if not isinstance(fields, list):
+            continue
+        # The role label is the worker's own; match its declared fixture where
+        # possible, else judge against the union of both headers.
+        fixture = str(spec.get("fixture") or "")
+        target = None
+        for r, name in json.loads(
+                (FIXTURES / "fixtures.json").read_text(encoding="utf-8")).items():
+            if fixture and Path(name).name == Path(fixture).name:
+                target = canon[r]
+        pool = target if target else all_canon
+        rows = []
+        for f in fields:
+            f = str(f)
+            verdict, canonical = classify(f, pool)
+            rows.append({"declared": f, "verdict": verdict,
+                         "canonical": canonical})
+            verdicts.append(verdict)
+        declared[role] = rows
+
+    rec["status"] = "GRADED"
+    rec["declared"] = declared                       # (2) every declared token
+    rec["padded"] = sum(1 for v in verdicts if v == PADDED)      # (3)
+    rec["collapsed"] = sum(1 for v in verdicts if v == COLLAPSED)  # (4)
+    rec["exact"] = sum(1 for v in verdicts if v == EXACT)
+    rec["other"] = sum(1 for v in verdicts if v == OTHER)
+    rec["total"] = len(verdicts)
+    rec["separator_whitespace_survives"] = rec["padded"] > 0
+    rec["internal_whitespace_preserved"] = rec["collapsed"] == 0
+    rec["tokenization"] = ("CLEAN" if rec["padded"] == 0
+                           and rec["collapsed"] == 0 and rec["other"] == 0
+                           else "FINDINGS")
+    return rec
+
+
+def main() -> int:
+    canon = canonical_tokens()
+    records = [analyse_run(r) for r in RUNS]
+
+    lines = ["# W1-I tokenization results", "",
+             "Generated by `work_interface/w1i/tokenization_report.py`. "
+             "Read-only.", "",
+             "**This is the primary measure.** Overall structural PASS is "
+             "deliberately not used as the tokenization measure.", "",
+             "## 1. Canonical header tokens (derived by the input contract)",
+             ""]
+    for role, toks in canon.items():
+        lines.append(f"- `{role}` -> {toks}")
+    lines += ["",
+              "Every token but `Remarks` carries an internal space, so PADDED, "
+              "COLLAPSED and EXACT are separable outcomes.", "",
+              "## 2-4. Per-run declarations", "",
+              "| run | arm | tokenization | exact | padded | collapsed | other |"
+              " separator ws survives | internal ws preserved |",
+              "|---|---|---|---|---|---|---|---|---|"]
+    for r in records:
+        if r["status"] != "GRADED":
+            lines.append(f"| {r['run']} | {r['arm']} | **{r['status']}** | "
+                         f"| | | | | |")
+            continue
+        lines.append(
+            f"| {r['run']} | {r['arm']} | **{r['tokenization']}** | "
+            f"{r['exact']} | {r['padded']} | {r['collapsed']} | {r['other']} | "
+            f"{'YES' if r['separator_whitespace_survives'] else 'no'} | "
+            f"{'yes' if r['internal_whitespace_preserved'] else 'NO'} |")
+
+    lines += ["", "## Declared tokens, verbatim", ""]
+    for r in records:
+        lines.append(f"### {r['run']} — arm {r['arm']}")
+        lines.append("")
+        if r["status"] != "GRADED":
+            lines += [f"- {r['status']}", ""]
+            continue
+        for role, rows in (r.get("declared") or {}).items():
+            lines.append(f"- `{role}`")
+            for row in rows:
+                mark = "" if row["verdict"] == EXACT else "  <-- "
+                lines.append(f"    - {row['declared']!r} **{row['verdict']}**"
+                             f"{mark}{row['canonical']!r}"
+                             if row["verdict"] != EXACT
+                             else f"    - {row['declared']!r} {row['verdict']}")
+        lines.append("")
+
+    lines += ["## Descriptive comparison", ""]
+    for arm in ("r2", "r3"):
+        rs = [r for r in records if r["arm"] == arm and r["status"] == "GRADED"]
+        clean = [r for r in rs if r["tokenization"] == "CLEAN"]
+        lines.append(f"- **{arm}**: {len(clean)}/{len(rs)} runs with clean "
+                     f"tokenization; "
+                     f"padded tokens {sum(r['padded'] for r in rs)}, "
+                     f"collapsed {sum(r['collapsed'] for r in rs)}, "
+                     f"other {sum(r['other'] for r in rs)}")
+    lines += ["",
+              "**Descriptive only.** Three runs per arm cannot support a "
+              "reliability estimate, and no claim that r3 \"solves\" the "
+              "behaviour follows from this comparison.", ""]
+
+    (HERE / "TOKENIZATION.md").write_text("\n".join(lines), encoding="utf-8")
+    (HERE / "TOKENIZATION.json").write_text(
+        json.dumps({"canonical": canon, "runs": records}, indent=2,
+                   ensure_ascii=False), encoding="utf-8")
+    print("\n".join(lines))
+    print(f"\nWrote {HERE / 'TOKENIZATION.md'} and {HERE / 'TOKENIZATION.json'}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

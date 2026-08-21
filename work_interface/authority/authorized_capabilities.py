@@ -56,6 +56,51 @@ from authorized_reader import (  # noqa: E402,F401
 
 ARTIFACT_NAME = "work_definition.json"
 
+# Which files the two fixture identifiers resolve to. The DEFAULT is the W1-A
+# fixture pair, exactly as W1-F/W1-G/W1-H used it -- those packs are unaffected.
+# An experiment on a different fixture pair passes its own directory as the
+# optional second argument. The capability VOCABULARY never changes: the same
+# three identifiers, the same closed set, no path ever supplied by the caller.
+DEFAULT_FIXTURES = HERE.parent / "w1a" / "fixtures"
+FIXTURE_FILES = {"supplier_statement": "supplier-statement.txt",
+                 "ledger_book": "ledger-book.txt"}
+
+
+def resolve_resource(resource_id: str, run_dir: Path,
+                     fixtures: Path | None = None) -> Path:
+    """Map an identifier to a path. The caller never supplies a path."""
+    if resource_id == "skill":
+        return Path(run_dir) / "SKILL.md"
+    fixtures = Path(fixtures) if fixtures is not None else DEFAULT_FIXTURES
+    if resource_id in FIXTURE_FILES:
+        # A non-default fixture pair states its own role->file mapping in an
+        # explicit manifest. Never inferred from sort order or filename shape:
+        # a frozen experiment must be able to show which file played which role.
+        manifest = fixtures / "fixtures.json"
+        if manifest.is_file():
+            mapping = json.loads(manifest.read_text(encoding="utf-8"))
+            name = mapping.get(resource_id)
+            if not isinstance(name, str):
+                raise UnknownResource(
+                    f"fixtures.json does not declare a file for "
+                    f"{resource_id!r}")
+            return fixtures / name
+        return fixtures / FIXTURE_FILES[resource_id]
+    raise UnknownResource(
+        f"unknown resource_id {resource_id!r}; authorized identifiers are "
+        f"{list(RESOURCE_IDS)}")
+
+
+def read_authorized(resource_id: str, run_dir: Path,
+                    fixtures: Path | None = None) -> str:
+    """The exact text of an authorized resource. No transformation of any kind."""
+    if not isinstance(resource_id, str) or resource_id not in RESOURCE_IDS:
+        raise UnknownResource(
+            f"unknown resource_id {resource_id!r}; authorized identifiers are "
+            f"{list(RESOURCE_IDS)}")
+    return resolve_resource(resource_id, run_dir, fixtures).read_text(
+        encoding="utf-8")
+
 WRITE_TOOL_NAME = "write_work_definition"
 WRITE_TOOL_DESCRIPTION = (
     "Write the finished work definition for this run. "
@@ -138,7 +183,7 @@ def _tool_error(rid, text):
                          "isError": True})
 
 
-def handle(msg: dict, run_dir: Path):
+def handle(msg: dict, run_dir: Path, fixtures: Path | None = None):
     """One request -> one response, or None for a notification."""
     method = msg.get("method")
     rid = msg.get("id")
@@ -159,7 +204,8 @@ def handle(msg: dict, run_dir: Path):
 
         if name == READ_TOOL_NAME:
             try:
-                text = read_resource(args.get("resource_id"), run_dir)
+                text = read_authorized(args.get("resource_id"), run_dir,
+                                       fixtures)
             except UnknownResource as e:
                 return _tool_error(rid, str(e))
             except OSError as e:
@@ -188,9 +234,13 @@ def handle(msg: dict, run_dir: Path):
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     if not argv:
-        print("usage: authorized_capabilities.py <run_dir>", file=sys.stderr)
+        print("usage: authorized_capabilities.py <run_dir> [fixtures_dir]",
+              file=sys.stderr)
         return 2
     run_dir = Path(argv[0]).resolve()
+    # Optional second argument: the fixture pair this experiment uses. Omitted
+    # everywhere before W1-I, so W1-F/W1-G/W1-H resolve exactly as they did.
+    fixtures = Path(argv[1]).resolve() if len(argv) > 1 else None
     # MCP stdio is UTF-8. sys.stdin defaults to the console codepage on Windows
     # (cp1252 here), which silently mangles every non-ASCII byte on the INPUT
     # path -- an em dash arrived as three characters and was written back
@@ -206,7 +256,7 @@ def main(argv=None) -> int:
             msg = json.loads(line)
         except Exception:
             continue
-        out = handle(msg, run_dir)
+        out = handle(msg, run_dir, fixtures)
         if out is not None:
             sys.stdout.write(json.dumps(out) + "\n")
             sys.stdout.flush()

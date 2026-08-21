@@ -1,0 +1,9 @@
+Vendor Charge Summary - Synthetic Reconciliation Fixture
+=============================================================
+Header: Charge Period, Client Ref, Net Value, Tax Band, Settlement State
+2026-05, CLR-8801, 3120.00, STD, SETTLED
+2026-05, CLR-8802, 940.25, RED, OUTSTANDING
+2026-06, BRT-1140, 512.80, STD, SETTLED
+2026-06, BRT-1141, 2775.40, STD, OUTSTANDING
+2026-07, HLM-2093, 1660.00, RED, SETTLED
+2026-07, HLM-2094, 388.15, STD, OUTSTANDING

@@ -1,0 +1,41 @@
+{
+  "frozen_fidelity_check_sha256": "11984c096b8fd74f40549d17f9300dc732f3dbe1d4e1112f3dc0f412036b41d4",
+  "runs": [
+    {
+      "run": "U1",
+      "status": "NO_ARTIFACT",
+      "findings": [],
+      "confirmations": {}
+    },
+    {
+      "run": "U2",
+      "status": "NO_ARTIFACT",
+      "findings": [],
+      "confirmations": {}
+    },
+    {
+      "run": "U3",
+      "status": "NO_ARTIFACT",
+      "findings": [],
+      "confirmations": {}
+    },
+    {
+      "run": "V1",
+      "status": "NO_ARTIFACT",
+      "findings": [],
+      "confirmations": {}
+    },
+    {
+      "run": "V2",
+      "status": "NO_ARTIFACT",
+      "findings": [],
+      "confirmations": {}
+    },
+    {
+      "run": "V3",
+      "status": "NO_ARTIFACT",
+      "findings": [],
+      "confirmations": {}
+    }
+  ]
+}

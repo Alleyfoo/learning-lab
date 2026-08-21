@@ -1,0 +1,4 @@
+{
+  "supplier_statement": "vendor-charge-summary.txt",
+  "ledger_book": "internal-charge-ledger.txt"
+}

@@ -1,0 +1,9 @@
+Internal Charge Ledger - Synthetic Reconciliation Fixture
+=============================================================
+Header: Charge Period, Internal Key, Client Ref, Net Value, Settlement State, Remarks
+2026-05, IK-40017, CLR-8801, 3120.00, SETTLED, migrated from legacy ledger
+2026-05, IK-40018, CLR-8802, 940.25, OUTSTANDING, awaiting vendor credit
+2026-06, IK-40019, BRT-1140, 512.80, SETTLED,
+2026-06, IK-40020, BRT-1141, 2775.00, OUTSTANDING, value queried with vendor
+2026-07, IK-40021, HLM-2093, 1660.00, SETTLED,
+2026-08, IK-40022, GRN-5510, 745.60, OUTSTANDING, no vendor line received
