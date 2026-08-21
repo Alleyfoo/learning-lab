@@ -1,0 +1,300 @@
+======================================================================
+W1-K preparation verification
+======================================================================
+
+[1] Run directories exist and contain only frozen inputs
+PASS  A1: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+PASS  A2: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+PASS  A3: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+PASS  B1: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+PASS  B2: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+PASS  B3: entries=['PROMPT.md', 'SKILL.md'] (expected ['PROMPT.md', 'SKILL.md'])
+
+[2] Each SKILL.md matches its ARM's frozen revision
+PASS  A1: arm control (r2) sha256=0230969ea7fd00ed (frozen=0230969ea7fd00ed)
+PASS  A2: arm control (r2) sha256=0230969ea7fd00ed (frozen=0230969ea7fd00ed)
+PASS  A3: arm control (r2) sha256=0230969ea7fd00ed (frozen=0230969ea7fd00ed)
+PASS  B1: arm treatment (r2c) sha256=c9f9990133be9a1a (frozen=c9f9990133be9a1a)
+PASS  B2: arm treatment (r2c) sha256=c9f9990133be9a1a (frozen=c9f9990133be9a1a)
+PASS  B3: arm treatment (r2c) sha256=c9f9990133be9a1a (frozen=c9f9990133be9a1a)
+PASS  the arms carry DIFFERENT skill revisions
+PASS  arm A is byte-identical to frozen r2
+PASS  arm B is byte-identical to frozen r2c
+PASS  r2 is unchanged by the r2c promotion
+
+[3] Operator prompts point to distinct absolute run paths
+PASS  A1: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  A2: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  A3: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  B1: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  B2: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  B3: run-path present=True, artifact-path present=True, other-run paths leaked=[]
+PASS  distinct artifact targets: ['w1k\\runs\\A1\\work_definition.json', 'w1k\\runs\\A2\\work_definition.json', 'w1k\\runs\\A3\\work_definition.json', 'w1k\\runs\\B1\\work_definition.json', 'w1k\\runs\\B2\\work_definition.json', 'w1k\\runs\\B3\\work_definition.json']
+
+[4] Fixtures unchanged from W1-A (sha256 match)
+PASS  supplier-statement.txt: sha256=d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb (expected d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb)
+PASS  ledger-book.txt: sha256=284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e (expected 284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e)
+
+[5] Human answers unchanged from W1-A (sha256 match)
+PASS  human_answers.md sha256=5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd (expected 5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd)
+
+[6] W0D validator self-test + W1-A test suite still pass
+PASS  work_definition.py --self-test exit=0 (SELF-TEST PASSED (all 27 Work-Definition codes exercised / malformed external shape refused by name / authority invariant independent of self-claims / observed fields cross-checked against fixtures / valid proposal strips to taskmodel shape))
+PASS  pytest test_work_definition.py exit=0 (17 passed in 0.04s)
+
+[7] Grader on empty A1-A3 returns three NO_ARTIFACT without mutation
+PASS  grader exit=0, statuses={'A1': 'NO_ARTIFACT', 'A2': 'NO_ARTIFACT', 'A3': 'NO_ARTIFACT', 'B1': 'NO_ARTIFACT', 'B2': 'NO_ARTIFACT', 'B3': 'NO_ARTIFACT'}, mutated=[]
+
+[8] Known-good W0D oracle still grades PASS (temp copy, no mutation)
+PASS  oracle valid=True codes=[]
+
+[9] No unrelated or protected files staged in git
+PASS  protected files staged: []
+
+[10] A1/A2/A3 cannot reach the old matcher
+PASS  no code defines or calls 'classify_turn' (docstrings may mention it)
+PASS  no code defines or calls 'intents_in' (docstrings may mention it)
+PASS  no code defines or calls 'segment_fragments' (docstrings may mention it)
+PASS  no code defines or calls 'match_message' (docstrings may mention it)
+PASS  no code defines or calls 'UNIQUE_MATCH' (docstrings may mention it)
+PASS  no code defines or calls 'MULTIPLE_MATCHES' (docstrings may mention it)
+PASS  no code defines or calls 'load_answer_table' (docstrings may mention it)
+PASS  imports no W1-A harness module ['__future__', 'dataclasses', 'fs_backstop', 'hashlib', 'json', 'os', 'path_guard', 'pathlib', 'subprocess', 'sys', 'threading', 'time']
+PASS  imported module exposes no classify_turn()
+PASS  imported module exposes no intents_in()
+PASS  imported module exposes no segment_fragments()
+PASS  imported module exposes no match_message()
+PASS  imported module exposes no load_answer_table()
+PASS  no W1-A harness module is loaded ([])
+
+[11] Canonical block integrity
+PASS  frozen table reads 9 rows (got 9)
+      block: 693 bytes, sha256=46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330
+PASS  mandated rows are (0, 1, 2, 3, 4, 5)
+PASS  row 0: question and answer present verbatim
+PASS  row 1: question and answer present verbatim
+PASS  row 2: question and answer present verbatim
+PASS  row 3: question and answer present verbatim
+PASS  row 4: question and answer present verbatim
+PASS  row 5: question and answer present verbatim
+PASS  answers in frozen table order [68, 154, 250, 389, 552, 661]
+PASS  excluded row 6 does not leak into the block
+PASS  excluded row 7 does not leak into the block
+PASS  excluded row 8 does not leak into the block
+PASS  worker-owned term 'refuse_run' absent from the block
+PASS  worker-owned term 'refuse_key' absent from the block
+PASS  worker-owned term 'left_then_right' absent from the block
+PASS  worker-owned term 'sorted_by_key' absent from the block
+PASS  worker-owned term 'output_order' absent from the block
+PASS  worker-owned term 'both_same' absent from the block
+PASS  worker-owned term 'only_left' absent from the block
+PASS  worker-owned term 'classify' absent from the block
+PASS  worker-owned term 'purpose' absent from the block
+PASS  every block line is verbatim from human_answers.md []
+
+[12] Frozen fidelity checker is pinned and intact
+PASS  fidelity_gate.py present
+PASS  frozen fidelity_check.py present
+PASS  fidelity_gate.py pins a checker sha256
+PASS  frozen checker matches the pin: 11984c096b8fd74f vs 11984c096b8fd74f
+PASS  frozen checker imports no dialogue harness ['__future__', 'argparse', 'block_harness', 'dataclasses', 'json', 'pathlib', 're', 'sys']
+
+[13] Fidelity gate on empty A1-A3 returns three NO_ARTIFACT
+PASS  fidelity_gate exit=0
+PASS  statuses={'A1': 'NO_ARTIFACT', 'A2': 'NO_ARTIFACT', 'A3': 'NO_ARTIFACT', 'B1': 'NO_ARTIFACT', 'B2': 'NO_ARTIFACT', 'B3': 'NO_ARTIFACT'}
+PASS  gate mutated nothing: []
+
+[14] Surface-B lifecycle adopted; A4 shadow is non-binding
+PASS  the activation is exactly 'Continue.' 'Continue.'
+PASS  next_message cannot see the agent text
+PASS  block once, then continuations
+PASS  tool activity cannot reset the silent streak
+PASS  silent budget is two
+PASS  the batch runs A4 in SHADOW mode (fs_enforcing=False)
+PASS  session mode is approve -- Surface A enforcement IS adopted in W1-K
+PASS  the fail-closed permission handler IS wired into the batch
+PASS  the canonical block is pinned to the W1-B/W1-C value
+PASS  arm A is pinned to r2
+PASS  arm B is pinned to r2c
+PASS  exactly two arms
+
+[15] W1-D void anti-regression: structured path detection
+PASS  no bare lexical markers in FORBIDDEN_EXTRA []
+PASS  every forbidden entry anchors to a real resource []
+PASS  K1: 16 frozen tool updates -> no violation 
+PASS  K2: 24 frozen tool updates -> no violation 
+PASS  K3: 22 frozen tool updates -> no violation 
+PASS  replayed a meaningful number of updates: 62
+PASS  an actual human_answers.md access still VIOLATES
+PASS  an actual sibling-run access still VIOLATES
+
+[16] Surface A enforced: approve mode + fail-closed policy
+PASS  the batch requests approve mode
+PASS  the batch uses the permission session
+PASS  A4 runs as an independent post-turn watch
+PASS  A4 does not flip the lifecycle outcome; AUTHORITY is its own layer
+PASS  authorized SKILL.md read is ALLOWED
+PASS  designated artifact write is ALLOWED
+PASS  shell is DENIED even for an authorized file
+PASS  an arbitrary write is DENIED
+PASS  an undeclared read is DENIED
+PASS  an unparseable request is DENIED
+PASS  the prompt names no tool or route (read_image)
+PASS  the prompt names no tool or route (text_editor)
+PASS  the prompt names no tool or route (use the tool)
+PASS  the prompt names no tool or route (instead of shell)
+PASS  the W1-D2 shell hint is still present -- the prompt was NOT edited to compensate for the enforcement
+
+[17] the two-verb capability box
+PASS  the worker is offered exactly two verbs ['read_authorized_resource', 'write_work_definition']
+PASS  read authority is UNCHANGED from W1-F ('skill', 'supplier_statement', 'ledger_book')
+PASS  the reader takes ONE argument
+PASS  and it is a closed enum -- no path is representable
+PASS  reader rejects additional properties
+PASS  the writer takes ONE argument
+PASS  content is TEXT, not a parsed object -- malformed JSON must reach the structural gate
+PASS  writer rejects additional properties
+PASS  the writer has no 'path' argument
+PASS  the writer has no 'file' argument
+PASS  the writer has no 'filename' argument
+PASS  the writer has no 'destination' argument
+PASS  the writer has no 'dir' argument
+PASS  the writer has no 'target' argument
+PASS  the writer has no 'mode' argument
+PASS  the writer has no 'append' argument
+PASS  the writer has no 'encoding' argument
+PASS  the destination is fixed internally to work_definition.json
+PASS  resource skill resolves to a real file
+PASS  resource supplier_statement resolves to a real file
+PASS  resource ledger_book resolves to a real file
+PASS  the batch injects the CAPABILITY server per session
+PASS  per-session injection is wired
+PASS  the policy is given the same closed identifier set
+PASS  and the writer clause is explicitly enabled for this pack
+PASS  approve mode is unchanged
+PASS  A4 remains an independent post-turn watch
+PASS  reader call for skill is ALLOWED
+PASS  reader call for supplier_statement is ALLOWED
+PASS  reader call for ledger_book is ALLOWED
+PASS  the writer call is ALLOWED
+PASS  an unknown identifier is DENIED
+PASS  shell is STILL denied unconditionally
+PASS  undeclared reads are STILL denied
+PASS  arbitrary writes are STILL denied
+PASS  content + a path does NOT reach the writer clause
+PASS  non-string content is DENIED
+PASS  A1 prompt does not mention 'read_authorized_resource'
+PASS  A1 prompt does not mention 'write_work_definition'
+PASS  A1 prompt does not mention 'resource_id'
+PASS  A1 prompt does not mention 'authorized reader'
+PASS  A1 prompt does not mention 'capability'
+PASS  A1 prompt does not mention 'mcp'
+PASS  A1 prompt does not mention 'supplier_statement'
+PASS  A1 prompt does not mention 'ledger_book'
+PASS  A2 prompt does not mention 'read_authorized_resource'
+PASS  A2 prompt does not mention 'write_work_definition'
+PASS  A2 prompt does not mention 'resource_id'
+PASS  A2 prompt does not mention 'authorized reader'
+PASS  A2 prompt does not mention 'capability'
+PASS  A2 prompt does not mention 'mcp'
+PASS  A2 prompt does not mention 'supplier_statement'
+PASS  A2 prompt does not mention 'ledger_book'
+PASS  A3 prompt does not mention 'read_authorized_resource'
+PASS  A3 prompt does not mention 'write_work_definition'
+PASS  A3 prompt does not mention 'resource_id'
+PASS  A3 prompt does not mention 'authorized reader'
+PASS  A3 prompt does not mention 'capability'
+PASS  A3 prompt does not mention 'mcp'
+PASS  A3 prompt does not mention 'supplier_statement'
+PASS  A3 prompt does not mention 'ledger_book'
+PASS  B1 prompt does not mention 'read_authorized_resource'
+PASS  B1 prompt does not mention 'write_work_definition'
+PASS  B1 prompt does not mention 'resource_id'
+PASS  B1 prompt does not mention 'authorized reader'
+PASS  B1 prompt does not mention 'capability'
+PASS  B1 prompt does not mention 'mcp'
+PASS  B1 prompt does not mention 'supplier_statement'
+PASS  B1 prompt does not mention 'ledger_book'
+PASS  B2 prompt does not mention 'read_authorized_resource'
+PASS  B2 prompt does not mention 'write_work_definition'
+PASS  B2 prompt does not mention 'resource_id'
+PASS  B2 prompt does not mention 'authorized reader'
+PASS  B2 prompt does not mention 'capability'
+PASS  B2 prompt does not mention 'mcp'
+PASS  B2 prompt does not mention 'supplier_statement'
+PASS  B2 prompt does not mention 'ledger_book'
+PASS  B3 prompt does not mention 'read_authorized_resource'
+PASS  B3 prompt does not mention 'write_work_definition'
+PASS  B3 prompt does not mention 'resource_id'
+PASS  B3 prompt does not mention 'authorized reader'
+PASS  B3 prompt does not mention 'capability'
+PASS  B3 prompt does not mention 'mcp'
+PASS  B3 prompt does not mention 'supplier_statement'
+PASS  B3 prompt does not mention 'ledger_book'
+
+[18] corrected UTF-8 transport (the one intentional change)
+PASS  the capability server reconfigures stdin explicitly
+PASS  and it reconfigures it to UTF-8
+PASS  non-ASCII survives the stdio round trip byte-identical
+PASS  the em dash is NOT double-encoded (the exact W1-G failure mode)
+PASS  the canonical block still contains the em dash that exposed it -- so W1-K genuinely exercises the corrected path
+PASS  frozen authorized_reader.py is deliberately NOT modified (it is W1-F evidence)
+
+[19] Surface C design: one variable, and real controls
+PASS  r2c removes essentially nothing from r2 2 line(s)
+PASS  r2c adds the provenance surface
+PASS  r2c adds NO reminder prose: 'all six'
+PASS  r2c adds NO reminder prose: 'every answer'
+PASS  r2c adds NO reminder prose: 'one answer per'
+PASS  r2c adds NO reminder prose: 'make sure'
+PASS  r2c adds NO reminder prose: 'be sure to'
+PASS  r2c adds NO reminder prose: 'remember to'
+PASS  r2c adds NO reminder prose: 'do not omit'
+PASS  r2c is r2-based, NOT r3 -- the tokenization line stays parked
+PASS  v0+C adds exactly five named codes
+PASS  the frozen v0 validator is byte-unchanged by v0+C
+PASS  arm B is graded against v0+C, arm A against v0
+PASS  A1 and B1 prompts differ ONLY by run id and siblings 
+PASS  A1 prompt does not mention 'provenance'
+PASS  A1 prompt does not mention 'r2c'
+PASS  A1 prompt does not mention 'treatment'
+PASS  A1 prompt does not mention 'control'
+PASS  A1 prompt does not mention 'arm'
+PASS  A2 prompt does not mention 'provenance'
+PASS  A2 prompt does not mention 'r2c'
+PASS  A2 prompt does not mention 'treatment'
+PASS  A2 prompt does not mention 'control'
+PASS  A2 prompt does not mention 'arm'
+PASS  A3 prompt does not mention 'provenance'
+PASS  A3 prompt does not mention 'r2c'
+PASS  A3 prompt does not mention 'treatment'
+PASS  A3 prompt does not mention 'control'
+PASS  A3 prompt does not mention 'arm'
+PASS  B1 prompt does not mention 'provenance'
+PASS  B1 prompt does not mention 'r2c'
+PASS  B1 prompt does not mention 'treatment'
+PASS  B1 prompt does not mention 'control'
+PASS  B1 prompt does not mention 'arm'
+PASS  B2 prompt does not mention 'provenance'
+PASS  B2 prompt does not mention 'r2c'
+PASS  B2 prompt does not mention 'treatment'
+PASS  B2 prompt does not mention 'control'
+PASS  B2 prompt does not mention 'arm'
+PASS  B3 prompt does not mention 'provenance'
+PASS  B3 prompt does not mention 'r2c'
+PASS  B3 prompt does not mention 'treatment'
+PASS  B3 prompt does not mention 'control'
+PASS  B3 prompt does not mention 'arm'
+PASS  slot classes are fixed: 0/1 existing, 2/3 none, 4/5 new
+PASS  positive controls, negative controls and targets are declared
+PASS  the ladder reports slot_offered
+PASS  the ladder reports provenance_populated
+PASS  the ladder reports binding_valid
+PASS  the ladder reports preservation
+PASS  overall FIDELITY PASS is explicitly NOT the primary result
+PASS  row 1 is flagged as a LIVE positive control after W1-J
+PASS  row 0's existing slot resolves on a real v0 artifact
+PASS  row 4 has no slot in a v0 artifact, as the control expects
+
+======================================================================
+PREP VERIFICATION PASSED (all 19 checks).

@@ -1,0 +1,56 @@
+{
+  "runs": [
+    {
+      "run": "A1",
+      "arm": "control",
+      "skill": "r2",
+      "status": "NO_ARTIFACT"
+    },
+    {
+      "run": "A2",
+      "arm": "control",
+      "skill": "r2",
+      "status": "NO_ARTIFACT"
+    },
+    {
+      "run": "A3",
+      "arm": "control",
+      "skill": "r2",
+      "status": "NO_ARTIFACT"
+    },
+    {
+      "run": "B1",
+      "arm": "treatment",
+      "skill": "r2c",
+      "status": "NO_ARTIFACT"
+    },
+    {
+      "run": "B2",
+      "arm": "treatment",
+      "skill": "r2c",
+      "status": "NO_ARTIFACT"
+    },
+    {
+      "run": "B3",
+      "arm": "treatment",
+      "skill": "r2c",
+      "status": "NO_ARTIFACT"
+    }
+  ],
+  "slot_class": {
+    "0": "existing",
+    "1": "existing",
+    "2": "none",
+    "3": "none",
+    "4": "new",
+    "5": "new"
+  },
+  "role": {
+    "0": "POSITIVE CONTROL",
+    "1": "POSITIVE CONTROL",
+    "2": "NEGATIVE CONTROL",
+    "3": "NEGATIVE CONTROL",
+    "4": "TARGET",
+    "5": "TARGET"
+  }
+}
