@@ -13,24 +13,10 @@ safe to enter the existing modelling/preview path*, NOT *established*.
 
 | run | status | skill_match | codes (if refused) | authority | override keys | sha256 |
 |---|---|---|---|---|---|---|
-| P1 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| P2 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| P3 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-
-## Detail
-
-### P1 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### P2 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### P3 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
+| P1 | **PASS** | yes |  | None |  | `ed5ed8efa884` |
+| P2 | **PASS** | yes |  | None |  | `311083b2260a` |
+| P3 | **PASS** | yes |  | None |  | `782cf7e2beae` |
 
 ## Pass rate
 
-**0/3 PASS** (primary W1-H success criterion: 3/3).
+**3/3 PASS** (primary W1-H success criterion: 3/3).

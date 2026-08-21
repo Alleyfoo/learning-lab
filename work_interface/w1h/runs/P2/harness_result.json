@@ -1,0 +1,143 @@
+{
+  "run": "P2",
+  "outcome": "COMPLETED",
+  "reason": "artifact written; session terminated immediately",
+  "turns": 2,
+  "artifact": true,
+  "blocks_delivered": 1,
+  "continuations_sent": 0,
+  "silent_turns": 0,
+  "block_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+  "lifecycle_revision": "r2_single_block",
+  "fs_authority_mode": "WATCH_INDEPENDENT",
+  "session_mode": "approve",
+  "permission_log": [
+    {
+      "toolCallId": "call_u6q3y2qw",
+      "title": "authorized-capabilities: read authorized resource",
+      "verdict": "ALLOW",
+      "kind": "READ",
+      "reason": "authorized reader, resource_id='skill'",
+      "paths": [],
+      "optionId": "allow_once",
+      "options_offered": [
+        "allow_always",
+        "allow_once",
+        "reject_once",
+        "reject_always"
+      ],
+      "rawInput": {
+        "resource_id": "skill"
+      }
+    },
+    {
+      "toolCallId": "call_hd1h251i",
+      "title": "authorized-capabilities: read authorized resource",
+      "verdict": "ALLOW",
+      "kind": "READ",
+      "reason": "authorized reader, resource_id='supplier_statement'",
+      "paths": [],
+      "optionId": "allow_once",
+      "options_offered": [
+        "allow_always",
+        "allow_once",
+        "reject_once",
+        "reject_always"
+      ],
+      "rawInput": {
+        "resource_id": "supplier_statement"
+      }
+    },
+    {
+      "toolCallId": "call_fry4r0k4",
+      "title": "authorized-capabilities: read authorized resource",
+      "verdict": "ALLOW",
+      "kind": "READ",
+      "reason": "authorized reader, resource_id='ledger_book'",
+      "paths": [],
+      "optionId": "allow_once",
+      "options_offered": [
+        "allow_always",
+        "allow_once",
+        "reject_once",
+        "reject_always"
+      ],
+      "rawInput": {
+        "resource_id": "ledger_book"
+      }
+    },
+    {
+      "toolCallId": "call_kr3kznby",
+      "title": "authorized-capabilities: write work definition",
+      "verdict": "ALLOW",
+      "kind": "WRITE",
+      "reason": "authorized writer, designated artifact (2436 chars)",
+      "paths": [],
+      "optionId": "allow_once",
+      "options_offered": [
+        "allow_always",
+        "allow_once",
+        "reject_once",
+        "reject_always"
+      ],
+      "rawInput": {
+        "content": "{\n  \"work_definition_version\": 0,\n  \"task_family\": \"reconciliation\",\n  \"model_id\": \"w1h-p2-frozen-revision-verify-match-key-and-amount\",\n  \"provenance\": {\n    \"producer\": \"goose_w1h_run_p2_model\",\n    \"skill\": \"define-lab-process\",\n    \"produced_at\": \"2026-08-21\"\n  },\n  \"purpose\": \"Reconcile supplier statement and internal ledger as peer sources, matching on invoice number and comparing amounts within GBP 0.01 tolerance.\",\n  \"sources\": {\n    \"supplier_statement\": {\n      \"role_label\": \"Supplier Statement\",\n      \"fixture\": \"supplier-statement.txt\",\n      \"observed_fields\": [\"Date\", \"Supplier Name\", \"InvoiceNumber\", \"Amount\", \"Currency\", \"Status\"],\n      \"basis\": \"observed\"\n    },\n    \"ledger_book\": {\n      \"role_label\": \"Internal Ledger Book\",\n      \"fixture\": \"ledger-book.txt\",\n      \"observed_fields\": [\"Date\", \"ReferenceNumber\", \"SupplierName\", \"InvoiceNumber\", \"Amount\", \"Status\", \"Notes\"],\n      \"basis\": \"observed\"\n    }\n  },\n  \"body\": {\n    \"left\": \"supplier_statement\",\n    \"right\": \"ledger_book\",\n    \"match_on\": {\n      \"left_field\": \"InvoiceNumber\",\n      \"right_field\": \"InvoiceNumber\",\n      \"basis\": \"human_confirmed\",\n      \"confirmation\": \"Q_match_key\"\n    },\n    \"compare\": [\n      {\n        \"field\": \"Amount\",\n        \"comparison\": \"within\",\n        \"tolerance\": \"0.01\",\n        \"basis\": \"human_confirmed\",\n        \"confirmation\": \"Q_amount_comparison\"\n      }\n    ],\n    \"classify\": {\n      \"both_same\": \"match\",\n      \"both_different\": \"amount_discrepancy\",\n      \"only_left\": \"ledger_only\",\n      \"only_right\": \"statement_only\"\n    },\n    \"output_order\": \"left_then_right\",\n    \"on_duplicate_key\": \"refuse_key\",\n    \"on_non_numeric\": \"refuse_key\"\n  },\n  \"output\": {\n    \"reports_fields\": [\"InvoiceNumber\", \"Amount\"],\n    \"context_fields\": [\"Date\", \"Supplier Name\", \"Status\"]\n  },\n  \"human_confirmations\": [\n    {\n      \"id\": \"Q_match_key\",\n      \"question\": \"Which field identifies the same record / invoice in both files?\",\n      \"answer\": \"InvoiceNumber\",\n      \"basis\": \"human_confirmed\"\n    },\n    {\n      \"id\": \"Q_amount_comparison\",\n      \"question\": \"Should Amount be compared, and if so, how and with what tolerance?\",\n      \"answer\": \"Yes, compare Amount numerically, within 0.01.\",\n      \"basis\": \"human_confirmed\"\n    }\n  ],\n  \"open_questions\": [],\n  \"requested_destination\": \"review_only\",\n  \"requested_delivery\": {\n    \"format\": \"json_discrepancy_report\"\n  },\n  \"requested_authority\": null\n}"
+      }
+    }
+  ],
+  "shell_attempts": 0,
+  "authorized_reader_ids": [
+    "skill",
+    "supplier_statement",
+    "ledger_book"
+  ],
+  "capability_box": [
+    "read_authorized_resource",
+    "write_work_definition"
+  ],
+  "fs_snapshot_before": {
+    "acp_transcript.jsonl": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "PROMPT.md": {
+      "sha256": "17fabb08691efc8c83df6861e5e6acad4a2d1bc454674645e3cd20cd0697be08",
+      "size": 2557
+    },
+    "SKILL.md": {
+      "sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "size": 12093
+    }
+  },
+  "turn_log": [
+    {
+      "turn": 1,
+      "lifecycle": "DIALOGUE",
+      "silent_streak": 0,
+      "sent": "BLOCK",
+      "sent_sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330",
+      "agent_turn_text": "Thanks for the context. I've read both fixtures:\n\n**Supplier Statement** fields: Date, Supplier Name, InvoiceNumber, Amount, Currency, Status  \n**Internal Ledger Book** fields: Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes\n\nNow I need to ask the human a few **load-bearing questions** required by the skill:\n\n---\n\n## Questions for Settlement\n\n**Q1 (Match key):** Which field(s) identify the *same record* in both files?\n- Options: `Date` + `InvoiceNumber`, just `InvoiceNumber`, or something else?  \n  *(I recommend `InvoiceNumber` alone, since it appears unique and consistent across both.)*\n\n**Q2 (Comparisons):** Which field(s) should be compared between the two sources?\n- Clearly, `Amount` is a candidate (both have this field).\n- Should `Status` also be compared? They use different values (`PAID` vs `CLEARED`, `UNPAID` vs `PENDING`), so comparing may need special handling.\n\n**Q3 (Comparison type & tolerance):** For each comparison:\n- What comparison method? `exact`, `trim`, `casefold`, `within` — or `trim_casefold`?\n- If within, what tolerance (e.g., `\"0.01\"`)?\n\n**Q4 (Output design):** Which fields should appear in the **report row**, and which are **context**?\n- At minimum: match key (`InvoiceNumber`).\n- Then: perhaps `Amount`, `SupplierName`, and one or both status fields.\n\n**Q5 (Source of truth / classify labels):** Is there a primary source of truth?\n- If yes, which file? (this affects the \"both_\" classification semantics)\n- If no source of truth is specified, I'll propose neutral labels.\n\n**Q6 (Duplicate key & non-numeric policy):** Are duplicate keys possible? Should we:\n- `refuse_run` or `refuse_key` if found?\n- And what about the non-numeric policy for numeric comparisons? (`refuse_run`, `refuse_key`)\n\n---\n\nOnce you answer these, I'll compile the artifact. If you want me to proceed with reasonable assumptions and only ask when blocked — say so too.",
+      "fs_watch": {
+        "filesystem_authority": "CLEAN",
+        "violations": [],
+        "permitted": [],
+        "reason": "no unauthorized filesystem mutation",
+        "evidence_preserved": true
+      }
+    }
+  ],
+  "hashes_before": {
+    "PROMPT.md": "17fabb08691efc8c83df6861e5e6acad4a2d1bc454674645e3cd20cd0697be08",
+    "SKILL.md": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  },
+  "hashes_after": {
+    "PROMPT.md": "17fabb08691efc8c83df6861e5e6acad4a2d1bc454674645e3cd20cd0697be08",
+    "SKILL.md": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+    "supplier-statement.txt": "d0cb95ab5755bef320390f11899c53034548a60678e27430882e556ce1a45feb",
+    "ledger-book.txt": "284861d7d948dd6f0cd3a5e7826a6794d15db0ce2aafe108dafa37752c36f25e",
+    "human_answers.md": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  }
+}

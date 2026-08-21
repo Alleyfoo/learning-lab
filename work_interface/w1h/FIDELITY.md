@@ -11,21 +11,39 @@ Reported INDEPENDENTLY of the structural grader.
 
 | run | fidelity | findings | artifact sha256 |
 |---|---|---|---|
-| P1 | **NO_ARTIFACT** | 0 | `-` |
-| P2 | **NO_ARTIFACT** | 0 | `-` |
-| P3 | **NO_ARTIFACT** | 0 | `-` |
+| P1 | **FIDELITY PASS** | 0 | `ed5ed8efa884` |
+| P2 | **FIDELITY FINDINGS** | 2 | `311083b2260a` |
+| P3 | **FIDELITY PASS** | 0 | `782cf7e2beae` |
 
 ## Detail
 
-### P1 — NO_ARTIFACT
+### P1 — FIDELITY PASS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_compare_amount` rows=[1] normal
+- confirmation `Q_currency_excluded` rows=[2] normal
+- confirmation `Q_source_of_truth` rows=[3] normal
+- confirmation `Q_report_fields` rows=[4] normal
+- confirmation `Q_context_fields` rows=[5] normal
+- no findings
 
-### P2 — NO_ARTIFACT
+### P2 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_amount_comparison` rows=[1] normal
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
 
-### P3 — NO_ARTIFACT
+### P3 — FIDELITY PASS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_compare_amount` rows=[1] normal
+- confirmation `Q_currency_incidental` rows=[2] normal
+- confirmation `Q_source_of_truth` rows=[3] normal
+- confirmation `Q_report_fields` rows=[4] normal
+- confirmation `Q_context_fields` rows=[5] normal
+- no findings
 
 ## Fidelity rate
 
-**0/3 FIDELITY PASS** (0 finding(s) across graded runs).
+**2/3 FIDELITY PASS** (2 finding(s) across graded runs).
