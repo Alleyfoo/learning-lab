@@ -56,7 +56,7 @@ new packs.
 
 ## B-2 — reporter constants should be derived, not pinned
 
-**Status: partially done (W1-I). Open for older packs.**
+**Status: RECURRED in W1-K. Open.**
 
 Cloning a pack repeatedly carried constants the new pack could not satisfy:
 
@@ -64,6 +64,7 @@ Cloning a pack repeatedly carried constants the new pack could not satisfy:
 W1-F  authority_report used A4.verdict instead of worker_verdict  -> false CONTESTED 3/3
 W1-I  CONSUMPTION_MARKERS held the W1-A fixture titles            -> false NO 6/6
 W1-I  grade.py skill_match pinned to the r2 hash                  -> false no on the whole r3 arm
+W1-K  same skill_match pin, reintroduced by cloning from W1-H      -> false no on the whole r2c arm
 ```
 
 Each was caught and corrected additively, and each cost a closure section. W1-I
@@ -86,3 +87,23 @@ reader is ever needed again, take a new revision rather than editing it.
 
 Same disposition for `w1e/authority_report.py:55`, which keeps the asymmetric
 A4 filtering defect for the same reason.
+
+---
+
+## B-4 — repeatability baseline is missing
+
+**Status: open. Raised by W1-K.**
+
+The same fixed configuration -- same model, r2, v0, fixtures, canonical order,
+capability box -- produced:
+
+
+
+Two perfect runs in one pack, none in the other, with **no declared variable
+between them**. Run-to-run variation is of the same order as the effects the
+last several packs have been trying to measure.
+
+Until that is characterised, three-run arms cannot resolve effects of this size.
+A baseline pack -- no variable moved, N larger than 3 -- would give later
+experiments a scale to be read against. This is not a bug; it is a missing
+instrument.
