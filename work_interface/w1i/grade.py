@@ -28,7 +28,8 @@ Output:
 
 Per run the summary records:
   - status:  PASS | REFUSED | NO_ARTIFACT | UNPARSEABLE_JSON
-  - skill_match: whether this run's SKILL.md matches the frozen W1-A sha256
+  - skill_match: whether this run's SKILL.md matches ANY declared frozen
+    revision; skill_revision names which one
   - for REFUSED: the sorted refusal codes and per-problem details
   - the sha256 of the agent's work_definition.json (provenance; detects later edits)
   - requested_authority (must be null) and any override/authority keys present
@@ -67,6 +68,12 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+_REVISIONS = {
+    "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a": "r2",
+    "ea259e1a2af8663987d1dd5bed333a0a1ae33701752166a39f1c17446be3d5d5": "r3",
+}
+
+
 def _grade_run(run_dir: Path, fixtures: Path) -> dict:
     """Read one B run's work_definition.json and SKILL.md (read-only) and grade them.
     Never writes into the run directory."""
@@ -84,7 +91,11 @@ def _grade_run(run_dir: Path, fixtures: Path) -> dict:
     skill_digest = _sha256(skill_path)
     record["skill_present"] = True
     record["skill_sha256"] = skill_digest
-    record["skill_match"] = (skill_digest == FROZEN_SKILL_SHA256)
+    # Differential packs carry more than one revision. Comparing every run
+    # to a single frozen hash marked the whole treatment arm as a mismatch
+    # (see CLOSURE.md 3). Match against ANY declared revision, and record which.
+    record["skill_revision"] = _REVISIONS.get(skill_digest)
+    record["skill_match"] = skill_digest in _REVISIONS
 
     # --- artifact grading -----------------------------------------------------
     artifact_path = run_dir / "work_definition.json"

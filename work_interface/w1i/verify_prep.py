@@ -799,6 +799,45 @@ def check_19_differential_design() -> None:
         _check(field in src, "the measure reports " + field)
 
 
+def check_20_reporter_pins() -> None:
+    """Reporter constants must follow THIS pack's inputs.
+
+    W1-I shipped with two constants inherited from W1-H that fixture T and the
+    r3 arm could never satisfy: CONSUMPTION_MARKERS held the W1-A fixture
+    titles, so RESOURCE_CONSUMPTION read NO in all six runs, and grade.py
+    compared every run to the r2 hash, so the whole treatment arm read
+    skill_match=no (see CLOSURE.md 3). Neither was worker behaviour.
+    """
+    print("\n[20] reporter constants follow the pack, not a stale pin")
+    import json as _json
+    sys.path.insert(0, str(_HERE))
+    import authority_report as AR
+    import grade as G
+
+    # -- consumption markers must be derivable from THIS pack's fixtures -----
+    F = _HERE / "fixtures"
+    mapping = _json.loads((F / "fixtures.json").read_text(encoding="utf-8"))
+    for rid, name in mapping.items():
+        marker = AR.CONSUMPTION_MARKERS.get(rid)
+        _check(isinstance(marker, str) and marker != "",
+               "a consumption marker exists for " + rid)
+        body = (F / name).read_text(encoding="utf-8")
+        _check(marker in body,
+               "the " + rid + " marker actually occurs in " + name
+               + " -- " + repr(marker))
+    _check("Supplier Statement File" not in AR.CONSUMPTION_MARKERS.values(),
+           "no W1-A fixture title survives as a marker")
+
+    # -- every declared revision must be accepted by the grader --------------
+    for rev, sha in (("r2", R2_SHA256), ("r3", R3_SHA256)):
+        _check(sha in G._REVISIONS,
+               "grade.py accepts the " + rev + " revision")
+        _check(G._REVISIONS[sha] == rev,
+               "and names it " + rev)
+    _check(len(G._REVISIONS) >= 2,
+           "the grader is arm-aware, not pinned to one revision")
+
+
 def main() -> int:
     print("=" * 70)
     print("W1-I preparation verification")
@@ -822,13 +861,14 @@ def main() -> int:
     check_17_capability_box()
     check_18_corrected_transport()
     check_19_differential_design()
+    check_20_reporter_pins()
     print("\n" + "=" * 70)
     if failures:
         print(f"PREP VERIFICATION FAILED: {len(failures)} check(s) failed")
         for f in failures:
             print(f"  - {f}")
         return 1
-    print("PREP VERIFICATION PASSED (all 19 checks).")
+    print("PREP VERIFICATION PASSED (all 20 checks).")
     return 0
 
 

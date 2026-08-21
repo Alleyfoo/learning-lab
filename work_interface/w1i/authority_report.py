@@ -44,11 +44,33 @@ CLEAN, CONTESTED = "CLEAN", "CONTESTED"
 
 # --- RESOURCE_CONSUMPTION ---------------------------------------------------
 # Marker text that can only be present if the resource's real bytes arrived.
-CONSUMPTION_MARKERS = {
-    "skill": "define-lab-process",
-    "supplier_statement": "Supplier Statement File",
-    "ledger_book": "Internal Ledger Book",
-}
+def _consumption_markers() -> dict[str, str]:
+    """Derive consumption markers from THIS pack's fixtures.
+
+    W1-I reported RESOURCE_CONSUMPTION=NO for both fixtures in all six runs
+    because these markers were still the W1-A fixture titles, which fixture T
+    can never contain (see CLOSURE.md 3). Deriving them from the declared
+    fixture pair makes the column follow the pack instead of a constant.
+    """
+    markers = {"skill": "define-lab-process"}
+    manifest = HERE / "fixtures" / "fixtures.json"
+    if manifest.is_file():
+        mapping = json.loads(manifest.read_text(encoding="utf-8"))
+        for rid, name in mapping.items():
+            p = HERE / "fixtures" / name
+            if p.is_file():
+                # first non-empty line is the fixture's own title line
+                for line in p.read_text(encoding="utf-8").splitlines():
+                    if line.strip():
+                        markers[rid] = line.strip()
+                        break
+    else:
+        markers["supplier_statement"] = "Supplier Statement File"
+        markers["ledger_book"] = "Internal Ledger Book"
+    return markers
+
+
+CONSUMPTION_MARKERS = _consumption_markers()
 
 
 def resource_consumption(run_dir: Path) -> dict:
