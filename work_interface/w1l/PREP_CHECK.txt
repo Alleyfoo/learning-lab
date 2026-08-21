@@ -1,0 +1,246 @@
+======================================================================
+W1-L preparation verification (observational)
+======================================================================
+
+[0] this verifier may not touch an executed pack
+PASS  no declared run holds evidence yet  (pack is unrun)
+PASS  the observational guard is wired in
+
+[1] the manifest declares this pack, and matches the bytes
+PASS  manifest verifies against the filesystem  (no problems)
+PASS  pack is 'w1l'
+PASS  treatment is explicitly NONE -- this is a baseline
+PASS  12 runs declared  (['R01', 'R02', 'R03']...)
+PASS  no undeclared run directories  ([])
+
+[2] every declared run holds exactly the frozen inputs
+PASS  R01: ['PROMPT.md', 'SKILL.md']
+PASS  R02: ['PROMPT.md', 'SKILL.md']
+PASS  R03: ['PROMPT.md', 'SKILL.md']
+PASS  R04: ['PROMPT.md', 'SKILL.md']
+PASS  R05: ['PROMPT.md', 'SKILL.md']
+PASS  R06: ['PROMPT.md', 'SKILL.md']
+PASS  R07: ['PROMPT.md', 'SKILL.md']
+PASS  R08: ['PROMPT.md', 'SKILL.md']
+PASS  R09: ['PROMPT.md', 'SKILL.md']
+PASS  R10: ['PROMPT.md', 'SKILL.md']
+PASS  R11: ['PROMPT.md', 'SKILL.md']
+PASS  R12: ['PROMPT.md', 'SKILL.md']
+
+[3] every SKILL.md is the declared revision (r2), byte-identical
+PASS  R01: r2 0230969ea7fd00ed
+PASS  R02: r2 0230969ea7fd00ed
+PASS  R03: r2 0230969ea7fd00ed
+PASS  R04: r2 0230969ea7fd00ed
+PASS  R05: r2 0230969ea7fd00ed
+PASS  R06: r2 0230969ea7fd00ed
+PASS  R07: r2 0230969ea7fd00ed
+PASS  R08: r2 0230969ea7fd00ed
+PASS  R09: r2 0230969ea7fd00ed
+PASS  R10: r2 0230969ea7fd00ed
+PASS  R11: r2 0230969ea7fd00ed
+PASS  R12: r2 0230969ea7fd00ed
+PASS  all runs share ONE revision -- no arms here  (1 distinct)
+PASS  and it is the frozen r2 on disk
+
+[4] NO treatment: no r2c, r3, Surface C, or reordering
+PASS  the skill carries no r3 tokenization amendment
+PASS  the skill's output block carries no provenance surface
+PASS  and it is the plain v0 output block
+PASS  delivery order is canonical [0, 1, 2, 3, 4, 5]
+PASS  the validator is plain v0, not v0+C
+PASS  the runner does not reference 'r2c'
+PASS  the runner does not reference 'work_definition_c'
+PASS  the runner does not reference 'DELIVERY_ORDER = tuple(reversed'
+
+[5] prompts are per-run and leak nothing about the design
+PASS  R01: names its own run directory
+PASS  R01: no other run's artifact path leaks  ([])
+PASS  R01: does not mention 'baseline'
+PASS  R01: does not mention 'repeatability'
+PASS  R01: does not mention 'variability'
+PASS  R01: does not mention 'twelve'
+PASS  R01: does not mention 'provenance'
+PASS  R01: does not mention 'read_authorized_resource'
+PASS  R01: does not mention 'write_work_definition'
+PASS  R01: does not mention 'resource_id'
+PASS  R01: does not mention 'mcp'
+PASS  R02: names its own run directory
+PASS  R02: no other run's artifact path leaks  ([])
+PASS  R02: does not mention 'baseline'
+PASS  R02: does not mention 'repeatability'
+PASS  R02: does not mention 'variability'
+PASS  R02: does not mention 'twelve'
+PASS  R02: does not mention 'provenance'
+PASS  R02: does not mention 'read_authorized_resource'
+PASS  R02: does not mention 'write_work_definition'
+PASS  R02: does not mention 'resource_id'
+PASS  R02: does not mention 'mcp'
+PASS  R03: names its own run directory
+PASS  R03: no other run's artifact path leaks  ([])
+PASS  R03: does not mention 'baseline'
+PASS  R03: does not mention 'repeatability'
+PASS  R03: does not mention 'variability'
+PASS  R03: does not mention 'twelve'
+PASS  R03: does not mention 'provenance'
+PASS  R03: does not mention 'read_authorized_resource'
+PASS  R03: does not mention 'write_work_definition'
+PASS  R03: does not mention 'resource_id'
+PASS  R03: does not mention 'mcp'
+PASS  R04: names its own run directory
+PASS  R04: no other run's artifact path leaks  ([])
+PASS  R04: does not mention 'baseline'
+PASS  R04: does not mention 'repeatability'
+PASS  R04: does not mention 'variability'
+PASS  R04: does not mention 'twelve'
+PASS  R04: does not mention 'provenance'
+PASS  R04: does not mention 'read_authorized_resource'
+PASS  R04: does not mention 'write_work_definition'
+PASS  R04: does not mention 'resource_id'
+PASS  R04: does not mention 'mcp'
+PASS  R05: names its own run directory
+PASS  R05: no other run's artifact path leaks  ([])
+PASS  R05: does not mention 'baseline'
+PASS  R05: does not mention 'repeatability'
+PASS  R05: does not mention 'variability'
+PASS  R05: does not mention 'twelve'
+PASS  R05: does not mention 'provenance'
+PASS  R05: does not mention 'read_authorized_resource'
+PASS  R05: does not mention 'write_work_definition'
+PASS  R05: does not mention 'resource_id'
+PASS  R05: does not mention 'mcp'
+PASS  R06: names its own run directory
+PASS  R06: no other run's artifact path leaks  ([])
+PASS  R06: does not mention 'baseline'
+PASS  R06: does not mention 'repeatability'
+PASS  R06: does not mention 'variability'
+PASS  R06: does not mention 'twelve'
+PASS  R06: does not mention 'provenance'
+PASS  R06: does not mention 'read_authorized_resource'
+PASS  R06: does not mention 'write_work_definition'
+PASS  R06: does not mention 'resource_id'
+PASS  R06: does not mention 'mcp'
+PASS  R07: names its own run directory
+PASS  R07: no other run's artifact path leaks  ([])
+PASS  R07: does not mention 'baseline'
+PASS  R07: does not mention 'repeatability'
+PASS  R07: does not mention 'variability'
+PASS  R07: does not mention 'twelve'
+PASS  R07: does not mention 'provenance'
+PASS  R07: does not mention 'read_authorized_resource'
+PASS  R07: does not mention 'write_work_definition'
+PASS  R07: does not mention 'resource_id'
+PASS  R07: does not mention 'mcp'
+PASS  R08: names its own run directory
+PASS  R08: no other run's artifact path leaks  ([])
+PASS  R08: does not mention 'baseline'
+PASS  R08: does not mention 'repeatability'
+PASS  R08: does not mention 'variability'
+PASS  R08: does not mention 'twelve'
+PASS  R08: does not mention 'provenance'
+PASS  R08: does not mention 'read_authorized_resource'
+PASS  R08: does not mention 'write_work_definition'
+PASS  R08: does not mention 'resource_id'
+PASS  R08: does not mention 'mcp'
+PASS  R09: names its own run directory
+PASS  R09: no other run's artifact path leaks  ([])
+PASS  R09: does not mention 'baseline'
+PASS  R09: does not mention 'repeatability'
+PASS  R09: does not mention 'variability'
+PASS  R09: does not mention 'twelve'
+PASS  R09: does not mention 'provenance'
+PASS  R09: does not mention 'read_authorized_resource'
+PASS  R09: does not mention 'write_work_definition'
+PASS  R09: does not mention 'resource_id'
+PASS  R09: does not mention 'mcp'
+PASS  R10: names its own run directory
+PASS  R10: no other run's artifact path leaks  ([])
+PASS  R10: does not mention 'baseline'
+PASS  R10: does not mention 'repeatability'
+PASS  R10: does not mention 'variability'
+PASS  R10: does not mention 'twelve'
+PASS  R10: does not mention 'provenance'
+PASS  R10: does not mention 'read_authorized_resource'
+PASS  R10: does not mention 'write_work_definition'
+PASS  R10: does not mention 'resource_id'
+PASS  R10: does not mention 'mcp'
+PASS  R11: names its own run directory
+PASS  R11: no other run's artifact path leaks  ([])
+PASS  R11: does not mention 'baseline'
+PASS  R11: does not mention 'repeatability'
+PASS  R11: does not mention 'variability'
+PASS  R11: does not mention 'twelve'
+PASS  R11: does not mention 'provenance'
+PASS  R11: does not mention 'read_authorized_resource'
+PASS  R11: does not mention 'write_work_definition'
+PASS  R11: does not mention 'resource_id'
+PASS  R11: does not mention 'mcp'
+PASS  R12: names its own run directory
+PASS  R12: no other run's artifact path leaks  ([])
+PASS  R12: does not mention 'baseline'
+PASS  R12: does not mention 'repeatability'
+PASS  R12: does not mention 'variability'
+PASS  R12: does not mention 'twelve'
+PASS  R12: does not mention 'provenance'
+PASS  R12: does not mention 'read_authorized_resource'
+PASS  R12: does not mention 'write_work_definition'
+PASS  R12: does not mention 'resource_id'
+PASS  R12: does not mention 'mcp'
+PASS  every run has a distinct artifact target
+
+[6] fixtures, answers and block are the declared frozen inputs
+PASS  fixture supplier_statement: supplier-statement.txt
+PASS  fixture ledger_book: ledger-book.txt
+PASS  answer table matches its declared sha256
+PASS  canonical block 693 bytes 46158afa4b7e682a
+PASS  and it is the same block W1-H/W1-K delivered
+PASS  every delivered part is the right row, in order
+
+[7] reporter constants are DERIVED, and denominators are too
+PASS  the supplier_statement marker occurs in its own fixture  ('Supplier Statement File - Synthetic Reconcili)
+PASS  the ledger_book marker occurs in its own fixture  ('Internal Ledger Book - Synthetic Reconciliati)
+PASS  runs denominator 12
+PASS  rows denominator 6
+PASS  the reporter takes its run set from the manifest
+PASS  the reporter hard-codes no '/3'
+PASS  the reporter hard-codes no '/6 runs'
+PASS  the reporter hard-codes no 'glob('
+PASS  and never enumerates runs/ directly
+
+[8] both primary fingerprints, and they classify correctly
+PASS  classifies EXACT  (EXACT)
+PASS  classifies SINGLE_FIELD_PAD  (SINGLE_FIELD_PAD)
+PASS  SINGLE_FIELD_PAD preserves the offending token(s)  (' Supplier Name')
+PASS  classifies SYSTEMATIC_PAD  (SYSTEMATIC_PAD)
+PASS  SYSTEMATIC_PAD preserves the offending token(s)  (' Supplier Name')
+PASS  classifies UNSPLIT_HEADER  (UNSPLIT_HEADER)
+PASS  UNSPLIT_HEADER preserves the offending token(s)  ('Date, Supplier Name, InvoiceNumber, Amo)
+PASS  classifies COLLAPSED  (COLLAPSED)
+PASS  COLLAPSED preserves the offending token(s)  ('SupplierName')
+PASS  classifies OTHER  (OTHER)
+PASS  OTHER preserves the offending token(s)  ('Bogus')
+PASS  w1h/P1 preservation reproduces EEEEEE
+PASS  w1h/P1 tokenization reproduces EXACT
+PASS  w1h/P2 preservation reproduces EE----
+PASS  w1h/P2 tokenization reproduces EXACT
+PASS  w1k/A1 preservation reproduces E-----
+PASS  w1k/A1 tokenization reproduces UNSPLIT_HEADER
+
+[9] reporters run against a temp COPY, not the pack
+PASS  baseline_report runs (exit 0)
+PASS  and writes its report INTO THE COPY
+PASS  reports 0/12 graded on an unrun pack -- denominator derived
+PASS  the PACK itself is byte-unchanged by this check  (no mutations)
+PASS  no reporter output leaked into the pack
+
+[10] frozen instruments intact; infra regressions pass
+PASS  v0 self-test exit=0
+PASS  B-1/B-2 pack-infra regressions exit=0
+PASS  frozen fidelity checker is pinned and intact
+PASS  the corrected UTF-8 capability server is in place
+
+[11] the verifier mutated nothing
+PASS  the pack is byte-identical to before this run  (no mutations)
+
+======================================================================
+PREP VERIFICATION PASSED (all 12 checks).

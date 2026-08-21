@@ -1,0 +1,73 @@
+{
+  "pack": "w1l",
+  "title": "fixed-configuration repeatability baseline",
+  "treatment": null,
+  "runs": [
+    "R01",
+    "R02",
+    "R03",
+    "R04",
+    "R05",
+    "R06",
+    "R07",
+    "R08",
+    "R09",
+    "R10",
+    "R11",
+    "R12"
+  ],
+  "arms": {
+    "baseline": [
+      "R01",
+      "R02",
+      "R03",
+      "R04",
+      "R05",
+      "R06",
+      "R07",
+      "R08",
+      "R09",
+      "R10",
+      "R11",
+      "R12"
+    ]
+  },
+  "skills": {
+    "baseline": {
+      "revision": "r2",
+      "sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a"
+    }
+  },
+  "validator": {
+    "name": "v0",
+    "module": "work_definition"
+  },
+  "fixtures": {
+    "dir": "w1a/fixtures",
+    "roles": {
+      "supplier_statement": "supplier-statement.txt",
+      "ledger_book": "ledger-book.txt"
+    }
+  },
+  "answers": {
+    "path": "w1a/human_answers.md",
+    "sha256": "5fe99a5bb41a3f3698e7f821c0355c5bfd4812c266883b77bef0e09da5d1b1bd"
+  },
+  "block": {
+    "order": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "sha256": "46158afa4b7e682a32e3891cb5790df4b517bfb608f014c9c50cd60371db5330"
+  },
+  "artifact": "work_definition.json",
+  "capability_server": "authority/authorized_capabilities.py",
+  "provenance": {
+    "derived_from": "W1-K control arm (A1/A2/A3)",
+    "note": "No treatment. Nothing is varied. This pack measures how much the fixed configuration moves when nothing is changed."
+  }
+}

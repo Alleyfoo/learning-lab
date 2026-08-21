@@ -7,7 +7,11 @@ own task, taken when a line is between packs.
 
 ## B-1 — `verify_prep` must become genuinely observational
 
-**Status: open. Raised after W1-I.**
+**Status: CLOSED in W1-L.** `harness/prep_guard.py` provides the guard;
+`w1l/verify_prep.py` refuses an executed pack, runs reporters against a
+temporary copy, and fingerprints itself to prove it mutated nothing.
+Regressions in `harness/selftest_pack_infra.py`. Frozen packs keep their
+existing verifiers unchanged, as the scope guard below requires.
 
 ### The smell
 
@@ -56,7 +60,10 @@ new packs.
 
 ## B-2 — reporter constants should be derived, not pinned
 
-**Status: RECURRED in W1-K. Open.**
+**Status: CLOSED in W1-L.** `harness/pack_manifest.py` is the single source for
+the run set, fixtures, revisions, markers and denominators, and the run set is
+authoritative rather than globbed. Regressions in
+`harness/selftest_pack_infra.py`. Frozen packs keep their cloned literals.
 
 Cloning a pack repeatedly carried constants the new pack could not satisfy:
 
@@ -92,7 +99,8 @@ A4 filtering defect for the same reason.
 
 ## B-4 — repeatability baseline is missing
 
-**Status: open. Raised by W1-K.**
+**Status: IN PROGRESS.** Raised by W1-K; W1-L is the commissioned baseline pack,
+frozen and awaiting execution. This item closes when W1-L is closed.
 
 The same fixed configuration — same model, r2, v0, fixtures, canonical order,
 capability box — produced:
