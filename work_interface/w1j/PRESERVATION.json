@@ -1,0 +1,119 @@
+{
+  "control": [
+    {
+      "pack": "W1-H",
+      "run": "P1",
+      "status": "GRADED",
+      "order": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "EXACT_INDIVIDUAL",
+        "2": "EXACT_INDIVIDUAL",
+        "3": "EXACT_INDIVIDUAL",
+        "4": "EXACT_INDIVIDUAL",
+        "5": "EXACT_INDIVIDUAL"
+      },
+      "preserved_prefix_length": 6
+    },
+    {
+      "pack": "W1-H",
+      "run": "P2",
+      "status": "GRADED",
+      "order": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "EXACT_INDIVIDUAL",
+        "2": "ABSENT",
+        "3": "ABSENT",
+        "4": "ABSENT",
+        "5": "ABSENT"
+      },
+      "preserved_prefix_length": 2
+    },
+    {
+      "pack": "W1-H",
+      "run": "P3",
+      "status": "GRADED",
+      "order": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "EXACT_INDIVIDUAL",
+        "2": "EXACT_INDIVIDUAL",
+        "3": "EXACT_INDIVIDUAL",
+        "4": "EXACT_INDIVIDUAL",
+        "5": "EXACT_INDIVIDUAL"
+      },
+      "preserved_prefix_length": 6
+    }
+  ],
+  "treatment": [
+    {
+      "pack": "W1-J",
+      "run": "Q1",
+      "status": "NO_ARTIFACT",
+      "order": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ]
+    },
+    {
+      "pack": "W1-J",
+      "run": "Q2",
+      "status": "NO_ARTIFACT",
+      "order": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ]
+    },
+    {
+      "pack": "W1-J",
+      "run": "Q3",
+      "status": "NO_ARTIFACT",
+      "order": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ]
+    }
+  ],
+  "provenance_slot": {
+    "0": "YES",
+    "1": "YES",
+    "2": "NO",
+    "3": "NO",
+    "4": "NO",
+    "5": "NO"
+  }
+}
