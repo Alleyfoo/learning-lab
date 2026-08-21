@@ -8,8 +8,48 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1k\\runs\\A1\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "e0cb23a14db686b0df806ae042eeaa7cab72140a1b2ff5b85229543c659d9493",
+      "validated_against": "v0",
+      "status": "REFUSED",
+      "codes": [
+        "observed_field_not_in_source"
+      ],
+      "problems": [
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.statement",
+          "detail": "'Date, Supplier Name, InvoiceNumber, Amount, Currency, Status' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.ledger",
+          "detail": "'Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:body.match_on.left_field",
+          "detail": "'InvoiceNumber' is the match key for 'statement' but is not in that source's observed_fields"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:body.match_on.right_field",
+          "detail": "'InvoiceNumber' is the match key for 'ledger' but is not in that source's observed_fields"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:body",
+          "detail": "'Amount' compared on 'statement' but not in that source's observed_fields"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:body",
+          "detail": "'Amount' compared on 'ledger' but not in that source's observed_fields"
+        }
+      ],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "A2",
@@ -18,8 +58,15 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1k\\runs\\A2\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "eebba6a551831750aab597f035ada79ef0c977821beedebadc6978d0f9c118d1",
+      "validated_against": "v0",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "A3",
@@ -28,8 +75,15 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1k\\runs\\A3\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "3ca6bfd4a924dd740dd3ab32d2b7771dc6d254f0cfc4ebf98c19154729859aca",
+      "validated_against": "v0",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "B1",
@@ -38,8 +92,15 @@
       "skill_sha256": "c9f9990133be9a1afb66842160c48d90beff956f6d714c52ad3419b5ef8d9c6d",
       "skill_match": false,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1k\\runs\\B1\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "b490e8681a10d927d4da3f4618cdf0923cb3e79fcf0987a0c95a868b6f458d92",
+      "validated_against": "v0+C",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "B2",
@@ -48,8 +109,15 @@
       "skill_sha256": "c9f9990133be9a1afb66842160c48d90beff956f6d714c52ad3419b5ef8d9c6d",
       "skill_match": false,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1k\\runs\\B2\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "7661e5ba1e78866b791a1138d17c60eb81b6663f00ccee7967a1d7b398c2d7b6",
+      "validated_against": "v0+C",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "B3",
@@ -58,8 +126,48 @@
       "skill_sha256": "c9f9990133be9a1afb66842160c48d90beff956f6d714c52ad3419b5ef8d9c6d",
       "skill_match": false,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1k\\runs\\B3\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "a50e16d824578025c769107e08202bf1a5282a72b8d5318a970995425f9185f8",
+      "validated_against": "v0+C",
+      "status": "REFUSED",
+      "codes": [
+        "observed_field_not_in_source"
+      ],
+      "problems": [
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.supplier",
+          "detail": "'Date, Supplier Name, InvoiceNumber, Amount, Currency, Status' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.ledger",
+          "detail": "'Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:body.match_on.left_field",
+          "detail": "'InvoiceNumber' is the match key for 'supplier' but is not in that source's observed_fields"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:body.match_on.right_field",
+          "detail": "'InvoiceNumber' is the match key for 'ledger' but is not in that source's observed_fields"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:body",
+          "detail": "'Amount' compared on 'supplier' but not in that source's observed_fields"
+        },
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:body",
+          "detail": "'Amount' compared on 'ledger' but not in that source's observed_fields"
+        }
+      ],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     }
   ]
 }

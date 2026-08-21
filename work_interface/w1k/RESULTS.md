@@ -13,39 +13,33 @@ safe to enter the existing modelling/preview path*, NOT *established*.
 
 | run | status | skill_match | codes (if refused) | authority | override keys | sha256 |
 |---|---|---|---|---|---|---|
-| A1 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| A2 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| A3 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| B1 | **NO_ARTIFACT** | no |  | '' |  | `-` |
-| B2 | **NO_ARTIFACT** | no |  | '' |  | `-` |
-| B3 | **NO_ARTIFACT** | no |  | '' |  | `-` |
+| A1 | **REFUSED** | yes | observed_field_not_in_source | None |  | `e0cb23a14db6` |
+| A2 | **PASS** | yes |  | None |  | `eebba6a55183` |
+| A3 | **PASS** | yes |  | None |  | `3ca6bfd4a924` |
+| B1 | **PASS** | no |  | None |  | `b490e8681a10` |
+| B2 | **PASS** | no |  | None |  | `7661e5ba1e78` |
+| B3 | **REFUSED** | no | observed_field_not_in_source | None |  | `a50e16d82457` |
 
 ## Detail
 
-### A1 -- NO_ARTIFACT
+### A1 -- REFUSED
 
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
+- `observed_field_not_in_source` @ `<work_definition>:sources.statement` -- 'Date, Supplier Name, InvoiceNumber, Amount, Currency, Status' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']
+- `observed_field_not_in_source` @ `<work_definition>:sources.ledger` -- 'Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']
+- `observed_field_not_in_source` @ `<work_definition>:body.match_on.left_field` -- 'InvoiceNumber' is the match key for 'statement' but is not in that source's observed_fields
+- `observed_field_not_in_source` @ `<work_definition>:body.match_on.right_field` -- 'InvoiceNumber' is the match key for 'ledger' but is not in that source's observed_fields
+- `observed_field_not_in_source` @ `<work_definition>:body` -- 'Amount' compared on 'statement' but not in that source's observed_fields
+- `observed_field_not_in_source` @ `<work_definition>:body` -- 'Amount' compared on 'ledger' but not in that source's observed_fields
 
-### A2 -- NO_ARTIFACT
+### B3 -- REFUSED
 
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### A3 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### B1 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### B2 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### B3 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
+- `observed_field_not_in_source` @ `<work_definition>:sources.supplier` -- 'Date, Supplier Name, InvoiceNumber, Amount, Currency, Status' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']
+- `observed_field_not_in_source` @ `<work_definition>:sources.ledger` -- 'Date, ReferenceNumber, SupplierName, InvoiceNumber, Amount, Status, Notes' claimed observed but not in fixture header ['Date', 'ReferenceNumber', 'SupplierName', 'InvoiceNumber', 'Amount', 'Status', 'Notes']
+- `observed_field_not_in_source` @ `<work_definition>:body.match_on.left_field` -- 'InvoiceNumber' is the match key for 'supplier' but is not in that source's observed_fields
+- `observed_field_not_in_source` @ `<work_definition>:body.match_on.right_field` -- 'InvoiceNumber' is the match key for 'ledger' but is not in that source's observed_fields
+- `observed_field_not_in_source` @ `<work_definition>:body` -- 'Amount' compared on 'supplier' but not in that source's observed_fields
+- `observed_field_not_in_source` @ `<work_definition>:body` -- 'Amount' compared on 'ledger' but not in that source's observed_fields
 
 ## Pass rate
 
-**0/6 PASS** (primary W1-K success criterion: 3/3).
+**4/6 PASS** (primary W1-K success criterion: 3/3).

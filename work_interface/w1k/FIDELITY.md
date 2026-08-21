@@ -11,33 +11,71 @@ Reported INDEPENDENTLY of the structural grader.
 
 | run | fidelity | findings | artifact sha256 |
 |---|---|---|---|
-| A1 | **NO_ARTIFACT** | 0 | `-` |
-| A2 | **NO_ARTIFACT** | 0 | `-` |
-| A3 | **NO_ARTIFACT** | 0 | `-` |
-| B1 | **NO_ARTIFACT** | 0 | `-` |
-| B2 | **NO_ARTIFACT** | 0 | `-` |
-| B3 | **NO_ARTIFACT** | 0 | `-` |
+| A1 | **FIDELITY FINDINGS** | 5 | `e0cb23a14db6` |
+| A2 | **FIDELITY FINDINGS** | 4 | `eebba6a55183` |
+| A3 | **FIDELITY FINDINGS** | 4 | `3ca6bfd4a924` |
+| B1 | **FIDELITY PASS** | 0 | `b490e8681a10` |
+| B2 | **FIDELITY FINDINGS** | 1 | `7661e5ba1e78` |
+| B3 | **FIDELITY FINDINGS** | 3 | `a50e16d82457` |
 
 ## Detail
 
-### A1 — NO_ARTIFACT
+### A1 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_compare_amount` rows=[] FID-3 PHANTOM_CONFIRMATION
+- confirmation `Q_report_context_fields` rows=[0] FID-6 NONVERBATIM_CONFIRMATION [EMBEDDED]
+- `FID-1 UNCITED_HUMAN_FACT` @ `body.compare[Amount]` — confirmation 'Q_compare_amount' is FID-3 PHANTOM_CONFIRMATION rows=[]; provenance must be exclusive and byte-exact
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-3 PHANTOM_CONFIRMATION` @ `human_confirmations[Q_compare_amount]` — rows=[]
+- `FID-6 NONVERBATIM_CONFIRMATION` @ `human_confirmations[Q_report_context_fields]` — rows=[0] subreason=EMBEDDED
 
-### A2 — NO_ARTIFACT
+### A2 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_compare_amount` rows=[1, 2] FID-2 BUNDLED_CONFIRMATION
+- `FID-1 UNCITED_HUMAN_FACT` @ `body.compare[Amount]` — confirmation 'Q_compare_amount' is FID-2 BUNDLED_CONFIRMATION rows=[1, 2]; provenance must be exclusive and byte-exact
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-2 BUNDLED_CONFIRMATION` @ `human_confirmations[Q_compare_amount]` — rows=[1, 2]
 
-### A3 — NO_ARTIFACT
+### A3 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_compare_field` rows=[1] FID-6 NONVERBATIM_CONFIRMATION [TRAILING_CONTENT]
+- `FID-1 UNCITED_HUMAN_FACT` @ `body.compare[Amount]` — confirmation 'Q_compare_field' is FID-6 NONVERBATIM_CONFIRMATION rows=[1]; provenance must be exclusive and byte-exact
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-6 NONVERBATIM_CONFIRMATION` @ `human_confirmations[Q_compare_field]` — rows=[1] subreason=TRAILING_CONTENT
 
-### B1 — NO_ARTIFACT
+### B1 — FIDELITY PASS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_compare_amount_field` rows=[1] normal
+- confirmation `Q_currency_not_compared` rows=[2] normal
+- confirmation `Q_source_truth` rows=[3] normal
+- confirmation `Q_report_columns` rows=[4] normal
+- confirmation `Q_context_data` rows=[5] normal
+- no findings
 
-### B2 — NO_ARTIFACT
+### B2 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_comparison_amount` rows=[1] normal
+- confirmation `Q_status_not_compared` rows=[0, 2] FID-2 BUNDLED_CONFIRMATION
+- confirmation `Q_source_of_truth` rows=[3] normal
+- confirmation `Q_report_fields` rows=[4] normal
+- confirmation `Q_context_fields` rows=[5] normal
+- `FID-2 BUNDLED_CONFIRMATION` @ `human_confirmations[Q_status_not_compared]` — rows=[0, 2]
 
-### B3 — NO_ARTIFACT
+### B3 — FIDELITY FINDINGS
 
+- confirmation `Q_reconciliation_rules` rows=[0, 1, 4, 5] FID-2 BUNDLED_CONFIRMATION
+- `FID-1 UNCITED_HUMAN_FACT` @ `body.match_on` — confirmation 'Q_reconciliation_rules' is FID-2 BUNDLED_CONFIRMATION rows=[0, 1, 4, 5]; provenance must be exclusive and byte-exact
+- `FID-1 UNCITED_HUMAN_FACT` @ `body.compare[Amount]` — confirmation 'Q_reconciliation_rules' is FID-2 BUNDLED_CONFIRMATION rows=[0, 1, 4, 5]; provenance must be exclusive and byte-exact
+- `FID-2 BUNDLED_CONFIRMATION` @ `human_confirmations[Q_reconciliation_rules]` — rows=[0, 1, 4, 5]
 
 ## Fidelity rate
 
-**0/6 FIDELITY PASS** (0 finding(s) across graded runs).
+**1/6 FIDELITY PASS** (17 finding(s) across graded runs).

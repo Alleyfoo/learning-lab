@@ -4,37 +4,373 @@
       "run": "A1",
       "arm": "control",
       "skill": "r2",
-      "status": "NO_ARTIFACT"
+      "status": "GRADED",
+      "rows": {
+        "0": {
+          "slot_class": "existing",
+          "role": "POSITIVE CONTROL",
+          "slot_offered": true,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": true,
+          "cited": "Q_match_key",
+          "binding_valid": true
+        },
+        "1": {
+          "slot_class": "existing",
+          "role": "POSITIVE CONTROL",
+          "slot_offered": true,
+          "preservation": "ABSENT",
+          "provenance_populated": true,
+          "cited": "Q_compare_amount",
+          "binding_valid": false
+        },
+        "2": {
+          "slot_class": "none",
+          "role": "NEGATIVE CONTROL",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "3": {
+          "slot_class": "none",
+          "role": "NEGATIVE CONTROL",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "4": {
+          "slot_class": "new",
+          "role": "TARGET",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "5": {
+          "slot_class": "new",
+          "role": "TARGET",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        }
+      }
     },
     {
       "run": "A2",
       "arm": "control",
       "skill": "r2",
-      "status": "NO_ARTIFACT"
+      "status": "GRADED",
+      "rows": {
+        "0": {
+          "slot_class": "existing",
+          "role": "POSITIVE CONTROL",
+          "slot_offered": true,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": true,
+          "cited": "Q_match_key",
+          "binding_valid": true
+        },
+        "1": {
+          "slot_class": "existing",
+          "role": "POSITIVE CONTROL",
+          "slot_offered": true,
+          "preservation": "BUNDLED",
+          "provenance_populated": true,
+          "cited": "Q_compare_amount",
+          "binding_valid": true
+        },
+        "2": {
+          "slot_class": "none",
+          "role": "NEGATIVE CONTROL",
+          "slot_offered": false,
+          "preservation": "BUNDLED",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "3": {
+          "slot_class": "none",
+          "role": "NEGATIVE CONTROL",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "4": {
+          "slot_class": "new",
+          "role": "TARGET",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "5": {
+          "slot_class": "new",
+          "role": "TARGET",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        }
+      }
     },
     {
       "run": "A3",
       "arm": "control",
       "skill": "r2",
-      "status": "NO_ARTIFACT"
+      "status": "GRADED",
+      "rows": {
+        "0": {
+          "slot_class": "existing",
+          "role": "POSITIVE CONTROL",
+          "slot_offered": true,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": true,
+          "cited": "Q_match_key",
+          "binding_valid": true
+        },
+        "1": {
+          "slot_class": "existing",
+          "role": "POSITIVE CONTROL",
+          "slot_offered": true,
+          "preservation": "NONVERBATIM",
+          "provenance_populated": true,
+          "cited": "Q_compare_field",
+          "binding_valid": true
+        },
+        "2": {
+          "slot_class": "none",
+          "role": "NEGATIVE CONTROL",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "3": {
+          "slot_class": "none",
+          "role": "NEGATIVE CONTROL",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "4": {
+          "slot_class": "new",
+          "role": "TARGET",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "5": {
+          "slot_class": "new",
+          "role": "TARGET",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        }
+      }
     },
     {
       "run": "B1",
       "arm": "treatment",
       "skill": "r2c",
-      "status": "NO_ARTIFACT"
+      "status": "GRADED",
+      "rows": {
+        "0": {
+          "slot_class": "existing",
+          "role": "POSITIVE CONTROL",
+          "slot_offered": true,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": true,
+          "cited": "Q_match_key",
+          "binding_valid": true
+        },
+        "1": {
+          "slot_class": "existing",
+          "role": "POSITIVE CONTROL",
+          "slot_offered": true,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": true,
+          "cited": "Q_compare_amount_field",
+          "binding_valid": true
+        },
+        "2": {
+          "slot_class": "none",
+          "role": "NEGATIVE CONTROL",
+          "slot_offered": false,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "3": {
+          "slot_class": "none",
+          "role": "NEGATIVE CONTROL",
+          "slot_offered": false,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "4": {
+          "slot_class": "new",
+          "role": "TARGET",
+          "slot_offered": true,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": true,
+          "cited": "Q_report_columns",
+          "binding_valid": true
+        },
+        "5": {
+          "slot_class": "new",
+          "role": "TARGET",
+          "slot_offered": true,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": true,
+          "cited": "Q_context_data",
+          "binding_valid": true
+        }
+      }
     },
     {
       "run": "B2",
       "arm": "treatment",
       "skill": "r2c",
-      "status": "NO_ARTIFACT"
+      "status": "GRADED",
+      "rows": {
+        "0": {
+          "slot_class": "existing",
+          "role": "POSITIVE CONTROL",
+          "slot_offered": true,
+          "preservation": "BUNDLED",
+          "provenance_populated": true,
+          "cited": "Q_match_key",
+          "binding_valid": true
+        },
+        "1": {
+          "slot_class": "existing",
+          "role": "POSITIVE CONTROL",
+          "slot_offered": true,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": true,
+          "cited": "Q_comparison_amount",
+          "binding_valid": true
+        },
+        "2": {
+          "slot_class": "none",
+          "role": "NEGATIVE CONTROL",
+          "slot_offered": false,
+          "preservation": "BUNDLED",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "3": {
+          "slot_class": "none",
+          "role": "NEGATIVE CONTROL",
+          "slot_offered": false,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "4": {
+          "slot_class": "new",
+          "role": "TARGET",
+          "slot_offered": true,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": true,
+          "cited": "Q_report_fields",
+          "binding_valid": true
+        },
+        "5": {
+          "slot_class": "new",
+          "role": "TARGET",
+          "slot_offered": true,
+          "preservation": "EXACT_INDIVIDUAL",
+          "provenance_populated": true,
+          "cited": "Q_context_fields",
+          "binding_valid": true
+        }
+      }
     },
     {
       "run": "B3",
       "arm": "treatment",
       "skill": "r2c",
-      "status": "NO_ARTIFACT"
+      "status": "GRADED",
+      "rows": {
+        "0": {
+          "slot_class": "existing",
+          "role": "POSITIVE CONTROL",
+          "slot_offered": true,
+          "preservation": "BUNDLED",
+          "provenance_populated": true,
+          "cited": "Q_reconciliation_rules",
+          "binding_valid": true
+        },
+        "1": {
+          "slot_class": "existing",
+          "role": "POSITIVE CONTROL",
+          "slot_offered": true,
+          "preservation": "BUNDLED",
+          "provenance_populated": true,
+          "cited": "Q_reconciliation_rules",
+          "binding_valid": true
+        },
+        "2": {
+          "slot_class": "none",
+          "role": "NEGATIVE CONTROL",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "3": {
+          "slot_class": "none",
+          "role": "NEGATIVE CONTROL",
+          "slot_offered": false,
+          "preservation": "ABSENT",
+          "provenance_populated": false,
+          "cited": null,
+          "binding_valid": null
+        },
+        "4": {
+          "slot_class": "new",
+          "role": "TARGET",
+          "slot_offered": true,
+          "preservation": "BUNDLED",
+          "provenance_populated": true,
+          "cited": "Q_reconciliation_rules",
+          "binding_valid": true
+        },
+        "5": {
+          "slot_class": "new",
+          "role": "TARGET",
+          "slot_offered": true,
+          "preservation": "BUNDLED",
+          "provenance_populated": true,
+          "cited": "Q_reconciliation_rules",
+          "binding_valid": true
+        }
+      }
     }
   ],
   "slot_class": {

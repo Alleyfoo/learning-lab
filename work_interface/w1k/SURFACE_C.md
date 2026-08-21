@@ -21,44 +21,86 @@ canonical delivery order 0->5 in BOTH arms
 
 ## A1 — arm control (r2)
 
-- **NO_ARTIFACT**
+| row | slot class | slot offered | confirmation preservation | provenance populated | binding valid |
+|---|---|---|---|---|---|
+| 0 (match key) | existing | yes | **EXACT_INDIVIDUAL** | yes | yes |
+| 1 (compare) | existing | yes | **ABSENT** | yes | no |
+| 2 (currency) | none | no | **ABSENT** | no | - |
+| 3 (source of truth) | none | no | **ABSENT** | no | - |
+| 4 (report fields) | new | no | **ABSENT** | no | - |
+| 5 (context fields) | new | no | **ABSENT** | no | - |
 
 ## A2 — arm control (r2)
 
-- **NO_ARTIFACT**
+| row | slot class | slot offered | confirmation preservation | provenance populated | binding valid |
+|---|---|---|---|---|---|
+| 0 (match key) | existing | yes | **EXACT_INDIVIDUAL** | yes | yes |
+| 1 (compare) | existing | yes | **BUNDLED** | yes | yes |
+| 2 (currency) | none | no | **BUNDLED** | no | - |
+| 3 (source of truth) | none | no | **ABSENT** | no | - |
+| 4 (report fields) | new | no | **ABSENT** | no | - |
+| 5 (context fields) | new | no | **ABSENT** | no | - |
 
 ## A3 — arm control (r2)
 
-- **NO_ARTIFACT**
+| row | slot class | slot offered | confirmation preservation | provenance populated | binding valid |
+|---|---|---|---|---|---|
+| 0 (match key) | existing | yes | **EXACT_INDIVIDUAL** | yes | yes |
+| 1 (compare) | existing | yes | **NONVERBATIM** | yes | yes |
+| 2 (currency) | none | no | **ABSENT** | no | - |
+| 3 (source of truth) | none | no | **ABSENT** | no | - |
+| 4 (report fields) | new | no | **ABSENT** | no | - |
+| 5 (context fields) | new | no | **ABSENT** | no | - |
 
 ## B1 — arm treatment (r2c)
 
-- **NO_ARTIFACT**
+| row | slot class | slot offered | confirmation preservation | provenance populated | binding valid |
+|---|---|---|---|---|---|
+| 0 (match key) | existing | yes | **EXACT_INDIVIDUAL** | yes | yes |
+| 1 (compare) | existing | yes | **EXACT_INDIVIDUAL** | yes | yes |
+| 2 (currency) | none | no | **EXACT_INDIVIDUAL** | no | - |
+| 3 (source of truth) | none | no | **EXACT_INDIVIDUAL** | no | - |
+| 4 (report fields) | new | yes | **EXACT_INDIVIDUAL** | yes | yes |
+| 5 (context fields) | new | yes | **EXACT_INDIVIDUAL** | yes | yes |
 
 ## B2 — arm treatment (r2c)
 
-- **NO_ARTIFACT**
+| row | slot class | slot offered | confirmation preservation | provenance populated | binding valid |
+|---|---|---|---|---|---|
+| 0 (match key) | existing | yes | **BUNDLED** | yes | yes |
+| 1 (compare) | existing | yes | **EXACT_INDIVIDUAL** | yes | yes |
+| 2 (currency) | none | no | **BUNDLED** | no | - |
+| 3 (source of truth) | none | no | **EXACT_INDIVIDUAL** | no | - |
+| 4 (report fields) | new | yes | **EXACT_INDIVIDUAL** | yes | yes |
+| 5 (context fields) | new | yes | **EXACT_INDIVIDUAL** | yes | yes |
 
 ## B3 — arm treatment (r2c)
 
-- **NO_ARTIFACT**
+| row | slot class | slot offered | confirmation preservation | provenance populated | binding valid |
+|---|---|---|---|---|---|
+| 0 (match key) | existing | yes | **BUNDLED** | yes | yes |
+| 1 (compare) | existing | yes | **BUNDLED** | yes | yes |
+| 2 (currency) | none | no | **ABSENT** | no | - |
+| 3 (source of truth) | none | no | **ABSENT** | no | - |
+| 4 (report fields) | new | yes | **BUNDLED** | yes | yes |
+| 5 (context fields) | new | yes | **BUNDLED** | yes | yes |
 
 ## The ladder, by arm
 
 ### control
 
 ```text
-targets (4,5)            slot offered 0/0  populated 0/0  binding valid 0/0  EXACT_INDIVIDUAL 0/0
-positive controls (0,1)  slot offered 0/0  populated 0/0  binding valid 0/0  EXACT_INDIVIDUAL 0/0
-negative controls (2,3)  slot offered 0/0  populated 0/0  binding valid 0/0  EXACT_INDIVIDUAL 0/0
+targets (4,5)            slot offered 0/6  populated 0/6  binding valid 0/6  EXACT_INDIVIDUAL 0/6
+positive controls (0,1)  slot offered 6/6  populated 6/6  binding valid 5/6  EXACT_INDIVIDUAL 3/6
+negative controls (2,3)  slot offered 0/6  populated 0/6  binding valid 0/6  EXACT_INDIVIDUAL 0/6
 ```
 
 ### treatment
 
 ```text
-targets (4,5)            slot offered 0/0  populated 0/0  binding valid 0/0  EXACT_INDIVIDUAL 0/0
-positive controls (0,1)  slot offered 0/0  populated 0/0  binding valid 0/0  EXACT_INDIVIDUAL 0/0
-negative controls (2,3)  slot offered 0/0  populated 0/0  binding valid 0/0  EXACT_INDIVIDUAL 0/0
+targets (4,5)            slot offered 6/6  populated 6/6  binding valid 6/6  EXACT_INDIVIDUAL 4/6
+positive controls (0,1)  slot offered 6/6  populated 6/6  binding valid 6/6  EXACT_INDIVIDUAL 3/6
+negative controls (2,3)  slot offered 0/6  populated 0/6  binding valid 0/6  EXACT_INDIVIDUAL 3/6
 ```
 
 **Descriptive.** Three runs per arm. No percentages, no reliability estimate, no statistical inference. The interpretation branches are fixed in `PREREGISTRATION.md` and are read off these observations directly.

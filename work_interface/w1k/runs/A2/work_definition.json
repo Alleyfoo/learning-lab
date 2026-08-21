@@ -1,0 +1,77 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "W1K-A2",
+  "provenance": {
+    "producer": "goose-run-A2",
+    "skill": "define-lab-process",
+    "produced_at": "2026-08-21"
+  },
+  "purpose": "Reconcile supplier statement and internal ledger to identify matching invoices, amount discrepancies under GBP tolerance, and records missing from either source.",
+  "sources": {
+    "supplier-statement": {
+      "role_label": "External Supplier Statement",
+      "fixture": "supplier-statement.txt",
+      "observed_fields": ["Date", "Supplier Name", "InvoiceNumber", "Amount", "Currency", "Status"],
+      "basis": "observed"
+    },
+    "ledger-book": {
+      "role_label": "Internal Ledger Book",
+      "fixture": "ledger-book.txt",
+      "observed_fields": ["Date", "ReferenceNumber", "SupplierName", "InvoiceNumber", "Amount", "Status", "Notes"],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "supplier-statement",
+    "right": "ledger-book",
+    "match_on": {
+      "left_field": "InvoiceNumber",
+      "right_field": "InvoiceNumber",
+      "basis": "human_confirmed",
+      "confirmation": "Q_match_key"
+    },
+    "compare": [
+      {
+        "field": "Amount",
+        "comparison": "within",
+        "tolerance": "0.01",
+        "basis": "human_confirmed",
+        "confirmation": "Q_compare_amount"
+      }
+    ],
+    "classify": {
+      "both_same": "MATCH",
+      "both_different": "DISCREPANCY",
+      "only_left": "MISSING_FROM_LEDGER",
+      "only_right": "MISSING_FROM_STATEMENT"
+    },
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_key",
+    "on_non_numeric": "refuse_key"
+  },
+  "output": {
+    "reports_fields": ["InvoiceNumber", "Amount"],
+    "context_fields": ["Date", "Supplier Name", "Status"]
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_match_key",
+      "question": "Which field identifies the same record / invoice in both files?",
+      "answer": "InvoiceNumber",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_compare_amount",
+      "question": "Should Amount be compared, and if so, how and with what tolerance? Is Currency part of the reconciliation rule? Which file is the source of truth for matching?",
+      "answer": "Yes, compare Amount numerically, within 0.01.\nNo. All sample amounts are GBP; Currency is not compared and is not part of the rule.\nNeither — both are peer sources.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [],
+  "requested_destination": "review_only",
+  "requested_delivery": {
+    "format": "json_discrepancy_report"
+  },
+  "requested_authority": null
+}
