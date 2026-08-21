@@ -11,33 +11,62 @@ Reported INDEPENDENTLY of the structural grader.
 
 | run | fidelity | findings | artifact sha256 |
 |---|---|---|---|
-| U1 | **NO_ARTIFACT** | 0 | `-` |
-| U2 | **NO_ARTIFACT** | 0 | `-` |
-| U3 | **NO_ARTIFACT** | 0 | `-` |
-| V1 | **NO_ARTIFACT** | 0 | `-` |
-| V2 | **NO_ARTIFACT** | 0 | `-` |
-| V3 | **NO_ARTIFACT** | 0 | `-` |
+| U1 | **FIDELITY FINDINGS** | 2 | `e77506dd45d5` |
+| U2 | **FIDELITY FINDINGS** | 2 | `b0090a962e4f` |
+| U3 | **FIDELITY PASS** | 0 | `348ffdbe0923` |
+| V1 | **FIDELITY FINDINGS** | 2 | `c85f9a73ec1e` |
+| V2 | **FIDELITY FINDINGS** | 1 | `3f8325e7c0cb` |
+| V3 | **FIDELITY FINDINGS** | 2 | `eb83f682429a` |
 
 ## Detail
 
-### U1 — NO_ARTIFACT
+### U1 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_net_value_compare` rows=[1] normal
+- confirmation `Q_tax_band_incidental` rows=[2] normal
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
 
-### U2 — NO_ARTIFACT
+### U2 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_compare_tolerated` rows=[1] FID-6 NONVERBATIM_CONFIRMATION [TRAILING_CONTENT]
+- confirmation `Q_report_fields` rows=[4, 5] FID-2 BUNDLED_CONFIRMATION
+- `FID-6 NONVERBATIM_CONFIRMATION` @ `human_confirmations[Q_compare_tolerated]` — rows=[1] subreason=TRAILING_CONTENT
+- `FID-2 BUNDLED_CONFIRMATION` @ `human_confirmations[Q_report_fields]` — rows=[4, 5]
 
-### U3 — NO_ARTIFACT
+### U3 — FIDELITY PASS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_net_value` rows=[1] normal
+- confirmation `Q_tax_band` rows=[2] normal
+- confirmation `Q_source_of_truth` rows=[3] normal
+- confirmation `Q_report_fields` rows=[4] normal
+- confirmation `Q_context_fields` rows=[5] normal
+- no findings
 
-### V1 — NO_ARTIFACT
+### V1 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_net_value_compare` rows=[1] normal
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
 
-### V2 — NO_ARTIFACT
+### V2 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_compare_rule` rows=[1, 2, 3, 4, 5] FID-2 BUNDLED_CONFIRMATION
+- `FID-2 BUNDLED_CONFIRMATION` @ `human_confirmations[Q_compare_rule]` — rows=[1, 2, 3, 4, 5]
 
-### V3 — NO_ARTIFACT
+### V3 — FIDELITY FINDINGS
 
+- confirmation `Q_match_key` rows=[0] normal
+- confirmation `Q_comparison_field` rows=[1] normal
+- confirmation `Q_tax_band_exclusion` rows=[2] normal
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
+- `FID-5 UNRECORDED_HUMAN_ANSWER` @ `human_confirmations` — delivered canonical recorded nowhere
 
 ## Fidelity rate
 
-**0/6 FIDELITY PASS** (0 finding(s) across graded runs).
+**1/6 FIDELITY PASS** (9 finding(s) across graded runs).

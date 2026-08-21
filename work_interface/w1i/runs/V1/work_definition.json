@@ -1,0 +1,77 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "vendor-ledger-peer-reconcile-r1",
+  "provenance": {
+    "producer": "goose-v1-run-V1",
+    "skill": "define-lab-process",
+    "produced_at": "2026-08-21"
+  },
+  "purpose": "Reconcile vendor charge summary records against internal charge ledger to identify discrepancies in net values and missing lines across peer sources.",
+  "sources": {
+    "vendor_statement": {
+      "role_label": "Vendor Charge Summary",
+      "fixture": "vendor-charge-summary.txt",
+      "observed_fields": ["Charge Period", "Client Ref", "Net Value", "Tax Band", "Settlement State"],
+      "basis": "observed"
+    },
+    "internal_ledger": {
+      "role_label": "Internal Charge Ledger",
+      "fixture": "internal-charge-ledger.txt",
+      "observed_fields": ["Charge Period", "Internal Key", "Client Ref", "Net Value", "Settlement State", "Remarks"],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "vendor_statement",
+    "right": "internal_ledger",
+    "match_on": {
+      "left_field": "Client Ref",
+      "right_field": "Client Ref",
+      "basis": "human_confirmed",
+      "confirmation": "Q_match_key"
+    },
+    "compare": [
+      {
+        "field": "Net Value",
+        "comparison": "within",
+        "tolerance": "0.01",
+        "basis": "human_confirmed",
+        "confirmation": "Q_net_value_compare"
+      }
+    ],
+    "classify": {
+      "both_same": "matched",
+      "both_different": "discrepancy",
+      "only_left": "vendor_only",
+      "only_right": "internal_only"
+    },
+    "output_order": "sorted_by_key",
+    "on_duplicate_key": "refuse_run",
+    "on_non_numeric": "refuse_run"
+  },
+  "output": {
+    "reports_fields": ["Client Ref", "Net Value"],
+    "context_fields": ["Charge Period", "Settlement State"]
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_match_key",
+      "question": "Which field identifies the same record / charge line in both files?",
+      "answer": "Client Ref",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_net_value_compare",
+      "question": "Should Net Value be compared, and if so, how and with what tolerance?",
+      "answer": "Yes, compare Net Value numerically, within 0.01.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [],
+  "requested_destination": "review_only",
+  "requested_delivery": {
+    "format": "json_discrepancy_report"
+  },
+  "requested_authority": null
+}

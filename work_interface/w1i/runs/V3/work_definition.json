@@ -1,0 +1,83 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "w1i-v3-matcher",
+  "provenance": {
+    "producer": "goose",
+    "skill": "define-lab-process",
+    "produced_at": "2026-08-21"
+  },
+  "purpose": "reconcile vendor and internal charge records for discrepancy reporting",
+  "sources": {
+    "statement": {
+      "role_label": "vendor-statement",
+      "fixture": "vendor-charge-summary.txt",
+      "observed_fields": ["Charge Period", "Client Ref", "Net Value", "Tax Band", "Settlement State"],
+      "basis": "observed"
+    },
+    "ledger": {
+      "role_label": "internal-ledger",
+      "fixture": "internal-charge-ledger.txt",
+      "observed_fields": ["Charge Period", "Internal Key", "Client Ref", "Net Value", "Settlement State", "Remarks"],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "statement",
+    "right": "ledger",
+    "match_on": {
+      "left_field": "Client Ref",
+      "right_field": "Client Ref",
+      "basis": "human_confirmed",
+      "confirmation": "Q_match_key"
+    },
+    "compare": [
+      {
+        "field": "Net Value",
+        "comparison": "within",
+        "tolerance": "0.01",
+        "basis": "human_confirmed",
+        "confirmation": "Q_comparison_field"
+      }
+    ],
+    "classify": {
+      "both_same": "matched_within_tolerance",
+      "both_different": "different_values",
+      "only_left": "in_vendor_only",
+      "only_right": "in_ledger_only"
+    },
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_key",
+    "on_non_numeric": "refuse_key"
+  },
+  "output": {
+    "reports_fields": ["Client Ref", "Net Value"],
+    "context_fields": ["Charge Period", "Settlement State"]
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_match_key",
+      "question": "Which field identifies the same record in both files?",
+      "answer": "Client Ref",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_comparison_field",
+      "question": "Should Net Value be compared, and if so, how and with what tolerance?",
+      "answer": "Yes, compare Net Value numerically, within 0.01.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_tax_band_exclusion",
+      "question": "Is Tax Band part of the reconciliation rule?",
+      "answer": "No. Tax Band is recorded on the vendor side only; it is not compared and is not part of the rule.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [],
+  "requested_destination": "review_only",
+  "requested_delivery": {
+    "format": "json_discrepancy_report"
+  },
+  "requested_authority": null
+}

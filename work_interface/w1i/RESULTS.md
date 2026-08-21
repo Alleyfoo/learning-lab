@@ -13,39 +13,13 @@ safe to enter the existing modelling/preview path*, NOT *established*.
 
 | run | status | skill_match | codes (if refused) | authority | override keys | sha256 |
 |---|---|---|---|---|---|---|
-| U1 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| U2 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| U3 | **NO_ARTIFACT** | yes |  | '' |  | `-` |
-| V1 | **NO_ARTIFACT** | no |  | '' |  | `-` |
-| V2 | **NO_ARTIFACT** | no |  | '' |  | `-` |
-| V3 | **NO_ARTIFACT** | no |  | '' |  | `-` |
-
-## Detail
-
-### U1 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### U2 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### U3 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### V1 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### V2 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
-
-### V3 -- NO_ARTIFACT
-
-no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)
+| U1 | **PASS** | yes |  | None |  | `e77506dd45d5` |
+| U2 | **PASS** | yes |  | None |  | `b0090a962e4f` |
+| U3 | **PASS** | yes |  | None |  | `348ffdbe0923` |
+| V1 | **PASS** | no |  | None |  | `c85f9a73ec1e` |
+| V2 | **PASS** | no |  | None |  | `3f8325e7c0cb` |
+| V3 | **PASS** | no |  | None |  | `eb83f682429a` |
 
 ## Pass rate
 
-**0/6 PASS** (primary W1-I success criterion: 3/3).
+**6/6 PASS** (primary W1-I success criterion: 3/3).

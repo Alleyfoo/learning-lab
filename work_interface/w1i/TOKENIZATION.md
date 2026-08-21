@@ -15,42 +15,114 @@ Every token but `Remarks` carries an internal space, so PADDED, COLLAPSED and EX
 
 | run | arm | tokenization | exact | padded | collapsed | other | separator ws survives | internal ws preserved |
 |---|---|---|---|---|---|---|---|---|
-| U1 | r2 | **NO_ARTIFACT** | | | | | | |
-| U2 | r2 | **NO_ARTIFACT** | | | | | | |
-| U3 | r2 | **NO_ARTIFACT** | | | | | | |
-| V1 | r3 | **NO_ARTIFACT** | | | | | | |
-| V2 | r3 | **NO_ARTIFACT** | | | | | | |
-| V3 | r3 | **NO_ARTIFACT** | | | | | | |
+| U1 | r2 | **CLEAN** | 11 | 0 | 0 | 0 | no | yes |
+| U2 | r2 | **CLEAN** | 11 | 0 | 0 | 0 | no | yes |
+| U3 | r2 | **CLEAN** | 11 | 0 | 0 | 0 | no | yes |
+| V1 | r3 | **CLEAN** | 11 | 0 | 0 | 0 | no | yes |
+| V2 | r3 | **CLEAN** | 11 | 0 | 0 | 0 | no | yes |
+| V3 | r3 | **CLEAN** | 11 | 0 | 0 | 0 | no | yes |
 
 ## Declared tokens, verbatim
 
 ### U1 — arm r2
 
-- NO_ARTIFACT
+- `statement`
+    - 'Charge Period' EXACT
+    - 'Client Ref' EXACT
+    - 'Net Value' EXACT
+    - 'Tax Band' EXACT
+    - 'Settlement State' EXACT
+- `ledger`
+    - 'Charge Period' EXACT
+    - 'Internal Key' EXACT
+    - 'Client Ref' EXACT
+    - 'Net Value' EXACT
+    - 'Settlement State' EXACT
+    - 'Remarks' EXACT
 
 ### U2 — arm r2
 
-- NO_ARTIFACT
+- `vendor_statement`
+    - 'Charge Period' EXACT
+    - 'Client Ref' EXACT
+    - 'Net Value' EXACT
+    - 'Tax Band' EXACT
+    - 'Settlement State' EXACT
+- `internal_ledger`
+    - 'Charge Period' EXACT
+    - 'Internal Key' EXACT
+    - 'Client Ref' EXACT
+    - 'Net Value' EXACT
+    - 'Settlement State' EXACT
+    - 'Remarks' EXACT
 
 ### U3 — arm r2
 
-- NO_ARTIFACT
+- `supplier_statement`
+    - 'Charge Period' EXACT
+    - 'Client Ref' EXACT
+    - 'Net Value' EXACT
+    - 'Tax Band' EXACT
+    - 'Settlement State' EXACT
+- `internal_ledger`
+    - 'Charge Period' EXACT
+    - 'Internal Key' EXACT
+    - 'Client Ref' EXACT
+    - 'Net Value' EXACT
+    - 'Settlement State' EXACT
+    - 'Remarks' EXACT
 
 ### V1 — arm r3
 
-- NO_ARTIFACT
+- `vendor_statement`
+    - 'Charge Period' EXACT
+    - 'Client Ref' EXACT
+    - 'Net Value' EXACT
+    - 'Tax Band' EXACT
+    - 'Settlement State' EXACT
+- `internal_ledger`
+    - 'Charge Period' EXACT
+    - 'Internal Key' EXACT
+    - 'Client Ref' EXACT
+    - 'Net Value' EXACT
+    - 'Settlement State' EXACT
+    - 'Remarks' EXACT
 
 ### V2 — arm r3
 
-- NO_ARTIFACT
+- `statement`
+    - 'Charge Period' EXACT
+    - 'Client Ref' EXACT
+    - 'Net Value' EXACT
+    - 'Tax Band' EXACT
+    - 'Settlement State' EXACT
+- `ledger`
+    - 'Charge Period' EXACT
+    - 'Internal Key' EXACT
+    - 'Client Ref' EXACT
+    - 'Net Value' EXACT
+    - 'Settlement State' EXACT
+    - 'Remarks' EXACT
 
 ### V3 — arm r3
 
-- NO_ARTIFACT
+- `statement`
+    - 'Charge Period' EXACT
+    - 'Client Ref' EXACT
+    - 'Net Value' EXACT
+    - 'Tax Band' EXACT
+    - 'Settlement State' EXACT
+- `ledger`
+    - 'Charge Period' EXACT
+    - 'Internal Key' EXACT
+    - 'Client Ref' EXACT
+    - 'Net Value' EXACT
+    - 'Settlement State' EXACT
+    - 'Remarks' EXACT
 
 ## Descriptive comparison
 
-- **r2**: 0/0 runs with clean tokenization; padded tokens 0, collapsed 0, other 0
-- **r3**: 0/0 runs with clean tokenization; padded tokens 0, collapsed 0, other 0
+- **r2**: 3/3 runs with clean tokenization; padded tokens 0, collapsed 0, other 0
+- **r3**: 3/3 runs with clean tokenization; padded tokens 0, collapsed 0, other 0
 
 **Descriptive only.** Three runs per arm cannot support a reliability estimate, and no claim that r3 "solves" the behaviour follows from this comparison.

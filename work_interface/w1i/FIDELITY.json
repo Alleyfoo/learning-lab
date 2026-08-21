@@ -3,39 +3,248 @@
   "runs": [
     {
       "run": "U1",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 4,
+          "detail": "delivered canonical recorded nowhere"
+        },
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 5,
+          "detail": "delivered canonical recorded nowhere"
+        }
+      ],
+      "confirmations": {
+        "Q_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_net_value_compare": {
+          "rows": [
+            1
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_tax_band_incidental": {
+          "rows": [
+            2
+          ],
+          "verdict": "normal",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "e77506dd45d534b6e0ff6e867a2b4016380b9de74bfd3d8a659a5dc47b9f9b5d"
     },
     {
       "run": "U2",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-6 NONVERBATIM_CONFIRMATION",
+          "where": "human_confirmations[Q_compare_tolerated]",
+          "row": null,
+          "detail": "rows=[1] subreason=TRAILING_CONTENT"
+        },
+        {
+          "finding": "FID-2 BUNDLED_CONFIRMATION",
+          "where": "human_confirmations[Q_report_fields]",
+          "row": null,
+          "detail": "rows=[4, 5]"
+        }
+      ],
+      "confirmations": {
+        "Q_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_compare_tolerated": {
+          "rows": [
+            1
+          ],
+          "verdict": "FID-6 NONVERBATIM_CONFIRMATION",
+          "subreason": "TRAILING_CONTENT"
+        },
+        "Q_report_fields": {
+          "rows": [
+            4,
+            5
+          ],
+          "verdict": "FID-2 BUNDLED_CONFIRMATION",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "b0090a962e4ffe37b7c22cf4beee694bb686223be9a19bc4d9a76995fe3630de"
     },
     {
       "run": "U3",
-      "status": "NO_ARTIFACT",
+      "status": "FIDELITY PASS",
       "findings": [],
-      "confirmations": {}
+      "confirmations": {
+        "Q_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_net_value": {
+          "rows": [
+            1
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_tax_band": {
+          "rows": [
+            2
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_source_of_truth": {
+          "rows": [
+            3
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_report_fields": {
+          "rows": [
+            4
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_context_fields": {
+          "rows": [
+            5
+          ],
+          "verdict": "normal",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "348ffdbe0923d538434515acc2b1895c4da5f4e32f271c860a4b608d6ced8eaf"
     },
     {
       "run": "V1",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 4,
+          "detail": "delivered canonical recorded nowhere"
+        },
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 5,
+          "detail": "delivered canonical recorded nowhere"
+        }
+      ],
+      "confirmations": {
+        "Q_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_net_value_compare": {
+          "rows": [
+            1
+          ],
+          "verdict": "normal",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "c85f9a73ec1e3e8a62253b98ee43efa98b8f2c1b03d4e130373da049536008e1"
     },
     {
       "run": "V2",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-2 BUNDLED_CONFIRMATION",
+          "where": "human_confirmations[Q_compare_rule]",
+          "row": null,
+          "detail": "rows=[1, 2, 3, 4, 5]"
+        }
+      ],
+      "confirmations": {
+        "Q_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_compare_rule": {
+          "rows": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "verdict": "FID-2 BUNDLED_CONFIRMATION",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "3f8325e7c0cb28aae6485b0f093eb2d8f1503af775c84db2d3f9549facec71a7"
     },
     {
       "run": "V3",
-      "status": "NO_ARTIFACT",
-      "findings": [],
-      "confirmations": {}
+      "status": "FIDELITY FINDINGS",
+      "findings": [
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 4,
+          "detail": "delivered canonical recorded nowhere"
+        },
+        {
+          "finding": "FID-5 UNRECORDED_HUMAN_ANSWER",
+          "where": "human_confirmations",
+          "row": 5,
+          "detail": "delivered canonical recorded nowhere"
+        }
+      ],
+      "confirmations": {
+        "Q_match_key": {
+          "rows": [
+            0
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_comparison_field": {
+          "rows": [
+            1
+          ],
+          "verdict": "normal",
+          "subreason": null
+        },
+        "Q_tax_band_exclusion": {
+          "rows": [
+            2
+          ],
+          "verdict": "normal",
+          "subreason": null
+        }
+      },
+      "artifact_sha256": "eb83f682429a40ffe8d3aa795305fdbfc640afc2a2c0c8bf416697ef73cfb4ed"
     }
   ]
 }

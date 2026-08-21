@@ -8,8 +8,14 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1i\\runs\\U1\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "e77506dd45d534b6e0ff6e867a2b4016380b9de74bfd3d8a659a5dc47b9f9b5d",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "U2",
@@ -18,8 +24,14 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1i\\runs\\U2\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "b0090a962e4ffe37b7c22cf4beee694bb686223be9a19bc4d9a76995fe3630de",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "U3",
@@ -28,8 +40,14 @@
       "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
       "skill_match": true,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1i\\runs\\U3\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "348ffdbe0923d538434515acc2b1895c4da5f4e32f271c860a4b608d6ced8eaf",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "V1",
@@ -38,8 +56,14 @@
       "skill_sha256": "ea259e1a2af8663987d1dd5bed333a0a1ae33701752166a39f1c17446be3d5d5",
       "skill_match": false,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1i\\runs\\V1\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "c85f9a73ec1e3e8a62253b98ee43efa98b8f2c1b03d4e130373da049536008e1",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "V2",
@@ -48,8 +72,14 @@
       "skill_sha256": "ea259e1a2af8663987d1dd5bed333a0a1ae33701752166a39f1c17446be3d5d5",
       "skill_match": false,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1i\\runs\\V2\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "3f8325e7c0cb28aae6485b0f093eb2d8f1503af775c84db2d3f9549facec71a7",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     },
     {
       "run": "V3",
@@ -58,8 +88,14 @@
       "skill_sha256": "ea259e1a2af8663987d1dd5bed333a0a1ae33701752166a39f1c17446be3d5d5",
       "skill_match": false,
       "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1i\\runs\\V3\\work_definition.json",
-      "status": "NO_ARTIFACT",
-      "note": "no work_definition.json in the run directory (Goose wrote elsewhere or stopped early)"
+      "sha256": "eb83f682429a40ffe8d3aa795305fdbfc640afc2a2c0c8bf416697ef73cfb4ed",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
     }
   ]
 }

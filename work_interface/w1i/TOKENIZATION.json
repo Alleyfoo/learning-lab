@@ -20,32 +20,446 @@
     {
       "run": "U1",
       "arm": "r2",
-      "status": "NO_ARTIFACT"
+      "status": "GRADED",
+      "declared": {
+        "statement": [
+          {
+            "declared": "Charge Period",
+            "verdict": "EXACT",
+            "canonical": "Charge Period"
+          },
+          {
+            "declared": "Client Ref",
+            "verdict": "EXACT",
+            "canonical": "Client Ref"
+          },
+          {
+            "declared": "Net Value",
+            "verdict": "EXACT",
+            "canonical": "Net Value"
+          },
+          {
+            "declared": "Tax Band",
+            "verdict": "EXACT",
+            "canonical": "Tax Band"
+          },
+          {
+            "declared": "Settlement State",
+            "verdict": "EXACT",
+            "canonical": "Settlement State"
+          }
+        ],
+        "ledger": [
+          {
+            "declared": "Charge Period",
+            "verdict": "EXACT",
+            "canonical": "Charge Period"
+          },
+          {
+            "declared": "Internal Key",
+            "verdict": "EXACT",
+            "canonical": "Internal Key"
+          },
+          {
+            "declared": "Client Ref",
+            "verdict": "EXACT",
+            "canonical": "Client Ref"
+          },
+          {
+            "declared": "Net Value",
+            "verdict": "EXACT",
+            "canonical": "Net Value"
+          },
+          {
+            "declared": "Settlement State",
+            "verdict": "EXACT",
+            "canonical": "Settlement State"
+          },
+          {
+            "declared": "Remarks",
+            "verdict": "EXACT",
+            "canonical": "Remarks"
+          }
+        ]
+      },
+      "padded": 0,
+      "collapsed": 0,
+      "exact": 11,
+      "other": 0,
+      "total": 11,
+      "separator_whitespace_survives": false,
+      "internal_whitespace_preserved": true,
+      "tokenization": "CLEAN"
     },
     {
       "run": "U2",
       "arm": "r2",
-      "status": "NO_ARTIFACT"
+      "status": "GRADED",
+      "declared": {
+        "vendor_statement": [
+          {
+            "declared": "Charge Period",
+            "verdict": "EXACT",
+            "canonical": "Charge Period"
+          },
+          {
+            "declared": "Client Ref",
+            "verdict": "EXACT",
+            "canonical": "Client Ref"
+          },
+          {
+            "declared": "Net Value",
+            "verdict": "EXACT",
+            "canonical": "Net Value"
+          },
+          {
+            "declared": "Tax Band",
+            "verdict": "EXACT",
+            "canonical": "Tax Band"
+          },
+          {
+            "declared": "Settlement State",
+            "verdict": "EXACT",
+            "canonical": "Settlement State"
+          }
+        ],
+        "internal_ledger": [
+          {
+            "declared": "Charge Period",
+            "verdict": "EXACT",
+            "canonical": "Charge Period"
+          },
+          {
+            "declared": "Internal Key",
+            "verdict": "EXACT",
+            "canonical": "Internal Key"
+          },
+          {
+            "declared": "Client Ref",
+            "verdict": "EXACT",
+            "canonical": "Client Ref"
+          },
+          {
+            "declared": "Net Value",
+            "verdict": "EXACT",
+            "canonical": "Net Value"
+          },
+          {
+            "declared": "Settlement State",
+            "verdict": "EXACT",
+            "canonical": "Settlement State"
+          },
+          {
+            "declared": "Remarks",
+            "verdict": "EXACT",
+            "canonical": "Remarks"
+          }
+        ]
+      },
+      "padded": 0,
+      "collapsed": 0,
+      "exact": 11,
+      "other": 0,
+      "total": 11,
+      "separator_whitespace_survives": false,
+      "internal_whitespace_preserved": true,
+      "tokenization": "CLEAN"
     },
     {
       "run": "U3",
       "arm": "r2",
-      "status": "NO_ARTIFACT"
+      "status": "GRADED",
+      "declared": {
+        "supplier_statement": [
+          {
+            "declared": "Charge Period",
+            "verdict": "EXACT",
+            "canonical": "Charge Period"
+          },
+          {
+            "declared": "Client Ref",
+            "verdict": "EXACT",
+            "canonical": "Client Ref"
+          },
+          {
+            "declared": "Net Value",
+            "verdict": "EXACT",
+            "canonical": "Net Value"
+          },
+          {
+            "declared": "Tax Band",
+            "verdict": "EXACT",
+            "canonical": "Tax Band"
+          },
+          {
+            "declared": "Settlement State",
+            "verdict": "EXACT",
+            "canonical": "Settlement State"
+          }
+        ],
+        "internal_ledger": [
+          {
+            "declared": "Charge Period",
+            "verdict": "EXACT",
+            "canonical": "Charge Period"
+          },
+          {
+            "declared": "Internal Key",
+            "verdict": "EXACT",
+            "canonical": "Internal Key"
+          },
+          {
+            "declared": "Client Ref",
+            "verdict": "EXACT",
+            "canonical": "Client Ref"
+          },
+          {
+            "declared": "Net Value",
+            "verdict": "EXACT",
+            "canonical": "Net Value"
+          },
+          {
+            "declared": "Settlement State",
+            "verdict": "EXACT",
+            "canonical": "Settlement State"
+          },
+          {
+            "declared": "Remarks",
+            "verdict": "EXACT",
+            "canonical": "Remarks"
+          }
+        ]
+      },
+      "padded": 0,
+      "collapsed": 0,
+      "exact": 11,
+      "other": 0,
+      "total": 11,
+      "separator_whitespace_survives": false,
+      "internal_whitespace_preserved": true,
+      "tokenization": "CLEAN"
     },
     {
       "run": "V1",
       "arm": "r3",
-      "status": "NO_ARTIFACT"
+      "status": "GRADED",
+      "declared": {
+        "vendor_statement": [
+          {
+            "declared": "Charge Period",
+            "verdict": "EXACT",
+            "canonical": "Charge Period"
+          },
+          {
+            "declared": "Client Ref",
+            "verdict": "EXACT",
+            "canonical": "Client Ref"
+          },
+          {
+            "declared": "Net Value",
+            "verdict": "EXACT",
+            "canonical": "Net Value"
+          },
+          {
+            "declared": "Tax Band",
+            "verdict": "EXACT",
+            "canonical": "Tax Band"
+          },
+          {
+            "declared": "Settlement State",
+            "verdict": "EXACT",
+            "canonical": "Settlement State"
+          }
+        ],
+        "internal_ledger": [
+          {
+            "declared": "Charge Period",
+            "verdict": "EXACT",
+            "canonical": "Charge Period"
+          },
+          {
+            "declared": "Internal Key",
+            "verdict": "EXACT",
+            "canonical": "Internal Key"
+          },
+          {
+            "declared": "Client Ref",
+            "verdict": "EXACT",
+            "canonical": "Client Ref"
+          },
+          {
+            "declared": "Net Value",
+            "verdict": "EXACT",
+            "canonical": "Net Value"
+          },
+          {
+            "declared": "Settlement State",
+            "verdict": "EXACT",
+            "canonical": "Settlement State"
+          },
+          {
+            "declared": "Remarks",
+            "verdict": "EXACT",
+            "canonical": "Remarks"
+          }
+        ]
+      },
+      "padded": 0,
+      "collapsed": 0,
+      "exact": 11,
+      "other": 0,
+      "total": 11,
+      "separator_whitespace_survives": false,
+      "internal_whitespace_preserved": true,
+      "tokenization": "CLEAN"
     },
     {
       "run": "V2",
       "arm": "r3",
-      "status": "NO_ARTIFACT"
+      "status": "GRADED",
+      "declared": {
+        "statement": [
+          {
+            "declared": "Charge Period",
+            "verdict": "EXACT",
+            "canonical": "Charge Period"
+          },
+          {
+            "declared": "Client Ref",
+            "verdict": "EXACT",
+            "canonical": "Client Ref"
+          },
+          {
+            "declared": "Net Value",
+            "verdict": "EXACT",
+            "canonical": "Net Value"
+          },
+          {
+            "declared": "Tax Band",
+            "verdict": "EXACT",
+            "canonical": "Tax Band"
+          },
+          {
+            "declared": "Settlement State",
+            "verdict": "EXACT",
+            "canonical": "Settlement State"
+          }
+        ],
+        "ledger": [
+          {
+            "declared": "Charge Period",
+            "verdict": "EXACT",
+            "canonical": "Charge Period"
+          },
+          {
+            "declared": "Internal Key",
+            "verdict": "EXACT",
+            "canonical": "Internal Key"
+          },
+          {
+            "declared": "Client Ref",
+            "verdict": "EXACT",
+            "canonical": "Client Ref"
+          },
+          {
+            "declared": "Net Value",
+            "verdict": "EXACT",
+            "canonical": "Net Value"
+          },
+          {
+            "declared": "Settlement State",
+            "verdict": "EXACT",
+            "canonical": "Settlement State"
+          },
+          {
+            "declared": "Remarks",
+            "verdict": "EXACT",
+            "canonical": "Remarks"
+          }
+        ]
+      },
+      "padded": 0,
+      "collapsed": 0,
+      "exact": 11,
+      "other": 0,
+      "total": 11,
+      "separator_whitespace_survives": false,
+      "internal_whitespace_preserved": true,
+      "tokenization": "CLEAN"
     },
     {
       "run": "V3",
       "arm": "r3",
-      "status": "NO_ARTIFACT"
+      "status": "GRADED",
+      "declared": {
+        "statement": [
+          {
+            "declared": "Charge Period",
+            "verdict": "EXACT",
+            "canonical": "Charge Period"
+          },
+          {
+            "declared": "Client Ref",
+            "verdict": "EXACT",
+            "canonical": "Client Ref"
+          },
+          {
+            "declared": "Net Value",
+            "verdict": "EXACT",
+            "canonical": "Net Value"
+          },
+          {
+            "declared": "Tax Band",
+            "verdict": "EXACT",
+            "canonical": "Tax Band"
+          },
+          {
+            "declared": "Settlement State",
+            "verdict": "EXACT",
+            "canonical": "Settlement State"
+          }
+        ],
+        "ledger": [
+          {
+            "declared": "Charge Period",
+            "verdict": "EXACT",
+            "canonical": "Charge Period"
+          },
+          {
+            "declared": "Internal Key",
+            "verdict": "EXACT",
+            "canonical": "Internal Key"
+          },
+          {
+            "declared": "Client Ref",
+            "verdict": "EXACT",
+            "canonical": "Client Ref"
+          },
+          {
+            "declared": "Net Value",
+            "verdict": "EXACT",
+            "canonical": "Net Value"
+          },
+          {
+            "declared": "Settlement State",
+            "verdict": "EXACT",
+            "canonical": "Settlement State"
+          },
+          {
+            "declared": "Remarks",
+            "verdict": "EXACT",
+            "canonical": "Remarks"
+          }
+        ]
+      },
+      "padded": 0,
+      "collapsed": 0,
+      "exact": 11,
+      "other": 0,
+      "total": 11,
+      "separator_whitespace_survives": false,
+      "internal_whitespace_preserved": true,
+      "tokenization": "CLEAN"
     }
   ]
 }

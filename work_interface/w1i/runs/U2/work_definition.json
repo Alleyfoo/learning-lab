@@ -1,0 +1,102 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "charge-ref-reconciler",
+  "provenance": {
+    "producer": "goose",
+    "skill": "define-lab-process",
+    "produced_at": "2026-08-21"
+  },
+  "purpose": "Reconcile vendor charge summary with internal ledger as peer sources using client reference keys and net value comparisons",
+  "sources": {
+    "vendor_statement": {
+      "role_label": "Vendor Charge Summary",
+      "fixture": "vendor-charge-summary.txt",
+      "observed_fields": [
+        "Charge Period",
+        "Client Ref",
+        "Net Value",
+        "Tax Band",
+        "Settlement State"
+      ],
+      "basis": "observed"
+    },
+    "internal_ledger": {
+      "role_label": "Internal Charge Ledger",
+      "fixture": "internal-charge-ledger.txt",
+      "observed_fields": [
+        "Charge Period",
+        "Internal Key",
+        "Client Ref",
+        "Net Value",
+        "Settlement State",
+        "Remarks"
+      ],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "vendor_statement",
+    "right": "internal_ledger",
+    "match_on": {
+      "left_field": "Client Ref",
+      "right_field": "Client Ref",
+      "basis": "human_confirmed",
+      "confirmation": "Q_match_key"
+    },
+    "compare": [
+      {
+        "field": "Net Value",
+        "comparison": "within",
+        "tolerance": "0.01",
+        "basis": "human_confirmed",
+        "confirmation": "Q_compare_tolerated"
+      }
+    ],
+    "classify": {
+      "both_same": "match",
+      "both_different": "discrepancy",
+      "only_left": "vendor_only",
+      "only_right": "ledger_only"
+    },
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_key",
+    "on_non_numeric": "refuse_run"
+  },
+  "output": {
+    "reports_fields": [
+      "Client Ref",
+      "Net Value"
+    ],
+    "context_fields": [
+      "Charge Period",
+      "Settlement State"
+    ]
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_match_key",
+      "question": "Which field identifies the same record / charge line in both files?",
+      "answer": "Client Ref",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_compare_tolerated",
+      "question": "Should Net Value be compared, and if so, how and with what tolerance? Is Tax Band part of the reconciliation rule? Which file is the source of truth?",
+      "answer": "Yes, compare Net Value numerically, within 0.01. No. Neither — both are peer sources.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_report_fields",
+      "question": "Which fields should appear in the report row? Which fields are context for the report?",
+      "answer": "The match key (Client Ref) and the compared field (Net Value). Charge Period and Settlement State.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [],
+  "requested_destination": "review_only",
+  "requested_delivery": {
+    "format": "json_discrepancy_report"
+  },
+  "requested_authority": null
+}
