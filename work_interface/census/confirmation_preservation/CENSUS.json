@@ -1,0 +1,185 @@
+{
+  "corpus": [
+    {
+      "pack": "W1-H",
+      "run": "P1",
+      "revision": "r2",
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "EXACT_INDIVIDUAL",
+        "2": "EXACT_INDIVIDUAL",
+        "3": "EXACT_INDIVIDUAL",
+        "4": "EXACT_INDIVIDUAL",
+        "5": "EXACT_INDIVIDUAL"
+      }
+    },
+    {
+      "pack": "W1-H",
+      "run": "P2",
+      "revision": "r2",
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "EXACT_INDIVIDUAL",
+        "2": "ABSENT",
+        "3": "ABSENT",
+        "4": "ABSENT",
+        "5": "ABSENT"
+      }
+    },
+    {
+      "pack": "W1-H",
+      "run": "P3",
+      "revision": "r2",
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "EXACT_INDIVIDUAL",
+        "2": "EXACT_INDIVIDUAL",
+        "3": "EXACT_INDIVIDUAL",
+        "4": "EXACT_INDIVIDUAL",
+        "5": "EXACT_INDIVIDUAL"
+      }
+    },
+    {
+      "pack": "W1-I",
+      "run": "U1",
+      "revision": "r2",
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "EXACT_INDIVIDUAL",
+        "2": "EXACT_INDIVIDUAL",
+        "3": "ABSENT",
+        "4": "ABSENT",
+        "5": "ABSENT"
+      }
+    },
+    {
+      "pack": "W1-I",
+      "run": "U2",
+      "revision": "r2",
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "NONVERBATIM",
+        "2": "ABSENT",
+        "3": "ABSENT",
+        "4": "BUNDLED",
+        "5": "BUNDLED"
+      }
+    },
+    {
+      "pack": "W1-I",
+      "run": "U3",
+      "revision": "r2",
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "EXACT_INDIVIDUAL",
+        "2": "EXACT_INDIVIDUAL",
+        "3": "EXACT_INDIVIDUAL",
+        "4": "EXACT_INDIVIDUAL",
+        "5": "EXACT_INDIVIDUAL"
+      }
+    },
+    {
+      "pack": "W1-I",
+      "run": "V1",
+      "revision": "r3",
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "EXACT_INDIVIDUAL",
+        "2": "ABSENT",
+        "3": "ABSENT",
+        "4": "ABSENT",
+        "5": "ABSENT"
+      }
+    },
+    {
+      "pack": "W1-I",
+      "run": "V2",
+      "revision": "r3",
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "BUNDLED",
+        "2": "BUNDLED",
+        "3": "BUNDLED",
+        "4": "BUNDLED",
+        "5": "BUNDLED"
+      }
+    },
+    {
+      "pack": "W1-I",
+      "run": "V3",
+      "revision": "r3",
+      "rows": {
+        "0": "EXACT_INDIVIDUAL",
+        "1": "EXACT_INDIVIDUAL",
+        "2": "EXACT_INDIVIDUAL",
+        "3": "ABSENT",
+        "4": "ABSENT",
+        "5": "ABSENT"
+      }
+    }
+  ],
+  "provenance_slot": {
+    "0": [
+      "YES",
+      "body.match_on.basis + .confirmation"
+    ],
+    "1": [
+      "YES",
+      "body.compare[].basis + .confirmation"
+    ],
+    "2": [
+      "NO",
+      "an exclusion: the decision's effect is a field's ABSENCE from compare[], and an absence cannot carry a basis"
+    ],
+    "3": [
+      "NO",
+      "no source-of-truth/peer key exists in the v0 shape"
+    ],
+    "4": [
+      "NO",
+      "output.reports_fields has no provenance keys"
+    ],
+    "5": [
+      "NO",
+      "output.context_fields has no provenance keys"
+    ]
+  },
+  "tallies": {
+    "0": {
+      "EXACT_INDIVIDUAL": 9,
+      "BUNDLED": 0,
+      "NONVERBATIM": 0,
+      "ABSENT": 0
+    },
+    "1": {
+      "EXACT_INDIVIDUAL": 7,
+      "BUNDLED": 1,
+      "NONVERBATIM": 1,
+      "ABSENT": 0
+    },
+    "2": {
+      "EXACT_INDIVIDUAL": 5,
+      "BUNDLED": 1,
+      "NONVERBATIM": 0,
+      "ABSENT": 3
+    },
+    "3": {
+      "EXACT_INDIVIDUAL": 3,
+      "BUNDLED": 1,
+      "NONVERBATIM": 0,
+      "ABSENT": 5
+    },
+    "4": {
+      "EXACT_INDIVIDUAL": 3,
+      "BUNDLED": 2,
+      "NONVERBATIM": 0,
+      "ABSENT": 4
+    },
+    "5": {
+      "EXACT_INDIVIDUAL": 3,
+      "BUNDLED": 2,
+      "NONVERBATIM": 0,
+      "ABSENT": 4
+    }
+  }
+}
