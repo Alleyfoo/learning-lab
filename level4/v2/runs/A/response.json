@@ -1,0 +1,160 @@
+{
+  "schema": "system_verdict/v0",
+  "packet_id": "level4-v1",
+  "overall": "investigate",
+  "summary": "A nine-worker, five-scope fleet of deterministic workers, mostly idle: four workers have never run, four are healthy and one (april-invoicing) is blocked on a human question. The operationally interesting material is not the blocked worker on its own but three internal inconsistencies in the recorded state: a promotion rationale that contradicts the very investigation now open against it, last-run timestamps for two workers that are identical to their own establishment timestamps and therefore cannot be real event times, and inbox counters on the fleet's only committing worker that has ever run which do not reconcile. Because of the timestamp defect I cannot date anything in the operational record, and the packet carries no capture time, so I cannot say how long any condition has persisted. None of these conditions appears in the initiative box or in the dispatched work; the authority layer currently records no route by which running-fleet state becomes work. The packet contains no untrusted_content and no model_interpretation, so there is nothing to flag as hostile or as opinion presented as fact.",
+  "findings": [
+    {
+      "id": "F1",
+      "claim": "april-invoicing was promoted to version 2 on a recorded rationale of 'complete coverage', while the investigation now open against that same worker states the replacement key has only 3/4 left coverage. Both statements concern the same replacement and cannot both be true of it.",
+      "basis": "observed",
+      "confidence": "high",
+      "evidence_refs": ["worker:april-invoicing", "history:april-invoicing#2", "investigation:april-invoicing", "run:april-invoicing#6"],
+      "reasoning": "history:april-invoicing#2 records the promotion to v2 with why = 'the replacement is the sole candidate with complete coverage and unique right-side keys'. The open investigation asks whether price_list.Ref is the intended replacement for Item code 'given that order_lines.Article matches price_list.Ref with only 3/4 left coverage even though Ref is unique on the right'. The 'unique right-side keys' half matches; the coverage half directly contradicts. The worker's last run (run:april-invoicing#6, on v2) did not complete (ok false, 0 rows, 0 refusals) and one item sits in exceptions, which is consistent with a promoted key that does not cover its input, but the packet records no failure reason and I do not assert that as the cause. I also cannot order the promotion against the investigation, because investigation.opened_at is null. Either the promotion gate accepted a coverage claim that did not hold, or the investigation concerns later data; the packet does not settle which, and that distinction is what decides whether this is one worker's problem or the promotion path's."
+    },
+    {
+      "id": "F2",
+      "claim": "The recorded last-run times for orders-enrichment and room-reservation are identical to those workers' own establishment timestamps, so at least some operational timestamps in this packet are not event times and cannot support reasoning about when work happened or how stale the fleet is.",
+      "basis": "observed",
+      "confidence": "high",
+      "evidence_refs": ["run:orders-enrichment#4", "history:orders-enrichment#1", "run:room-reservation#8", "history:room-reservation#1", "history:acme-timesheets#1"],
+      "reasoning": "orders-enrichment was established at 2026-08-16T10:20:51 and its fourth and latest run is recorded at 2026-08-16T10:20:51. room-reservation was established at 2026-08-16T10:20:51 and its eighth and latest run is recorded at 2026-08-16T10:20:51. A worker cannot have completed four or eight runs at the instant of its establishment, so at least one of the two recorded times per worker is not the time of the event it is attached to. The same instant also carries acme-timesheets' establishment, which points at a batch or seeding operation rather than three coincidences. This is a defect in the packet's own evidence and it degrades every other operational reading: it is why I decline to call any worker stale, and why I treat F3's counters as questionable rather than as a reliable arithmetic record."
+    },
+    {
+      "id": "F3",
+      "claim": "room-reservation, the only worker in the fleet that declares a durable effect and has ever run, reports more items processed (8) than items seen (7), against 7 completed, 2 recovered, 1 duplicate skipped and 17 ledger lines. These counters do not reconcile on their face.",
+      "basis": "observed",
+      "confidence": "medium",
+      "evidence_refs": ["worker:room-reservation", "run:room-reservation#8"],
+      "reasoning": "room-reservation declares_effect append_to_reservations with committing true, so its work mutates durable state rather than only producing output. Its inbox reports items_seen 7, completed 7, processed 8. Whether the extra processed unit is a benign accounting artefact of the 2 recovered items and 1 skipped duplicate, or a work item processed twice against a state-appending worker, is not determinable from these aggregates, and given F2 I do not treat the counters as dependable without the underlying records. I name this because of what the worker is, not because the gap is large: for a committing worker an unexplained processing surplus is the one discrepancy whose worst case reaches real state. I am not asserting that a double append occurred; the packet supports no causal story here."
+    },
+    {
+      "id": "F4",
+      "claim": "Two workers carry an open investigation but only one is 'blocked'; acme-timesheets is reported healthy with an open investigation whose question and opened_at are both null, so it records a hold that no person can act on.",
+      "basis": "observed",
+      "confidence": "high",
+      "evidence_refs": ["worker:acme-timesheets", "investigation:acme-timesheets", "totals:fleet", "worker:april-invoicing"],
+      "reasoning": "totals:fleet gives workers_with_open_investigation 2 against a status histogram with blocked 1. The packet defines blocked as 'an investigation is open, waiting on a person', which acme-timesheets satisfies while being reported healthy, so either status is not derived from investigation_open or one of the two records is wrong. Independently of which, investigation:acme-timesheets carries no question and no opened_at, making it an open hold with no content: nobody can answer it and nothing dates it. This is a smaller matter than F1 but the same shape, a state record and an investigation record disagreeing about the same worker."
+    },
+    {
+      "id": "F5",
+      "claim": "None of the operational conditions in this packet is represented anywhere in the authority layer: all eight initiatives are engineering-hygiene items, and the single dispatched work item is this packet experiment itself. Running-fleet state currently has no recorded route into the work system.",
+      "basis": "observed",
+      "confidence": "high",
+      "evidence_refs": ["authority:current-work", "authority:roles", "authority:wip", "initiative:I-1", "initiative:I-2", "initiative:I-3", "initiative:I-4", "initiative:I-5", "initiative:I-6", "initiative:I-7", "initiative:I-8", "totals:fleet"],
+      "reasoning": "I-1 through I-8 concern product priorities, untracked supervisor state, a duplicated frozen skill, scratch files, directory naming, stale-handoff checking, line endings, and a failing system-map self-test. Not one concerns a worker, a run, an investigation or an inbox. authority:current-work records exactly one dispatched item, issue #9, this experiment, with W1-L, I-8 and product gap 1 all undispatched. So a blocked worker and an unanswered investigation exist in operational state with no corresponding initiative, and per authority:roles a finding is not work until Roundtable disposes of it. That combination, rather than any single worker, is the structural observation in this snapshot. I record it rather than act on it: authority:wip already places the Manager at the one-item limit, and nothing here authorises dispatch."
+    },
+    {
+      "id": "F6",
+      "claim": "Four of nine workers have never run, including the two most recently established (acme-august-recon, kesko-reconciliation) and training-room, which declares a durable effect that has therefore never been exercised.",
+      "basis": "observed",
+      "confidence": "high",
+      "evidence_refs": ["worker:acme-august-recon", "worker:kesko-reconciliation", "worker:supplier-outstanding", "worker:training-room", "totals:fleet"],
+      "reasoning": "All four report run_count 0, last_run null and empty inboxes, with a single established history event each. Both of the fleet's committing workers fall under this finding or F3: training-room has never run at all, and room-reservation is the one whose counters do not reconcile, so the effect-declaring path in this fleet has been exercised exactly once, by the worker whose record is questionable. Four never-run workers is not itself a fault, since establishment without a first run is a legitimate state. It matters here because I cannot tell whether these are recently built and awaiting input or abandoned: F2 and the absent capture time deny me the elapsed time that would distinguish them."
+    },
+    {
+      "id": "F7",
+      "claim": "Scope identity is unnormalised. 'Acme Oy' and 'acme' exist as two separate scopes, each owning one worker, which is concrete instance evidence for the product gap the authority layer already records as highest.",
+      "basis": "observed",
+      "confidence": "medium",
+      "evidence_refs": ["scope:Acme Oy", "scope:acme", "worker:acme-timesheets", "worker:acme-august-recon", "authority:product-gap-1"],
+      "reasoning": "The topology lists five scopes, two of which are 'Acme Oy' (owning acme-timesheets) and 'acme' (owning acme-august-recon). That they are two records is observed; that they denote the same company is an inference from their names, and the packet contains nothing that resolves it. authority:product-gap-1 states that nothing scopes the workspace to one company and the map renders every scope at once, and a duplicated company identity is exactly the state that gap describes. So this is not a new problem but a measurement of a known and already-prioritised one. I rank it here rather than higher because it is already disposed of at the authority level and needs no new decision, only evidence that the gap is real, which this is."
+    },
+    {
+      "id": "F8",
+      "claim": "The packet does not distinguish production work from lab exercise, and several signals suggest much of the run history is exercise: a company-scoped worker is triggered from an experiment fixtures path, and acme-timesheets' entire eight-run history spans about eighty seconds.",
+      "basis": "inferred",
+      "confidence": "medium",
+      "evidence_refs": ["worker:acme-timesheets", "worker:orders-enrichment", "worker:room-reservation", "history:acme-timesheets#1", "history:acme-timesheets#2", "run:acme-timesheets#8"],
+      "reasoning": "acme-timesheets sits in the named company scope 'Acme Oy' yet triggers on 'experimentZ/fixtures/A'; orders-enrichment triggers on 'enrichment/fixtures/' and room-reservation on a 'state/fixtures/' path. acme-timesheets was established at 10:20:51, promoted at 10:22:02 and last ran at 10:22:10, so eight runs and a version promotion all fall inside roughly eighty seconds. I label this inferred: no packet field declares a worker demo or production, and a fixture trigger is not proof of a non-production worker. It is here because it changes how everything above should be read. Treating these run histories as production incidents would misdirect attention, and the packet offers no field that lets a reader avoid that mistake."
+    },
+    {
+      "id": "F9",
+      "claim": "Input contracts are declared for only two of nine workers and no destinations are declared at all, so the topology cannot answer what feeds, or is fed by, most of this fleet.",
+      "basis": "observed",
+      "confidence": "medium",
+      "evidence_refs": ["source:acme-august-recon:statement", "source:acme-august-recon:transactions", "source:fazerish-invoicing:order_lines", "source:fazerish-invoicing:price_list", "worker:april-invoicing", "worker:kesko-reconciliation"],
+      "reasoning": "The sources list holds four records covering acme-august-recon and fazerish-invoicing only, and destinations is empty. The remaining seven workers have a trigger path and, in several cases, null input_adapter and null work_item_identity. This is a limit on what the packet can be asked rather than a fault in itself, and it bounds F1 in particular: april-invoicing's investigation concerns the relationship between order_lines and price_list, but april-invoicing declares no sources here, so the packet cannot show me the contract the promotion was judged against."
+    }
+  ],
+  "uncertainties": [
+    {
+      "question": "When was this snapshot taken? The packet carries no capture timestamp.",
+      "why_it_matters": "Without it, blocked, never_run and the last recorded activity have no duration. A worker blocked for an hour and one blocked for a month are different situations, and this packet renders them identically. Combined with F2, I have no reliable clock at all."
+    },
+    {
+      "question": "Was april-invoicing's investigation opened before or after the v2 promotion?",
+      "why_it_matters": "It decides F1. Opened afterwards on new data, the promotion was sound at the time and this is routine drift. Opened before, or against the same evidence, the promotion gate recorded complete coverage for a candidate that did not have it, which would be a fault in the promotion path rather than in one worker. investigation.opened_at is null, so the packet cannot order them."
+    },
+    {
+      "question": "Do room-reservation's 17 ledger lines and 8 processed units correspond to its 7 completed work items exactly once each?",
+      "why_it_matters": "This is the only durable effect the fleet has actually produced. If the surplus is an accounting artefact of recovery and duplicate-skipping it is nothing; if a work item was appended to reservations twice, real state is wrong. The aggregates cannot separate the two."
+    },
+    {
+      "question": "Are 'Acme Oy' and 'acme' the same company?",
+      "why_it_matters": "If they are, the fleet already carries a split identity for a real customer, and F7 is a live data problem rather than only an illustration of a known product gap."
+    },
+    {
+      "question": "What is acme-timesheets' investigation about, and how is 'blocked' derived from investigation_open?",
+      "why_it_matters": "An open investigation with a null question either holds a worker for a reason nobody can retrieve, or is a residue that should have been closed. Which it is determines whether the fleet has one worker awaiting a person or two."
+    },
+    {
+      "question": "Which workers here carry real company data and which are lab exercise?",
+      "why_it_matters": "Per F8 the packet has no field for this. Any prioritisation of the findings above depends on it, and I have ranked them without it."
+    }
+  ],
+  "requested_evidence": [
+    {
+      "ref_or_description": "A capture timestamp on snapshot, and event-time provenance for operational_state records",
+      "reason": "F2 shows the present timestamps are not dependable, and the snapshot has no time of its own. Together these are the single largest limit on what a packet of this shape can support."
+    },
+    {
+      "ref_or_description": "fleet/workers/april-invoicing/runs.jsonl for run:april-invoicing#6, and the item in that worker's exceptions/ directory",
+      "reason": "run#6 is recorded as failed with zero rows, zero refusals and no reason. This would show whether the failure is the same key-coverage problem the investigation names, an association I have deliberately not asserted as cause."
+    },
+    {
+      "ref_or_description": "The candidate evaluation record behind history:april-invoicing#2, and investigation.json for april-invoicing including opened_at",
+      "reason": "Resolves F1: whether complete coverage was measured and later invalidated, or asserted against evidence that already showed 3/4."
+    },
+    {
+      "ref_or_description": "fleet/workers/room-reservation/runs.jsonl, its processed/ directory, and the reservations state it appends to",
+      "reason": "Reconciles the 8/7/7/17 counters in F3 against the reservations actually appended. This is the only place in the packet where an error could have reached durable state."
+    },
+    {
+      "ref_or_description": "investigation.json for acme-timesheets, and the rule by which a worker's status is derived from investigation_open",
+      "reason": "Resolves F4, by showing whether the empty investigation or the healthy status is the wrong record."
+    },
+    {
+      "ref_or_description": "A declared production/lab distinction on workers, and the input contracts for the seven workers that declare no sources",
+      "reason": "F8 and F9. Without the first, severity ranking of everything above is partly guesswork; without the second, the packet cannot be asked what feeds most of its fleet."
+    }
+  ],
+  "recommendations": [
+    {
+      "to": "roundtable",
+      "recommendation": "Advisory: dispose of the april-invoicing contradiction as a question about the promotion gate rather than about one worker, specifically whether a version may be promoted on a recorded coverage claim that is not retained as checkable evidence. acme-timesheets was promoted with the identical rationale string through the same enrichment engine and now also carries an open investigation, which is why I suggest treating this as a gate question; that pairing is an inference from two records and is not on its own sufficient to conclude the gate is faulty.",
+      "evidence_refs": ["history:april-invoicing#2", "investigation:april-invoicing", "history:acme-timesheets#2", "investigation:acme-timesheets", "engine:enrichment/harness/execute_enrichment.py"]
+    },
+    {
+      "to": "roundtable",
+      "recommendation": "Advisory: consider whether operational state needs a route into the initiative box at all. Every one of I-1 through I-8 is an engineering-hygiene item, so a blocked worker and an unanswered investigation currently have nowhere to be recorded and persist without ever being disposed of. This is an observation about the work system's coverage; it is a Roundtable question rather than something to dispatch, and the Manager is already at the one-item WIP limit with issue #9.",
+      "evidence_refs": ["authority:roles", "authority:wip", "authority:current-work", "initiative:I-8", "totals:fleet"]
+    },
+    {
+      "to": "roundtable",
+      "recommendation": "Advisory: treat the timestamp defect in F2 as a property of the packet generator and consider whether operational_state should carry event-time provenance before verdicts of this kind are relied on. Since issue #9 is this packet experiment, that defect is in scope for the dispatched work in a way the fleet findings are not. Note also that provenance already declares operational_state unreconstructable from any revision, so no second reader can check F1 through F4 against the source tree: the operational half of this packet is unverifiable by design.",
+      "evidence_refs": ["run:orders-enrichment#4", "history:orders-enrichment#1", "run:room-reservation#8", "history:room-reservation#1", "authority:current-work"]
+    },
+    {
+      "to": "manager",
+      "recommendation": "Advisory: none of the above is dispatchable as it stands. authority:wip permits one dispatched item and authority:current-work records it as issue #9, and per authority:roles these findings are not work until Roundtable disposes of them. If evidence is gathered, the room-reservation records in F3 are the ones to pull first, because that worker is the only one whose output has reached durable state.",
+      "evidence_refs": ["authority:wip", "authority:roles", "authority:current-work", "worker:room-reservation"]
+    },
+    {
+      "to": "none",
+      "recommendation": "For the record: I have taken no action and have no means to take one. Nothing above was promoted, dispatched, repaired, closed or executed. Every item is a recommendation drawn from a single snapshot whose operational half I cannot independently verify.",
+      "evidence_refs": ["authority:llm-boundary"]
+    }
+  ],
+  "content_flags": []
+}

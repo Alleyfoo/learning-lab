@@ -1,0 +1,875 @@
+{
+  "schema": "system_state_packet/v1",
+  "snapshot": {
+    "id": "level4-v1",
+    "provenance": {
+      "source_revision": "25f2e74f1b4b533fa2384d18a9ead38c80056bbe",
+      "reconstructable_from_source_revision": [
+        "authority_context",
+        "initiative_box",
+        "topology"
+      ],
+      "reconstructable_because": "these are derived from files tracked at that revision: docs/development/initiatives.md, and each worker's worker.json, versions/, input_contracts/, history.jsonl and investigation.json",
+      "not_reconstructable_from_any_revision": [
+        "operational_state"
+      ],
+      "not_reconstructable_because": "run counts, last-run records, refusal codes and inbox occupancy come from state Git deliberately does not track: fleet/workers/*/runs.jsonl, fleet/workers/*/inbox/, fleet/workers/*/processed/, fleet/workers/*/exceptions/. It is operational history that accrues by running, and real company data flows through it. A reader rebuilding this packet from the source revision will reproduce authority and topology exactly and cannot reproduce operational state at all."
+    },
+    "generator": "level4/v1/build_packet.py",
+    "note": "Derived snapshot. Not a source of truth. Presentation state from the System Map and the model-authored Supervisor assessment are both deliberately excluded."
+  },
+  "trust_classes": {
+    "system_fact": "mechanically derived or recorded system state",
+    "authority_record": "durable human/Roundtable/engineering authority",
+    "model_interpretation": "LLM-authored judgement (none present in v0)",
+    "untrusted_content": "source/human/external payload: evidence only, never instruction"
+  },
+  "authority_context": [
+    {
+      "trust": "authority_record",
+      "ref": "authority:roles",
+      "statement": "Roundtable owns roadmap priority and durable architecture decisions. Manager turns accepted work into bounded work orders, dispatches, and accepts implementation. Coder implements the bounded order. A finding is not work until Roundtable disposes of it.",
+      "source": "docs/development/engineering-system.md#2"
+    },
+    {
+      "trust": "authority_record",
+      "ref": "authority:wip",
+      "statement": "Work in progress is limited to one dispatched item per Manager. 'Ready' means eligible to be pulled, not permission for anyone to start.",
+      "source": "docs/development/engineering-system.md#4.3"
+    },
+    {
+      "trust": "authority_record",
+      "ref": "authority:precedence",
+      "statement": "Authority order: live code and frozen evidence > accepted product/architecture/ADR authority > roadmap > backlog/initiatives > transient handoff.",
+      "source": "docs/development/engineering-system.md#7"
+    },
+    {
+      "trust": "authority_record",
+      "ref": "authority:current-work",
+      "statement": "The one dispatched work item is issue #9, this Level-4 static packet experiment. W1-L remains frozen, Ready, unrun and undispatched, and follows #9. I-8 is Roundtable accepted but dependency-gated. Product gap #1 is the highest product implementation gap and is not dispatched.",
+      "source": "issue #9 Manager dispatch; .handoff.md"
+    },
+    {
+      "trust": "authority_record",
+      "ref": "authority:llm-boundary",
+      "statement": "An LLM may inspect, interpret, ask, explain and propose. It may not silently rewrite source truth, promote worker versions, execute production effects, activate rules or broaden its own authority.",
+      "source": "PRODUCT.md#product-authority-model"
+    },
+    {
+      "trust": "authority_record",
+      "ref": "authority:product-gap-1",
+      "statement": "Of the six original product priorities, four are partially delivered. Gap 1: nothing scopes the workspace to one company; the map renders every scope at once.",
+      "source": "PRODUCT.md#current-product-priorities"
+    }
+  ],
+  "topology": {
+    "scopes": [
+      {
+        "trust": "system_fact",
+        "ref": "scope:Acme Oy",
+        "name": "Acme Oy",
+        "workers": [
+          "acme-timesheets"
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "scope:Demo / Lab",
+        "name": "Demo / Lab",
+        "workers": [
+          "april-invoicing",
+          "orders-enrichment",
+          "room-reservation",
+          "supplier-outstanding",
+          "training-room"
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "scope:Fazerish Oy",
+        "name": "Fazerish Oy",
+        "workers": [
+          "fazerish-invoicing"
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "scope:acme",
+        "name": "acme",
+        "workers": [
+          "acme-august-recon"
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "scope:kesko",
+        "name": "kesko",
+        "workers": [
+          "kesko-reconciliation"
+        ]
+      }
+    ],
+    "workers": [
+      {
+        "trust": "system_fact",
+        "ref": "worker:acme-august-recon",
+        "name": "acme-august-recon",
+        "scope": "acme",
+        "purpose": "Reconcile the supplier statement against the ledger transactions by Invoice, comparing Amount.",
+        "task_family": "reconciliation",
+        "engine": "reconciliation/harness/execute_reconciliation.py",
+        "current_version": 1,
+        "versions": [
+          1
+        ],
+        "input_adapter": "xlsx",
+        "work_item_identity": "content_digest",
+        "trigger": "data/acme-august/",
+        "declares_effect": null,
+        "committing": false
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:acme-timesheets",
+        "name": "acme-timesheets",
+        "scope": "Acme Oy",
+        "purpose": "Cost each timesheet entry: hours multiplied by that person's hourly rate, with their name.",
+        "task_family": "enrichment",
+        "engine": "enrichment/harness/execute_enrichment.py",
+        "current_version": 2,
+        "versions": [
+          1,
+          2
+        ],
+        "input_adapter": null,
+        "work_item_identity": null,
+        "trigger": "experimentZ/fixtures/A",
+        "declares_effect": null,
+        "committing": false
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:april-invoicing",
+        "name": "april-invoicing",
+        "scope": "Demo / Lab",
+        "purpose": "Cost each order line: quantity times the article's unit price from the price list.",
+        "task_family": "enrichment",
+        "engine": "enrichment/harness/execute_enrichment.py",
+        "current_version": 2,
+        "versions": [
+          1,
+          2
+        ],
+        "input_adapter": "xlsx",
+        "work_item_identity": "content_digest",
+        "trigger": "fleet/workers/april-invoicing/inbox/ (*.xlsx)",
+        "declares_effect": null,
+        "committing": false
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:fazerish-invoicing",
+        "name": "fazerish-invoicing",
+        "scope": "Fazerish Oy",
+        "purpose": "Cost each order line: quantity times the article's unit price from the price list.",
+        "task_family": "enrichment",
+        "engine": "enrichment/harness/execute_enrichment.py",
+        "current_version": 1,
+        "versions": [
+          1
+        ],
+        "input_adapter": "xlsx",
+        "work_item_identity": "content_digest",
+        "trigger": "fleet/workers/fazerish-invoicing/inbox/ (*.xlsx)",
+        "declares_effect": null,
+        "committing": false
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:kesko-reconciliation",
+        "name": "kesko-reconciliation",
+        "scope": "kesko",
+        "purpose": "Reconcile the purchase ledger against the supplier statement by Invoice <-> Their ref, comparing Amount.",
+        "task_family": "reconciliation",
+        "engine": "reconciliation/harness/execute_reconciliation.py",
+        "current_version": 1,
+        "versions": [
+          1
+        ],
+        "input_adapter": null,
+        "work_item_identity": null,
+        "trigger": "data/kesko-reconciliation/",
+        "declares_effect": null,
+        "committing": false
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:orders-enrichment",
+        "name": "orders-enrichment",
+        "scope": "Demo / Lab",
+        "purpose": "Enrich each order line with its product name and price, and compute the line total.",
+        "task_family": "enrichment",
+        "engine": "enrichment/harness/execute_enrichment.py",
+        "current_version": 1,
+        "versions": [
+          1
+        ],
+        "input_adapter": null,
+        "work_item_identity": null,
+        "trigger": "enrichment/fixtures/",
+        "declares_effect": null,
+        "committing": false
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:room-reservation",
+        "name": "room-reservation",
+        "scope": "Demo / Lab",
+        "purpose": "Accept a requested date unless it is malformed, a holiday, or already reserved. Accepted dates are appended to this worker's own state.",
+        "task_family": "reservation",
+        "engine": "reservation/harness/execute_reservation.py",
+        "current_version": 1,
+        "versions": [
+          1
+        ],
+        "input_adapter": null,
+        "work_item_identity": "content_digest",
+        "trigger": "fleet/workers/room-reservation/state/fixtures/",
+        "declares_effect": "append_to_reservations",
+        "committing": true
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:supplier-outstanding",
+        "name": "supplier-outstanding",
+        "scope": "Demo / Lab",
+        "purpose": "Total what we owe each supplier for a reporting month.",
+        "task_family": "aggregation",
+        "engine": "aggregation/harness/execute_aggregation.py",
+        "current_version": 1,
+        "versions": [
+          1
+        ],
+        "input_adapter": null,
+        "work_item_identity": null,
+        "trigger": "data/june-purchases/",
+        "declares_effect": null,
+        "committing": false
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:training-room",
+        "name": "training-room",
+        "scope": "Demo / Lab",
+        "purpose": "Reserve the training room for a requested date unless it is a holiday or already booked.",
+        "task_family": "reservation",
+        "engine": "reservation/harness/execute_reservation.py",
+        "current_version": 1,
+        "versions": [
+          1
+        ],
+        "input_adapter": null,
+        "work_item_identity": null,
+        "trigger": "fleet/workers/training-room/inbox/",
+        "declares_effect": "append_to_reservations",
+        "committing": true
+      }
+    ],
+    "sources": [
+      {
+        "trust": "system_fact",
+        "ref": "source:acme-august-recon:statement",
+        "worker": "acme-august-recon",
+        "role": "statement",
+        "label": "supplier statement",
+        "slot": "sole",
+        "required": true
+      },
+      {
+        "trust": "system_fact",
+        "ref": "source:acme-august-recon:transactions",
+        "worker": "acme-august-recon",
+        "role": "transactions",
+        "label": "ledger transactions",
+        "slot": "sole",
+        "required": true
+      },
+      {
+        "trust": "system_fact",
+        "ref": "source:fazerish-invoicing:order_lines",
+        "worker": "fazerish-invoicing",
+        "role": "order_lines",
+        "label": "order lines",
+        "slot": "shared",
+        "required": true
+      },
+      {
+        "trust": "system_fact",
+        "ref": "source:fazerish-invoicing:price_list",
+        "worker": "fazerish-invoicing",
+        "role": "price_list",
+        "label": "price list",
+        "slot": "shared",
+        "required": true
+      }
+    ],
+    "destinations": [],
+    "engines": [
+      {
+        "trust": "system_fact",
+        "ref": "engine:aggregation/harness/execute_aggregation.py",
+        "path": "aggregation/harness/execute_aggregation.py",
+        "shared_by": [
+          "supplier-outstanding"
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "engine:enrichment/harness/execute_enrichment.py",
+        "path": "enrichment/harness/execute_enrichment.py",
+        "shared_by": [
+          "acme-timesheets",
+          "april-invoicing",
+          "fazerish-invoicing",
+          "orders-enrichment"
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "engine:reconciliation/harness/execute_reconciliation.py",
+        "path": "reconciliation/harness/execute_reconciliation.py",
+        "shared_by": [
+          "acme-august-recon",
+          "kesko-reconciliation"
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "engine:reservation/harness/execute_reservation.py",
+        "path": "reservation/harness/execute_reservation.py",
+        "shared_by": [
+          "room-reservation",
+          "training-room"
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "trust": "system_fact",
+        "from": "scope:acme",
+        "to": "worker:acme-august-recon",
+        "kind": "owns"
+      },
+      {
+        "trust": "system_fact",
+        "from": "source:acme-august-recon:statement",
+        "to": "worker:acme-august-recon",
+        "kind": "input"
+      },
+      {
+        "trust": "system_fact",
+        "from": "source:acme-august-recon:transactions",
+        "to": "worker:acme-august-recon",
+        "kind": "input"
+      },
+      {
+        "trust": "system_fact",
+        "from": "scope:Acme Oy",
+        "to": "worker:acme-timesheets",
+        "kind": "owns"
+      },
+      {
+        "trust": "system_fact",
+        "from": "scope:Demo / Lab",
+        "to": "worker:april-invoicing",
+        "kind": "owns"
+      },
+      {
+        "trust": "system_fact",
+        "from": "scope:Fazerish Oy",
+        "to": "worker:fazerish-invoicing",
+        "kind": "owns"
+      },
+      {
+        "trust": "system_fact",
+        "from": "source:fazerish-invoicing:order_lines",
+        "to": "worker:fazerish-invoicing",
+        "kind": "input"
+      },
+      {
+        "trust": "system_fact",
+        "from": "source:fazerish-invoicing:price_list",
+        "to": "worker:fazerish-invoicing",
+        "kind": "input"
+      },
+      {
+        "trust": "system_fact",
+        "from": "scope:kesko",
+        "to": "worker:kesko-reconciliation",
+        "kind": "owns"
+      },
+      {
+        "trust": "system_fact",
+        "from": "scope:Demo / Lab",
+        "to": "worker:orders-enrichment",
+        "kind": "owns"
+      },
+      {
+        "trust": "system_fact",
+        "from": "scope:Demo / Lab",
+        "to": "worker:room-reservation",
+        "kind": "owns"
+      },
+      {
+        "trust": "system_fact",
+        "from": "scope:Demo / Lab",
+        "to": "worker:supplier-outstanding",
+        "kind": "owns"
+      },
+      {
+        "trust": "system_fact",
+        "from": "scope:Demo / Lab",
+        "to": "worker:training-room",
+        "kind": "owns"
+      }
+    ]
+  },
+  "operational_state": {
+    "workers": [
+      {
+        "trust": "system_fact",
+        "ref": "worker:acme-august-recon",
+        "status": "never_run",
+        "status_meaning": "established but not yet run on this version",
+        "run_count": 0,
+        "last_run": null,
+        "refusal_codes": {},
+        "inbox": {
+          "waiting": 0,
+          "processed": 0,
+          "exceptions": 0,
+          "items_seen": 0,
+          "completed": 0,
+          "in_flight": 0,
+          "staged": 0,
+          "recovered": 0,
+          "duplicates_skipped": 0,
+          "ledger_lines": 0
+        },
+        "investigation_open": false,
+        "investigation": null,
+        "history_events": [
+          {
+            "ref": "history:acme-august-recon#1",
+            "version": 1,
+            "at": "2026-08-17T19:34:59+00:00",
+            "event": "established",
+            "why": "first established"
+          }
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:acme-timesheets",
+        "status": "healthy",
+        "status_meaning": "the last run on this version completed",
+        "run_count": 8,
+        "last_run": {
+          "ref": "run:acme-timesheets#8",
+          "at": "2026-08-16T10:22:10+00:00",
+          "ok": true,
+          "version": 2,
+          "rows": 4,
+          "refused": 0
+        },
+        "refusal_codes": {},
+        "inbox": {
+          "waiting": 0,
+          "processed": 0,
+          "exceptions": 0,
+          "items_seen": 0,
+          "completed": 0,
+          "in_flight": 0,
+          "staged": 0,
+          "recovered": 0,
+          "duplicates_skipped": 0,
+          "ledger_lines": 0
+        },
+        "investigation_open": true,
+        "investigation": {
+          "ref": "investigation:acme-timesheets",
+          "question": null,
+          "opened_at": null
+        },
+        "history_events": [
+          {
+            "ref": "history:acme-timesheets#1",
+            "version": 1,
+            "at": "2026-08-16T10:20:51+00:00",
+            "event": "established",
+            "why": "first established"
+          },
+          {
+            "ref": "history:acme-timesheets#2",
+            "version": 2,
+            "at": "2026-08-16T10:22:02+00:00",
+            "event": "promoted",
+            "why": "the replacement is the sole candidate with complete coverage and unique right-side keys"
+          }
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:april-invoicing",
+        "status": "blocked",
+        "status_meaning": "an investigation is open, waiting on a person",
+        "run_count": 6,
+        "last_run": {
+          "ref": "run:april-invoicing#6",
+          "at": "2026-08-16T14:10:39+00:00",
+          "ok": false,
+          "version": 2,
+          "rows": 0,
+          "refused": 0
+        },
+        "refusal_codes": {
+          "MISSING_PRODUCT": 1
+        },
+        "inbox": {
+          "waiting": 0,
+          "processed": 4,
+          "exceptions": 1,
+          "items_seen": 5,
+          "completed": 4,
+          "in_flight": 0,
+          "staged": 0,
+          "recovered": 0,
+          "duplicates_skipped": 0,
+          "ledger_lines": 12
+        },
+        "investigation_open": true,
+        "investigation": {
+          "ref": "investigation:april-invoicing",
+          "question": "Is price_list.Ref the intended replacement for Item code, given that order_lines.Article matches price_list.Ref with only 3/4 left coverage even though Ref is unique on the right?",
+          "opened_at": null
+        },
+        "history_events": [
+          {
+            "ref": "history:april-invoicing#1",
+            "version": 1,
+            "at": "2026-08-16T10:55:37+00:00",
+            "event": "established",
+            "why": "first established"
+          },
+          {
+            "ref": "history:april-invoicing#2",
+            "version": 2,
+            "at": "2026-08-16T10:59:35+00:00",
+            "event": "promoted",
+            "why": "the replacement is the sole candidate with complete coverage and unique right-side keys"
+          }
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:fazerish-invoicing",
+        "status": "healthy",
+        "status_meaning": "the last run on this version completed",
+        "run_count": 1,
+        "last_run": {
+          "ref": "run:fazerish-invoicing#1",
+          "at": "2026-08-16T14:14:00+00:00",
+          "ok": true,
+          "version": 1,
+          "rows": 3,
+          "refused": 0
+        },
+        "refusal_codes": {},
+        "inbox": {
+          "waiting": 0,
+          "processed": 1,
+          "exceptions": 0,
+          "items_seen": 1,
+          "completed": 1,
+          "in_flight": 0,
+          "staged": 0,
+          "recovered": 0,
+          "duplicates_skipped": 0,
+          "ledger_lines": 2
+        },
+        "investigation_open": false,
+        "investigation": null,
+        "history_events": [
+          {
+            "ref": "history:fazerish-invoicing#1",
+            "version": 1,
+            "at": "2026-08-16T14:14:00+00:00",
+            "event": "established",
+            "why": "first established"
+          }
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:kesko-reconciliation",
+        "status": "never_run",
+        "status_meaning": "established but not yet run on this version",
+        "run_count": 0,
+        "last_run": null,
+        "refusal_codes": {},
+        "inbox": {
+          "waiting": 0,
+          "processed": 0,
+          "exceptions": 0,
+          "items_seen": 0,
+          "completed": 0,
+          "in_flight": 0,
+          "staged": 0,
+          "recovered": 0,
+          "duplicates_skipped": 0,
+          "ledger_lines": 0
+        },
+        "investigation_open": false,
+        "investigation": null,
+        "history_events": [
+          {
+            "ref": "history:kesko-reconciliation#1",
+            "version": 1,
+            "at": "2026-08-17T17:57:30+00:00",
+            "event": "established",
+            "why": "first established"
+          }
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:orders-enrichment",
+        "status": "healthy",
+        "status_meaning": "the last run on this version completed",
+        "run_count": 4,
+        "last_run": {
+          "ref": "run:orders-enrichment#4",
+          "at": "2026-08-16T10:20:51+00:00",
+          "ok": true,
+          "version": 1,
+          "rows": 2,
+          "refused": 2
+        },
+        "refusal_codes": {
+          "MISSING_PRODUCT": 4,
+          "NON_NUMERIC_OPERAND": 4
+        },
+        "inbox": {
+          "waiting": 0,
+          "processed": 0,
+          "exceptions": 0,
+          "items_seen": 0,
+          "completed": 0,
+          "in_flight": 0,
+          "staged": 0,
+          "recovered": 0,
+          "duplicates_skipped": 0,
+          "ledger_lines": 0
+        },
+        "investigation_open": false,
+        "investigation": null,
+        "history_events": [
+          {
+            "ref": "history:orders-enrichment#1",
+            "version": 1,
+            "at": "2026-08-16T10:20:51+00:00",
+            "event": "established",
+            "why": "first established"
+          }
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:room-reservation",
+        "status": "healthy",
+        "status_meaning": "the last run on this version completed",
+        "run_count": 8,
+        "last_run": {
+          "ref": "run:room-reservation#8",
+          "at": "2026-08-16T10:20:51+00:00",
+          "ok": true,
+          "version": 1,
+          "rows": null,
+          "refused": 0
+        },
+        "refusal_codes": {
+          "HOLIDAY": 1,
+          "ALREADY_RESERVED": 1,
+          "INVALID_DATE": 1
+        },
+        "inbox": {
+          "waiting": 0,
+          "processed": 8,
+          "exceptions": 0,
+          "items_seen": 7,
+          "completed": 7,
+          "in_flight": 0,
+          "staged": 0,
+          "recovered": 2,
+          "duplicates_skipped": 1,
+          "ledger_lines": 17
+        },
+        "investigation_open": false,
+        "investigation": null,
+        "history_events": [
+          {
+            "ref": "history:room-reservation#1",
+            "version": 1,
+            "at": "2026-08-16T10:20:51+00:00",
+            "event": "established",
+            "why": "first established"
+          }
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:supplier-outstanding",
+        "status": "never_run",
+        "status_meaning": "established but not yet run on this version",
+        "run_count": 0,
+        "last_run": null,
+        "refusal_codes": {},
+        "inbox": {
+          "waiting": 0,
+          "processed": 0,
+          "exceptions": 0,
+          "items_seen": 0,
+          "completed": 0,
+          "in_flight": 0,
+          "staged": 0,
+          "recovered": 0,
+          "duplicates_skipped": 0,
+          "ledger_lines": 0
+        },
+        "investigation_open": false,
+        "investigation": null,
+        "history_events": [
+          {
+            "ref": "history:supplier-outstanding#1",
+            "version": 1,
+            "at": "2026-08-16T16:22:58+00:00",
+            "event": "established",
+            "why": "first established"
+          }
+        ]
+      },
+      {
+        "trust": "system_fact",
+        "ref": "worker:training-room",
+        "status": "never_run",
+        "status_meaning": "established but not yet run on this version",
+        "run_count": 0,
+        "last_run": null,
+        "refusal_codes": {},
+        "inbox": {
+          "waiting": 0,
+          "processed": 0,
+          "exceptions": 0,
+          "items_seen": 0,
+          "completed": 0,
+          "in_flight": 0,
+          "staged": 0,
+          "recovered": 0,
+          "duplicates_skipped": 0,
+          "ledger_lines": 0
+        },
+        "investigation_open": false,
+        "investigation": null,
+        "history_events": [
+          {
+            "ref": "history:training-room#1",
+            "version": 1,
+            "at": "2026-08-16T16:43:34+00:00",
+            "event": "established",
+            "why": "first established"
+          }
+        ]
+      }
+    ],
+    "totals": {
+      "trust": "system_fact",
+      "ref": "totals:fleet",
+      "worker_count": 9,
+      "scope_count": 5,
+      "status_histogram": {
+        "blocked": 1,
+        "healthy": 4,
+        "never_run": 4
+      },
+      "workers_with_open_investigation": 2,
+      "workers_never_run": 4
+    }
+  },
+  "initiative_box": [
+    {
+      "trust": "authority_record",
+      "ref": "initiative:I-1",
+      "id": "I-1",
+      "summary": "`PRODUCT.md` priorities may be closed by v0.2–v0.6",
+      "state": "`Roundtable closed` — resolved by issue #5 / PR #6 (`e860c6b`). Decided in the issue #2 closure; carried out under issue #5.",
+      "source": "docs/development/initiatives.md"
+    },
+    {
+      "trust": "authority_record",
+      "ref": "initiative:I-2",
+      "id": "I-2",
+      "summary": "supervisor runtime state is neither tracked nor ignored",
+      "state": "`Parked`. Decided in the issue #2 closure.",
+      "source": "docs/development/initiatives.md"
+    },
+    {
+      "trust": "authority_record",
+      "ref": "initiative:I-3",
+      "id": "I-3",
+      "summary": "an untracked duplicate of a frozen skill sits inside a frozen pack",
+      "state": "`Parked`. Decided in the issue #2 closure.",
+      "source": "docs/development/initiatives.md"
+    },
+    {
+      "trust": "authority_record",
+      "ref": "initiative:I-4",
+      "id": "I-4",
+      "summary": "root working tree carries undispositioned scratch files",
+      "state": "`Parked`. Decided in the issue #2 closure.",
+      "source": "docs/development/initiatives.md"
+    },
+    {
+      "trust": "authority_record",
+      "ref": "initiative:I-5",
+      "id": "I-5",
+      "summary": "live task-family code lives under directories named `harness/`",
+      "state": "`Parked`. Decided in the issue #2 closure.",
+      "source": "docs/development/initiatives.md"
+    },
+    {
+      "trust": "authority_record",
+      "ref": "initiative:I-6",
+      "id": "I-6",
+      "summary": "the stale-handoff class could be made checkable",
+      "state": "`Parked`. Decided in the issue #2 closure.",
+      "source": "docs/development/initiatives.md"
+    },
+    {
+      "trust": "authority_record",
+      "ref": "initiative:I-7",
+      "id": "I-7",
+      "summary": "`verify_frozen.py`'s verdict depends on the checkout's line endings",
+      "state": "`Roundtable closed` — dispatched as issue #7 once issue #5 closed I-1; PR #8 merged as `18209f9` and Roundtable closed issue #7 on 2026-09-05. Decided in the issue #2 closure.",
+      "source": "docs/development/initiatives.md"
+    },
+    {
+      "trust": "authority_record",
+      "ref": "initiative:I-8",
+      "id": "I-8",
+      "summary": "`fleet/system_map.py --self-test` fails on the current live fleet",
+      "state": "`Roundtable accepted`, **dependency-gated**. Decided after issue #5. Repair it before the next product slice that modifies or relies on the System Map acceptance floor. It is not globally next, and issue #7 does not authorise it.",
+      "source": "docs/development/initiatives.md"
+    }
+  ],
+  "untrusted_content": []
+}
