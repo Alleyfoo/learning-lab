@@ -1,0 +1,43 @@
+# The working tree must reproduce the committed bytes, exactly.
+#
+# Why this file exists
+# --------------------
+# `scripts/check_surfaced.py` transitively imports `experimentL/harness/
+# execute_recipe.py` -> `experimentJ/harness/macro_v2.py`, whose import-time
+# `verify_v1_source()` hashes `experimentI/harness/gate_I.py` byte-exactly
+# against a hash frozen in `experimentJ/expected.json`. Every file in that chain
+# is frozen evidence or a historical harness, so none may be edited -- which
+# leaves the bytes on disk as the only free variable. `core.autocrlf` is `true`
+# at system level on at least one development machine, so a fresh clone gets a
+# CRLF working tree and that guard reports VOID on an artifact that never
+# changed.
+#
+# Why `-text` and NOT `text=auto eol=lf`
+# --------------------------------------
+# `-text` disables end-of-line conversion in BOTH directions: on checkout the
+# working tree receives the blob verbatim, and on `git add` nothing is
+# normalized. That is exactly the invariant the frozen guards need, and no more.
+#
+# `* text=auto eol=lf` would also fix the checkout, but it would additionally
+# make Git normalize on the way IN. 171 tracked files -- every one of them under
+# `work_interface/`, the frozen W1 experiment packs -- have CRLF in their
+# committed blob. Under `text=auto` a later `git add` touching any of them would
+# silently rewrite frozen experiment evidence to LF. That is the exact class of
+# defect this repository exists to prevent, so the broader attribute is the
+# wrong tool here even though it is the more common idiom.
+#
+# Nothing in this file changes committed content. It changes what a checkout
+# puts on disk.
+#
+# Existing checkouts
+# ------------------
+# Git applies attributes when it WRITES a file. It does not rewrite files
+# already present in a working tree, so a clone made before this file existed
+# keeps its CRLF copies and the frozen guards keep reporting VOID. For those:
+#
+#     python scripts/normalize_worktree_eol.py            # report
+#     python scripts/normalize_worktree_eol.py --apply    # rewrite EOL-only files
+#
+# See issue #7 and docs/development/initiatives.md I-7.
+
+* -text
