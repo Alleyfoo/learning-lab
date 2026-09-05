@@ -1,0 +1,44 @@
+@startuml
+!theme plain
+title Learning Lab — intended product journey (high-level sequence)
+
+actor Operator
+participant "Company data" as Data
+participant "adapters" as Adapters
+participant "inspector" as Inspector
+participant "modeller" as Modeller
+participant "taskmodel + task family" as Model
+participant "worker" as Worker
+participant "fleet / system map" as Fleet
+participant "supervisor" as Supervisor
+
+Operator -> Data : provide incoming operational data
+Data -> Adapters : read permitted input
+Adapters -> Inspector : normalized structural representation
+Inspector -> Inspector : measure observable facts
+Inspector -> Modeller : evidence / observed structure
+Operator -> Modeller : describe purpose / answer load-bearing questions
+Modeller -> Model : propose explicit task model
+Model --> Modeller : validation / task semantics
+Modeller --> Operator : deterministic preview + required confirmations
+Operator -> Modeller : establish/confirm where required
+Modeller -> Worker : establish versioned deterministic work
+
+loop recurring operation
+  Data -> Worker : production input
+  Worker -> Model : execute explicit task semantics
+  Model --> Worker : result / refusal
+  Worker -> Fleet : run provenance / effects / exception state
+end
+
+Operator -> Fleet : inspect company flow and current state
+Fleet -> Supervisor : read-only company/fleet context
+Operator -> Supervisor : ask / investigate
+Supervisor --> Operator : interpretation grounded in referents/evidence
+Supervisor ..> Fleet : proposed investigation/improvement only
+
+note over Operator,Supervisor
+This is the product-level journey described by README.md / PRODUCT.md.
+It is not a function-by-function call trace.
+end note
+@enduml
