@@ -2,7 +2,7 @@
 
 Repository-grounded discovery artifacts. They describe the system; they do not create it by being drawn.
 
-Which notation answers which question is decided in [`../modelling-guide.md`](../modelling-guide.md). Why these views are split into two kinds is decided in [ADR-0002](../../decisions/ADR-0002-architecture-model-grounding.md).
+Which notation answers which question is decided in [`../modelling-guide.md`](../modelling-guide.md). Why these views are split into two kinds is **proposed** in [ADR-0002](../../decisions/ADR-0002-architecture-model-grounding.md), which is awaiting Roundtable and is not yet authority.
 
 ## The two kinds
 

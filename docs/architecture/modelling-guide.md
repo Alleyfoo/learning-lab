@@ -1,7 +1,11 @@
 # Modelling and notation guide
 
 **Status:** authoritative for which notation to use.
-**Owner:** Roundtable, via ADR-0001 and ADR-0002.
+**Owner:** Roundtable, via ADR-0001.
+
+> The MEASURED/INTENDED split described in §3 is **proposed** in ADR-0002 and has not been
+> accepted. The views in the repository already carry those headers, which is evidence for
+> the proposal; §3 is not yet authority.
 
 Learning Lab uses established modelling notations. This document says which notation answers which question, and what a model may and may not claim.
 

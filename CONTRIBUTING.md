@@ -65,7 +65,7 @@ Where an experiment design calls for preregistration, freeze the question, varia
 
 Use the notation that answers the question; UML is a language, not one diagram type.
 
-Every architecture view declares whether it is **MEASURED** (every edge extracted from the repository) or **INTENDED** (responsibility and flow as an authority document describes it). Do not mix them in one file — that is how a conceptual arrow gets read as a dependency.
+Every architecture view currently declares whether it is **MEASURED** (every edge extracted from the repository) or **INTENDED** (responsibility and flow as an authority document describes it), and none mixes the two — that is how a conceptual arrow gets read as a dependency. Making that a standing convention is **proposed** in [ADR-0002](docs/decisions/ADR-0002-architecture-model-grounding.md) and awaits Roundtable; follow it, but do not cite it as settled.
 
 If you change the live package structure, the measured view has to change with it:
 

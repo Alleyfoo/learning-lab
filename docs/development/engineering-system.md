@@ -259,7 +259,7 @@ Rules that follow from the order:
 | --- | --- |
 | This process | `docs/development/engineering-system.md` (this file) |
 | Governance decision | `docs/decisions/ADR-0001-development-governance.md` |
-| Architecture-model grounding decision | `docs/decisions/ADR-0002-architecture-model-grounding.md` |
+| Architecture-model grounding — **proposed**, not accepted | `docs/decisions/ADR-0002-architecture-model-grounding.md` |
 | Notation choice | `docs/architecture/modelling-guide.md` |
 | Architecture views | `docs/architecture/uml/` |
 | Discoveries awaiting disposition | `docs/development/initiatives.md` |

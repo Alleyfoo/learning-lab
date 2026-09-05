@@ -12,7 +12,7 @@ This file is a pointer, not a second copy of the rules. Where it seems to disagr
 
 3. **Frozen evidence is never edited.** Experiment packs, fixtures and historical harnesses stay as they are, including their defects. `authorized_reader.py` keeps a cp1252 defect on purpose; backlog item B-3 explains why. Corrections are additive and apply to new work, not to the record of old work.
 
-4. **Diagrams do not create architecture.** Views under `docs/architecture/uml/` are reverse-engineered. Each declares MEASURED or INTENDED. If you change the live package structure, run:
+4. **Diagrams do not create architecture.** Views under `docs/architecture/uml/` are reverse-engineered. Each declares MEASURED or INTENDED — a convention proposed in ADR-0002, not yet accepted. If you change the live package structure, run:
 
    ```bash
    python scripts/check_architecture_grounding.py

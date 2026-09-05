@@ -6,9 +6,11 @@ every edge in it was extracted from the repository. A claim like that decays
 silently -- a package gains an import, the diagram does not, and the next
 contributor plans against a structure that no longer exists.
 
-ADR-0002 records the decision that the measured view is checked by a script
-rather than by eye, and `operating_procedure.md` §2.1 is the existing position
-it rests on: a rule is only worth stating if it is checkable.
+ADR-0002 *proposes* that the measured view be checked by a script rather than by
+eye. It is Proposed, not accepted -- this script is evidence that the proposal is
+cheap and works, not a convention already in force. The existing position it rests
+on is `operating_procedure.md` §2.1: a rule is only worth stating if it is
+checkable.
 
 ## What is measured
 

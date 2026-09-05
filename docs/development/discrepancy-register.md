@@ -61,7 +61,7 @@ The same section says the pieces "are still split across separate modeller, flee
 ## D4 — the first component diagram's edges did not exist in the code
 
 **Status:** resolved on this branch.
-**Disposition:** `fix documentation`, plus ADR-0002 so the class of error is detectable.
+**Disposition:** `fix documentation`. ADR-0002 additionally *proposes* a convention that would make this class of error detectable; it is awaiting Roundtable and is not part of the fix.
 
 **Established by:** measuring imports across the twelve live packages, accounting for the repository's `sys.path` bare-module import style, and comparing the result with the fifteen edges drawn in the original `02-live-component-map.puml`. Of those fifteen:
 
@@ -91,7 +91,7 @@ Two concrete cases: `calendar_job/unattended.py` imports `execute_reservation`, 
 - `02-live-responsibility-map.puml` — INTENDED. Responsibility and data flow as `PRODUCT.md` and `README.md` describe it. Says in its header that its arrows are not import edges.
 - `05-package-dependencies.puml` — MEASURED. Every edge extracted from the source, and re-derivable by `scripts/check_architecture_grounding.py`.
 
-ADR-0002 records the decision that architecture views declare which kind they are and that the measured one is script-checked.
+ADR-0002 proposes — it does not decide — that architecture views declare which kind they are and that the measured one is script-checked. The split and the check landed here as evidence for that proposal; whether they become a standing convention is Roundtable's call.
 
 ---
 
