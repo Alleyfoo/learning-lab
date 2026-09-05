@@ -1,0 +1,57 @@
+@startuml
+!theme plain
+title Learning Lab — development work-item state machine
+
+[*] --> Discovered
+
+state Discovered
+state Backlog
+state Ready
+state "In Progress" as InProgress
+state "Manager Review" as ManagerReview
+state Implemented
+state "Roundtable Closure" as RoundtableClosure
+state Closed
+state Parked
+state Rejected
+state Superseded
+
+Discovered --> Backlog : Roundtable accepts into roadmap/backlog
+Discovered --> Parked : Roundtable parks
+Discovered --> Rejected : Roundtable rejects
+
+Backlog --> Ready : Definition of Ready satisfied
+Backlog --> Parked : Roundtable parks
+Backlog --> Superseded : Roundtable replaces direction
+
+Ready --> InProgress : Manager pulls / dispatches bounded work
+InProgress --> ManagerReview : Coder returns implementation + evidence
+ManagerReview --> InProgress : review rejected / corrections required
+ManagerReview --> Implemented : Manager accepts against work order / DoD
+Implemented --> RoundtableClosure : return to roadmap authority
+RoundtableClosure --> Closed : roadmap/architecture status updated
+RoundtableClosure --> Backlog : follow-up authorized as a new bounded item
+RoundtableClosure --> Superseded : result changes/replaces planned direction
+
+Parked --> Backlog : Roundtable reactivates
+Rejected --> [*]
+Superseded --> [*]
+Closed --> [*]
+
+note right of Ready
+DoR = Definition of Ready.
+Unresolved architecture policy is not silently delegated to Coder.
+end note
+
+note right of Implemented
+Manager acceptance answers:
+"Was the commissioned work implemented correctly?"
+It does not close roadmap authority.
+end note
+
+note right of RoundtableClosure
+Roundtable answers:
+"What does this result mean for roadmap/product/architecture authority?"
+This is not a second code review.
+end note
+@enduml
