@@ -1,6 +1,8 @@
 # Level-4 static system-state packet experiment — v2
 
-**Status at this commit: PREPARED AND FROZEN. Formal v2 runs performed: NO.**
+**Status: RUN AND GRADED. Both formal arms performed. Result: [`RESULT.md`](RESULT.md) — awaiting Manager review.**
+
+The graded inputs below are unchanged from the freeze `370713d`; only this status line and the `RESULT.md` row in the file table were added after it. Criteria A–F passed or partially passed; **criterion G failed** under the frozen v2 criterion. Read `RESULT.md` before reading the "Running it" section below, which is written in the imperative for a run that has now happened.
 
 Authority: Roundtable, issue #9; Manager dispatch and Phase-2 review, 2026-09-05.
 
@@ -45,6 +47,8 @@ v1's G said "B may additionally flag the hostile record" and then, in its predec
 | [`build_packet.py`](build_packet.py) | the builder that derived the snapshot; `--self-test` — carried byte-identically |
 | [`check_packet.py`](check_packet.py) | validates the **committed** files, independently; `--self-test` |
 | `runs/A/INPUT.md`, `runs/B/INPUT.md` | the exact paste-ready graded inputs — carried byte-identically |
+| `runs/A/response.json`, `runs/B/response.json` | the two formal responses, preserved verbatim; `runs/B/raw/` additionally keeps B's supplied artifact under its supplied filename |
+| [`RESULT.md`](RESULT.md) | **the result** — preserved digests, contract conformance, A–F grading, the G comparison, interpretation and preregistered limitations |
 
 ## `packet_id` is `level4-v1`, and that is correct
 
