@@ -1,0 +1,78 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "supplier-ledger-recon",
+  "provenance": {
+    "producer": "goose-r08",
+    "skill": "define-lab-process",
+    "produced_at": "2026-09-06"
+  },
+  "purpose": "Reconcile supplier statement with internal ledger to identify matched and unmatched transactions",
+  "sources": {
+    "statement": {
+      "role_label": "Supplier Statement",
+      "fixture": "supplier-statement.txt",
+      "observed_fields": ["Date", "Supplier Name", "InvoiceNumber", "Amount", "Currency", "Status"],
+      "basis": "observed"
+    },
+    "ledger": {
+      "role_label": "Internal Ledger Book",
+      "fixture": "ledger-book.txt",
+      "observed_fields": ["Date", "ReferenceNumber", "SupplierName", "InvoiceNumber", "Amount", "Status", "Notes"],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "statement",
+    "right": "ledger",
+    "match_on": {
+      "left_field": "InvoiceNumber",
+      "right_field": "InvoiceNumber",
+      "basis": "human_confirmed",
+      "confirmation": "Q_match_key"
+    },
+    "compare": [
+      {
+        "field": "Amount",
+        "comparison": "exact",
+        "tolerance": null,
+        "basis": "observed",
+        "confirmation": null
+      }
+    ],
+    "classify": {
+      "both_same": "matched",
+      "both_different": "discrepancy",
+      "only_left": "statement_only",
+      "only_right": "ledger_only"
+    },
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_key",
+    "on_non_numeric": "refuse_run"
+  },
+  "output": {
+    "reports_fields": ["InvoiceNumber", "Amount"],
+    "context_fields": []
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_match_key",
+      "question": "Which field should identify the same record in both files for reconciliation?",
+      "answer": "InvoiceNumber. Both sources have InvoiceNumber and that is the natural transaction identifier.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "Q_status_comparison",
+      "question": "Should the Status field (PAID/UNPAID vs CLEARED/PENDING) be compared or is it treated as a different status scheme?",
+      "load_bearing": false,
+      "status": "unresolved"
+    }
+  ],
+  "requested_destination": "review_only",
+  "requested_delivery": {
+    "format": "json_discrepancy_report"
+  },
+  "requested_authority": null
+}

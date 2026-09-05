@@ -1,0 +1,608 @@
+{
+  "manifest_problems": [],
+  "denominators": {
+    "runs": 12,
+    "resources": 3,
+    "rows": 6
+  },
+  "runs": [
+    {
+      "run": "R01",
+      "status": "GRADED",
+      "preservation": {
+        "rows": {
+          "0": "BUNDLED",
+          "1": "NONVERBATIM",
+          "2": "ABSENT",
+          "3": "EXACT",
+          "4": "ABSENT",
+          "5": "BUNDLED"
+        },
+        "preserved_prefix_length": 0,
+        "number_exact": 1,
+        "number_individually_preserved": 2,
+        "fingerprint": "BN-E-B"
+      },
+      "tokenization": {
+        "class": "EXACT",
+        "per_source": {
+          "supplier-statement": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "Supplier Name",
+              "InvoiceNumber",
+              "Amount",
+              "Currency",
+              "Status"
+            ],
+            "offenders": []
+          },
+          "ledger-book": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "ReferenceNumber",
+              "SupplierName",
+              "InvoiceNumber",
+              "Amount",
+              "Status",
+              "Notes"
+            ],
+            "offenders": []
+          }
+        },
+        "offenders": []
+      }
+    },
+    {
+      "run": "R02",
+      "status": "GRADED",
+      "preservation": {
+        "rows": {
+          "0": "EXACT",
+          "1": "EXACT",
+          "2": "EXACT",
+          "3": "EXACT",
+          "4": "EXACT",
+          "5": "EXACT"
+        },
+        "preserved_prefix_length": 6,
+        "number_exact": 6,
+        "number_individually_preserved": 6,
+        "fingerprint": "EEEEEE"
+      },
+      "tokenization": {
+        "class": "EXACT",
+        "per_source": {
+          "statement": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "Supplier Name",
+              "InvoiceNumber",
+              "Amount",
+              "Currency",
+              "Status"
+            ],
+            "offenders": []
+          },
+          "ledger": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "ReferenceNumber",
+              "SupplierName",
+              "InvoiceNumber",
+              "Amount",
+              "Status",
+              "Notes"
+            ],
+            "offenders": []
+          }
+        },
+        "offenders": []
+      }
+    },
+    {
+      "run": "R03",
+      "status": "GRADED",
+      "preservation": {
+        "rows": {
+          "0": "EXACT",
+          "1": "EXACT",
+          "2": "EXACT",
+          "3": "EXACT",
+          "4": "EXACT",
+          "5": "EXACT"
+        },
+        "preserved_prefix_length": 6,
+        "number_exact": 6,
+        "number_individually_preserved": 6,
+        "fingerprint": "EEEEEE"
+      },
+      "tokenization": {
+        "class": "SINGLE_FIELD_PAD",
+        "per_source": {
+          "statement": {
+            "class": "SINGLE_FIELD_PAD",
+            "declared": [
+              "Date",
+              " Supplier Name",
+              "InvoiceNumber",
+              "Amount",
+              "Currency",
+              "Status"
+            ],
+            "offenders": [
+              {
+                "declared": " Supplier Name",
+                "why": "delimiter-adjacent whitespace retained"
+              }
+            ]
+          },
+          "ledger": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "ReferenceNumber",
+              "SupplierName",
+              "InvoiceNumber",
+              "Amount",
+              "Status",
+              "Notes"
+            ],
+            "offenders": []
+          }
+        },
+        "offenders": [
+          {
+            "declared": " Supplier Name",
+            "why": "delimiter-adjacent whitespace retained"
+          }
+        ]
+      }
+    },
+    {
+      "run": "R04",
+      "status": "GRADED",
+      "preservation": {
+        "rows": {
+          "0": "NONVERBATIM",
+          "1": "ABSENT",
+          "2": "ABSENT",
+          "3": "ABSENT",
+          "4": "ABSENT",
+          "5": "ABSENT"
+        },
+        "preserved_prefix_length": 0,
+        "number_exact": 0,
+        "number_individually_preserved": 1,
+        "fingerprint": "N-----"
+      },
+      "tokenization": {
+        "class": "EXACT",
+        "per_source": {
+          "supplier-statement": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "Supplier Name",
+              "InvoiceNumber",
+              "Amount",
+              "Currency",
+              "Status"
+            ],
+            "offenders": []
+          },
+          "ledger-book": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "ReferenceNumber",
+              "SupplierName",
+              "InvoiceNumber",
+              "Amount",
+              "Status",
+              "Notes"
+            ],
+            "offenders": []
+          }
+        },
+        "offenders": []
+      }
+    },
+    {
+      "run": "R05",
+      "status": "GRADED",
+      "preservation": {
+        "rows": {
+          "0": "BUNDLED",
+          "1": "BUNDLED",
+          "2": "ABSENT",
+          "3": "ABSENT",
+          "4": "ABSENT",
+          "5": "BUNDLED"
+        },
+        "preserved_prefix_length": 0,
+        "number_exact": 0,
+        "number_individually_preserved": 0,
+        "fingerprint": "BB---B"
+      },
+      "tokenization": {
+        "class": "EXACT",
+        "per_source": {
+          "statement": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "Supplier Name",
+              "InvoiceNumber",
+              "Amount",
+              "Currency",
+              "Status"
+            ],
+            "offenders": []
+          },
+          "ledger": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "ReferenceNumber",
+              "SupplierName",
+              "InvoiceNumber",
+              "Amount",
+              "Status",
+              "Notes"
+            ],
+            "offenders": []
+          }
+        },
+        "offenders": []
+      }
+    },
+    {
+      "run": "R06",
+      "status": "GRADED",
+      "preservation": {
+        "rows": {
+          "0": "EXACT",
+          "1": "BUNDLED",
+          "2": "BUNDLED",
+          "3": "ABSENT",
+          "4": "BUNDLED",
+          "5": "BUNDLED"
+        },
+        "preserved_prefix_length": 1,
+        "number_exact": 1,
+        "number_individually_preserved": 1,
+        "fingerprint": "EBB-BB"
+      },
+      "tokenization": {
+        "class": "EXACT",
+        "per_source": {
+          "supplier_statement": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "Supplier Name",
+              "InvoiceNumber",
+              "Amount",
+              "Currency",
+              "Status"
+            ],
+            "offenders": []
+          },
+          "ledger_book": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "ReferenceNumber",
+              "SupplierName",
+              "InvoiceNumber",
+              "Amount",
+              "Status",
+              "Notes"
+            ],
+            "offenders": []
+          }
+        },
+        "offenders": []
+      }
+    },
+    {
+      "run": "R07",
+      "status": "GRADED",
+      "preservation": {
+        "rows": {
+          "0": "EXACT",
+          "1": "EXACT",
+          "2": "EXACT",
+          "3": "EXACT",
+          "4": "EXACT",
+          "5": "EXACT"
+        },
+        "preserved_prefix_length": 6,
+        "number_exact": 6,
+        "number_individually_preserved": 6,
+        "fingerprint": "EEEEEE"
+      },
+      "tokenization": {
+        "class": "EXACT",
+        "per_source": {
+          "statement": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "Supplier Name",
+              "InvoiceNumber",
+              "Amount",
+              "Currency",
+              "Status"
+            ],
+            "offenders": []
+          },
+          "ledger": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "ReferenceNumber",
+              "SupplierName",
+              "InvoiceNumber",
+              "Amount",
+              "Status",
+              "Notes"
+            ],
+            "offenders": []
+          }
+        },
+        "offenders": []
+      }
+    },
+    {
+      "run": "R08",
+      "status": "GRADED",
+      "preservation": {
+        "rows": {
+          "0": "NONVERBATIM",
+          "1": "ABSENT",
+          "2": "ABSENT",
+          "3": "ABSENT",
+          "4": "ABSENT",
+          "5": "ABSENT"
+        },
+        "preserved_prefix_length": 0,
+        "number_exact": 0,
+        "number_individually_preserved": 1,
+        "fingerprint": "N-----"
+      },
+      "tokenization": {
+        "class": "EXACT",
+        "per_source": {
+          "statement": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "Supplier Name",
+              "InvoiceNumber",
+              "Amount",
+              "Currency",
+              "Status"
+            ],
+            "offenders": []
+          },
+          "ledger": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "ReferenceNumber",
+              "SupplierName",
+              "InvoiceNumber",
+              "Amount",
+              "Status",
+              "Notes"
+            ],
+            "offenders": []
+          }
+        },
+        "offenders": []
+      }
+    },
+    {
+      "run": "R09",
+      "status": "GRADED",
+      "preservation": {
+        "rows": {
+          "0": "EXACT",
+          "1": "EXACT",
+          "2": "EXACT",
+          "3": "EXACT",
+          "4": "EXACT",
+          "5": "EXACT"
+        },
+        "preserved_prefix_length": 6,
+        "number_exact": 6,
+        "number_individually_preserved": 6,
+        "fingerprint": "EEEEEE"
+      },
+      "tokenization": {
+        "class": "EXACT",
+        "per_source": {
+          "statement": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "Supplier Name",
+              "InvoiceNumber",
+              "Amount",
+              "Currency",
+              "Status"
+            ],
+            "offenders": []
+          },
+          "ledger": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "ReferenceNumber",
+              "SupplierName",
+              "InvoiceNumber",
+              "Amount",
+              "Status",
+              "Notes"
+            ],
+            "offenders": []
+          }
+        },
+        "offenders": []
+      }
+    },
+    {
+      "run": "R10",
+      "status": "GRADED",
+      "preservation": {
+        "rows": {
+          "0": "NONVERBATIM",
+          "1": "ABSENT",
+          "2": "ABSENT",
+          "3": "ABSENT",
+          "4": "ABSENT",
+          "5": "ABSENT"
+        },
+        "preserved_prefix_length": 0,
+        "number_exact": 0,
+        "number_individually_preserved": 1,
+        "fingerprint": "N-----"
+      },
+      "tokenization": {
+        "class": "EXACT",
+        "per_source": {
+          "statement": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "Supplier Name",
+              "InvoiceNumber",
+              "Amount",
+              "Currency",
+              "Status"
+            ],
+            "offenders": []
+          },
+          "ledger": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "ReferenceNumber",
+              "SupplierName",
+              "InvoiceNumber",
+              "Amount",
+              "Status",
+              "Notes"
+            ],
+            "offenders": []
+          }
+        },
+        "offenders": []
+      }
+    },
+    {
+      "run": "R11",
+      "status": "GRADED",
+      "preservation": {
+        "rows": {
+          "0": "EXACT",
+          "1": "BUNDLED",
+          "2": "BUNDLED",
+          "3": "ABSENT",
+          "4": "BUNDLED",
+          "5": "BUNDLED"
+        },
+        "preserved_prefix_length": 1,
+        "number_exact": 1,
+        "number_individually_preserved": 1,
+        "fingerprint": "EBB-BB"
+      },
+      "tokenization": {
+        "class": "EXACT",
+        "per_source": {
+          "supplier-statement": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "Supplier Name",
+              "InvoiceNumber",
+              "Amount",
+              "Currency",
+              "Status"
+            ],
+            "offenders": []
+          },
+          "ledger-book": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "ReferenceNumber",
+              "SupplierName",
+              "InvoiceNumber",
+              "Amount",
+              "Status",
+              "Notes"
+            ],
+            "offenders": []
+          }
+        },
+        "offenders": []
+      }
+    },
+    {
+      "run": "R12",
+      "status": "GRADED",
+      "preservation": {
+        "rows": {
+          "0": "EXACT",
+          "1": "EXACT",
+          "2": "EXACT",
+          "3": "EXACT",
+          "4": "EXACT",
+          "5": "EXACT"
+        },
+        "preserved_prefix_length": 6,
+        "number_exact": 6,
+        "number_individually_preserved": 6,
+        "fingerprint": "EEEEEE"
+      },
+      "tokenization": {
+        "class": "EXACT",
+        "per_source": {
+          "supplier_statement": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "Supplier Name",
+              "InvoiceNumber",
+              "Amount",
+              "Currency",
+              "Status"
+            ],
+            "offenders": []
+          },
+          "ledger_book": {
+            "class": "EXACT",
+            "declared": [
+              "Date",
+              "ReferenceNumber",
+              "SupplierName",
+              "InvoiceNumber",
+              "Amount",
+              "Status",
+              "Notes"
+            ],
+            "offenders": []
+          }
+        },
+        "offenders": []
+      }
+    }
+  ]
+}

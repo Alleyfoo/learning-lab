@@ -1,0 +1,245 @@
+{
+  "frozen_skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+  "runs": [
+    {
+      "run": "R01",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R01",
+      "skill_present": true,
+      "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R01\\work_definition.json",
+      "sha256": "575bab3f6ad6f0efbe3317a86ea39f0e5842b4a070066fcfc7635e6b764b49f7",
+      "validated_against": "v0",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
+    },
+    {
+      "run": "R02",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R02",
+      "skill_present": true,
+      "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R02\\work_definition.json",
+      "sha256": "9c3fdce8470effb389e76511ec54469948159988cdced07a3dafe8a53c23df9a",
+      "validated_against": "v0",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
+    },
+    {
+      "run": "R03",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R03",
+      "skill_present": true,
+      "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R03\\work_definition.json",
+      "sha256": "f3929fbe67444297fa904398a2e5544156da0de0b7de9f37c7f1c1071e79d89b",
+      "validated_against": "v0",
+      "status": "REFUSED",
+      "codes": [
+        "observed_field_not_in_source"
+      ],
+      "problems": [
+        {
+          "code": "observed_field_not_in_source",
+          "where": "<work_definition>:sources.statement",
+          "detail": "' Supplier Name' claimed observed but not in fixture header ['Date', 'Supplier Name', 'InvoiceNumber', 'Amount', 'Currency', 'Status']"
+        }
+      ],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
+    },
+    {
+      "run": "R04",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R04",
+      "skill_present": true,
+      "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R04\\work_definition.json",
+      "sha256": "dd9fce50820b6fee3307de7d1406ef3fccc6a5bca6d9f4b9b59c476c745993bd",
+      "validated_against": "v0",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
+    },
+    {
+      "run": "R05",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R05",
+      "skill_present": true,
+      "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R05\\work_definition.json",
+      "sha256": "d8f71f30599a5a8481a5a2060690ea6e313562a13dfc2e6c3358a0fd248816ec",
+      "validated_against": "v0",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
+    },
+    {
+      "run": "R06",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R06",
+      "skill_present": true,
+      "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R06\\work_definition.json",
+      "sha256": "08d663a06022ea35658a302adeba4d85d2ed9a8db8d2da5412f13fd48b550e92",
+      "validated_against": "v0",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
+    },
+    {
+      "run": "R07",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R07",
+      "skill_present": true,
+      "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R07\\work_definition.json",
+      "sha256": "55bb40f834a4bddf4ca999fe1ae3c6205a0c0d98cf3a1fef528b3089dbaee283",
+      "validated_against": "v0",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
+    },
+    {
+      "run": "R08",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R08",
+      "skill_present": true,
+      "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R08\\work_definition.json",
+      "sha256": "9752b673b1b1ff226efc24ce516d96715a50056b411fcfc47d2838f2c43a0d9a",
+      "validated_against": "v0",
+      "status": "REFUSED",
+      "codes": [
+        "comparison_tolerance_mismatch",
+        "malformed_tolerance"
+      ],
+      "problems": [
+        {
+          "code": "comparison_tolerance_mismatch",
+          "where": "<work_definition>:body",
+          "detail": "'exact' may not carry a tolerance"
+        },
+        {
+          "code": "malformed_tolerance",
+          "where": "<work_definition>:body",
+          "detail": "None"
+        }
+      ],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
+    },
+    {
+      "run": "R09",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R09",
+      "skill_present": true,
+      "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R09\\work_definition.json",
+      "sha256": "8ecd8ae74b137ac4746961b0d2724a1ecb89b751d845f6b2a76c96650e5efc1b",
+      "validated_against": "v0",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
+    },
+    {
+      "run": "R10",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R10",
+      "skill_present": true,
+      "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R10\\work_definition.json",
+      "sha256": "dff7a7b002679d39c9208331b023f522bf11bc115b2a96d831c9eb132feb5924",
+      "validated_against": "v0",
+      "status": "REFUSED",
+      "codes": [
+        "comparison_tolerance_mismatch",
+        "malformed_tolerance"
+      ],
+      "problems": [
+        {
+          "code": "comparison_tolerance_mismatch",
+          "where": "<work_definition>:body",
+          "detail": "'exact' may not carry a tolerance"
+        },
+        {
+          "code": "malformed_tolerance",
+          "where": "<work_definition>:body",
+          "detail": ""
+        }
+      ],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
+    },
+    {
+      "run": "R11",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R11",
+      "skill_present": true,
+      "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R11\\work_definition.json",
+      "sha256": "01b52c5dc138c7043e2d1c5dcb5b2b321ae19bafdcc5a78d3ea226b3e8e60c66",
+      "validated_against": "v0",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
+    },
+    {
+      "run": "R12",
+      "run_path": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R12",
+      "skill_present": true,
+      "skill_sha256": "0230969ea7fd00edd0989dc19e6f9658bcfedd4320415efe1f6c5e8cfe9a089a",
+      "skill_match": true,
+      "artifact": "C:\\Users\\pertt\\learning-lab\\work_interface\\w1l\\runs\\R12\\work_definition.json",
+      "sha256": "62da60adbf636d2665be4689afa50aaebee793a780015d006632cc3a5ee94fbb",
+      "validated_against": "v0",
+      "status": "PASS",
+      "codes": [],
+      "problems": [],
+      "requested_authority": null,
+      "override_keys_present": [],
+      "work_definition_version": 0,
+      "task_family": "reconciliation"
+    }
+  ]
+}
