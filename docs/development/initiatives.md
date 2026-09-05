@@ -121,6 +121,11 @@ Deliberately **not** built here. It is a new mechanism, and the existing-system-
 
 What that means in practice: the check reports 27 false alarms on a CRLF checkout, and would report the other 11 on a clean LF one. It cannot currently pass anywhere. Its failure message — "An artifact was modified after being frozen" — is wrong in both cases, and it is the message a worker would act on.
 
+`scripts/check_surfaced.py` has the same root cause and fails the same way: it
+reports `VOID: experimentI/harness/gate_I.py sha256 4319d94f... != frozen da76ed98...`,
+and `da76ed98...` is exactly the hash of the committed blob. Both integrity checks in
+`scripts/` therefore currently report corruption in a clean checkout of `main`.
+
 This is the same defect class as backlog item B-1: a verifier whose verdict is not a property of the thing verified. It is adjacent to the cp1252 decoding defects already recorded in W1-F and B-3, and it is more consequential than either, because this check is what stands between the evidence estate and silent corruption. While it cries wolf, a real change would not be believed.
 
 **Deliberately not fixed here.** Both plausible fixes — normalising line endings before hashing, or re-freezing the eleven CRLF-derived hashes — change frozen-evidence machinery, which is not this task's scope and is not a Coder's call. `frozen_manifest.json` says so itself: "Do not edit a hash to make a check pass -- if an artifact legitimately changed, that is a re-freeze and belongs in a commit that says so." Nothing legitimately changed, so neither a re-freeze nor a hash edit is obviously right, and choosing between them is a decision.
