@@ -82,14 +82,25 @@ def read_blobs(rels: list[str], root: Path = LAB) -> dict:
     """
     if not rels:
         return {}
-    proc = subprocess.Popen(["git", "cat-file", "--batch"], cwd=str(root),
-                            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                            stderr=subprocess.DEVNULL)
-    query = bytes().join((f"HEAD:{r}".encode("utf-8") + LF) for r in rels)
-    assert proc.stdin is not None and proc.stdout is not None
-    proc.stdin.write(query)
-    proc.stdin.close()
+    # The query goes through a temp FILE rather than a pipe. Writing all of it to
+    # stdin before reading stdout deadlocks on any real repository: git fills the
+    # ~64KB stdout pipe buffer and blocks, while this process is still blocked
+    # writing stdin. A file as stdin lets git stream output while we read it.
+    import tempfile
+    with tempfile.TemporaryDirectory() as qdir:
+        qfile = Path(qdir) / "batch-query"
+        qfile.write_bytes(bytes().join(
+            (f"HEAD:{r}".encode("utf-8") + LF) for r in rels))
+        with qfile.open("rb") as stdin_handle:
+            proc = subprocess.Popen(["git", "cat-file", "--batch"], cwd=str(root),
+                                    stdin=stdin_handle, stdout=subprocess.PIPE,
+                                    stderr=subprocess.DEVNULL)
+            out = _drain(proc, rels)
+    return out
 
+
+def _drain(proc, rels: list[str]) -> dict:
+    """Read one `--batch` response per requested path."""
     out: dict = {}
     for rel in rels:
         header = proc.stdout.readline()
@@ -234,13 +245,34 @@ def _self_test() -> int:
         check(classify(root) == ([], []),
               "CANARY: an untracked file must never enter the candidate set")
 
+        # CANARY for the pipe deadlock this script shipped with once: the first
+        # batched version wrote every query to git's stdin BEFORE reading stdout,
+        # so on a real repository git filled the ~64KB stdout pipe and blocked
+        # while this process was still blocked writing stdin. Three fixture files
+        # never came close to the buffer, so the self-test passed and a real run
+        # hung. This fixture deliberately exceeds it in both directions.
+        bulk = root / "bulk"
+        bulk.mkdir()
+        payload = (b"x" * 400) + LF
+        for i in range(300):
+            (bulk / f"f{i:03d}.txt").write_bytes(payload)
+        _git(["add", "-A"], root)
+        _git(["commit", "-qm", "bulk"], root)
+        rels = [f"bulk/f{i:03d}.txt" for i in range(300)]
+        total = len(rels) * len(payload)
+        check(total > 64 * 1024,
+              f"the bulk fixture must exceed a pipe buffer to prove anything: {total}")
+        blobs = read_blobs(rels, root)
+        check(len(blobs) == 300 and all(blobs[r] == payload for r in rels),
+              "CANARY: reading many blobs at once must return them all, not hang")
+
     if failures:
         for f in failures:
             print(f"FAIL  {f}")
         return 1
-    print("OK  self-test: 10 checks -- EOL-only diffs are found and normalized to "
+    print("OK  self-test: 13 checks -- EOL-only diffs are found and normalized to "
           "the committed bytes; a genuine local edit blocks the apply and survives "
-          "it untouched; binary payload and untracked files are never rewritten")
+          "it untouched; binary payload and untracked files are never rewritten; a batch far larger than a pipe buffer returns instead of deadlocking")
     return 0
 
 
