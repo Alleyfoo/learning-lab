@@ -32,8 +32,9 @@ State changes past `Initiative` are Roundtable's, and the reason is recorded in 
 
 ## I-1 — `PRODUCT.md` priorities may be closed by v0.2–v0.6
 
-**State:** `Roundtable accepted` — highest priority. Decided in the issue #2 closure; active work is issue #5.
+**State:** `Roundtable closed` — resolved by issue #5 / PR #6 (`e860c6b`). Decided in the issue #2 closure; carried out under issue #5.
 **Roundtable reason:** "The product authority is stale enough to misdirect a fresh worker. This becomes the next bounded work item."
+**Outcome:** `PRODUCT.md` re-grounded against the live system — two of the six original priorities delivered, four partial with their residual gaps named. Product gap 1 (nothing scopes the workspace to one company) remains the highest product gap; it is **not** dispatched.
 **Raised by:** issue #2, establishing the engineering system
 **Established by:** [discrepancy register D3](discrepancy-register.md#d3--productmd-lists-product-priorities-that-appear-already-delivered)
 
@@ -112,7 +113,7 @@ Deliberately **not** built here. It is a new mechanism, and the existing-system-
 
 ## I-7 — `verify_frozen.py`'s verdict depends on the checkout's line endings
 
-**State:** `Roundtable accepted` — queued immediately behind I-1. Decided in the issue #2 closure. **Not Ready and not dispatched**; issue #5 does not authorise starting it.
+**State:** `In progress` — dispatched as issue #7 once issue #5 closed I-1. Decided in the issue #2 closure.
 **Roundtable reason:** "The evidence estate appears intact, but a corruption verifier that cannot give checkout-invariant verdicts is not trustworthy."
 **Raised by:** issue #2, running the existing checks before proposing this branch
 **Established by:** `python scripts/verify_frozen.py` reports **27 mismatches across 76 checked artifacts** in this working copy. Re-hashing each artifact in both renderings gives:
@@ -137,7 +138,9 @@ and `da76ed98...` is exactly the hash of the committed blob. Both integrity chec
 
 This is the same defect class as backlog item B-1: a verifier whose verdict is not a property of the thing verified. It is adjacent to the cp1252 decoding defects already recorded in W1-F and B-3, and it is more consequential than either, because this check is what stands between the evidence estate and silent corruption. While it cries wolf, a real change would not be believed.
 
-**Deliberately not fixed here.** Both plausible fixes — normalising line endings before hashing, or re-freezing the eleven CRLF-derived hashes — change frozen-evidence machinery, which is not this task's scope and is not a Coder's call. `frozen_manifest.json` says so itself: "Do not edit a hash to make a check pass -- if an artifact legitimately changed, that is a re-freeze and belongs in a commit that says so." Nothing legitimately changed, so neither a re-freeze nor a hash edit is obviously right, and choosing between them is a decision.
+**Deliberately not fixed here.** Both plausible fixes — normalising line endings before hashing, or re-freezing the eleven CRLF-derived hashes — change frozen-evidence machinery, which is not this task's scope and is not a Coder's call.
+
+**Resolved under issue #7.** Neither of those two was the answer. The measurement was reproduced at `main` and one further fact settled the design: **every committed blob is LF** (0 of 76 carry CRLF), and `core.autocrlf` is `true` at system level on this machine, so a fresh clone gets CRLF regardless of the repository's intent. The fix is `.gitattributes` pinning the checkout to LF — required because the `check_surfaced.py` chain runs entirely through frozen files that cannot be edited — plus EOL-invariant comparison for text in `verify_frozen.py`, which lets the eleven CRLF-recorded hashes keep verifying without being re-frozen. No recorded hash was edited and no frozen artifact content changed. `frozen_manifest.json` says so itself: "Do not edit a hash to make a check pass -- if an artifact legitimately changed, that is a re-freeze and belongs in a commit that says so." Nothing legitimately changed, so neither a re-freeze nor a hash edit is obviously right, and choosing between them is a decision.
 
 The measurement above is the useful part: it establishes that the estate is intact, which is the question a failing integrity check actually raises.
 
@@ -145,7 +148,7 @@ The measurement above is the useful part: it establishes that the estate is inta
 
 ## I-8 — `fleet/system_map.py --self-test` fails on the current live fleet
 
-**State:** Discovered
+**State:** `Roundtable accepted`, **dependency-gated**. Decided after issue #5. Repair it before the next product slice that modifies or relies on the System Map acceptance floor. It is not globally next, and issue #7 does not authorise it.
 **Raised by:** issue #5, while grounding product priority 3 against live source
 **Established by:** `python fleet/system_map.py --self-test` reports:
 
