@@ -24,13 +24,16 @@ Neither is a roadmap. `docs/roadmap/` is.
 What was observed. What it would cost to leave. What deciding it would require.
 ```
 
-State changes past `Initiative` are Roundtable's, and the reason is recorded in the entry.
+State changes past `Initiative` are Roundtable's, and the reason is recorded in the entry. The dispositions on I-1 through I-7 were decided in the Roundtable closure of issue #2 and are recorded here verbatim; this file does not re-decide them.
+
+`Roundtable accepted` is not permission to start. Manager still dispatches, and only one item at a time (engineering system §4.3, §10).
 
 ---
 
 ## I-1 — `PRODUCT.md` priorities may be closed by v0.2–v0.6
 
-**State:** Initiative
+**State:** `Roundtable accepted` — highest priority. Decided in the issue #2 closure; active work is issue #5.
+**Roundtable reason:** "The product authority is stale enough to misdirect a fresh worker. This becomes the next bounded work item."
 **Raised by:** issue #2, establishing the engineering system
 **Established by:** [discrepancy register D3](discrepancy-register.md#d3--productmd-lists-product-priorities-that-appear-already-delivered)
 
@@ -42,7 +45,8 @@ Only Roundtable may change `PRODUCT.md`. What is needed is a closure decision �
 
 ## I-2 — supervisor runtime state is neither tracked nor ignored
 
-**State:** Discovered
+**State:** `Parked`. Decided in the issue #2 closure.
+**Roundtable reason:** "Real hygiene question, not a current product/authority blocker."
 **Raised by:** issue #2, while grounding the repository
 **Established by:** `git status --porcelain` reports `supervisor/backlog.jsonl`, `supervisor/current_assessment.json` and `supervisor/runs/` as untracked; `.gitignore` covers `fleet/workers/*/` runtime state with an explicit rationale but says nothing about the supervisor's.
 
@@ -54,7 +58,8 @@ The question is which of these are operational history (ignore, like the fleet's
 
 ## I-3 — an untracked duplicate of a frozen skill sits inside a frozen pack
 
-**State:** Discovered
+**State:** `Parked`. Decided in the issue #2 closure.
+**Roundtable reason:** "Preserve until intentionally inspected/dispositioned; no passing worker deletes it."
 **Raised by:** issue #2, while grounding the repository
 **Established by:** `work_interface/w1a/skill/` tracks `skill.md` and `PROVENANCE.md` (which records the frozen sha256). `work_interface/w1a/skill/skill_frozen_copy.md` is untracked and opens with the same "frozen revision" header.
 
@@ -66,7 +71,8 @@ Deciding it means one of: it is the same bytes and is redundant; it is evidence 
 
 ## I-4 — root working tree carries undispositioned scratch files
 
-**State:** Discovered
+**State:** `Parked`. Decided in the issue #2 closure.
+**Roundtable reason:** "Working-copy hygiene, not repository architecture."
 **Raised by:** issue #2, while grounding the repository
 **Established by:** `git status --porcelain` lists `W0B/`, `W0B_TODO.md`, `_shotA.png`, `_shotB.html`, `_shotB.png`, `read_all.py`, `read_answers_binary.py`, `read_fixture.py`, `read_human_answers.py`, `read_skill.py`, `read_skill_content.py`, `skill_content.txt`, `tmp/`, `skills/CodeReview/` and `work_interface/w1a/fixtures/tmp/` as untracked.
 
@@ -78,7 +84,8 @@ Deciding it means separating the ones that are evidence from the ones that are s
 
 ## I-5 — live task-family code lives under directories named `harness/`
 
-**State:** Discovered
+**State:** `Parked`. Decided in the issue #2 closure.
+**Roundtable reason:** "Naming ambiguity is real but renaming has broad import/frozen-history cost and no demonstrated product failure yet."
 **Raised by:** issue #2, while building the measured architecture view
 **Established by:** `reservation/`, `enrichment/`, `aggregation/` and `reconciliation/` contain no top-level module; all four hold exactly `harness/<family>_model.py`, `harness/execute_<family>.py` and `harness/run_<family>.py`. `PRODUCT.md` and `README.md` both list the four packages as live system path. Elsewhere in this repository `harness/` means experiment scaffolding — `definition_phase/harness/`, `experimentL/harness/`, `work_interface/harness/`.
 
@@ -90,7 +97,8 @@ This is a naming observation, not a defect: the code is live and is imported by 
 
 ## I-6 — the stale-handoff class could be made checkable
 
-**State:** Discovered
+**State:** `Parked`. Decided in the issue #2 closure.
+**Roundtable reason:** "The new precedence/continuity rules have not yet demonstrated insufficiency; do not add another mechanism pre-emptively."
 **Raised by:** issue #2
 **Established by:** [discrepancy register D1](discrepancy-register.md#d1--handoffmd-was-stale-by-two-closed-packs)
 
@@ -104,7 +112,8 @@ Deliberately **not** built here. It is a new mechanism, and the existing-system-
 
 ## I-7 — `verify_frozen.py`'s verdict depends on the checkout's line endings
 
-**State:** Discovered
+**State:** `Roundtable accepted` — queued immediately behind I-1. Decided in the issue #2 closure. **Not Ready and not dispatched**; issue #5 does not authorise starting it.
+**Roundtable reason:** "The evidence estate appears intact, but a corruption verifier that cannot give checkout-invariant verdicts is not trustworthy."
 **Raised by:** issue #2, running the existing checks before proposing this branch
 **Established by:** `python scripts/verify_frozen.py` reports **27 mismatches across 76 checked artifacts** in this working copy. Re-hashing each artifact in both renderings gives:
 
@@ -131,3 +140,26 @@ This is the same defect class as backlog item B-1: a verifier whose verdict is n
 **Deliberately not fixed here.** Both plausible fixes — normalising line endings before hashing, or re-freezing the eleven CRLF-derived hashes — change frozen-evidence machinery, which is not this task's scope and is not a Coder's call. `frozen_manifest.json` says so itself: "Do not edit a hash to make a check pass -- if an artifact legitimately changed, that is a re-freeze and belongs in a commit that says so." Nothing legitimately changed, so neither a re-freeze nor a hash edit is obviously right, and choosing between them is a decision.
 
 The measurement above is the useful part: it establishes that the estate is intact, which is the question a failing integrity check actually raises.
+
+---
+
+## I-8 — `fleet/system_map.py --self-test` fails on the current live fleet
+
+**State:** Discovered
+**Raised by:** issue #5, while grounding product priority 3 against live source
+**Established by:** `python fleet/system_map.py --self-test` reports:
+
+```text
+SELF-TEST FAILED:
+  the exception should sit under ONE customer: {'kesko', 'acme', 'Demo / Lab'}
+  CANARY: Demo / Lab must stay healthy -- an exception under one customer must NOT colour another
+  CANARY: acme must stay healthy -- an exception under one customer must NOT colour another
+```
+
+The self-test calls `fleet.load_all()` — the **live** fleet — and then asserts `len(hurt_scopes) == 1`, so it depends on the seeded fleet containing exactly one non-healthy customer. It now contains three: `acme-august-recon` and `kesko-reconciliation` are `never_run`, and `april-invoicing` is `blocked`.
+
+**This does not appear to be a map defect.** Per-worker status is still derived (`node["status"] == status_of(w)` passes for every worker), and the failing assertions are the canary's precondition rather than the property itself. The two named workers are the ones established through the v0.3/v0.4 Define journey, and a newly established worker is `never_run` by construction — so delivering product priority 4 is what invalidated the fixture assumption.
+
+The cost of leaving it: the canary that proves "an exception under one customer must not colour another" cannot currently fire, so that property is unverified on every run.
+
+**Deliberately not fixed here.** Issue #5 authorises product-authority reconciliation, not test or fleet-state changes, and the plausible fixes differ in kind — build the canary from a constructed fixture rather than the live fleet, or change live worker state, which is production data. Choosing between those is a decision.

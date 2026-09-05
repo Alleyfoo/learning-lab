@@ -34,7 +34,7 @@ supervisor explains what matters, investigates novelty and proposes improvements
 
 The repository contains all of these pieces. The live workspace (`supervisor/app.py`) describes itself as already recentred on this flow — the Fleet System Map is its primary surface, the incoming-data browser sits beside it, and the modeller is reachable from an unmodelled data directory as a "Define work" flow.
 
-**`PRODUCT.md` has not been updated to reflect that**, and still lists the recentring among the next priorities. That disagreement is recorded as [discrepancy D3](docs/development/discrepancy-register.md) and raised as [initiative I-1](docs/development/initiatives.md); only Roundtable may resolve it. Until it does, read `PRODUCT.md`'s priority list knowing the code has moved past parts of it.
+[PRODUCT.md](PRODUCT.md) has since been re-grounded against that live system: of its original six product priorities, two are delivered and four are partially delivered, with the remaining gap in each named as the actual next product work. The measured evidence per priority is in [discrepancy D3](docs/development/discrepancy-register.md).
 
 See [PRODUCT.md](PRODUCT.md) for the product/system map and the distinction between what exists now and what is still missing.
 
