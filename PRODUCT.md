@@ -202,23 +202,25 @@ A useful target shape is:
 └───────────────────┴─────────────────────────────────┴─────────────────────┘
 ```
 
-This is a product direction, not a claim that the integrated shell already exists.
+This shape is now **partly real**: `supervisor/app.py` is a single workspace whose primary tab already places the incoming-data browser, the company system map and the supervisor's assessment together. What the sketch still shows and the workspace does not is the **company header** — the workspace is fleet-wide rather than scoped to one company. See "Current product priorities", remaining gap 1.
 
 ## Existing pieces
 
-### Incoming-data / adapter floor — exists, integration incomplete
+### Incoming-data / adapter floor — exists, integrated to sheet level
 
-`adapters/` and the earlier ingestion work provide structural ingestion support, including spreadsheet/workbook handling. The current modeller, however, still starts from prepared/selectable sources rather than presenting the full incoming company file tree as the primary object.
+`adapters/` and the earlier ingestion work provide structural ingestion support, including spreadsheet/workbook handling.
 
-**Product gap:** expose incoming files/workbooks/sheets/tables directly and preserve the distinction between “received but not understood” and “bound into modelled work.”
+The incoming company file tree is now a primary object: `supervisor/incoming.py` scans the `data/` library and every worker's inbox/processed/exceptions, and the browser renders it beside the map. Each directory is marked `worker:<name>` / `no worker link` / `model exists`, which is the “received but not understood” versus “bound into modelled work” distinction this section asked for. Modelling starts from that tree rather than from prepared sources.
+
+**Remaining product gap:** the tree stops at file and sheet names. Columns and sample rows appear only inside the Define-work flow, and only for a directory with no worker and no model.
 
 ### Mechanical observation — exists
 
 `inspector/` and modeller observation logic establish program-owned facts and evidence. This is a core product asset: it prevents the LLM from laundering plausible semantic claims into observations.
 
-### Modeller — exists as a separate surface
+### Modeller — exists, and is now embedded in the company workspace
 
-`modeller/app.py` currently provides the DEFINE journey:
+`modeller/app.py` remains available as its own surface, and provides the DEFINE journey:
 
 ```text
 Data
@@ -229,7 +231,7 @@ Data
 → Preview
 ```
 
-This is close to the intended modelling interaction, but it needs to become part of the company workspace and start from the company's incoming data rather than feeling like a separate laboratory tool.
+That journey is now also reachable from inside the company workspace: selecting an unmodelled directory in the incoming browser opens a Define-work panel that drives this same floor through `supervisor/define.py` — a glue layer over `modeller/pipeline.py` and `modeller/builder.py`, not a second modeller — and ends at an explicit human-gated Establish, after which the worker appears on the map. Modelling therefore starts from the company's incoming data rather than from a separate laboratory tool.
 
 ### Deterministic worker/runtime — exists
 
@@ -242,7 +244,7 @@ Task families currently represented:
 - aggregation;
 - reconciliation.
 
-### Fleet map — exists and should be restored to the center
+### Fleet map — exists and is now the center
 
 `fleet/system_map.py` + `fleet/map_component.py` already implement a read-only deterministic system map. Important properties are already correct:
 
@@ -254,13 +256,15 @@ Task families currently represented:
 - status is recomputed from authoritative fleet state;
 - worker nodes are clickable navigation.
 
-The existing map begins **after modelling**. It sees sources that an established model declares.
+The map is now the workspace's primary surface: first tab, centre column, with the incoming-data browser to its left and the supervisor's assessment on top. A company known only from an `intake.json` sidecar appears as a scope node before any worker exists, so a company with data but no modelled work is visible.
 
-**Product gap:** extend the visual mental model leftward so the operator can also see incoming company files/workbooks/sheets that have not yet been modelled or whose role is still unknown.
+For **data**, the map still begins after modelling: it sees sources that an established model declares.
 
-### Supervisor — exists as a separate supporting surface
+**Remaining product gap:** extend the visual mental model leftward for data as well — incoming files/workbooks/sheets that have not yet been modelled, or whose role is still unknown, are not nodes on the map, and nothing draws the edge from an arriving file to the modelled work it became. Today they are visible beside the map rather than on it.
 
-`supervisor/` now contains the proven harness and Workspace v0.1:
+### Supervisor — exists, and now sits beside the map
+
+`supervisor/` contains the proven harness and the workspace built on it. `supervisor/app.py`'s module docstring is the current description of that surface. The floor it established:
 
 - read-only fleet context;
 - restricted Python / skills analysis;
@@ -273,9 +277,11 @@ The existing map begins **after modelling**. It sees sources that an established
 - duplicate/conflict guards for rules;
 - human-gated rule activation.
 
-This work is useful, but the current standalone Dashboard is **not the product center**.
+The Dashboard is no longer the centre: the workspace opens on the System Map, the supervisor's current assessment renders on top of that company context, and the Dashboard is the fuller supporting read.
 
-The supervisor should become the communication/interpretation layer beside the company map:
+**Remaining product gap:** a filed assessment is plain text — findings, priorities and normal-context strings, with suggestions carrying free-text evidence. Nothing binds a finding to the worker, company or map node it interprets, so the operator cannot move from a finding to the object it is about.
+
+The interpretation layer beside the company map:
 
 ```text
 objective company map + state
@@ -400,14 +406,35 @@ The lesson is already sufficient for product use. More synthetic governance expe
 
 ## Current product priorities
 
-The next meaningful product work is not another supervisor laboratory or another dashboard polish pass. It is integration around the company:
+The six priorities below were written before the v0.2–v0.6 integration work landed. They were re-grounded against the live repository in issue #5; this section now records the measured state rather than the original intent.
 
-1. **Company as the top-level object.** Give data, modelled tasks, runs, effects and supervision a clear owner/context.
-2. **Incoming-data browser.** Show files → workbooks → sheets/tables → columns/samples before the system knows what they mean.
-3. **Restore the system map as a primary surface.** Existing established-worker map is the base; extend it to connect incoming/unmodelled data to understood/modelled work.
-4. **Embed the modeller in that context.** Select/inspect incoming data, discuss the job, establish a model, and see the new flow appear on the company map.
-5. **Put the supervisor beside the map.** Supervisor findings should point to the company objects/evidence they interpret.
-6. **Keep Improvements/Rules secondary.** They support institutional learning; they are not the user's main mental model of the company.
+Two are delivered. Four are partially delivered, and the remaining gap in each is the actual next product work. None was found undelivered.
+
+### Delivered
+
+**4. Embed the modeller in the company context.** Selecting an unmodelled `data/` directory in the incoming browser opens a Define-work panel that runs the existing modeller floor one stage at a time — inspect, declare workbook sheets, observe, interpret, propose, answer a load-bearing question, deterministic preview — and ends at an explicit, human-gated **Establish worker**, after which the new worker appears on the map in its company's lane. `supervisor/app.py` `_render_define_panel` / `_render_discover_stage`, over `supervisor/define.py`, which is a glue layer on `modeller/pipeline.py` + `modeller/builder.py` rather than a second modeller. The LLM proposes; only the operator establishes.
+
+**6. Keep Improvements/Rules secondary.** The workspace opens on **System Map**; Improvements and Rules are separate later tabs, and the Dashboard is explicitly the fuller supporting read rather than the centre. `supervisor/app.py` tab order.
+
+### Partially delivered — these gaps are the next product work
+
+**1. Company as the top-level object.** *Delivered:* a company is a typed, clickable object on the map, its lanes derived from each worker's declared `customer`; selecting one opens a panel gathering that company's established work, incoming/known data, declared destinations and an "add a data source" action. Pre-worker company identity exists through an `intake.json` sidecar, so a company with data but no worker still appears.
+*Remaining gap:* the workspace is not **scoped** to one company. The map renders every scope at once and nothing selects a company as the container for the whole workspace, so the single-company shell sketched under "The central workspace" is not the current shape.
+
+**2. Incoming-data browser.** *Delivered:* the browser lists the `data/` library and every worker's inbox/processed/exceptions, down to **file and sheet names**, and marks each directory `worker:<name>` / `no worker link` / `model exists` / `adapter` — the "received but not understood" versus "bound into modelled work" distinction this section asked for.
+*Remaining gap:* it stops at the sheet. Columns and sample rows are visible only inside the Define-work flow, which opens only for a directory that has no worker and no model. A directory that is already modelled has no column or sample view anywhere.
+
+**3. System map as the primary surface.** *Delivered:* the map is the primary surface — first tab, centre column, browser to its left and the supervisor's assessment on top — and it stays derived from authoritative fleet state and writes nothing. Pre-worker companies now appear on it.
+*Remaining gap:* the leftward extension asked for under "Fleet map" below is still open for *data*. The graph is built from workers, scopes and shared executors; no incoming file, workbook or sheet is a node, and no edge connects an arriving file to the modelled work it became. The map still begins after modelling; the browser sits beside it rather than the map reaching into it.
+
+**5. Put the supervisor beside the map.** *Delivered:* it is beside it. The current assessment renders on top of the company context in the same tab, "Review fleet" runs from there, and the Dashboard is the supporting full read.
+*Remaining gap:* findings do not yet **point to** the company objects they interpret. A filed assessment is plain text — findings, priorities and normal-context strings, with suggestions carrying free-text evidence — so nothing binds a finding to the worker, company or map node it is about, and there is no way to click a finding and land on that node.
+
+### How to read this section
+
+Each "remaining gap" is a bounded piece of product work, not a restatement of the original priority. The relative order above is the original one; Roundtable owns any re-ordering.
+
+The measured evidence behind each disposition is recorded in [`docs/development/discrepancy-register.md`](docs/development/discrepancy-register.md) D3.
 
 ## Engineering cleanup worth doing alongside product work
 

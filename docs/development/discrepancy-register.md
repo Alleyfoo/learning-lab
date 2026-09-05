@@ -43,18 +43,27 @@ The same section says the pieces "are still split across separate modeller, flee
 
 ---
 
-## D3 — `PRODUCT.md` lists product priorities that appear already delivered
+## D3 — `PRODUCT.md` priorities did not match the live v0.2–v0.6 system
 
-**Status:** open. Requires Roundtable.
-**Disposition:** `create roadmap item` — raised as [I-1](initiatives.md#i-1).
+**Status:** resolved, and narrowed to four named residual gaps.
+**Disposition:** `fix authority` — performed by Roundtable's authorisation in issue #5, not by a Coder acting on the finding.
 
-**Established by:** `PRODUCT.md` § "Current product priorities" lists six items as "the next meaningful product work", including #1 company as top-level object, #2 incoming-data browser, #3 restore the system map as a primary surface, #4 embed the modeller, #5 put the supervisor beside the map. `supervisor/app.py` describes all of those as implemented: the System Map is the primary tab, an incoming file/workbook/sheet browser sits to its left, the assessment sits on top, and v0.3 "closes the gap between the two halves (PRODUCT.md priority #4)" with a Define-work panel and an explicit human-gated Establish. `fleet/system_map.py` and `supervisor/app.py` both handle pre-worker company identity from `intake.json` sidecars.
+**Originally established by:** `PRODUCT.md` § "Current product priorities" listed six items as "the next meaningful product work"; `supervisor/app.py` described several of them as implemented. `PRODUCT.md` was last changed 2026-08-17; the v0.2–v0.6 work landed 2026-08-18.
 
-`PRODUCT.md` was last changed 2026-08-17; the v0.2–v0.6 work landed 2026-08-18.
+**How it was resolved.** The suspicion was a lead, not a verdict. Each of the six priorities was re-grounded against live source in issue #5. Two are delivered; four are partially delivered; none was undelivered. The gaps are preserved rather than swept up into a "product direction closed" claim.
 
-**Why it is not fixed here:** `PRODUCT.md` is rank-2 authority (engineering system §7) and only Roundtable may change it. A Coder correcting the priority list would be exactly the `Implemented -> Roundtable closed` transition the process forbids. What the delivered work *means* for the roadmap is a closure decision, not a documentation edit.
+| # | Priority | Verdict | Evidence |
+| --- | --- | --- | --- |
+| 1 | Company as the top-level object | **partial** | Delivered: `system_map.parse_selection` types `scope:X` as `{"kind":"company"}`; `lanes()`/`scope_of()` derive lanes from each worker's declared `customer`; `app.py` `_render_company_panel` gathers a company's workers, incoming data, destinations and an add-data action; pre-worker identity via `incoming._read_intake` + `build(extra_scopes=…)`. Gap: nothing scopes the workspace to one company — `build()` renders every scope at once. |
+| 2 | Incoming-data browser | **partial** | Delivered: `incoming.scan` returns the `data/` library and per-worker inbox/processed/exceptions; `_file_entry` carries `{name, kind, sheets}`; `app.py` `_render_incoming_browser` marks `worker:` / `no worker link` / `model exists` / `adapter`. Gap: `_file_entry` carries no columns or rows. Columns and samples exist only in `define.discover_workbook` (5-row preview), reachable only from the Define-work button, which `app.py` shows only when `worker is None and not has_model`. |
+| 3 | System map as primary surface | **partial** | Delivered: `st.tabs` puts "System Map" first; it is the centre column with browser left and assessment on top; `system_map` self-test asserts `build()` writes nothing; pre-worker scope nodes render. Gap: `build()` emits nodes only from workers, scopes and shared executors — no incoming file/workbook/sheet node, and no edge from an arriving file to the work it became. |
+| 4 | Modeller embedded in company context | **delivered** | `app.py` Define-work button -> `_render_discover_stage` (discover/declare/validate/materialize) -> the unchanged modeller journey -> deterministic preview -> explicit human-gated "Establish worker" -> `_clear_define()` and rerun return to the map with the new worker in its company lane. `customer` is captured at establish. Covered end to end by `define.py --self-test`. |
+| 5 | Supervisor beside the map | **partial** | Delivered: `_render_assessment_banner` renders on top of the browser+map in the same tab; "Review fleet" runs there; the Dashboard tab is the supporting full read. Gap: `assessment.file_assessment_callable` takes `findings`, `priorities`, `normal_context` as strings, and `compose` projects suggestions to `{id, text, evidence}` with free-text evidence. No referent binds a finding to a worker, company or map node. |
+| 6 | Improvements/Rules secondary | **delivered** | `st.tabs(["System Map", "Dashboard", "Improvements", "Rules", "Fleet & run details"])` — the map is the default; Improvements and Rules are separate later tabs. |
 
-**What Roundtable has to decide:** which of priorities #1–#6 are closed by v0.2–v0.6, what remains open in each, and what the next priority actually is.
+**One distinction worth keeping.** Two capabilities are implemented and self-tested but **not exercised by current live data**: no `intake.json` sidecar exists anywhere under `data/`, and no worker in `fleet/workers/` declares a `destination`. Both paths have self-test coverage (`incoming.py`, `system_map.py`, `define.py`). That is not a delivery gap — it is seed data that does not use them — but a reader comparing the map to the code should know why neither appears on screen today.
+
+**What remains open.** The four residual gaps are now carried in `PRODUCT.md` § "Current product priorities" as the next product work. This register entry no longer tracks them; product authority does.
 
 ---
 
