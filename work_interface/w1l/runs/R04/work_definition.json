@@ -1,0 +1,75 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "lab-rec-process-1",
+  "provenance": {
+    "producer": "goose-r04",
+    "skill": "define-lab-process",
+    "produced_at": "2026-09-06"
+  },
+  "purpose": "Reconcile supplier statement invoices against internal ledger records to identify matched, unmatched, and discrepancy entries",
+  "sources": {
+    "supplier-statement": {
+      "role_label": "External Supplier Statement",
+      "fixture": "supplier-statement.txt",
+      "observed_fields": ["Date", "Supplier Name", "InvoiceNumber", "Amount", "Currency", "Status"],
+      "basis": "observed"
+    },
+    "ledger-book": {
+      "role_label": "Internal Ledger Book",
+      "fixture": "ledger-book.txt",
+      "observed_fields": ["Date", "ReferenceNumber", "SupplierName", "InvoiceNumber", "Amount", "Status", "Notes"],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "supplier-statement",
+    "right": "ledger-book",
+    "match_on": {
+      "left_field": "InvoiceNumber",
+      "right_field": "InvoiceNumber",
+      "basis": "human_confirmed",
+      "confirmation": "Q_match_key"
+    },
+    "compare": [
+      {
+        "field": "Amount",
+        "comparison": "within",
+        "tolerance": "0.01",
+        "basis": "human_confirmed",
+        "confirmation": "Q_amount_comparison"
+      }
+    ],
+    "classify": {
+      "both_same": "matched",
+      "both_different": "discrepancy",
+      "only_left": "statement_only",
+      "only_right": "ledger_only"
+    },
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_run",
+    "on_non_numeric": "refuse_key"
+  },
+  "output": {
+    "reports_fields": ["InvoiceNumber", "Amount"],
+    "context_fields": ["SupplierName"]
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_match_key",
+      "question": "Which field identifies the same record in both files?",
+      "answer": "InvoiceNumber is the identifier in both sources",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_amount_comparison",
+      "question": "Which fields should be compared and with what comparison/tolerance? Amount should be compared with 'within' tolerance of 0.01.",
+      "answer": "Compare Amount field with 'within' comparison and 0.01 tolerance for currency matching",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [],
+  "requested_destination": "review_only",
+  "requested_delivery": { "format": "json_discrepancy_report" },
+  "requested_authority": null
+}

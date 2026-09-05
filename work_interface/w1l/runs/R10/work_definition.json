@@ -1,0 +1,95 @@
+{
+  "work_definition_version": 0,
+  "task_family": "reconciliation",
+  "model_id": "W1-L R10 Supplier Ledgers-Reconcile",
+  "provenance": {
+    "producer": "goose W1-L run R10",
+    "skill": "define-lab-process",
+    "produced_at": "2026-09-06"
+  },
+  "purpose": "Reconcile supplier statement records against internal ledger book to identify discrepancies in amounts, statuses, and missing records using InvoiceNumber as the match key.",
+  "sources": {
+    "statement": {
+      "role_label": "Supplier Statement",
+      "fixture": "supplier-statement.txt",
+      "observed_fields": ["Date", "Supplier Name", "InvoiceNumber", "Amount", "Currency", "Status"],
+      "basis": "observed"
+    },
+    "ledger": {
+      "role_label": "Internal Ledger Book",
+      "fixture": "ledger-book.txt",
+      "observed_fields": ["Date", "ReferenceNumber", "SupplierName", "InvoiceNumber", "Amount", "Status", "Notes"],
+      "basis": "observed"
+    }
+  },
+  "body": {
+    "left": "statement",
+    "right": "ledger",
+    "match_on": {
+      "left_field": "InvoiceNumber",
+      "right_field": "InvoiceNumber",
+      "basis": "human_confirmed",
+      "confirmation": "Q_match_key"
+    },
+    "compare": [
+      {
+        "field": "Amount",
+        "comparison": "exact",
+        "tolerance": "",
+        "basis": "human_confirmed",
+        "confirmation": "Q_compare_amount"
+      }
+    ],
+    "classify": {
+      "both_same": "matched",
+      "both_different": "discrepancy",
+      "only_left": "orphan_statement",
+      "only_right": "orphan_ledger"
+    },
+    "output_order": "left_then_right",
+    "on_duplicate_key": "refuse_run",
+    "on_non_numeric": "refuse_key"
+  },
+  "output": {
+    "reports_fields": ["InvoiceNumber", "Amount"],
+    "context_fields": ["Date", "Currency", "ReferenceNumber", "Status"]
+  },
+  "human_confirmations": [
+    {
+      "id": "Q_match_key",
+      "question": "Which field identifies the same record in both files? Please specify exactly which fields to use.",
+      "answer": "InvoiceNumber is the matching identifier in both supplier statement and ledger book. This field uniquely identifies each transaction record.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_compare_amount",
+      "question": "Which fields should be compared, with what comparison method (exact/trim/casefold/etc.)?",
+      "answer": "Compare Amount field using exact comparison. The Amount values are numeric GBP currency amounts that must match exactly for a match.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_status_handling",
+      "question": "Status fields differ between files (PAID vs CLEARED, UNPAID vs PENDING). Should Status be considered part of the reconciliation rule or is it incidental/contextual?",
+      "answer": "Status field is contextual only. Focus reconciliation on InvoiceNumber match and Amount comparison. Different status codes in the two systems reflect internal processing states rather than value mismatches.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_source_truth",
+      "question": "Which file, if either, is the source of truth? If neither are authoritative, state that both are peer sources for reconciliation.",
+      "answer": "Both supplier statement and ledger book are peer sources for reconciliation. Neither overrides the other; discrepancies between them must be reported as findings.",
+      "basis": "human_confirmed"
+    },
+    {
+      "id": "Q_report_fields",
+      "question": "Which fields should appear in the report row, and which are context?",
+      "answer": "Report rows include InvoiceNumber (match key) and Amount (compared field). Context includes Date, Supplier Name/SupplierName, Currency, ReferenceNumber, Status, and Notes from both sources.",
+      "basis": "human_confirmed"
+    }
+  ],
+  "open_questions": [],
+  "requested_destination": "review_only",
+  "requested_delivery": {
+    "format": "json_discrepancy_report"
+  },
+  "requested_authority": null
+}
