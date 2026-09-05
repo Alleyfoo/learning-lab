@@ -18,6 +18,7 @@ Learning Lab uses established software-engineering mechanisms rather than a proj
 | Authorised direction | [`docs/roadmap/`](docs/roadmap/) |
 | Somewhere to put a discovery that is out of scope | [`docs/development/initiatives.md`](docs/development/initiatives.md) |
 | Known documentation-vs-repository disagreements | [`docs/development/discrepancy-register.md`](docs/development/discrepancy-register.md) |
+| The work item you were dispatched, and its state | its GitHub issue, then its PR, branch and review |
 | What is being worked on right now | [`.handoff.md`](.handoff.md) — navigation only, never authority |
 
 ## The flow
@@ -43,6 +44,21 @@ Three rules carry most of the weight:
 
 Transitions each have exactly one authorised actor, and some are always illegal — `Discovered -> In progress` most of all. See the engineering system, §4.2 and §4.2.1.
 
+## Where development state lives
+
+| Object | Carries |
+| --- | --- |
+| Repository | Persistent engineering context and authority |
+| Issue | One authorised work item: purpose, bounds, acceptance criteria |
+| Branch + PR | Implementation state for that work item |
+| PR review and comments | Manager feedback, corrections, technical acceptance |
+| Issue closure | Roundtable's roadmap/architecture closure |
+| Chat | Discussion aid — not the durable transport for development state |
+
+To pick up work already in flight, read the instructions, then the issue, then the PR and its commits, then the latest Manager review. Anything the next person needs belongs in one of those, not in a chat thread. See the engineering system, §10.
+
+Manager dispatches the exact work item. `Ready` means an item is eligible to be pulled, not that anyone may start it.
+
 ## Which document wins
 
 ```text
@@ -65,7 +81,7 @@ Where an experiment design calls for preregistration, freeze the question, varia
 
 Use the notation that answers the question; UML is a language, not one diagram type.
 
-Every architecture view currently declares whether it is **MEASURED** (every edge extracted from the repository) or **INTENDED** (responsibility and flow as an authority document describes it), and none mixes the two — that is how a conceptual arrow gets read as a dependency. Making that a standing convention is **proposed** in [ADR-0002](docs/decisions/ADR-0002-architecture-model-grounding.md) and awaits Roundtable; follow it, but do not cite it as settled.
+Every architecture view declares whether it is **MEASURED** (every edge extracted from the repository) or **INTENDED** (responsibility and flow as an authority document describes it). Do not mix them in one file — that is how a conceptual arrow gets read as a dependency. The convention is [ADR-0002](docs/decisions/ADR-0002-architecture-model-grounding.md).
 
 If you change the live package structure, the measured view has to change with it:
 

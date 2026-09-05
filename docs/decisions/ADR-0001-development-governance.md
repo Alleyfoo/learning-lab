@@ -81,7 +81,7 @@ Rejected. This collapses product/architecture authority into execution and reint
 - `docs/development/initiatives.md` — where a discovery goes
 - `docs/development/discrepancy-register.md` — documentation/repository disagreements and their dispositions
 - `docs/architecture/modelling-guide.md` — which notation answers which question
-- `docs/decisions/ADR-0002-architecture-model-grounding.md` — **Proposed**: how architecture views could be kept honest
+- `docs/decisions/ADR-0002-architecture-model-grounding.md` — how architecture views are kept honest
 - `docs/architecture/uml/04-development-workflow.puml` — this loop as a state machine
 - `PRODUCT.md`
 - `docs/roadmap/work-interface-lab-roadmap.md`
