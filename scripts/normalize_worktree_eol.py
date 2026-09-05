@@ -161,6 +161,37 @@ def apply(root: Path = LAB) -> int:
         if data is not None:
             (root / rel).write_bytes(data)
     print(f"normalized {len(eol_only)} file(s) to their committed bytes")
+    return refresh_index(root)
+
+
+def refresh_index(root: Path = LAB) -> int:
+    """Update the index's cached stat data, and PROVE no content was staged.
+
+    Without this the migration leaves `git status` reporting thousands of
+    modified files that `git diff` says are identical: the index still caches the
+    old (CRLF) size, and `git update-index --refresh` does not clear it. A
+    repository that looks massively modified when nothing changed is its own
+    hazard -- the next worker cannot see a real edit in that noise.
+
+    `git add --renormalize .` rewrites the stat data. Under this repository's
+    `* -text` it must stage NOTHING, because the working tree already holds the
+    committed bytes. That is asserted rather than assumed: if anything did get
+    staged, the content changed, which must never happen here, and the operator
+    is told to inspect it rather than trust this script.
+    """
+    _git(["add", "--renormalize", "."], root)
+    staged = [p for p in _git(["diff", "--cached", "--name-only", "HEAD"],
+                              root).decode("utf-8").split() if p]
+    if staged:
+        print("")
+        print(f"WARNING: refreshing the index staged {len(staged)} content "
+              f"change(s), which normalizing to committed bytes must never do:")
+        for rel in staged[:20]:
+            print(f"  {rel}")
+        print("Inspect with `git diff --cached` and unstage with `git reset` "
+              "before trusting this run.")
+        return 1
+    print("index stat data refreshed; nothing staged, so no content changed")
     return 0
 
 
@@ -239,6 +270,11 @@ def _self_test() -> int:
         check((root / "bin.dat").read_bytes() == bytes([0xFF, 0xFE]) + CRLF + bytes([0x80]),
               "CANARY: a binary carrying CRLF payload must not be rewritten")
         check(classify(root) == ([], []), "the tree must be clean afterwards")
+        check(_git(["diff", "--cached", "--name-only", "HEAD"], root).strip() == b"",
+              "CANARY: the index refresh must stage NO content change")
+        check(_git(["status", "--porcelain"], root).strip() == b"",
+              "git status must be clean after a successful apply, not full of "
+              "phantom modifications")
 
         # untracked files are never considered
         (root / "scratch.tmp").write_bytes(b"x" + CRLF)
@@ -270,7 +306,7 @@ def _self_test() -> int:
         for f in failures:
             print(f"FAIL  {f}")
         return 1
-    print("OK  self-test: 13 checks -- EOL-only diffs are found and normalized to "
+    print("OK  self-test: 15 checks -- EOL-only diffs are found and normalized to "
           "the committed bytes; a genuine local edit blocks the apply and survives "
           "it untouched; binary payload and untracked files are never rewritten; a batch far larger than a pipe buffer returns instead of deadlocking")
     return 0
