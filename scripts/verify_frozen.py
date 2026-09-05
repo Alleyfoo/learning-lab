@@ -71,21 +71,42 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def is_binary(data: bytes) -> bool:
-    """A NUL byte means the artifact is not text and must never be EOL-folded.
+# Tab, LF and CR are the only C0 control bytes that occur in text.
+_TEXT_CONTROLS = (9, 10, 13)
 
-    Every binary artifact in the frozen estate is an xlsx (a zip), and all 38 of
-    them carry NULs. The heuristic is deliberately conservative: anything that
-    might be text is treated as text, and text is the only thing whose
-    line-ending representation is forgiven.
+
+def is_text(data: bytes) -> bool:
+    """Whether this artifact is text, decided POSITIVELY.
+
+    Only text may have its line endings forgiven, so the classification must
+    prove text rather than fail to prove binary. "Not a NUL in sight" is not a
+    proof: a non-text stream can contain no NUL, and treating it as text would
+    fold CRLF bytes that are payload, letting a corrupted binary verify against
+    its old hash. That is the hole this predicate closes.
+
+    Text here means both:
+
+      * the bytes decode as UTF-8, and
+      * they carry no C0 control byte other than tab, LF or CR.
+
+    NUL is a control byte, so this subsumes the old heuristic rather than
+    sitting beside it. Anything that fails either arm keeps exact-byte
+    integrity. On the current frozen estate the two agree exactly -- 38 text,
+    38 binary -- so this tightens the guarantee without moving any artifact
+    across the boundary.
     """
-    return bytes([0]) in data
+    try:
+        data.decode("utf-8")
+    except UnicodeDecodeError:
+        return False
+    return not any(b < 32 and b not in _TEXT_CONTROLS for b in data)
 
 
 def renderings(data: bytes) -> set:
     """Every hash this artifact could legitimately have been recorded under.
 
-    Binary: exactly one -- its bytes. Exact-byte integrity is unchanged.
+    Non-text: exactly one -- its bytes. Exact-byte integrity is unchanged.
+    Text is identified positively by `is_text`; everything else is non-text.
 
     Text: the same content in either line-ending representation. A checkout is
     free to store text as LF or CRLF; that is a property of the machine, not of
@@ -96,7 +117,7 @@ def renderings(data: bytes) -> set:
     The raw bytes are included too, so a file with mixed endings that matches
     its record exactly still passes.
     """
-    if is_binary(data):
+    if not is_text(data):
         return {hashlib.sha256(data).hexdigest()}
     lf = data.replace(CRLF, LF)
     crlf = lf.replace(LF, CRLF)
@@ -349,7 +370,7 @@ def _self_test() -> int:
         blob = bytes([0]) + b"PK" + CRLF + b"payload" + CRLF + bytes([0, 255])
         bin_file = write("thing.xlsx", blob)
         blob_hash = hashlib.sha256(blob).hexdigest()
-        check(is_binary(blob), "the binary fixture must be detected as binary")
+        check(not is_text(blob), "the binary fixture must be classified non-text")
         check(integrity(bin_file, blob_hash) == (True, False),
               "an unchanged binary must verify on its exact bytes")
         check(len(renderings(blob)) == 1,
@@ -362,6 +383,31 @@ def _self_test() -> int:
         check(integrity(one_byte, blob_hash)[0] is False,
               "a single changed byte in a binary must fail")
 
+        # (4b) THE HOLE THE NUL HEURISTIC LEFT: a non-text payload containing
+        # NO NUL at all, whose CRLF bytes are payload rather than line endings.
+        # "No NUL" would have called this text and folded those bytes, letting a
+        # corrupted binary verify against its old hash. Positive classification
+        # is what closes it.
+        no_nul = (bytes([0xFF, 0xFE]) + b"PK" + CRLF + bytes([0x80, 0x81])
+                  + CRLF + bytes([0xC3, 0x28]))
+        check(bytes([0]) not in no_nul,
+              "the canary payload must contain NO NUL, or it proves nothing")
+        check(CRLF in no_nul, "the canary payload must contain CRLF bytes")
+        check(not is_text(no_nul),
+              "CANARY: a no-NUL non-text payload must be classified non-text")
+        nn_file = write("nonul.bin", no_nul)
+        nn_hash = hashlib.sha256(no_nul).hexdigest()
+        check(integrity(nn_file, nn_hash) == (True, False),
+              "an unchanged no-NUL binary must verify on its exact bytes")
+        nn_folded = write("nonul_folded.bin", no_nul.replace(CRLF, LF))
+        check(integrity(nn_folded, nn_hash)[0] is False,
+              "CANARY: folding CRLF to LF inside a no-NUL BINARY must fail -- "
+              "this is what the NUL heuristic would have wrongly accepted")
+
+        # text is classified positively, so valid UTF-8 text still folds
+        check(is_text(lf_bytes) and is_text(crlf_bytes),
+              "ordinary text must still be classified text and keep folding")
+
         # (5) the text rule must not quietly accept an empty or truncated file
         truncated = write("trunc.txt", lf_bytes[: len(lf_bytes) // 2])
         check(integrity(truncated, lf_hash)[0] is False,
@@ -371,9 +417,9 @@ def _self_test() -> int:
         for f in failures:
             print(f"FAIL  {f}")
         return 1
-    print("OK  self-test: 13 checks -- LF and CRLF renderings of intact text both "
-          "verify; text mutation, appended text and truncation fail; binaries stay "
-          "exact-byte and are NOT EOL-folded")
+    print("OK  self-test: 20 checks -- LF and CRLF renderings of intact text both "
+          "verify; text mutation, appended text and truncation fail; non-text stays "
+          "exact-byte and is NOT EOL-folded, including a payload with NO NUL")
     return 0
 
 

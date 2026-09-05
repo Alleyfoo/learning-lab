@@ -12,6 +12,14 @@
 # frozen artifacts have CRLF in their blob), so this file changes no committed
 # content. It makes a checkout faithful to what was committed.
 #
+# This file governs what Git WRITES on checkout. It does not rewrite files that
+# are already sitting in a working tree, so a clone made before it existed keeps
+# its CRLF copies and the frozen guards above keep reporting VOID. For those,
+# run the explicit, refusing migration:
+#
+#     python scripts/normalize_worktree_eol.py            # report
+#     python scripts/normalize_worktree_eol.py --apply    # rewrite EOL-only files
+#
 # See issue #7 and docs/development/initiatives.md I-7.
 
 * text=auto eol=lf
