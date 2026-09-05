@@ -20,15 +20,26 @@ That is all this script does.
 
 What it will and will not touch
 -------------------------------
-It rewrites a tracked file ONLY when the working copy differs from the
-committed blob by line endings ALONE -- that is, when
+It rewrites a tracked file ONLY when BOTH of these hold:
 
-    disk.replace(CRLF, LF) == blob
+    disk.replace(CRLF, LF) == blob        the difference is EOL-shaped
+    is_text(disk) and is_text(blob)       and both sides are proven text
+
+The second condition is not decoration. The byte test alone is satisfied by a
+NON-text local edit -- committed payload `... LF ...` changed to `... CRLF ...`
+is a content change wearing a line ending's clothes, and rewriting it would
+destroy the operator's work. `is_text` is imported from the integrity checker so
+there is one definition of text, not two that can drift apart.
+
+A tracked path the operator has DELETED counts as substantive and blocks the
+run. Skipping it because it is not a regular file would let `--apply` reach the
+index refresh, where `git add --renormalize .` can stage the deletion.
 
 Anything else is a genuine local edit and is never touched. If any tracked file
-has a substantive difference, the script REFUSES to apply and names the files,
-because a bulk `git checkout -- .` or `git reset --hard` would silently discard
-that work. Untracked files are never read or written.
+has a substantive difference, the script REFUSES to apply -- before writing
+anything at all -- and names the files, because a bulk `git checkout -- .` or
+`git reset --hard` would silently discard that work. Untracked files are never
+read or written.
 
 Rewriting a file to its own committed bytes is the opposite of altering frozen
 evidence: it restores the checkout to what the repository actually contains. No
@@ -51,6 +62,13 @@ from pathlib import Path
 LAB = Path(__file__).resolve().parents[1]
 CRLF = bytes([13, 10])
 LF = bytes([10])
+
+# The SAME predicate the integrity checker uses, imported rather than re-stated:
+# two definitions of "text" that could drift is exactly how the hole this script
+# was corrected for gets reopened. `verify_frozen` is not a frozen artifact, so
+# importing it is lawful; it has no import-time side effects.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from verify_frozen import is_text  # noqa: E402
 
 
 def _git(args: list[str], cwd: Path = LAB) -> bytes:
@@ -125,24 +143,50 @@ def _drain(proc, rels: list[str]) -> dict:
 
 
 def classify(root: Path = LAB) -> tuple[list[str], list[str]]:
-    """(eol_only, substantive) tracked paths whose working copy differs from HEAD."""
+    """(eol_only, substantive) tracked paths whose working copy differs from HEAD.
+
+    Only a difference PROVEN to be textual line-ending representation may land in
+    `eol_only`; everything else is substantive and blocks the migration.
+
+    Two traps this guards, both of which let real local work be overwritten:
+
+    * `disk.replace(CRLF, LF) == blob` is not on its own evidence of a line-ending
+      difference. Committed non-text bytes holding `... LF ...`, locally edited to
+      `... CRLF ...`, satisfy it exactly -- and that edit is payload, not
+      representation. Both sides must be proven text first, by the same positive
+      predicate the integrity checker uses.
+    * A tracked path the user has DELETED is real local state. Skipping it because
+      it is not a regular file would let `--apply` proceed to the index refresh,
+      where `git add --renormalize .` can stage the deletion. A missing tracked
+      path is therefore substantive, and blocks before anything is written.
+    """
     eol_only: list[str] = []
     substantive: list[str] = []
-    rels = [r for r in tracked_files(root) if (root / r).is_file()]
-    blobs = read_blobs(rels, root)
-    for rel in rels:
+    readable: list[str] = []
+    for rel in tracked_files(root):
         path = root / rel
+        if not path.exists():
+            # locally deleted (or a broken symlink): real local state, never ours
+            substantive.append(rel)
+        elif path.is_file():
+            readable.append(rel)
+        # anything else -- a directory or a special file where a blob is tracked --
+        # is left alone rather than guessed at.
+
+    blobs = read_blobs(readable, root)
+    for rel in readable:
         blob = blobs.get(rel)
         if blob is None:
             continue
-        disk = path.read_bytes()
+        disk = (root / rel).read_bytes()
         if disk == blob:
             continue
-        if disk.replace(CRLF, LF) == blob:
+        if (disk.replace(CRLF, LF) == blob
+                and is_text(disk) and is_text(blob)):
             eol_only.append(rel)
         else:
             substantive.append(rel)
-    return eol_only, substantive
+    return sorted(eol_only), sorted(substantive)
 
 
 def apply(root: Path = LAB) -> int:
@@ -281,6 +325,48 @@ def _self_test() -> int:
         check(classify(root) == ([], []),
               "CANARY: an untracked file must never enter the candidate set")
 
+        # (A) CANARY: a NON-TEXT tracked blob given an EOL-SHAPED local byte edit.
+        # `disk.replace(CRLF, LF) == blob` is satisfied exactly, so the predicate
+        # this script shipped with would have called it eol_only and overwritten
+        # the operator's edit with the committed bytes. Positive text proof is
+        # what stops it. The payload carries NO NUL, so the weaker "NUL means
+        # binary" test would not have saved it either.
+        payload_blob = bytes([0xFF, 0xFE]) + b"PK" + LF + bytes([0x80, 0x81])
+        (root / "payload.bin").write_bytes(payload_blob)
+        _git(["add", "-A"], root)
+        _git(["commit", "-qm", "payload"], root)
+        edited = bytes([0xFF, 0xFE]) + b"PK" + CRLF + bytes([0x80, 0x81])
+        (root / "payload.bin").write_bytes(edited)
+        check(edited.replace(CRLF, LF) == payload_blob,
+              "the canary edit must satisfy the OLD predicate, or it proves nothing")
+        check(bytes([0]) not in edited,
+              "the canary payload must contain NO NUL, or it only tests the old test")
+        eol_only, substantive = classify(root)
+        check("payload.bin" not in eol_only,
+              "CANARY: a non-text local edit must NEVER be classified eol_only")
+        check("payload.bin" in substantive,
+              "a non-text local edit must be classified substantive")
+        check(apply(root) == 1, "apply must refuse while that edit is present")
+        check((root / "payload.bin").read_bytes() == edited,
+              "CANARY: the non-text local edit must survive the refused apply "
+              "byte for byte")
+        (root / "payload.bin").write_bytes(payload_blob)     # restore for later checks
+
+        # (B) CANARY: a tracked path the operator has DELETED locally. Skipping it
+        # because it is not a regular file would let --apply reach the index
+        # refresh, where `git add --renormalize .` can stage the deletion.
+        (root / "keep.txt").unlink()
+        eol_only, substantive = classify(root)
+        check("keep.txt" in substantive,
+              "CANARY: a locally deleted tracked path must be substantive")
+        check(apply(root) == 1, "apply must refuse while a tracked file is deleted")
+        check(not (root / "keep.txt").exists(),
+              "CANARY: the deletion must remain a working-tree deletion")
+        staged = _git(["diff", "--cached", "--name-only", "HEAD"], root).strip()
+        check(staged == b"",
+              f"CANARY: the migration must stage nothing while refusing: {staged!r}")
+        _git(["checkout", "--", "keep.txt"], root)           # restore for later checks
+
         # CANARY for the pipe deadlock this script shipped with once: the first
         # batched version wrote every query to git's stdin BEFORE reading stdout,
         # so on a real repository git filled the ~64KB stdout pipe and blocked
@@ -306,9 +392,9 @@ def _self_test() -> int:
         for f in failures:
             print(f"FAIL  {f}")
         return 1
-    print("OK  self-test: 15 checks -- EOL-only diffs are found and normalized to "
+    print("OK  self-test: 25 checks -- EOL-only diffs are found and normalized to "
           "the committed bytes; a genuine local edit blocks the apply and survives "
-          "it untouched; binary payload and untracked files are never rewritten; a batch far larger than a pipe buffer returns instead of deadlocking")
+          "it untouched; binary payload and untracked files are never rewritten; a batch far larger than a pipe buffer returns instead of deadlocking; a NON-TEXT edit shaped like an EOL change, and a tracked deletion, both refuse and survive untouched")
     return 0
 
 

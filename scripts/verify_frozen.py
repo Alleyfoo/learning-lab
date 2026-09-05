@@ -38,14 +38,25 @@ Checkout invariance
 -------------------
 A frozen hash is a claim about an artifact, not about the machine holding it.
 Text can be checked out as LF or CRLF; that representation must not change the
-verdict, and `renderings()` is where that is decided. Binary artifacts keep
-exact-byte semantics -- they are never EOL-folded.
+verdict, and `renderings()` is where that is decided. Non-text artifacts keep
+exact-byte semantics -- they are never EOL-folded, and `is_text` decides which
+is which POSITIVELY rather than by failing to spot a NUL.
 
-`.gitattributes` pins the checkout to LF so that the byte-exact guards inside
-frozen experiment harnesses (which cannot be edited) also see what was
-committed. The two mechanisms answer different halves: the attributes file
-fixes what lands on disk, `renderings()` forgives hashes that were recorded
-from a CRLF checkout before that file existed. Neither edits a recorded hash.
+`.gitattributes` carries `* -text`, which disables end-of-line conversion in
+both directions: a checkout receives each blob verbatim, and `git add`
+normalizes nothing. That is what lets the byte-exact guards inside frozen
+experiment harnesses -- which cannot be edited -- see what was committed. It is
+deliberately NOT `text=auto eol=lf`: 171 tracked files, all under
+`work_interface/`, have CRLF in their committed blobs, and normalizing on the
+way in would rewrite frozen experiment evidence. A byte-faithful checkout is the
+requirement here; an LF house style is not.
+
+The two mechanisms answer different halves. The attributes file fixes what lands
+on disk. `renderings()` forgives the eleven hashes recorded from a CRLF checkout
+before that file existed. Neither edits a recorded hash.
+
+An existing checkout predates the attributes file and Git will not rewrite it;
+`scripts/normalize_worktree_eol.py` is the guarded transition for those.
 """
 from __future__ import annotations
 
