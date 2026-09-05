@@ -68,21 +68,60 @@ def tracked_files(root: Path = LAB) -> list[str]:
 
 def blob_bytes(rel: str, root: Path = LAB) -> bytes | None:
     """The committed bytes of `rel` at HEAD, or None if it is not in HEAD."""
-    try:
-        return _git(["show", f"HEAD:{rel}"], root)
-    except RuntimeError:
-        return None
+    return read_blobs([rel], root).get(rel)
+
+
+def read_blobs(rels: list[str], root: Path = LAB) -> dict:
+    """Committed bytes for many paths in ONE `git cat-file --batch` process.
+
+    A `git show` per path costs a process spawn per file; this repository tracks
+    thousands, which made the naive version unusable at repo scale. The batch
+    protocol is: send `HEAD:<path>` per line, read back either
+    `<oid> <type> <size>` followed by that many bytes and a newline, or a line
+    ending in `missing`.
+    """
+    if not rels:
+        return {}
+    proc = subprocess.Popen(["git", "cat-file", "--batch"], cwd=str(root),
+                            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            stderr=subprocess.DEVNULL)
+    query = bytes().join((f"HEAD:{r}".encode("utf-8") + LF) for r in rels)
+    assert proc.stdin is not None and proc.stdout is not None
+    proc.stdin.write(query)
+    proc.stdin.close()
+
+    out: dict = {}
+    for rel in rels:
+        header = proc.stdout.readline()
+        if not header:
+            break
+        parts = header.split()
+        if len(parts) < 3 or parts[-1] not in (b"blob", b"tree", b"commit", b"tag"):
+            if header.rstrip().endswith(b"missing"):
+                out[rel] = None
+                continue
+            # `<oid> blob <size>` is the normal shape; anything else is not a blob
+            if len(parts) != 3:
+                out[rel] = None
+                continue
+        size = int(parts[2])
+        data = proc.stdout.read(size)
+        proc.stdout.read(1)                    # the trailing newline
+        out[rel] = data if parts[1] == b"blob" else None
+    proc.stdout.close()
+    proc.wait()
+    return out
 
 
 def classify(root: Path = LAB) -> tuple[list[str], list[str]]:
     """(eol_only, substantive) tracked paths whose working copy differs from HEAD."""
     eol_only: list[str] = []
     substantive: list[str] = []
-    for rel in tracked_files(root):
+    rels = [r for r in tracked_files(root) if (root / r).is_file()]
+    blobs = read_blobs(rels, root)
+    for rel in rels:
         path = root / rel
-        if not path.is_file():
-            continue
-        blob = blob_bytes(rel, root)
+        blob = blobs.get(rel)
         if blob is None:
             continue
         disk = path.read_bytes()
@@ -105,8 +144,11 @@ def apply(root: Path = LAB) -> int:
             print(f"  {rel}")
         print("\nCommit, stash or revert them, then run this again.")
         return 1
+    blobs = read_blobs(eol_only, root)
     for rel in eol_only:
-        (root / rel).write_bytes(blob_bytes(rel, root) or b"")
+        data = blobs.get(rel)
+        if data is not None:
+            (root / rel).write_bytes(data)
     print(f"normalized {len(eol_only)} file(s) to their committed bytes")
     return 0
 
