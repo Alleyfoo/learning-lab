@@ -4,7 +4,18 @@ Read [`docs/development/engineering-system.md`](docs/development/engineering-sys
 
 This file is a pointer, not a second copy of the rules. Where it seems to disagree with the engineering system, the engineering system wins.
 
-## The four that agents get wrong here
+## Where your work comes from
+
+Manager dispatches one work item. To reconstruct it, read, in this order:
+
+1. this file, [`CONTRIBUTING.md`](CONTRIBUTING.md) and the engineering system;
+2. the **issue** — the authorised work item, its bounds and acceptance criteria;
+3. the **PR and its commits**, if implementation already exists;
+4. the **latest Manager review or PR comment**.
+
+That is everything. You never need a chat transcript to recover the previous worker's state, and you must not rely on one: put whatever the next worker needs into the PR or the issue instead.
+
+## The five that agents get wrong here
 
 1. **A discovery is not work.** If you find something outside your task, record it in [`docs/development/initiatives.md`](docs/development/initiatives.md) and continue with the task you were given. `Discovered -> In progress` is an illegal transition. Do not fix it "while you are in there".
 
@@ -12,11 +23,13 @@ This file is a pointer, not a second copy of the rules. Where it seems to disagr
 
 3. **Frozen evidence is never edited.** Experiment packs, fixtures and historical harnesses stay as they are, including their defects. `authorized_reader.py` keeps a cp1252 defect on purpose; backlog item B-3 explains why. Corrections are additive and apply to new work, not to the record of old work.
 
-4. **Diagrams do not create architecture.** Views under `docs/architecture/uml/` are reverse-engineered. Each declares MEASURED or INTENDED — a convention proposed in ADR-0002, not yet accepted. If you change the live package structure, run:
+4. **Diagrams do not create architecture.** Views under `docs/architecture/uml/` are reverse-engineered. Each declares MEASURED or INTENDED (ADR-0002). If you change the live package structure, run:
 
    ```bash
    python scripts/check_architecture_grounding.py
    ```
+
+5. **You do not choose your own task.** `Ready` means an item is eligible to be pulled by Manager — not permission for whoever finds it. Do not scan the repository and start something because it looks next. If you think the wrong thing was dispatched, say so; record anything else you noticed as an initiative.
 
 ## Authority order
 

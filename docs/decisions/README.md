@@ -9,7 +9,7 @@ Use an ADR when the decision constrains future work. Do not use one for ordinary
 | ADR | Title | Status | Date |
 | --- | --- | --- | --- |
 | [0001](ADR-0001-development-governance.md) | Development governance and authority loop | Accepted | 2026-09-05 |
-| [0002](ADR-0002-architecture-model-grounding.md) | Architecture models are measured, not asserted | Proposed | 2026-09-05 |
+| [0002](ADR-0002-architecture-model-grounding.md) | Architecture models are measured, not asserted | Accepted | 2026-09-05 |
 
 ## Status values
 

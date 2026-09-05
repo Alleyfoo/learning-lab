@@ -1,17 +1,16 @@
 # ADR-0002: Architecture models are measured, not asserted
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-09-05
+**Accepted by:** Roundtable, issue #3
 
-> **Not authority.** This ADR was written during implementation, from a discrepancy
-> found while building the architecture package. Issue #2 commissions the accepted
-> governance decision (ADR-0001); it does not authorise a Coder or Manager to accept a
-> further architecture decision discovered along the way. Roundtable owns that.
->
-> What is in the repository — the MEASURED/INTENDED headers, the split views and
-> `scripts/check_architecture_grounding.py` — is **evidence supporting this proposal**,
-> not a convention already in force. Until Roundtable accepts, rejects or amends this
-> ADR, nothing elsewhere may cite it as settled.
+> **How this reached Accepted.** Written during issue #2's implementation, from a
+> discrepancy found while building the architecture package, and deliberately returned
+> as `Proposed` rather than self-accepted: issue #2 commissioned ADR-0001, not a second
+> architecture decision discovered along the way. Roundtable accepted it unchanged in
+> issue #3. The MEASURED/INTENDED headers, the split views and
+> `scripts/check_architecture_grounding.py` were the evidence for the proposal; they are
+> now the convention this ADR establishes.
 
 ## Context
 

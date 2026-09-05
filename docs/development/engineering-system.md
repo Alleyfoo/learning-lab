@@ -16,7 +16,7 @@ A new development worker should be able to answer these from the repository alon
 | # | Question | Answer |
 | --- | --- | --- |
 | 1 | What is the current product/architecture authority? | `PRODUCT.md` for product direction and the live/research split; accepted ADRs in [`docs/decisions/`](../decisions/) for durable architecture decisions; the code and frozen evidence for what actually exists. |
-| 2 | What work is currently allowed to start? | Items in **Ready** (§4). Today that is the work-interface line's next step — executing the frozen, preregistered `work_interface/w1l/` baseline pack — per [`.handoff.md`](../../.handoff.md) and backlog item B-4. Nothing else has been declared Ready. |
+| 2 | What work is currently allowed to start? | Only what Manager has **dispatched** to you (§4.2, §10). `Ready` means an item is eligible to be pulled, not that anyone may start it. Today the only item in `Ready` is the work-interface line's next step — executing the frozen, preregistered `work_interface/w1l/` baseline pack — per [`.handoff.md`](../../.handoff.md) and backlog item B-4. |
 | 3 | Who may change the roadmap? | Roundtable only (§2). |
 | 4 | Who may dispatch implementation? | Manager only (§2, §4.2). |
 | 5 | Who accepts implementation as technically complete? | Manager, against the Definition of Done (§6). |
@@ -25,9 +25,14 @@ A new development worker should be able to answer these from the repository alon
 | 8 | What must be true before work starts? | The Definition of Ready (§5). |
 | 9 | What must be true before work is done? | The Definition of Done (§6). |
 | 10 | Which modelling notation should be used for a given question? | [`docs/architecture/modelling-guide.md`](../architecture/modelling-guide.md). |
-| 11 | Where is a durable architecture decision recorded? | An ADR in [`docs/decisions/`](../decisions/). |
+| 11 | Where is a durable architecture decision recorded? | An ADR in [`docs/decisions/`](../decisions/). Its [index](../decisions/README.md) gives each ADR's current status, and each ADR states its own. |
 | 12 | Which document wins when two documents disagree? | The precedence order in §7. |
 | 13 | Which parts of the repository are live system and which are frozen research evidence? | `PRODUCT.md` § "What is live code vs research record" and `README.md` § "Repository map" name the split; [`docs/architecture/uml/05-package-dependencies.puml`](../architecture/uml/05-package-dependencies.puml) is the measured live structure, checked by `scripts/check_architecture_grounding.py`. |
+| 14 | Where does durable development context live? | The repository, plus the issue, the PR and its review (§10). Not chat. |
+| 15 | What does an issue represent, and what does a PR represent? | The issue is one authorised work item — purpose, bounds, acceptance criteria. The PR is the implementation state of that work item (§10). |
+| 16 | Where does Manager correction and acceptance live? | In the PR's reviews and comments (§10). |
+| 17 | Who decides which work item a worker may start? | Manager, by dispatching it. A worker does not choose its own from the repository (§10). |
+| 18 | Do I need chat to recover the previous worker's state? | No. Read the instructions, the issue, the PR and its commits, then the latest Manager review (§10). |
 
 ---
 
@@ -259,10 +264,51 @@ Rules that follow from the order:
 | --- | --- |
 | This process | `docs/development/engineering-system.md` (this file) |
 | Governance decision | `docs/decisions/ADR-0001-development-governance.md` |
-| Architecture-model grounding — **proposed**, not accepted | `docs/decisions/ADR-0002-architecture-model-grounding.md` |
+| Architecture-model grounding decision | `docs/decisions/ADR-0002-architecture-model-grounding.md` |
 | Notation choice | `docs/architecture/modelling-guide.md` |
 | Architecture views | `docs/architecture/uml/` |
 | Discoveries awaiting disposition | `docs/development/initiatives.md` |
 | Known documentation-vs-repository discrepancies | `docs/development/discrepancy-register.md` |
 | Contributor entry point | `CONTRIBUTING.md` |
 | Agent entry point | `CLAUDE.md` |
+| Durable development state | the issue, the PR, and its review — see §10 |
+
+---
+
+## 10. Where development state lives
+
+Development state lives in the repository and in the standard GitHub objects around it. Nothing here is a new mechanism; this section only says which existing object carries which part of the lifecycle in §4.
+
+| Object | Carries |
+| --- | --- |
+| **Repository** | Persistent engineering context and authority — code, frozen evidence, `PRODUCT.md`, ADRs, roadmap, this process. |
+| **Issue** | One authorised work item: its purpose, bounds and acceptance criteria. |
+| **Branch + PR** | The implementation state of that work item, including its commit history. |
+| **PR review and comments** | Manager feedback, requested corrections, and technical acceptance. |
+| **Issue closure** | Roundtable's roadmap/architecture closure. |
+| **Chat** | Discussion and thinking aid. **Not** the durable transport for development state. |
+
+### Reconstructing a work item
+
+A dispatched worker should be able to rebuild everything it needs from repository state, in this order:
+
+1. the repository's agent/contributor instructions — [`CLAUDE.md`](../../CLAUDE.md), [`CONTRIBUTING.md`](../../CONTRIBUTING.md), and this document;
+2. the governing **issue**;
+3. the **PR and its commits**, if implementation already exists;
+4. the latest **Manager review or PR comment**.
+
+If any of those four is missing something the next worker needs, the fix is to write it into that object — not into a chat message, a side file, or a bespoke handoff format.
+
+Anything a worker reports at the end of a task belongs in the PR or the issue, where the next worker will look for it.
+
+### Why this is written down
+
+The failure mode it removes is specific and was observed before this system existed: worker reports and continuation instructions lived only in long, unsearchable chat threads and had to be copy/pasted between agents by hand. Chat is not searchable by the next worker, not versioned, and not visible from the repository. Everything durable therefore lands in an object that is.
+
+### Dispatch is not self-service
+
+**Manager dispatches the exact work item.** A worker does not scan the repository, notice something that looks `Ready` or next, and start it.
+
+`Ready` is a statement about the item — its Definition of Ready is satisfied, so it is *eligible to be pulled* — not permission for whoever finds it. The `Ready -> Dispatched` transition is Manager's (§4.2), and `Dispatched -> In progress` is the point at which a worker begins.
+
+A worker who believes the wrong thing was dispatched says so, and records anything else it noticed in [`initiatives.md`](initiatives.md). It does not re-choose its own task.
