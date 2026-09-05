@@ -1,0 +1,23 @@
+# Frozen-integrity depends on the checkout reproducing the committed bytes.
+#
+# `scripts/check_surfaced.py` transitively imports `experimentL/harness/
+# execute_recipe.py` -> `experimentJ/harness/macro_v2.py`, whose import-time
+# `verify_v1_source()` hashes `experimentI/harness/gate_I.py` byte-exactly
+# against a hash frozen in `experimentJ/expected.json`. Every file in that chain
+# is frozen evidence or a historical harness, so none of them may be edited --
+# which leaves the bytes on disk as the only free variable. A CRLF checkout
+# makes that guard report VOID on an artifact that never changed.
+#
+# Every committed blob in this repository is already LF (measured: 0 of 76
+# frozen artifacts have CRLF in their blob), so this file changes no committed
+# content. It makes a checkout faithful to what was committed.
+#
+# See issue #7 and docs/development/initiatives.md I-7.
+
+* text=auto eol=lf
+
+# Binary artifacts keep exact-byte identity and are never EOL-translated.
+# The frozen estate's 38 binary artifacts are all xlsx.
+*.xlsx binary
+*.png  binary
+*.pyc  binary
