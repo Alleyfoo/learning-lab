@@ -113,7 +113,7 @@ Deliberately **not** built here. It is a new mechanism, and the existing-system-
 
 ## I-7 — `verify_frozen.py`'s verdict depends on the checkout's line endings
 
-**State:** `In progress` — dispatched as issue #7 once issue #5 closed I-1. Decided in the issue #2 closure.
+**State:** `Roundtable closed` — dispatched as issue #7 once issue #5 closed I-1; PR #8 merged as `18209f9` and Roundtable closed issue #7 on 2026-09-05. Decided in the issue #2 closure.
 **Roundtable reason:** "The evidence estate appears intact, but a corruption verifier that cannot give checkout-invariant verdicts is not trustworthy."
 **Raised by:** issue #2, running the existing checks before proposing this branch
 **Established by:** `python scripts/verify_frozen.py` reports **27 mismatches across 76 checked artifacts** in this working copy. Re-hashing each artifact in both renderings gives:
