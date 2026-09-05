@@ -1,0 +1,50 @@
+@startuml
+!theme plain
+title Learning Lab — system context (repository-grounded)
+
+actor Operator
+folder "Company data\nfiles / workbooks / tables" as CompanyData
+
+rectangle "Learning Lab — live system" as Live {
+  component "adapters" as Adapters
+  component "inspector" as Inspector
+  component "modeller" as Modeller
+  component "taskmodel" as TaskModel
+  component "task families\nreservation / enrichment /\naggregation / reconciliation" as Families
+  component "worker" as Worker
+  component "fleet + system map" as Fleet
+  component "supervisor" as Supervisor
+}
+
+folder "Frozen research / evidence estate\nexperiment* / definition_phase / s1..s15 /\nuq1_audit / work_interface packs" as Research
+
+cloud "Agent workspace / Work\n(research hypothesis, not product authority)" as Work
+
+Operator --> Modeller : define / confirm work
+Operator --> Fleet : operate / inspect map
+Operator --> Supervisor : ask / investigate / review
+CompanyData --> Adapters : structural input
+Adapters --> Inspector : observable structure/data
+Inspector --> Modeller : measured facts / evidence
+Modeller --> TaskModel : proposed explicit model
+TaskModel --> Families : task-family semantics
+Families --> Worker : deterministic execution semantics
+Worker --> Fleet : established runs / refusals / effects
+Fleet --> Supervisor : read-only operational context
+Supervisor ..> Fleet : proposals / investigations\n(no silent production authority)
+
+Work ..> Modeller : proposed definition path
+Work ..> Supervisor : consultation path
+
+Research ..> Live : evidence that established current floor
+
+note right of Research
+Research is preserved evidence/history,
+not an alternate live application path.
+end note
+
+note bottom of Work
+The Work-interface roadmap is a hypothesis/research contract.
+PRODUCT.md remains product authority until that hypothesis is adopted.
+end note
+@enduml
