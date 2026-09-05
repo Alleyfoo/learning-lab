@@ -1,4 +1,14 @@
 @startuml
+'=============================================================================
+' KIND      INTENDED -- the system boundary as the authority documents
+'           describe it. Arrows are responsibility and data flow, NOT
+'           import edges; for those see 05-package-dependencies.puml.
+' GROUNDING README.md ("Current product direction", "Repository map");
+'           PRODUCT.md ("The mental model", "Product authority model",
+'           "What is live code vs research record");
+'           docs/roadmap/work-interface-lab-roadmap.md (the Work
+'           hypothesis, which is explicitly not product authority).
+'=============================================================================
 !theme plain
 title Learning Lab — system context (repository-grounded)
 

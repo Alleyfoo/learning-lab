@@ -1,4 +1,13 @@
 @startuml
+'=============================================================================
+' KIND      INTENDED -- the product-level journey as the authority
+'           documents describe it. It is NOT a function-by-function call
+'           trace; for the measured structure see
+'           05-package-dependencies.puml, and for the data path of
+'           established operation see 08-operational-data-flow.puml.
+' GROUNDING README.md ("Current product direction", "What is implemented
+'           now"); PRODUCT.md ("The intended journey" steps 1-6).
+'=============================================================================
 !theme plain
 title Learning Lab — intended product journey (high-level sequence)
 

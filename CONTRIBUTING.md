@@ -1,38 +1,76 @@
 # Contributing to Learning Lab
 
-Learning Lab uses established software-engineering mechanisms rather than a project-specific development protocol.
+Learning Lab uses established software-engineering mechanisms rather than a project-specific development protocol. Before adding a new process mechanism, find the established concept that already covers the problem and use it — see the existing-system-first rule.
 
-Start with:
+**Read first:** [`docs/development/engineering-system.md`](docs/development/engineering-system.md). It is the normative description of how development work moves, and it opens with the answers to the thirteen questions a new worker needs.
 
-- [`docs/development/engineering-system.md`](docs/development/engineering-system.md) — Kanban flow, Roundtable/Manager/Coder authority, DoR, DoD, WIP, ADR/RFC/UML terminology and document precedence;
-- [`docs/decisions/ADR-0001-development-governance.md`](docs/decisions/ADR-0001-development-governance.md) — accepted governance decision;
-- [`docs/architecture/uml/README.md`](docs/architecture/uml/README.md) — repository-grounded architecture discovery views;
-- [`PRODUCT.md`](PRODUCT.md) — current product/architecture direction;
-- [`docs/roadmap/`](docs/roadmap/) — authorized roadmap/research contracts;
-- [`.handoff.md`](.handoff.md) — transient current-work navigation only, never authority.
+## Where things are
 
-## Development flow
+| You need | Go to |
+| --- | --- |
+| The development process — roles, states, DoR, DoD, WIP, precedence | [`docs/development/engineering-system.md`](docs/development/engineering-system.md) |
+| Why the governance loop is what it is | [`docs/decisions/ADR-0001-development-governance.md`](docs/decisions/ADR-0001-development-governance.md) |
+| Durable architecture decisions | [`docs/decisions/`](docs/decisions/) |
+| A proposal that needs discussion first | [`docs/rfcs/`](docs/rfcs/) |
+| Which diagram notation answers which question | [`docs/architecture/modelling-guide.md`](docs/architecture/modelling-guide.md) |
+| What the live system actually looks like | [`docs/architecture/uml/`](docs/architecture/uml/) |
+| Product direction and the live/research split | [`PRODUCT.md`](PRODUCT.md) |
+| Authorised direction | [`docs/roadmap/`](docs/roadmap/) |
+| Somewhere to put a discovery that is out of scope | [`docs/development/initiatives.md`](docs/development/initiatives.md) |
+| Known documentation-vs-repository disagreements | [`docs/development/discrepancy-register.md`](docs/development/discrepancy-register.md) |
+| What is being worked on right now | [`.handoff.md`](.handoff.md) — navigation only, never authority |
+
+## The flow
 
 ```text
-Discovery -> backlog/initiative intake
-          -> Roundtable disposition
-          -> Ready (DoR satisfied)
-          -> Manager dispatch
-          -> Coder implementation
-          -> Manager review (DoD / acceptance)
-          -> Implemented
-          -> Roundtable roadmap/authority closure
-          -> Closed
+Discovered
+  -> Initiative / Backlog     anyone may record a discovery
+  -> Roundtable accepted      Roundtable decides it is real work
+  -> Roadmapped               Roundtable gives it a priority
+  -> Ready                    Manager: Definition of Ready satisfied
+  -> Dispatched               Manager: bounded work order, WIP respected
+  -> In progress              Coder implements
+  -> Manager review           Coder returns implementation + evidence
+  -> Implemented              Manager: Definition of Done satisfied
+  -> Roundtable closed        Roundtable updates roadmap/architecture status
 ```
 
-A discovery does not become development scope automatically. Coder does not change roadmap authority. Manager does not silently expand roadmap scope. Manager acceptance and Roundtable closure are different gates.
+Three rules carry most of the weight:
+
+1. **A discovery is not work.** Found something outside your task? Write it to `docs/development/initiatives.md` and keep going. It becomes work when Roundtable says so, not when you found it.
+2. **Manager acceptance and Roundtable closure are different gates.** Manager answers "was the commissioned work implemented correctly?" Roundtable answers "what does this mean for the roadmap and architecture?" Neither may perform the other.
+3. **A Coder does not change roadmap, architecture or authority** to make the task easier or larger.
+
+Transitions each have exactly one authorised actor, and some are always illegal — `Discovered -> In progress` most of all. See the engineering system, §4.2 and §4.2.1.
+
+## Which document wins
+
+```text
+live code + frozen evidence
+  > accepted product / architecture / ADR authority
+  > roadmap
+  > backlog / initiatives
+  > transient handoff / notes
+```
+
+If `.handoff.md` disagrees with the repository, the handoff is stale. Repair it; never plan from it.
 
 ## Research evidence
 
-Frozen experiments, negative results, corrections and historical defects are evidence. Do not clean them up in place merely because a newer mechanism exists. Correct current/future machinery additively and preserve the evidence that motivated the correction.
+Frozen experiments, negative results, corrections and historical defects are **evidence**. Do not clean them up in place because a newer mechanism exists. `authorized_reader.py` keeps a cp1252 defect on purpose — it is W1-F evidence, and backlog item B-3 says so. Correct current and future machinery additively; preserve what motivated the correction.
+
+Where an experiment design calls for preregistration, freeze the question, variable, baseline, measurement and interpretation branches **before** execution.
 
 ## Architecture documentation
 
-Use the established notation that answers the question. UML is the default architecture modelling language, not a requirement to force everything into one diagram type. Use ADRs for durable decisions; use RFCs for substantial proposals that need discussion before a decision.
+Use the notation that answers the question; UML is a language, not one diagram type.
 
-When a diagram disagrees with code or frozen evidence, the diagram is wrong. When repository reality disagrees with accepted architecture/product authority, record the discrepancy and route it through the governance loop.
+Every architecture view declares whether it is **MEASURED** (every edge extracted from the repository) or **INTENDED** (responsibility and flow as an authority document describes it). Do not mix them in one file — that is how a conceptual arrow gets read as a dependency.
+
+If you change the live package structure, the measured view has to change with it:
+
+```bash
+python scripts/check_architecture_grounding.py
+```
+
+When a diagram disagrees with code, the diagram is wrong. When code disagrees with accepted authority, record a discrepancy and route it through the loop — do not redraw until the contradiction disappears.

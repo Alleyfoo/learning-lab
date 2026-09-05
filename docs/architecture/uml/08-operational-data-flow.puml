@@ -1,0 +1,89 @@
+@startuml
+'=============================================================================
+' KIND      MEASURED -- processes and stores named from the code that
+'           implements them; each store is a real path under
+'           fleet/workers/<name>/.
+' GROUNDING fleet/inbox.py (poll, _poll_contract_item, LEDGER="ledger.jsonl",
+'           FOLDERS, retained_name); fleet/input_set.py (SET_FILE, bind,
+'           _materialize, fingerprint, run_input); fleet/fleet.py
+'           (record_run, load); adapters/xlsx.py; worker/runtime.py;
+'           fleet/system_map.py; supervisor/app.py.
+'
+' NOTATION  Data Flow Diagram, level 1. Circles/rounded boxes are
+'           PROCESSES, the open-ended boxes are DATA STORES, the actors
+'           are EXTERNAL ENTITIES. Arrows are DATA, never control flow --
+'           see docs/architecture/modelling-guide.md §2.
+'
+' No LLM appears anywhere in this diagram. That is the point of it: once
+' work is established, the recurring path runs without one.
+'=============================================================================
+!theme plain
+title Learning Lab — established operation, data flow (DFD level 1, MEASURED)
+
+skinparam componentStyle rectangle
+
+actor "Operator" as OP
+actor "Company\ndata files" as SRC
+
+component "1.0\nRead + identify\narriving item" as P1
+component "2.0\nBind role /\ncomplete input set" as P2
+component "3.0\nValidate against\ninput contract" as P3
+component "4.0\nExecute the\ntask model" as P4
+component "5.0\nRecord run,\nfile the item" as P5
+component "6.0\nDerive the\nsystem map" as P6
+component "7.0\nInterpret +\npropose" as P7
+
+database "D1  worker.json\n     versions/vN.json" as D1
+database "D2  input_contracts/vN.json" as D2
+database "D3  input_set.json" as D3
+database "D4  ledger.jsonl" as D4
+database "D5  runs.jsonl" as D5
+database "D6  processed/  exceptions/" as D6
+database "D7  assessment, backlog,\n     improvements, rulebook" as D7
+
+SRC --> P1 : file dropped into inbox/
+P1 --> D4 : item_id (content digest),\nclaim + precondition
+D4 --> P1 : last recorded state\n(duplicate? staged?)
+P1 --> P2 : item + declared roles
+
+P2 --> D3 : binding, materialized member
+D3 --> P2 : open set, completeness
+D1 --> P2 : source_roles, slot kinds
+P2 --> P3 : complete input set + fingerprint
+
+D2 --> P3 : sheet / collection / header_row\nfor this version
+P3 --> P5 : refusal (named reason)
+P3 --> P4 : validated rows
+
+D1 --> P4 : the established model version
+P4 --> P5 : result / refusal / applied effect
+
+P5 --> D5 : run record, version, run_input.fingerprint
+P5 --> D4 : terminal state
+P5 --> D6 : raw arrival retained by digest
+
+D1 --> P6 : established workers, declared\ninputs, destinations
+D5 --> P6 : run and exception state
+P6 --> OP : read-only company system map
+
+D4 --> P7 : exceptions
+D5 --> P7 : run history
+D7 --> P7 : prior findings, rules
+P7 --> D7 : findings, proposals\n(never activation)
+P7 --> OP : interpretation, grounded in referents
+OP --> D7 : human-gated activation
+
+note as N1
+**Boundaries this flow keeps**
+
+* Every store written by 5.0 is written AFTER the claim in D4, so an
+  interrupted pass is reconstructable rather than invisible.
+* 3.0 emits a NAMED refusal into the same path as a result. A refusal
+  is an outcome, not an error to be retried away.
+* `run_input.fingerprint` in D5 is what makes run-exactly-once
+  decidable across a crash: recovery matches on it rather than
+  guessing from file position.
+* 7.0 writes only to D7, and only proposals. The arrow that turns a
+  proposal into an active rule starts at the Operator, not at 7.0.
+end note
+@enduml

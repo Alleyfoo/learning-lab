@@ -1,49 +1,60 @@
-# Learning Lab UML grounding package
+# Architecture views
 
-These diagrams are **architecture-discovery artifacts grounded in the repository**. They describe the current live system and its relationship to the research estate; they do not create architecture merely by being drawn.
+Repository-grounded discovery artifacts. They describe the system; they do not create it by being drawn.
 
-## Grounding sources
+Which notation answers which question is decided in [`../modelling-guide.md`](../modelling-guide.md). Why these views are split into two kinds is decided in [ADR-0002](../../decisions/ADR-0002-architecture-model-grounding.md).
 
-Primary authority/evidence used for this first package:
+## The two kinds
 
-- `README.md` — live vs research repository map and current entry points;
-- `PRODUCT.md` — current product direction, live component roles and authority model;
-- `docs/roadmap/work-interface-lab-roadmap.md` — Work-interface research hypothesis, explicitly not product authority;
-- `work_interface/BACKLOG.md` — current bounded infrastructure/research backlog;
-- `.handoff.md` plus current `main` history — operational-state drift check;
-- live package layout under `adapters/`, `inspector/`, `modeller/`, `taskmodel/`, `worker/`, `fleet/`, `supervisor/` and task-family packages.
+Every file states its kind in its own header, and no file mixes them.
 
-This package intentionally does **not** infer detailed call edges that were not inspected. Later diagrams should add source-file/function evidence when they claim a narrower execution path.
+| Kind | Means | How it is kept true |
+| --- | --- | --- |
+| **MEASURED** | Every edge was extracted from the repository. An edge that is not in the code is a defect in the view. | `python scripts/check_architecture_grounding.py` |
+| **INTENDED** | Responsibility, flow or journey as an authority document describes it. Arrows are conceptual, **not** import edges. | Reviewed against the document it renders |
 
 ## Views
 
-| File | UML type | Question answered |
-| --- | --- | --- |
-| `01-system-context.puml` | component/context | What are the major live parts, external actors and the frozen research estate? |
-| `02-live-component-map.puml` | component/package | How do the live packages divide observation, modelling, deterministic execution, fleet state and supervision? |
-| `03-product-journey-sequence.puml` | sequence | What is the intended high-level journey from incoming data to established deterministic work and supervision? |
-| `04-development-workflow.puml` | state machine | How does authorized development move through Roundtable -> Manager -> Coder -> Manager -> Roundtable? |
+| File | Kind | Notation | Question answered |
+| --- | --- | --- | --- |
+| `01-system-context.puml` | INTENDED | UML component / context | What are the major live parts, the external actors, and the frozen research estate? |
+| `02-live-responsibility-map.puml` | INTENDED | UML component / package | How do the live packages divide observation, definition, deterministic execution, fleet state and supervision? |
+| `03-product-journey-sequence.puml` | INTENDED | UML sequence | What is the journey from incoming data to established deterministic work and supervision? |
+| `04-development-workflow.puml` | INTENDED | UML state machine | How does a **development** work item move, and who may move it? |
+| `05-package-dependencies.puml` | **MEASURED** | UML component / package | What actually depends on what among the twelve live packages? |
+| `06-domain-model.puml` | **MEASURED** | UML class | What are the durable objects of established work, and what invariants do they carry? |
+| `07-inbox-item-state.puml` | **MEASURED** | UML state machine | What states can a **runtime** work item occupy, including recovery? |
+| `08-operational-data-flow.puml` | **MEASURED** | DFD level 1 | How does data move once work is established, and where is it stored? |
 
-## Reading rule
+Two state machines exist deliberately. `04` is the development work item; `07` is the runtime work item. They are different objects and must not be read as one.
 
-When a diagram disagrees with code or frozen evidence, **the diagram is wrong**.
+## Checking the measured views
 
-When code/evidence disagrees with accepted architecture/product authority, record the discrepancy and send it through the governance loop; do not silently redraw the diagram to make the contradiction disappear.
+```bash
+python scripts/check_architecture_grounding.py
+python scripts/check_architecture_grounding.py --self-test
+```
 
-## Notation rule
+The first re-derives the live package dependency edges from the source and compares them with `05-package-dependencies.puml`, reporting drift in both directions. The second exercises the checker itself against a synthetic fixture, including both the bare `sys.path`-style import and the package-qualified one.
 
-Use the established notation that matches the question. UML is not mandatory where another notation is clearer:
+`06`, `07` and `08` are measured by reading, not by script: their content is the shape of dataclasses, ledger literals and file paths. Their headers name the exact sources so a reader can re-check any claim.
 
-- DFD for pure data movement;
-- ERD for relational data structure;
-- BPMN for process orchestration when UML activity/state views become awkward.
+## Rendering
 
-The purpose is shared understanding, not notation purity.
+Any PlantUML renderer. Nothing here depends on a hosted service, and no rendered images are committed.
 
-## Initial findings exposed by this pass
+## Reading rules
 
-1. **Live system and research estate are already explicitly distinct.** The root mixes them physically, but `README.md` and `PRODUCT.md` name the live product path and identify experiment/history directories as evidence rather than alternate implementations.
-2. **Product authority and Work-interface roadmap are intentionally different.** The Work-interface roadmap labels itself a hypothesis/research contract and says it does not replace `PRODUCT.md` yet.
-3. **The current live UI is split across modeller, fleet/map and supervisor surfaces.** `PRODUCT.md` says these should converge around the company as the top-level object.
-4. **`.handoff.md` is stale relative to `main`.** It reports W1-J as current while later history closes W1-K and freezes W1-L. This is classified as operational-document drift, not an architecture contradiction.
-5. **The repository already behaves like an evidence-driven Kanban system in places** — frozen packs, backlog, closure/disposition and bounded cleanup — but the states and authority transitions were implicit. ADR-0001 and the development state-machine make those transitions explicit without changing research semantics.
+1. When a diagram disagrees with the code, **the diagram is wrong**.
+2. When the code disagrees with accepted architecture or product authority, that is a **discrepancy**. Record it in [`../../development/discrepancy-register.md`](../../development/discrepancy-register.md); do not silently redraw until the contradiction disappears.
+3. An INTENDED arrow is not a dependency. Eight of the fifteen arrows in `02` deliberately run opposite to the real import direction, and five describe a hand-off that no import performs at all, because flow and dependency are different questions.
+
+## What this package established
+
+Building it produced five findings. The three that are actual disagreements are recorded with their evidence in the [discrepancy register](../../development/discrepancy-register.md) as D1–D4; the other two are confirmations.
+
+1. **The live/research split is already explicit** in `README.md` and `PRODUCT.md`; the root mixes them physically but the authority documents name the twelve live packages. Confirmed as-is.
+2. **The product roadmap and product authority are deliberately different documents.** `docs/roadmap/work-interface-lab-roadmap.md` labels itself a hypothesis and says so.
+3. **The first component diagram's edges did not match the code** — of its fifteen arrows, 2 matched a real dependency in the direction drawn, 8 ran the opposite way, and 5 existed in neither direction; 13 of the 22 real edges appeared nowhere in it. That is D4, and it is why `02` and `05` are now separate files.
+4. **`modeller/` is the most load-bearing live package**, not a UI surface: it composes all four task families, and both `worker/` and `fleet/` depend on it. This is visible only in the measured view.
+5. **Documentation lagged the code by one day and several versions** — the stale handoff (D1), the v0.1 supervisor label (D2) and the product priorities that appear already delivered (D3).

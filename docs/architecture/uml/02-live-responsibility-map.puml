@@ -1,0 +1,90 @@
+@startuml
+'=============================================================================
+' KIND      INTENDED -- responsibility and data flow, as the authority
+'           documents describe it.
+' GROUNDING PRODUCT.md ("The intended journey", "Existing pieces",
+'           "What is live code vs research record"); README.md
+'           ("What is implemented now", "Repository map").
+'
+' THE ARROWS HERE ARE NOT IMPORT EDGES. They say which component is
+' responsible for handing what to which, not which module imports which.
+' For the measured dependency structure see 05-package-dependencies.puml,
+' which disagrees with this view on purpose -- see ADR-0002 and
+' docs/development/discrepancy-register.md D4.
+'=============================================================================
+!theme plain
+title Learning Lab — live responsibilities and data flow (INTENDED)
+
+package "Input + observation" {
+  component "adapters" as Adapters
+  component "inspector" as Inspector
+}
+
+package "Definition" {
+  component "modeller" as Modeller
+  component "taskmodel" as TaskModel
+}
+
+package "Task families" {
+  component "reservation" as Reservation
+  component "enrichment" as Enrichment
+  component "aggregation" as Aggregation
+  component "reconciliation" as Reconciliation
+}
+
+package "Deterministic operation" {
+  component "worker" as Worker
+  component "fleet" as Fleet
+  component "calendar_job" as CalendarJob
+}
+
+package "Interpretation + improvement" {
+  component "supervisor" as Supervisor
+}
+
+Adapters --> Inspector : structural data
+Inspector --> Modeller : observed facts / evidence
+Modeller --> TaskModel : explicit task model
+TaskModel --> Reservation
+TaskModel --> Enrichment
+TaskModel --> Aggregation
+TaskModel --> Reconciliation
+Reservation --> Worker
+Enrichment --> Worker
+Aggregation --> Worker
+Reconciliation --> Worker
+Worker --> Fleet : established worker state / runs
+CalendarJob --> Worker : unattended reservation path
+Fleet --> Supervisor : fleet context / exceptions / map state
+Supervisor ..> Fleet : investigation / improvement proposals
+
+note right of Modeller
+Current DEFINE surface.
+Large pipeline remains live product code.
+end note
+
+note right of Fleet
+Owns established fleet/operations and
+derives the read-only system map from
+authority-bearing state.
+end note
+
+note right of Supervisor
+May interpret, investigate and propose.
+Does not silently establish, promote or
+execute authority-bearing changes.
+end note
+
+note bottom
+**Flow, not dependency.** Of the fifteen arrows here, only two
+(modeller/taskmodel, supervisor/fleet) also run in the direction the
+code depends. Eight run the opposite way to the real import, and five
+describe a hand-off that no import performs at all -- including
+adapters/inspector and calendar_job/worker. Thirteen further real
+dependencies are deliberately absent, because they are not steps in
+the flow.
+
+That is correct for a flow view and wrong for a dependency one, which
+is why these are two files. See 05-package-dependencies.puml.
+end note
+@enduml

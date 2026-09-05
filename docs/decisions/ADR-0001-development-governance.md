@@ -27,6 +27,16 @@ Roundtable -> Manager -> Coder -> Manager -> Roundtable
 
 The delivery workflow uses **Kanban**, with a Definition of Ready (**DoR**), Definition of Done (**DoD**) and explicit Work In Progress (**WIP**) limits.
 
+Work items move through an explicit state model with a **named owner for every transition**, so that a transition nobody is authorised to make is visibly illegal rather than merely unusual:
+
+```text
+Discovered -> Initiative / Backlog -> Roundtable accepted -> Roadmapped
+           -> Ready -> Dispatched -> In progress -> Manager review
+           -> Implemented -> Roundtable closed
+```
+
+The states, their transition owners and the transitions that are always illegal are defined in `docs/development/engineering-system.md` §4, which is normative for them.
+
 Durable architecture decisions use **Architecture Decision Records (ADRs)**. Substantial proposals that require discussion before decision may use **Requests for Comments (RFCs)**.
 
 Repository-grounded architecture discovery uses the appropriate established modelling notation, primarily **UML (Unified Modeling Language)**, with DFD/ERD/BPMN where those answer the question better.
@@ -67,7 +77,12 @@ Rejected. This collapses product/architecture authority into execution and reint
 
 ## Related
 
-- `docs/development/engineering-system.md`
+- `docs/development/engineering-system.md` — the normative process description
+- `docs/development/initiatives.md` — where a discovery goes
+- `docs/development/discrepancy-register.md` — documentation/repository disagreements and their dispositions
+- `docs/architecture/modelling-guide.md` — which notation answers which question
+- `docs/decisions/ADR-0002-architecture-model-grounding.md` — how architecture views are kept honest
+- `docs/architecture/uml/04-development-workflow.puml` — this loop as a state machine
 - `PRODUCT.md`
 - `docs/roadmap/work-interface-lab-roadmap.md`
 - `work_interface/BACKLOG.md`
