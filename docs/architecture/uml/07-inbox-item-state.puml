@@ -1,0 +1,80 @@
+@startuml
+'=============================================================================
+' KIND      MEASURED -- every state below is a literal written into the
+'           worker's ledger by fleet/inbox.py, and every terminal state is
+'           a member of that module's TERMINAL tuple.
+' GROUNDING fleet/inbox.py: poll(), _poll_contract_item(), reconcile(),
+'           item_state(), TERMINAL, IDENTITY_POLICIES, FOLDERS.
+'
+' This is the RUNTIME work item -- one arriving file. It is a different
+' object from the DEVELOPMENT work item in 04-development-workflow.puml,
+' and the two state machines must not be read as one.
+'=============================================================================
+!theme plain
+title Learning Lab — runtime work-item states (MEASURED)
+
+[*] --> Waiting : file arrives in inbox/
+
+state Waiting
+state Claimed
+state Staged
+state Completed
+state Exception
+state SkippedDuplicate as "skipped_duplicate"
+state RecoveredCompleted as "recovered_completed"
+state RecoveredException as "recovered_exception"
+
+Waiting --> Exception : unreadable item\n(moved to exceptions/)
+Waiting --> SkippedDuplicate : already completed under this\ncontent digest -- NOT re-run,\nand its effect NOT re-applied
+Waiting --> Staged : contract path: the input set\nis still partial
+Waiting --> Claimed : claimed BEFORE the run,\nwith a recorded precondition
+
+Staged --> Staged : re-poll skips it; the SET,\nnot the file location, is\nthe authority
+Staged --> Claimed : the last required slot arrives
+
+Claimed --> Completed : healthy
+Claimed --> Exception : refused or failed\n(moved to exceptions/)
+
+Claimed --> RecoveredCompleted : recovery: already_landed,\nor safe_to_retry then healthy
+Claimed --> RecoveredException : recovery: indeterminate,\nor retried and unhealthy
+
+Completed --> [*]
+Exception --> [*]
+SkippedDuplicate --> [*]
+RecoveredCompleted --> [*]
+RecoveredException --> [*]
+
+note right of Claimed
+The claim is written **before** the effect,
+with the precondition it observed. An
+interrupted pass therefore leaves evidence
+rather than a fresh-looking file.
+end note
+
+note as N1
+**Recovery verdicts** (fleet/inbox.py reconcile)
+
+  already_landed   effect absent at claim time, present now
+                   -> complete WITHOUT re-executing
+  safe_to_retry    definitely absent, or none was earnable
+                   -> re-execute
+  indeterminate    the question cannot be answered
+                   -> exception, never guessed either way
+
+"Definitely absent" and "cannot tell" lead to opposite actions.
+Collapsing them would retry a booking that may already exist,
+which is why `effect_landed` returns None rather than False when
+worker state is unreadable.
+end note
+
+note as N2
+**Item identity**
+
+`work_item_identity` has exactly one implemented policy,
+`content_digest`. A worker that declares nothing, or something
+else, is REFUSED -- the policy is not defaulted.
+
+That identity is what makes `skipped_duplicate` safe: the same
+bytes arriving twice is the same work item, not new work.
+end note
+@enduml

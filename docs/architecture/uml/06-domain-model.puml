@@ -1,0 +1,157 @@
+@startuml
+'=============================================================================
+' KIND      MEASURED -- every class, attribute and relationship below was
+'           read out of the source or out of a real record on disk.
+' GROUNDING taskmodel/task_model.py (Problem, Source, TaskModel, Report,
+'           TaskType); fleet/fleet.py (Worker dataclass and its properties,
+'           establish/record_run/promote); fleet/inbox.py (ledger entries,
+'           TERMINAL, IDENTITY_POLICIES, retained_name); fleet/input_set.py;
+'           and the on-disk records under fleet/workers/acme-august-recon/
+'           (worker.json, versions/v1.json, input_contracts/v1.json,
+'           history.jsonl) and fleet/workers/acme-timesheets/runs.jsonl.
+'
+' This is the domain model of ESTABLISHED WORK. It is drawn as a UML class
+' diagram rather than an ERD because the durable state is JSON/JSONL files
+' under fleet/workers/, not relational tables -- see
+' docs/architecture/modelling-guide.md §2.
+'=============================================================================
+!theme plain
+title Learning Lab — domain model of established work (MEASURED)
+
+class Worker {
+  .. identity: worker.json ..
+  name : str
+  purpose : str
+  task : str
+  base : path
+  trigger : path
+  customer : str
+  input_adapter : str
+  work_item_identity : str
+  source_roles : map<role, RoleSpec>
+  destination : dict?
+  --
+  engine : derived from task
+  effect : model.on_accept
+  committing : effect AND a committing runtime exists
+}
+
+note right of Worker
+`destination` says where a result is
+INTENDED to go. It is not permission to
+put it there -- `committing` is the
+separate fact. (fleet/fleet.py)
+end note
+
+class RoleSpec {
+  label : str
+  slot : "sole" | "shared"
+  required : bool
+}
+
+class WorkerVersion {
+  version : int
+  model : TaskModel
+  digest : sha256
+}
+
+class HistoryEvent {
+  version : int
+  at : timestamp
+  event : "established" | "promoted" | ...
+  digest : sha256
+  why : str
+}
+
+class InputContract {
+  version : int
+  roles : map<role, {sheet, collection, header_row}>
+}
+
+note right of InputContract
+Version-bound. A contract belongs to one
+worker version; it is not a global schema.
+end note
+
+class TaskModel {
+  model_version : int
+  model_id : str
+  task : str
+  sources : map<name, Source>
+  body : dict
+  malformed_sources : str?
+}
+
+class Source {
+  name : str
+  path : str
+  collection : str
+}
+
+class TaskType {
+  name : str
+  refusals : tuple<str>
+  body_problem_codes : tuple<str>
+  validate_body(model, base)
+}
+
+class Problem {
+  code : str
+  where : str
+  detail : str
+}
+
+class Run {
+  at : timestamp
+  version : int
+  ok : bool
+  rows : int
+  refused : int
+  refusals : list<str>
+  problems : list<Problem>
+  run_input : {fingerprint, ...}?
+}
+
+class InboxItem {
+  item_id : content digest
+  file : str
+  state : see 07-inbox-item-state
+  precondition : {committing, effect_target_present}?
+}
+
+class Investigation {
+  packet : dict
+  question : str?
+}
+
+Worker "1" *-- "1..*" WorkerVersion : versions/vN.json
+Worker "1" *-- "0..*" HistoryEvent : history.jsonl
+Worker "1" *-- "0..*" InputContract : input_contracts/vN.json
+Worker "1" *-- "0..*" Run : runs.jsonl
+Worker "1" *-- "0..*" InboxItem : inbox/ -> processed/ | exceptions/
+Worker "1" o-- "0..1" Investigation
+Worker "1" *-- "1..*" RoleSpec : source_roles
+
+WorkerVersion "1" --> "1" TaskModel : the established model
+InputContract "1" ..> "1" WorkerVersion : bound to
+TaskModel "1" *-- "1..*" Source
+TaskModel "1" ..> "1" TaskType : task name resolves\nin the registry
+TaskType ..> Problem : validate_body returns
+Run "0..*" --> "1" WorkerVersion : ran which version
+Run ..> Problem : records
+
+note as N1
+**The invariants this shape carries**
+
+* A run names the **version** it ran, so a promotion never rewrites
+  what an earlier run meant.
+* `digest` is recorded per version in `history.jsonl`, so a version's
+  identity is checkable rather than asserted.
+* `work_item_identity` has exactly one implemented policy,
+  `content_digest`. A worker declaring anything else is refused --
+  it is not a default (fleet/inbox.py IDENTITY_POLICIES).
+* `body` is opaque to `taskmodel`, by design: the envelope is shared,
+  the task-family body is not. This is the same envelope-over-body
+  discipline the Work Definition v0 contract reuses.
+end note
+@enduml

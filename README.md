@@ -32,7 +32,9 @@ normal deterministic operation
 supervisor explains what matters, investigates novelty and proposes improvements
 ```
 
-The repository already contains most of these pieces, but they are still split across separate modeller, fleet/map and supervisor surfaces. The next product step is to **recenter them around Company → Incoming Data → Understanding → Modelled Work → Output**, with the existing system map as a primary visual model and the supervisor as an interpretation layer over that context.
+The repository contains all of these pieces. The live workspace (`supervisor/app.py`) describes itself as already recentred on this flow — the Fleet System Map is its primary surface, the incoming-data browser sits beside it, and the modeller is reachable from an unmodelled data directory as a "Define work" flow.
+
+**`PRODUCT.md` has not been updated to reflect that**, and still lists the recentring among the next priorities. That disagreement is recorded as [discrepancy D3](docs/development/discrepancy-register.md) and raised as [initiative I-1](docs/development/initiatives.md); only Roundtable may resolve it. Until it does, read `PRODUCT.md`'s priority list knowing the code has moved past parts of it.
 
 See [PRODUCT.md](PRODUCT.md) for the product/system map and the distinction between what exists now and what is still missing.
 
@@ -77,11 +79,11 @@ python -m streamlit run fleet/app.py
 
 Choose **System map** in the fleet console to inspect the existing map.
 
-### Supervisor Workspace v0.1
+### Supervisor workspace
 
 `supervisor/` contains the explicit supervisory harness and the current Streamlit workspace. The supervisor has read/analysis/proposal authority but no silent production authority.
 
-Workspace v0.1 currently provides:
+The workspace has advanced through several versions since this section was written; `supervisor/app.py`'s module docstring is the current description of what the surface does and which product priorities it closes. The floor it established, and still provides:
 
 - a persisted supervisor-authored assessment;
 - findings, priorities and normal/no-action context;
@@ -103,7 +105,7 @@ or directly:
 python -m streamlit run supervisor/app.py
 ```
 
-The supervisor workspace is **supporting machinery, not the final product shell**. Its next integration target is the company/data/map workspace described in [PRODUCT.md](PRODUCT.md).
+The supervisor workspace is **supporting machinery, not the final product shell**. Its integration with the company/data/map workspace described in [PRODUCT.md](PRODUCT.md) is the work that has since landed in `supervisor/app.py` — see the note under "Current product direction".
 
 ## The authority boundary
 
@@ -144,7 +146,7 @@ The root intentionally contains both live system code and frozen research histor
 | `taskmodel/` | shared task-model structures/contracts |
 | `worker/` | deterministic worker/runtime machinery |
 | `fleet/` | established fleet, operations, investigations and system map |
-| `supervisor/` | supervisory harness, memory, improvements/rules and Workspace v0.1 |
+| `supervisor/` | supervisory harness, memory, improvements/rules and the Streamlit workspace |
 | `reservation/` | reservation task family |
 | `enrichment/` | enrichment task family |
 | `aggregation/` | aggregation task family |
@@ -210,8 +212,11 @@ These are engineering tasks, not new research claims.
 
 ## Where to read next
 
+- [`docs/development/engineering-system.md`](docs/development/engineering-system.md) — **how development works here**: roles, work-item states, Definition of Ready/Done, and which document wins when two disagree. It opens with the answers a new worker needs.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — contributor entry point. [`CLAUDE.md`](CLAUDE.md) — the same for agents.
+- [`docs/architecture/uml/`](docs/architecture/uml/) — architecture views, each marked MEASURED or INTENDED.
 - [PRODUCT.md](PRODUCT.md) — current product mental model, live components, missing integration and next direction.
-- [`.handoff.md`](.handoff.md) — detailed current implementation handoff.
+- [`.handoff.md`](.handoff.md) — what is being worked on right now. **Navigation only, never authority**: it ranks last in the precedence order and has been stale before.
 - [`falsification_ledger.md`](falsification_ledger.md) — historical falsification/correction record.
 - [`research_agentic_data_task_modelling.md`](research_agentic_data_task_modelling.md) — earlier research framing.
 - [`MIGRATION.json`](MIGRATION.json) — repository migration authority/history.

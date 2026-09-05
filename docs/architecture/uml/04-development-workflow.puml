@@ -1,0 +1,104 @@
+@startuml
+'=============================================================================
+' KIND      INTENDED -- a view of the process defined in
+'           docs/development/engineering-system.md §4. That document is
+'           normative; if this diagram and it disagree, the document wins.
+' GROUNDING docs/development/engineering-system.md §4.1 (states), §4.2
+'           (transition ownership), §4.2.1 (illegal transitions);
+'           docs/decisions/ADR-0001-development-governance.md.
+'
+' Transition labels name the ACTOR who may perform them. That is the
+' load-bearing content: a state machine whose edges anyone may take is
+' not a governance model.
+'
+' This is the DEVELOPMENT work item. The RUNTIME work item is a different
+' object with a different state machine -- see 07-inbox-item-state.puml.
+'=============================================================================
+!theme plain
+title Learning Lab — development work-item states (INTENDED)
+
+[*] --> Discovered
+
+state Discovered
+state Backlog as "Initiative / Backlog"
+state Accepted as "Roundtable accepted"
+state Roadmapped
+state Ready
+state Dispatched
+state InProgress as "In progress"
+state ManagerReview as "Manager review"
+state Implemented
+state Closed as "Roundtable closed"
+state Parked
+state Rejected
+state Superseded
+
+Discovered --> Backlog : **anyone** — written to intake\nwith its evidence
+
+Backlog --> Accepted : **Roundtable** — it is real work
+Backlog --> Parked : **Roundtable** — reason recorded
+Backlog --> Rejected : **Roundtable** — reason recorded
+
+Accepted --> Roadmapped : **Roundtable** — priority and\nroadmap placement decided
+
+Roadmapped --> Ready : **Manager** — DoR satisfied
+
+Ready --> Dispatched : **Manager** — bounded work order,\nWIP limit respected
+
+Dispatched --> InProgress : **Coder** — work started
+
+InProgress --> ManagerReview : **Coder** — implementation\n+ evidence returned
+
+ManagerReview --> InProgress : **Manager** — rejected,\ncorrections required
+ManagerReview --> Implemented : **Manager** — DoD satisfied
+
+Implemented --> Closed : **Roundtable** — roadmap/architecture\nstatus updated from what landed
+
+Closed --> Backlog : **Roundtable** — follow-up authorised\nas a NEW item
+Parked --> Backlog : **Roundtable** — reactivated
+
+Roadmapped --> Superseded : **Roundtable**
+Closed --> [*]
+Rejected --> [*]
+Superseded --> [*]
+
+note right of Ready
+**DoR** — the item may not be dispatched
+until unresolved policy is decided by
+Roundtable rather than silently delegated
+to the Coder.
+end note
+
+note right of Implemented
+**Manager acceptance** answers:
+"was the commissioned work implemented
+correctly?"
+
+It does not close roadmap authority, and
+Manager may not take the next edge.
+end note
+
+note right of Closed
+**Roundtable closure** answers:
+"what does this result mean for the
+roadmap, product and architecture?"
+
+It is not a second code review.
+end note
+
+note as N1
+**Always illegal** (engineering system §4.2.1)
+
+  Discovered -> In progress          a finding became work with
+                                     nobody deciding it should
+  Roadmapped -> Dispatched           skips Ready; the Coder will
+                                     invent policy while implementing
+  Ready -> Implemented               no review happened
+  Manager review -> Roundtable closed  collapses the two approvals
+  Implemented -> Roundtable closed
+    performed by Manager             Manager taking roadmap authority
+
+If one of these appears to have happened, the work is out of process
+and returns to the last legal state.
+end note
+@enduml

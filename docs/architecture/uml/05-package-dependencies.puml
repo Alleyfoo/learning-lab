@@ -1,0 +1,84 @@
+@startuml
+'=============================================================================
+' KIND      MEASURED -- every edge below was extracted from the source.
+' GROUNDING the twelve live packages named in PRODUCT.md
+'           "What is live code vs research record".
+' CHECK     python scripts/check_architecture_grounding.py
+'           re-derives these edges and fails on any drift in either
+'           direction. Do not add an edge here by hand without the code
+'           edge to match, and do not delete one to make the check pass.
+'
+' Reading note: the live packages do not use package-qualified imports.
+' They put sibling directories on sys.path and import bare module names
+' (import task_model, import worker as W, import observe). An edge below
+' therefore means "some module in A imports a module owned by B", which
+' is the dependency that actually constrains change.
+'
+' A --> B reads "A depends on B".
+'=============================================================================
+!theme plain
+title Learning Lab — live package dependencies (MEASURED)
+
+component "adapters" as adapters
+component "inspector" as inspector
+component "taskmodel" as taskmodel
+component "modeller" as modeller
+component "worker" as worker
+component "fleet" as fleet
+component "supervisor" as supervisor
+component "reservation" as reservation
+component "enrichment" as enrichment
+component "aggregation" as aggregation
+component "reconciliation" as reconciliation
+component "calendar_job" as calendar_job
+
+' --- task families depend on the shared model contract ------------------
+aggregation --> taskmodel : task_model
+enrichment --> taskmodel : task_model
+reconciliation --> taskmodel : task_model
+reservation --> taskmodel : task_model
+
+' --- the modeller composes the families ---------------------------------
+modeller --> taskmodel : task_model
+modeller --> inspector : observe
+modeller --> aggregation : aggregation_model, execute_aggregation
+modeller --> enrichment : enrichment_model, execute_enrichment
+modeller --> reconciliation : reconciliation_model, execute_reconciliation
+modeller --> reservation : reservation_model, execute_reservation
+
+' --- the deterministic runtime ------------------------------------------
+worker --> taskmodel : task_model
+worker --> inspector : observe
+worker --> modeller : builder
+worker --> reservation : reservation_model, execute_reservation
+calendar_job --> taskmodel : task_model
+calendar_job --> reservation : reservation_model, execute_reservation
+
+' --- fleet owns established state and reaches down to the runtime --------
+fleet --> worker : worker, runtime
+fleet --> modeller : builder, manifest, pipeline
+fleet --> adapters : adapters.xlsx
+
+' --- the supervisor reads the fleet and drives the DEFINE glue -----------
+supervisor --> fleet : fleet, inbox, confirmations, system_map, map_component
+supervisor --> modeller : pipeline
+supervisor --> adapters : xlsx
+
+note as N1
+**What the measured shape says**
+
+* `taskmodel` and `inspector` are leaves. Nothing they import is live
+  product code, so they are the two packages a change can start from
+  without pulling anything else with it.
+* `modeller` is not only the DEFINE surface: it is the composition
+  point for all four task families, and both `worker` and `fleet`
+  depend on it. It is the most load-bearing live package, not a UI.
+* `calendar_job` reaches the reservation family and the task model
+  directly. It does not go through `worker`.
+* `fleet -> worker -> modeller -> families -> taskmodel` is the real
+  spine. The intended flow view draws several of these arrows the
+  other way round, correctly, because flow is not dependency.
+* Workbook ingestion enters through `fleet` and `supervisor`, not
+  through `modeller` -- see discrepancy register D6.
+end note
+@enduml
