@@ -22,14 +22,18 @@ What it will and will not touch
 -------------------------------
 It rewrites a tracked file ONLY when BOTH of these hold:
 
-    disk.replace(CRLF, LF) == blob        the difference is EOL-shaped
-    is_text(disk) and is_text(blob)       and both sides are proven text
+    disk.replace(CRLF, LF) == blob                  the difference is EOL-shaped
+    restorable_text(disk) and restorable_text(blob)  and both sides are text
 
 The second condition is not decoration. The byte test alone is satisfied by a
 NON-text local edit -- committed payload `... LF ...` changed to `... CRLF ...`
 is a content change wearing a line ending's clothes, and rewriting it would
-destroy the operator's work. `is_text` is imported from the integrity checker so
-there is one definition of text, not two that can drift apart.
+destroy the operator's work.
+
+`restorable_text` is deliberately NOT `verify_frozen.is_text`; see its docstring.
+The strict integrity predicate rejects valid-UTF-8 files carrying ANSI escapes,
+three of which are tracked here, and using it made the migration refuse to run
+at all.
 
 A tracked path the operator has DELETED counts as substantive and blocks the
 run. Skipping it because it is not a regular file would let `--apply` reach the
@@ -63,12 +67,47 @@ LAB = Path(__file__).resolve().parents[1]
 CRLF = bytes([13, 10])
 LF = bytes([10])
 
-# The SAME predicate the integrity checker uses, imported rather than re-stated:
-# two definitions of "text" that could drift is exactly how the hole this script
-# was corrected for gets reopened. `verify_frozen` is not a frozen artifact, so
-# importing it is lawful; it has no import-time side effects.
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from verify_frozen import is_text  # noqa: E402
+
+
+def restorable_text(data: bytes) -> bool:
+    """Positive text test for EOL RESTORATION. Deliberately not the integrity one.
+
+    The two answer different questions, and the difference is load-bearing:
+
+    `verify_frozen.is_text` asks *may I forgive this artifact's line-ending
+    representation when checking its hash?* A false positive there lets a
+    corrupted binary verify, so it is strict: valid UTF-8 AND no C0 control byte
+    but tab, LF, CR.
+
+    This asks *is this a file Git itself would have EOL-converted on checkout,
+    such that restoring the committed bytes gives back what was committed?* Using
+    the strict predicate here misclassifies real repository content:
+    `experimentR/results/probe{1,2,3}_raw.txt` are raw terminal captures holding
+    ANSI escape sequences (byte 27). They are valid UTF-8, Git converted them on
+    checkout, and the strict test calls them non-text -- which made `--apply`
+    refuse outright and the migration impossible to run at all.
+
+    So this test drops only the control-byte arm and keeps the two that carry the
+    safety property:
+
+        no NUL          Git's own binary heuristic, and
+        valid UTF-8     which arbitrary binary payload is not
+
+    A non-text payload edited into an EOL shape is still refused, because such
+    payload is not valid UTF-8 -- that is the canary in the self-test, and it is
+    why this stays a positive classification rather than a byte-shape guess.
+
+    The residual risk is narrow and named: a byte stream that is genuinely not
+    text, yet decodes as UTF-8, given a local edit that is exactly EOL-shaped,
+    would be restored. Nothing in this repository is such a file.
+    """
+    if bytes([0]) in data:
+        return False
+    try:
+        data.decode("utf-8")
+    except UnicodeDecodeError:
+        return False
+    return True
 
 
 def _git(args: list[str], cwd: Path = LAB) -> bytes:
@@ -182,7 +221,7 @@ def classify(root: Path = LAB) -> tuple[list[str], list[str]]:
         if disk == blob:
             continue
         if (disk.replace(CRLF, LF) == blob
-                and is_text(disk) and is_text(blob)):
+                and restorable_text(disk) and restorable_text(blob)):
             eol_only.append(rel)
         else:
             substantive.append(rel)
@@ -265,6 +304,11 @@ def report(root: Path = LAB) -> int:
 
 def _self_test() -> int:
     import tempfile
+    # imported HERE, only so the self-test can assert the two predicates really
+    # do differ on the case that blocked the migration. Production code in this
+    # module deliberately does not use it -- see `restorable_text`.
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from verify_frozen import is_text as is_text_strict
     failures: list[str] = []
 
     def check(cond: bool, why: str) -> None:
@@ -352,6 +396,29 @@ def _self_test() -> int:
               "byte for byte")
         (root / "payload.bin").write_bytes(payload_blob)     # restore for later checks
 
+        # (A2) CANARY: real repository content -- a raw terminal capture holding
+        # ANSI escape bytes -- is valid UTF-8 and Git converts it on checkout, so
+        # it MUST stay eligible. The strict integrity predicate calls byte 27
+        # non-text; using it here made --apply refuse outright on three tracked
+        # experimentR probe files and the migration could not run at all.
+        esc_blob = b"Thinking..." + LF + b"out" + bytes([27]) + b"[4D" + LF
+        (root / "ansi_raw.txt").write_bytes(esc_blob)
+        _git(["add", "-A"], root)
+        _git(["commit", "-qm", "ansi"], root)
+        (root / "ansi_raw.txt").write_bytes(esc_blob.replace(LF, CRLF))
+        check(bytes([27]) in esc_blob, "the ANSI fixture must carry an escape byte")
+        check(not is_text_strict(esc_blob),
+              "the fixture must be one the STRICT integrity predicate rejects, "
+              "or it does not reproduce the blocking case")
+        check(restorable_text(esc_blob),
+              "CANARY: valid-UTF-8 text with ANSI escapes must be restorable")
+        eol_only, substantive = classify(root)
+        check("ansi_raw.txt" in eol_only,
+              "CANARY: an ANSI-carrying text file must be eligible, not blocking")
+        check(apply(root) == 0, "apply must succeed with only such files present")
+        check((root / "ansi_raw.txt").read_bytes() == esc_blob,
+              "the ANSI file must be restored to its committed bytes")
+
         # (B) CANARY: a tracked path the operator has DELETED locally. Skipping it
         # because it is not a regular file would let --apply reach the index
         # refresh, where `git add --renormalize .` can stage the deletion.
@@ -392,9 +459,9 @@ def _self_test() -> int:
         for f in failures:
             print(f"FAIL  {f}")
         return 1
-    print("OK  self-test: 25 checks -- EOL-only diffs are found and normalized to "
+    print("OK  self-test: 31 checks -- EOL-only diffs are found and normalized to "
           "the committed bytes; a genuine local edit blocks the apply and survives "
-          "it untouched; binary payload and untracked files are never rewritten; a batch far larger than a pipe buffer returns instead of deadlocking; a NON-TEXT edit shaped like an EOL change, and a tracked deletion, both refuse and survive untouched")
+          "it untouched; binary payload and untracked files are never rewritten; a batch far larger than a pipe buffer returns instead of deadlocking; a NON-TEXT edit shaped like an EOL change, and a tracked deletion, both refuse and survive untouched; valid-UTF-8 text carrying ANSI escapes stays eligible")
     return 0
 
 
