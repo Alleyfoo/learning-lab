@@ -140,7 +140,15 @@ This is the same defect class as backlog item B-1: a verifier whose verdict is n
 
 **Deliberately not fixed here.** Both plausible fixes — normalising line endings before hashing, or re-freezing the eleven CRLF-derived hashes — change frozen-evidence machinery, which is not this task's scope and is not a Coder's call.
 
-**Resolved under issue #7.** Neither of those two was the answer. The measurement was reproduced at `main` and one further fact settled the design: **every committed blob is LF** (0 of 76 carry CRLF), and `core.autocrlf` is `true` at system level on this machine, so a fresh clone gets CRLF regardless of the repository's intent. The fix is `.gitattributes` pinning the checkout to LF — required because the `check_surfaced.py` chain runs entirely through frozen files that cannot be edited — plus EOL-invariant comparison for text in `verify_frozen.py`, which lets the eleven CRLF-recorded hashes keep verifying without being re-frozen. No recorded hash was edited and no frozen artifact content changed. `frozen_manifest.json` says so itself: "Do not edit a hash to make a check pass -- if an artifact legitimately changed, that is a re-freeze and belongs in a commit that says so." Nothing legitimately changed, so neither a re-freeze nor a hash edit is obviously right, and choosing between them is a decision.
+**Resolved under issue #7.** Neither of those two was the answer. The measurement was reproduced at `main`, and two further facts settled the design: **every frozen artifact's committed blob is LF** (0 of 76 carry CRLF), and `core.autocrlf` is `true` at *system* level on this machine, so a fresh clone gets CRLF regardless of the repository's intent.
+
+The fix has three parts:
+
+1. **`.gitattributes` with `* -text`** so a checkout reproduces the committed bytes. Required, because the `check_surfaced.py` chain runs entirely through frozen files that cannot be edited, leaving the bytes on disk as the only free variable. `-text` rather than the commoner `text=auto eol=lf`: 171 tracked files, all under `work_interface/`, have CRLF in their committed blobs, and `text=auto` would silently normalize that frozen experiment evidence on any later `git add`.
+2. **EOL-invariant comparison for text** in `verify_frozen.py`, so the eleven CRLF-recorded hashes keep verifying without being re-frozen. Text is classified **positively** — valid UTF-8 with no C0 control byte but tab/LF/CR — so a non-text payload never enters the folding path and keeps exact-byte integrity.
+3. **`scripts/normalize_worktree_eol.py`** for checkouts that already existed, since attributes govern what Git writes and do not rewrite files already on disk.
+
+No recorded hash was edited and no frozen artifact content changed. `frozen_manifest.json` says so itself: "Do not edit a hash to make a check pass -- if an artifact legitimately changed, that is a re-freeze and belongs in a commit that says so." Nothing legitimately changed, so neither a re-freeze nor a hash edit is obviously right, and choosing between them is a decision.
 
 The measurement above is the useful part: it establishes that the estate is intact, which is the question a failing integrity check actually raises.
 
